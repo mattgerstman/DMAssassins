@@ -45,7 +45,7 @@ func getPlayer(name string, plainPW string) {
 func main() {
 
 	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable")
-	
+	fmt.Println(err)
 	//reader := bufio.NewReader(os.Stdin)
 	//fmt.Print("Name: ")
 	name := "Matt"
