@@ -2,54 +2,36 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
+	//"fmt"
+	//"github.com/gorilla/schema"
 )
 
 var db *sql.DB
 
 const (
 	usersPath = "/users/"
+	loginPath = "/login/"
+	gamePath  = "/game/"
+	homePath  = "/"
 )
 
-func serveGetUser(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		email := r.URL.Path[len(usersPath):]
-		if err != nil {
-			http.Error(w, "Couldn't parse ID from users path.", http.StatusBadRequest)
-			return
-		}
-
-		var user_id string
-
-		err = db.QueryRow("SELECT user_id FROM dm_users WHERE email = $1", email).Scan(&user_id)
-		switch {
-			case err == sql.ErrNoRows:
-				http.NotFound(w, r)
-				return
-			case err != nil:
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-		}
-
-		w.Write([]byte(user_id))
-	}
+func WriteObjToPayload(w http.ResponseWriter, obj interface{}) {
+	var output map[string]interface{}
+	output = make(map[string]interface{})
+	output["response"] = obj
+	encoder := json.NewEncoder(w)
+	encoder.Encode(output)
 }
 
-func serveUsers(db *sql.DB) http.HandlerFunc {
+func HomeHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			serveGetUser(db)(w, r)
-		// case "POST":
-		// 	servePostUser(db)(w, r)
-		// case "DELETE":
-		// 	serveDeleteUser(db)(w, r)
-		default:
-		}
+
 	}
 }
-
 
 func connect() {
 	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable")
@@ -59,6 +41,11 @@ func StartServer() {
 	connect()
 	defer db.Close()
 
-	http.HandleFunc(usersPath, serveUsers(db))
+	r := mux.NewRouter()
+	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
+	r.HandleFunc(usersPath, UserHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(loginPath, LoginHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST", "DELETE")
+	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
 }
