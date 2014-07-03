@@ -44,7 +44,7 @@ func StartServer() {
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
 	r.HandleFunc(usersPath, UserHandler()).Methods("GET", "POST", "DELETE")
-	r.HandleFunc(loginPath, LoginHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(loginPath, SessionHandler()).Methods("POST", "DELETE")
 	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST", "DELETE")
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
