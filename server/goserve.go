@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	//"fmt"
+	"fmt"
 	//"github.com/gorilla/schema"
 )
 
@@ -19,7 +20,21 @@ const (
 	homePath  = "/"
 )
 
-func WriteObjToPayload(w http.ResponseWriter, obj interface{}) {
+func HttpErrorLogger(w http.ResponseWriter, msg string, code int) *ApplicationError {
+	err := errors.New(msg)
+	httpCode := code / 100
+	http.Error(w, msg, httpCode)
+	return &ApplicationError{msg, err, code}
+}
+
+func WriteObjToPayload(w http.ResponseWriter, obj interface{}, err *ApplicationError) {
+
+	if err != nil {
+		fmt.Println("Real Error\n")
+		HttpErrorLogger(w, err.Msg, err.Code)
+		return
+	}
+
 	var output map[string]interface{}
 	output = make(map[string]interface{})
 	output["response"] = obj

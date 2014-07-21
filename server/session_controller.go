@@ -10,11 +10,16 @@ import (
 
 var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 
-func getSession(w http.ResponseWriter, r *http.Request) interface{} {
+func getSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	email := r.FormValue("email")
 	password := r.FormValue("password")
-	user := GetUserByEmail(email)
+	user, err := GetUserByEmail(email)
+
+	if err != nil {
+		return nil, err
+	}
+
 	valid := user.CheckPassword(password)
 
 	if valid {
@@ -28,10 +33,10 @@ func getSession(w http.ResponseWriter, r *http.Request) interface{} {
 		session.Save(r, w)
 	}
 
-	return valid
+	return valid, nil
 }
 
-func killSession(w http.ResponseWriter, r *http.Request) interface{} {
+func killSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	session.Options = &sessions.Options{
 		Path:     "/",
@@ -39,22 +44,28 @@ func killSession(w http.ResponseWriter, r *http.Request) interface{} {
 		HttpOnly: true,
 	}
 
-	return session.Save(r, w)
+	return session.Save(r, w), nil
 }
 
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		var obj interface{}
+		var err *ApplicationError
+
 		switch r.Method {
 		case "GET":
-			WriteObjToPayload(w, getSession(w, r))
+			obj, err = getSession(w, r)
 			//case "POST":
 		//WriteObjToPayload(w, postUser(w, r))
 
 		//servePostUser(db)(w, r)
 		case "DELETE":
-			WriteObjToPayload(w, killSession(w, r))
+			obj, err = killSession(w, r)
 		default:
+			obj = nil
+			err = NewSimpleApplicationError("Invalid Http Method", ERROR_INVALID_METHOD)
 		}
+		WriteObjToPayload(w, obj, err)
 	}
 }
