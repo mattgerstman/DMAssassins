@@ -1,0 +1,1 @@
+var WEB_ROOT = '/Users/Matthew/Dropbox/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/';

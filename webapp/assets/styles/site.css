@@ -1,0 +1,7 @@
+.thumbnail {
+	width:300px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+a, a:focus { outline: none; }
