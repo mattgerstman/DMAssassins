@@ -31,7 +31,7 @@ func NewUser(email string, plainPW string, secret string) (*User, *ApplicationEr
 	id := uuid.New()
 	password, err := Crypt([]byte(plainPW))
 
-	_, err = db.Query(`INSERT INTO dm_users (user_id, email, password, secret) VALUES ($1,$2,$3,$4)`, id, email, password, secret)
+	_, err = db.Exec(`INSERT INTO dm_users (user_id, email, password, secret) VALUES ($1,$2,$3,$4)`, id, email, password, secret)
 	if (err != nil) {
 		//log error
 		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE}
@@ -75,31 +75,34 @@ func (user *User) CheckPassword(plainPW string) bool {
 	return false
 }
 
-func (user *User) KillTarget(secret string) string {
+func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
-	transaction, _ := db.Begin()
+	transaction, err := db.Begin()
 	defer transaction.Commit()
+
 	logged_in_user := user.User_id
 	var target_secret string
-	err := db.QueryRow(`SELECT secret FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret)
+	err = db.QueryRow(`SELECT secret FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret)
 
-	var new_target_id string
-	new_target_id = ''
+	new_target_id := ""
 	if secret == target_secret {
 
-		var new_target_id, old_target_id string
+		var old_target_id string
 
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1`, logged_in_user).Scan(&old_target_id)
-		err = db.QueryRow(`UPDATE dm_users SET alive = false WHERE user_id = $1`, old_target_id)
+		_, err = db.Exec(`UPDATE dm_users SET alive = false WHERE user_id = $1`, old_target_id)
 
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&new_target_id)
 
-		err = db.QueryRow(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`, logged_in_user)
-		err = db.QueryRow(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`, new_target_id, logged_in_user)
+		_, err = db.Exec(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`, logged_in_user)
+		_, err = db.Exec(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`, new_target_id, logged_in_user)
 
 	} else {
-		fmt.Println("Invalid secret: ", secret)
+		msg := fmt.Sprintf("Invalid secret: %s", secret)
+		return "", NewSimpleApplicationError(msg, ERROR_INVALID_SECRET)
 	}
 
-	return new_target_id
+	_ = err
+
+	return new_target_id, nil
 }
