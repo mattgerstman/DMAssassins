@@ -7,6 +7,7 @@ import (
 	"net/http"
 	//"github.com/gorilla/schema"
 )
+
 //Get user should probably be updated to be a get by URL not query parameter
 //None of my functions need a ResponseWriter anymore but I haven't removed it yet
 func getUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) {
@@ -14,7 +15,7 @@ func getUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) 
 	email := vars["email"]
 
 	if email == "" {
-		msg := "Missing Parameter: email."		
+		msg := "Missing Parameter: email."
 		return nil, NewSimpleApplicationError(msg, ERROR_MISSING_PARAMETER)
 	}
 

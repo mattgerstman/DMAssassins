@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	"fmt"
 	//"github.com/gorilla/schema"
 )
 
@@ -19,6 +19,7 @@ const (
 	gamePath  = "/game/"
 	homePath  = "/"
 )
+
 //This function logs an error to the HTTP response and then returns an application error to be used as necessary
 func HttpErrorLogger(w http.ResponseWriter, msg string, code int) *ApplicationError {
 	err := errors.New(msg)

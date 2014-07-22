@@ -5,7 +5,7 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"fmt"
-//	"log"
+	//	"log"
 )
 
 //All of the functions in here need to switch to the ApplicationError Constructors
@@ -16,14 +16,13 @@ type User struct {
 	Secret          string
 	hashed_password []byte
 }
+
 //Yea you like me clearing it from memory
 func clear(b []byte) {
 	for i := 0; i < len(b); i++ {
 		b[i] = 0
 	}
 }
-
-
 
 func Crypt(password []byte) ([]byte, error) {
 	defer clear(password)
@@ -35,7 +34,7 @@ func NewUser(email string, plainPW string, secret string) (*User, *ApplicationEr
 	password, err := Crypt([]byte(plainPW))
 
 	_, err = db.Exec(`INSERT INTO dm_users (user_id, email, password, secret) VALUES ($1,$2,$3,$4)`, id, email, password, secret)
-	if (err != nil) {
+	if err != nil {
 		//log error
 		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE}
 	}
@@ -61,9 +60,9 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + user_id
-		return nil, &ApplicationError{msg, err, ERROR_INVALID_USER_ID} 
+		return nil, &ApplicationError{msg, err, ERROR_INVALID_USER_ID}
 	case err != nil:
-		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE} 
+		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE}
 	default:
 		return &User{user_id, email, secret, []byte(hashed_password)}, nil
 	}

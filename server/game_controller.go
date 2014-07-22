@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 )
+
 //Consult the UserHandler for how I'm actually handling Handlers right now
 func GameHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
