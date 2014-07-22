@@ -7,7 +7,8 @@ import (
 	"net/http"
 	//"github.com/gorilla/schema"
 )
-
+//Get user should probably be updated to be a get by URL not query parameter
+//None of my functions need a ResponseWriter anymore but I haven't removed it yet
 func getUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) {
 	vars := mux.Vars(r)
 	email := vars["email"]
@@ -20,6 +21,8 @@ func getUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) 
 	return GetUserByEmail(email)
 }
 
+//I'm under the impression post should stay with query values
+//None of my functions need a ResponseWriter anymore but I haven't removed it yet
 func postUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	email := r.PostFormValue("email")
@@ -42,6 +45,7 @@ func postUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError)
 	return NewUser(email, password, secret)
 }
 
+//None of my functions need a ResponseWriter anymore but I haven't removed it yet
 func deleteUser(w http.ResponseWriter, r *http.Request) (string, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	logged_in_user, ok := session.Values["user_id"].(string)
@@ -53,12 +57,13 @@ func deleteUser(w http.ResponseWriter, r *http.Request) (string, *ApplicationErr
 
 	r.ParseForm()
 	secret := r.FormValue("secret")
-
+	//need to actually handle the case where the user doesn't exist
 	user, err := GetUserById(logged_in_user)
 	_ = err
 	return user.KillTarget(secret)
 }
 
+//This is pretty much the default of how I'm writing my Handlers. I'm unaware of anything wrong with it.
 func UserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

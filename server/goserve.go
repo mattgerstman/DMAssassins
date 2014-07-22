@@ -19,7 +19,7 @@ const (
 	gamePath  = "/game/"
 	homePath  = "/"
 )
-
+//This function logs an error to the HTTP response and then returns an application error to be used as necessary
 func HttpErrorLogger(w http.ResponseWriter, msg string, code int) *ApplicationError {
 	err := errors.New(msg)
 	httpCode := code / 100
@@ -30,7 +30,7 @@ func HttpErrorLogger(w http.ResponseWriter, msg string, code int) *ApplicationEr
 func WriteObjToPayload(w http.ResponseWriter, obj interface{}, err *ApplicationError) {
 
 	if err != nil {
-		fmt.Println("Real Error\n")
+		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
 		HttpErrorLogger(w, err.Msg, err.Code)
 		return
 	}
@@ -52,6 +52,7 @@ func connect() {
 	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable")
 }
 
+//Is this right?
 func StartServer() {
 	connect()
 	defer db.Close()

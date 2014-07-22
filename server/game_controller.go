@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 )
-
+//Consult the UserHandler for how I'm actually handling Handlers right now
 func GameHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -15,7 +15,6 @@ func GameHandler() http.HandlerFunc {
 		//	WriteObjToPayload(w, getUser(w, r))
 		case "POST":
 			obj, err := assignTargets()
-			WriteObjToPayload(w, obj, err)
 		// case "DELETE":
 		// 	WriteObjToPayload(w, deleteUser(w, r))
 		default:

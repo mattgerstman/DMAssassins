@@ -8,24 +8,27 @@ import (
 //	"log"
 )
 
+//All of the functions in here need to switch to the ApplicationError Constructors
+
 type User struct {
 	User_id         string
 	Email           string
 	Secret          string
 	hashed_password []byte
 }
-
+//Yea you like me clearing it from memory
 func clear(b []byte) {
 	for i := 0; i < len(b); i++ {
 		b[i] = 0
 	}
 }
 
+
+
 func Crypt(password []byte) ([]byte, error) {
 	defer clear(password)
 	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 }
-
 func NewUser(email string, plainPW string, secret string) (*User, *ApplicationError) {
 
 	id := uuid.New()
@@ -75,6 +78,7 @@ func (user *User) CheckPassword(plainPW string) bool {
 	return false
 }
 
+//I need to handle what happens if each sql statement fails, right now I'm totally bypassing the error checking
 func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	transaction, err := db.Begin()

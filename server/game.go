@@ -1,5 +1,7 @@
 package main
 
+//FYI this was the function that made me go holy shit I'm checking every error
+//I need to actually handle all of the error cases in here
 func assignTargets() (bool, *ApplicationError) {
 	var appErr *ApplicationError
 	msg := "Interal Error"
