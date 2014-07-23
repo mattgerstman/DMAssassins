@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
-	"net/http"
 )
 
 // Error codes are multiples of http codes for easy mapping
@@ -24,7 +23,7 @@ const (
 
 	// 500 - Internal Server Error
 	ErrCodeDatabase = 50001
-	ErrCodeNoSession = 50002
+	ErrCodeSession  = 50002 // Malformed Session
 )
 
 // ApplicationError contains information about errors that arise while accessing resources.
@@ -53,17 +52,20 @@ func NewApplicationError(msg string, err error, code int) *ApplicationError {
 
 func CheckError(msg string, err error, code int) *ApplicationError {
 	if err != nil {
-		return &ApplicationError{msg, err, code, nil}
+		return NewApplicationError(msg, err, code)
 	}
 	return nil
 }
 
 // LogWithSentry sends error report to sentry and records event id and error name to the logs
-func LogWithSentry(appErr *ApplicationError, r *http.Request) {
+func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, interfaces ...raven.Interface) {
 	sentryDSN = "https://b622b0f1b57b4c01bb76ed1da2a22d5b:9a6d3a8e9e5f42de8f184c4b1a6f64ce@app.getsentry.com/27710"
-	client, _ := raven.NewClient(sentryDSN, nil)
+	client, _ := raven.NewClient(sentryDSN, tags)
 
-	packet := raven.NewPacket(appErr.Error(), appErr.Exception, raven.NewHttp(r))
+	passthrough := append(interfaces, appErr.Exception)
+	
+	packet := raven.NewPacket(appErr.Error(), passthrough...)
+	packet.Level = level
 	eventID, _ := client.Capture(packet, nil)
 	message := fmt.Sprintf("Error event with id \"%s\" - %s", eventID, appErr.Error())
 	log.Println(message)

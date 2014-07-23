@@ -9,6 +9,8 @@ import (
 	//"github.com/gorilla/schema"
 )
 
+// GET function for /users/{email} returns a user's information
+// Need to add permissions to this on a per user basis
 func getUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
@@ -23,6 +25,7 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	return GetUserByEmail(email)
 }
 
+// Create user, need to create an auth token system for signups
 func postUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	email := r.PostFormValue("email")
@@ -46,7 +49,7 @@ func postUser(r *http.Request) (*User, *ApplicationError) {
 	return NewUser(email, password, secret)
 }
 
-//None of my functions need a ResponseWriter anymore but I haven't removed it yet
+// Kill a target, delete User may eventually be used by an admin
 func deleteUser(r *http.Request) (string, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	logged_in_user, ok := session.Values["user_id"].(string)
@@ -67,7 +70,6 @@ func deleteUser(r *http.Request) (string, *ApplicationError) {
 	return user.KillTarget(secret)
 }
 
-//This is pretty much the default of how I'm writing my Handlers. I'm unaware of anything wrong with it.
 func UserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"code.google.com/p/go.crypto/bcrypt"
+	"github.com/getsentry/raven-go"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ type User struct {
 	User_id         string
 	Email           string
 	Secret          string
+	Properties      map[string]string
 	hashed_password []byte
 }
 
@@ -39,7 +41,34 @@ func NewUser(email string, plainPW string, secret string) (*User, *ApplicationEr
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	return &User{id, email, secret, password}, nil
+	return &User{id, email, secret, nil, password}, nil
+}
+
+func GetUserProperties(user_id string) (map[string]string, *ApplicationError) {
+
+	properties := make(map[string]string)
+
+	rows, err := db.Query(`SELECT key, value FROM dm_user_properties WHERE user_id = $1`, user_id)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil, nil
+	case err != nil:
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		var key, value string
+
+		err := rows.Scan(&key, &value)
+		if err == nil {
+			properties[key] = value
+		} else {
+			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
+			LogWithSentry(appErr, map[string]string{"user_id": user_id}, raven.WARNING)
+		}
+		
+
+	}
+	return properties, nil
 }
 
 // Select a User from the DB by email and return it as a user object
@@ -54,7 +83,8 @@ func GetUserByEmail(email string) (*User, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
-		return &User{user_id, email, secret, []byte(hashed_password)}, nil
+		properties, _ := GetUserProperties(user_id)
+		return &User{user_id, email, secret, properties, []byte(hashed_password)}, nil
 	}
 }
 
@@ -69,7 +99,8 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
-		return &User{user_id, email, secret, []byte(hashed_password)}, nil
+		properties, _ := GetUserProperties(user_id)
+		return &User{user_id, email, secret, properties, []byte(hashed_password)}, nil
 	}
 }
 
@@ -82,62 +113,73 @@ func (user *User) CheckPassword(bytePW []byte) bool {
 	return false
 }
 
-//I need to handle what happens if each sql statement fails, right now I'm totally bypassing the error checking
+//Kills an Assassin's target, user must be logged in
 func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
-	tx, err := db.Begin()
-
 	logged_in_user := user.User_id
-	
+
+	old_target_id := ""
+	new_target_id := ""
+
 	var target_secret string
-	err = db.QueryRow(`SELECT secret FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret)
+	// Grab the target's secret and user_id for comparison/use below
+	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret, old_target_id)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	new_target_id := ""
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Confirm the user entered the right secret
 	if secret == target_secret {
 
-		var old_target_id string
-
-		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1`, logged_in_user).Scan(&old_target_id)
-		if err != nil {
-			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-
+		// Prepare the statement to kill the old target
 		setDead, err := db.Prepare(`UPDATE dm_users SET alive = false WHERE user_id = $1`)
 		if err != nil {
+			tx.Rollback()
 			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
+		// Execute the statement to kill the old target
 		_, err = tx.Stmt(setDead).Exec(old_target_id)
 		if err != nil {
+			tx.Rollback()
 			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
+		// Get the old target's target to assign to the Assassin
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&new_target_id)
 		if err != nil {
+			tx.Rollback()
 			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
+		// Delete the row for the dead user's target
 		removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`)
 		_, err = tx.Stmt(removeOldTarget).Exec(logged_in_user)
 		if err != nil {
+			tx.Rollback()
 			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
+		// Set up the Assassin's new target
 		setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`)
 		_, err = tx.Stmt(setNewTarget).Exec(new_target_id, logged_in_user)
 		if err != nil {
+			tx.Rollback()
 			return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
 	} else {
+		// If secret is invalid throw an error
 		msg := fmt.Sprintf("Invalid secret: %s", secret)
 		err := errors.New("Invalid Secret")
 		return "", NewApplicationError(msg, err, ErrCodeInvalidSecret)
 	}
-
-	_ = err
 
 	tx.Commit()
 

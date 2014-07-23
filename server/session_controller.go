@@ -2,15 +2,14 @@ package main
 
 import (
 	"errors"
-	//	"fmt"
-	"net/http"
-	//"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
+	"net/http"
 )
 
 //yes i know i need a real secret key and i should read it from a config file
 var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 
+// Create a session this will probably be rewritten later with basic auth
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	email := r.FormValue("email")
@@ -37,7 +36,8 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	return valid, nil
 }
 
-func killSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
+// Kill a session this will probably be rewritten later with basic auth
+func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	session.Options = &sessions.Options{
 		Path:     "/",
@@ -57,12 +57,8 @@ func SessionHandler() http.HandlerFunc {
 		switch r.Method {
 		case "POST":
 			obj, err = postSession(w, r)
-			//case "POST":
-		//WriteObjToPayload(w, postUser(w, r))
-
-		//servePostUser(db)(w, r)
 		case "DELETE":
-			obj, err = killSession(w, r)
+			obj, err = deleteSession(w, r)
 		default:
 			obj = nil
 			msg := "Not Found"

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
+	"github.com/getsentry/raven-go"
 	//"github.com/gorilla/schema"
 )
 
@@ -32,10 +33,12 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	if err != nil {
 		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
 		fmt.Println(err)
-		//HttpErrorLogger(w, err.Msg, err.Code)
-		LogWithSentry(err, r)
+		HttpErrorLogger(w, err.Msg, err.Code)
+		LogWithSentry(err, nil, raven.ERROR, raven.NewHttp(r))
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 
 	var output map[string]interface{}
 	output = make(map[string]interface{})
@@ -67,7 +70,7 @@ func StartServer() {
 	r.HandleFunc(usersGetPath, UserHandler()).Methods("GET")
 	r.HandleFunc(usersPath, UserHandler()).Methods("POST", "DELETE")
 	r.HandleFunc(loginPath, SessionHandler()).Methods("POST", "DELETE")
-	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gamePath, GameHandler()).Methods("POST")
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
 }
