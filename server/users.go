@@ -5,10 +5,8 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"fmt"
-	//	"log"
+	"errors"
 )
-
-//All of the functions in here need to switch to the ApplicationError Constructors
 
 type User struct {
 	User_id         string
@@ -17,7 +15,6 @@ type User struct {
 	hashed_password []byte
 }
 
-//Yea you like me clearing it from memory
 func clear(b []byte) {
 	for i := 0; i < len(b); i++ {
 		b[i] = 0
@@ -28,6 +25,7 @@ func Crypt(password []byte) ([]byte, error) {
 	defer clear(password)
 	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
 }
+
 func NewUser(email string, plainPW string, secret string) (*User, *ApplicationError) {
 
 	id := uuid.New()
@@ -35,8 +33,7 @@ func NewUser(email string, plainPW string, secret string) (*User, *ApplicationEr
 
 	_, err = db.Exec(`INSERT INTO dm_users (user_id, email, password, secret) VALUES ($1,$2,$3,$4)`, id, email, password, secret)
 	if err != nil {
-		//log error
-		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE}
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return &User{id, email, secret, password}, nil
@@ -45,10 +42,13 @@ func NewUser(email string, plainPW string, secret string) (*User, *ApplicationEr
 func GetUserByEmail(email string) (*User, *ApplicationError) {
 	var user_id, secret, hashed_password string
 	err := db.QueryRow(`SELECT user_id, secret, password FROM dm_users WHERE email = $1`, email).Scan(&user_id, &secret, &hashed_password)
+	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + email
-		return nil, &ApplicationError{msg, err, ERROR_INVALID_EMAIL}
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidEmail)
+	case err != nil:
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
 		return &User{user_id, email, secret, []byte(hashed_password)}, nil
 	}
@@ -60,9 +60,9 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + user_id
-		return nil, &ApplicationError{msg, err, ERROR_INVALID_USER_ID}
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUserId)
 	case err != nil:
-		return nil, &ApplicationError{"Internal Error", err, ERROR_DATABASE}
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
 		return &User{user_id, email, secret, []byte(hashed_password)}, nil
 	}
@@ -80,9 +80,8 @@ func (user *User) CheckPassword(plainPW string) bool {
 //I need to handle what happens if each sql statement fails, right now I'm totally bypassing the error checking
 func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
-	transaction, err := db.Begin()
-	defer transaction.Commit()
-
+	tx, err := db.Begin()
+	
 	logged_in_user := user.User_id
 	var target_secret string
 	err = db.QueryRow(`SELECT secret FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret)
@@ -93,19 +92,29 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 		var old_target_id string
 
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1`, logged_in_user).Scan(&old_target_id)
-		_, err = db.Exec(`UPDATE dm_users SET alive = false WHERE user_id = $1`, old_target_id)
-
+		setDead, err := db.Prepare(`UPDATE dm_users SET alive = false WHERE user_id = $1`)
+		res, err := tx.Stmt(setDead).Exec(old_target_id);
+		fmt.Println(res)
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&new_target_id)
 
-		_, err = db.Exec(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`, logged_in_user)
-		_, err = db.Exec(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`, new_target_id, logged_in_user)
+		removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`)
+		res, err = tx.Stmt(removeOldTarget).Exec(logged_in_user)
+		fmt.Println(res)
+
+		setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`)
+		res, err = tx.Stmt(setNewTarget).Exec(new_target_id, logged_in_user)
+		fmt.Println(res)
+		_ = err
 
 	} else {
 		msg := fmt.Sprintf("Invalid secret: %s", secret)
-		return "", NewSimpleApplicationError(msg, ERROR_INVALID_SECRET)
+		err := errors.New("Invalid Secret")
+		return "", NewApplicationError(msg, err, ErrCodeInvalidSecret)
 	}
 
 	_ = err
+
+	tx.Commit()
 
 	return new_target_id, nil
 }

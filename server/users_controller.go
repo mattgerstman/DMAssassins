@@ -5,26 +5,26 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
+	"errors"
 	//"github.com/gorilla/schema"
 )
 
-//Get user should probably be updated to be a get by URL not query parameter
-//None of my functions need a ResponseWriter anymore but I haven't removed it yet
-func getUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) {
+func getUser(r *http.Request) (*User, *ApplicationError) {
+	r.ParseForm()
 	vars := mux.Vars(r)
 	email := vars["email"]
 
 	if email == "" {
 		msg := "Missing Parameter: email."
-		return nil, NewSimpleApplicationError(msg, ERROR_MISSING_PARAMETER)
+		err := errors.New("Missing Parameter")
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
 	return GetUserByEmail(email)
 }
 
-//I'm under the impression post should stay with query values
-//None of my functions need a ResponseWriter anymore but I haven't removed it yet
-func postUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError) {
+
+func postUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	email := r.PostFormValue("email")
 	password := r.PostFormValue("password")
@@ -40,24 +40,28 @@ func postUser(w http.ResponseWriter, r *http.Request) (*User, *ApplicationError)
 		missingParam = "secret"
 	}
 	msg := fmt.Sprintf("Missing Parameter: %s", missingParam)
+	err := errors.New("Missing Parameter")
 	if missingParam != "" {
-		return nil, NewSimpleApplicationError(msg, ERROR_MISSING_PARAMETER)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 	return NewUser(email, password, secret)
 }
 
 //None of my functions need a ResponseWriter anymore but I haven't removed it yet
-func deleteUser(w http.ResponseWriter, r *http.Request) (string, *ApplicationError) {
+func deleteUser(r *http.Request) (string, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	logged_in_user, ok := session.Values["user_id"].(string)
 
 	if !ok || logged_in_user == "" {
 		msg := "Error: Not logged in"
-		return "", NewSimpleApplicationError(msg, ERROR_NO_SESSION)
+		err := errors.New("No session found for user")
+		return "", NewApplicationError(msg, err, ErrCodeNoSession)
 	}
 
 	r.ParseForm()
 	secret := r.FormValue("secret")
+	
+	fmt.Println(secret)
 	//need to actually handle the case where the user doesn't exist
 	user, err := GetUserById(logged_in_user)
 	_ = err
@@ -68,19 +72,22 @@ func deleteUser(w http.ResponseWriter, r *http.Request) (string, *ApplicationErr
 func UserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		fmt.Println("UserHandler()")
 		var obj interface{}
 		var err *ApplicationError
 
 		switch r.Method {
 		case "GET":
-			obj, err = getUser(w, r)
+			obj, err = getUser(r)
 		case "POST":
-			obj, err = postUser(w, r)
+			obj, err = postUser(r)
 		case "DELETE":
-			obj, err = deleteUser(w, r)
+			obj, err = deleteUser(r)
 		default:
 			obj = nil
-			err = NewSimpleApplicationError("Invalid Http Method", ERROR_INVALID_METHOD)
+			msg := "Not Found"
+			err := errors.New("Invalid Http Method")
+			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 
 		}
 		WriteObjToPayload(w, obj, err)

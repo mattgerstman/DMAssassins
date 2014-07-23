@@ -1,9 +1,9 @@
 package main
 
 import (
-	_ "github.com/lib/pq"
 	"net/http"
-	//"fmt"
+	"errors"
+	"fmt"
 	//"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 )
@@ -12,7 +12,7 @@ import (
 var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 
 //Tell me what's wrong with this
-func getSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
+func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -34,6 +34,7 @@ func getSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicati
 		session.Values["user_id"] = user.User_id
 		session.Save(r, w)
 	}
+	fmt.Println(valid)
 
 	return valid, nil
 }
@@ -58,8 +59,8 @@ func SessionHandler() http.HandlerFunc {
 		var err *ApplicationError
 
 		switch r.Method {
-		case "GET":
-			obj, err = getSession(w, r)
+		case "POST":
+			obj, err = postSession(w, r)
 			//case "POST":
 		//WriteObjToPayload(w, postUser(w, r))
 
@@ -68,7 +69,9 @@ func SessionHandler() http.HandlerFunc {
 			obj, err = killSession(w, r)
 		default:
 			obj = nil
-			err = NewSimpleApplicationError("Invalid Http Method", ERROR_INVALID_METHOD)
+			msg := "Not Found"
+			err := errors.New("Invalid Http Method")			
+			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
 		WriteObjToPayload(w, obj, err)
 	}

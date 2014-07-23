@@ -2,7 +2,14 @@ package main
 
 import (
 	"net/http"
+	"errors"
 )
+
+func postGame() (interface{}, *ApplicationError) {
+	AssignTargets();
+	return nil, nil
+}
+
 
 //Consult the UserHandler for how I'm actually handling Handlers right now
 func GameHandler() http.HandlerFunc {
@@ -15,12 +22,14 @@ func GameHandler() http.HandlerFunc {
 		//case "GET":
 		//	WriteObjToPayload(w, getUser(w, r))
 		case "POST":
-			obj, err := assignTargets()
+			obj, err = postGame()
 		// case "DELETE":
 		// 	WriteObjToPayload(w, deleteUser(w, r))
 		default:
 			obj = nil
-			err = NewSimpleApplicationError("Invalid Http Method", ERROR_INVALID_METHOD)
+			msg := "Not Found"
+			err := errors.New("Invalid Http Method")			
+			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
 		WriteObjToPayload(w, obj, err)
 	}

@@ -14,10 +14,10 @@ import (
 var db *sql.DB
 
 const (
-	usersPath = "/users/"
-	loginPath = "/login/"
-	gamePath  = "/game/"
-	homePath  = "/"
+	usersPath = "/users/{email}"
+	loginPath    = "/login/"
+	gamePath     = "/game/"
+	homePath     = "/"
 )
 
 //This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -49,8 +49,11 @@ func HomeHandler() http.HandlerFunc {
 	}
 }
 
-func connect() {
+func connect() (*sql.DB, error) {
+	var err error
 	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable")
+	fmt.Println(err)
+	return db, err
 }
 
 //Is this right?
