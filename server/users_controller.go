@@ -89,6 +89,6 @@ func UserHandler() http.HandlerFunc {
 			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 
 		}
-		WriteObjToPayload(w, obj, err)
+		WriteObjToPayload(w, r, obj, err)
 	}
 }

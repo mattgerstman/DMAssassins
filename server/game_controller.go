@@ -30,6 +30,6 @@ func GameHandler() http.HandlerFunc {
 			err := errors.New("Invalid Http Method")
 			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
-		WriteObjToPayload(w, obj, err)
+		WriteObjToPayload(w, r, obj, err)
 	}
 }

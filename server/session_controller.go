@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"fmt"
+	//	"fmt"
 	"net/http"
 	//"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
@@ -11,7 +11,6 @@ import (
 //yes i know i need a real secret key and i should read it from a config file
 var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 
-//Tell me what's wrong with this
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	email := r.FormValue("email")
@@ -21,8 +20,8 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	if err != nil {
 		return nil, err
 	}
-
-	valid := user.CheckPassword(password)
+	bytePW := []byte(password)
+	valid := user.CheckPassword(bytePW)
 
 	if valid {
 		session, _ := store.Get(r, "DMAssassins")
@@ -34,12 +33,10 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 		session.Values["user_id"] = user.User_id
 		session.Save(r, w)
 	}
-	fmt.Println(valid)
 
 	return valid, nil
 }
 
-//Tell me what's wrong with this
 func killSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
 	session.Options = &sessions.Options{
@@ -51,7 +48,6 @@ func killSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	return session.Save(r, w), nil
 }
 
-//Consult the UserHandler for how I'm actually handling Handlers right now
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -73,6 +69,6 @@ func SessionHandler() http.HandlerFunc {
 			err := errors.New("Invalid Http Method")
 			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
-		WriteObjToPayload(w, obj, err)
+		WriteObjToPayload(w, r, obj, err)
 	}
 }
