@@ -1,0 +1,69 @@
+login/index
+
+POST
+{
+	email: string
+	password: string
+}
+
+SUCCESS RESPONSE
+{
+	Instantiate Session
+}
+
+ERROR - Invalid Credentials
+
+
+/login/logout
+
+SUCCESS
+{
+	Clear all seasion data
+}
+
+
+
+/users/kill_target
+Requires: Session
+POST
+{
+	target_secret : string
+}
+SUCCESS RESPONSE
+{
+	target_id
+}
+
+
+
+ADMIN FUNCTIONS
+
+/users/get_user
+Requires Admin/Target
+POST
+{
+	user_id
+}
+
+/users/remove
+POST
+{
+	user_id
+}
+
+/users/revive
+POST
+{
+	user_id
+}
+
+/users/create
+{
+	email: string
+	name: string
+	password: string
+	secret: string
+	facebook: string
+	twitter: string
+	team: id
+}
