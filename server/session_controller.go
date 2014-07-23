@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
 	"errors"
 	"fmt"
+	"net/http"
 	//"github.com/gorilla/schema"
 	"github.com/gorilla/sessions"
 )
@@ -70,7 +70,7 @@ func SessionHandler() http.HandlerFunc {
 		default:
 			obj = nil
 			msg := "Not Found"
-			err := errors.New("Invalid Http Method")			
+			err := errors.New("Invalid Http Method")
 			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
 		WriteObjToPayload(w, obj, err)

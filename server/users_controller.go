@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	"errors"
 	//"github.com/gorilla/schema"
 )
 
@@ -22,7 +22,6 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 
 	return GetUserByEmail(email)
 }
-
 
 func postUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
@@ -60,7 +59,7 @@ func deleteUser(r *http.Request) (string, *ApplicationError) {
 
 	r.ParseForm()
 	secret := r.FormValue("secret")
-	
+
 	fmt.Println(secret)
 	//need to actually handle the case where the user doesn't exist
 	user, err := GetUserById(logged_in_user)

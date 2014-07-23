@@ -1,15 +1,14 @@
 package main
 
 import (
-	"net/http"
 	"errors"
+	"net/http"
 )
 
 func postGame() (interface{}, *ApplicationError) {
-	AssignTargets();
+	AssignTargets()
 	return nil, nil
 }
-
 
 //Consult the UserHandler for how I'm actually handling Handlers right now
 func GameHandler() http.HandlerFunc {
@@ -28,7 +27,7 @@ func GameHandler() http.HandlerFunc {
 		default:
 			obj = nil
 			msg := "Not Found"
-			err := errors.New("Invalid Http Method")			
+			err := errors.New("Invalid Http Method")
 			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
 		}
 		WriteObjToPayload(w, obj, err)

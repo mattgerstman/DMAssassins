@@ -15,9 +15,9 @@ var db *sql.DB
 
 const (
 	usersPath = "/users/{email}"
-	loginPath    = "/login/"
-	gamePath     = "/game/"
-	homePath     = "/"
+	loginPath = "/login/"
+	gamePath  = "/game/"
+	homePath  = "/"
 )
 
 //This function logs an error to the HTTP response and then returns an application error to be used as necessary

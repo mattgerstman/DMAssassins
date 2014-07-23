@@ -4,8 +4,8 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 type User struct {
@@ -81,7 +81,7 @@ func (user *User) CheckPassword(plainPW string) bool {
 func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	tx, err := db.Begin()
-	
+
 	logged_in_user := user.User_id
 	var target_secret string
 	err = db.QueryRow(`SELECT secret FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret)
@@ -93,7 +93,7 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1`, logged_in_user).Scan(&old_target_id)
 		setDead, err := db.Prepare(`UPDATE dm_users SET alive = false WHERE user_id = $1`)
-		res, err := tx.Stmt(setDead).Exec(old_target_id);
+		res, err := tx.Stmt(setDead).Exec(old_target_id)
 		fmt.Println(res)
 		err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&new_target_id)
 
