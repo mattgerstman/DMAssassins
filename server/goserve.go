@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	//"errors"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	"github.com/getsentry/raven-go"
 	//"github.com/gorilla/schema"
 )
 
@@ -29,7 +29,7 @@ func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
 }
 
 func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, err *ApplicationError) {
-
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if err != nil {
 		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
 		fmt.Println(err)

@@ -6,17 +6,13 @@ var app = app || {};
 		
 		
 		el: '#app',
-		events : {
-			'click #nav_target' : 'target'	
-		},
 
 		initialize: function(){
 			this.$body = $('#app_body');
 
 		},
-		target : function(){
-			var userView = new app.UserView();
-			this.$body.html(userView.render().el);			
+		renderPage : function(page) {
+			this.$body.html(page.render().el);
 		}
 	})
 })(jQuery);

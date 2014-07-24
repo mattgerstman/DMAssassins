@@ -23,8 +23,8 @@ var app = app || {};
 	  model: new app.User(),
 	  
 	  initialize : function (){
-	  
 		  this.listenTo(this.model, 'change', this.render)
+		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },
 	  
 	  render: function(){

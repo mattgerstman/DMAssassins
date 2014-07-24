@@ -27,10 +27,12 @@ var app = app || {};
 	  },
 	  select: function(event){
 			var target = event.currentTarget;
-			console.log($(target));
-			$('.active').removeClass('active');
-			$(target).addClass('active');
-			
+			this.highlight(target)
+
+	  },
+	  highlight: function(elem) {
+		$('.active').removeClass('active');
+		$(elem).addClass('active');
 	  }
   })
   

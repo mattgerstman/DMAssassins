@@ -63,7 +63,7 @@ func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven
 	client, _ := raven.NewClient(sentryDSN, tags)
 
 	passthrough := append(interfaces, appErr.Exception)
-	
+
 	packet := raven.NewPacket(appErr.Error(), passthrough...)
 	packet.Level = level
 	eventID, _ := client.Capture(packet, nil)

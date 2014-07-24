@@ -35,7 +35,7 @@
 				<%
 								_.each(dropdown_items, function(dropdown_item) {
 				%>
-									<li id="nav_<%=dropdown_item.toLowerCase()%>" class="nav_item"><a href="#"><%=dropdown_item%></a></li>
+									<li id="nav_<%=dropdown_item.toLowerCase()%>" class="nav_item"><a href=<%=dropdown_item%>><%=dropdown_item%></a></li>
 				<%	
 								})
 				%>
@@ -45,7 +45,7 @@
 						}
 						else {
 				%>
-							<li id="nav_<%=item.toLowerCase()%>" class="nav_item"><a href="#"><%=item%></a></li>
+							<li id="nav_<%=item.toLowerCase()%>" class="nav_item"><a href=#<%=item.toLowerCase()%>><%=item%></a></li>
 				<%  
 							}
 						})
@@ -97,28 +97,28 @@
 			 <div class="view text-center">
 			 	<div id="target_data">
 				   	<div class="row">
-						<label>Name:</label> <%= name %>
+						<label>Name:</label> <%= properties.name %>
 					</div>
 					<div class="row">
 					 	<label>Email:</label> <%= email %>
 					</div>
 					<div class="row">
-					 	<label>Facebook:</label> <%= facebook %>
+					 	<label>Facebook:</label> <%= properties.facebook %>
 					</div>
 					<div class="row">
-					 	<label>Twitter:</label> <%= twitter %>
+					 	<label>Twitter:</label> <%= properties.twitter %>
 					</div>
 				</div>
 				<div class="row">
 					<a href="#" class="thumbnail">
-					   <img src=<%= photo_thumb %>>
+					   <img src=<%= properties.photo_thumb %>>
 					</a>
 				</div>
 			 </div>
 		</div>
 		<div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
 		  <div class="modal-dialog">
-		 	<img class="img-responsive" src=<%= photo %> />   
+		 	<img class="img-responsive" src=<%= properties.photo %> />   
 		  </div>
 		</div>
 		

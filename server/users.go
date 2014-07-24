@@ -3,17 +3,18 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"code.google.com/p/go.crypto/bcrypt"
-	"github.com/getsentry/raven-go"
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/getsentry/raven-go"
+	"strings"
 )
 
 type User struct {
-	User_id         string
-	Email           string
-	Secret          string
-	Properties      map[string]string
+	User_id         string            `json:"user_id"`
+	Email           string            `json:"email"`
+	Secret          string            `json:"secret"`
+	Properties      map[string]string `json:"properties"`
 	hashed_password []byte
 }
 
@@ -60,12 +61,12 @@ func GetUserProperties(user_id string) (map[string]string, *ApplicationError) {
 
 		err := rows.Scan(&key, &value)
 		if err == nil {
+			key = strings.ToLower(key)
 			properties[key] = value
 		} else {
 			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
 			LogWithSentry(appErr, map[string]string{"user_id": user_id}, raven.WARNING)
 		}
-		
 
 	}
 	return properties, nil
