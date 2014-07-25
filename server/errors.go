@@ -17,9 +17,10 @@ const (
 	ErrCodeInvalidSecret = 40101
 
 	// 404 - Not Found
-	ErrCodeInvalidMethod = 40400
-	ErrCodeInvalidEmail  = 40401
-	ErrCodeInvalidUserId = 40402
+	ErrCodeInvalidMethod   = 40400
+	ErrCodeInvalidEmail    = 40401
+	ErrCodeInvalidUserId   = 40402
+	ErrCodeInvalidUsername = 40401
 
 	// 500 - Internal Server Error
 	ErrCodeDatabase = 50001

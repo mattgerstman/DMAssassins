@@ -15,11 +15,13 @@ import (
 var db *sql.DB
 
 const (
-	usersGetPath = "/users/{email}"
-	usersPath    = "/users/"
-	loginPath    = "/login/"
-	gamePath     = "/game/"
-	homePath     = "/"
+	usersPath               = "/users/"
+	usersUsernamePath       = "/users/{username}"
+	usersUsernameTargetPath = "/users/{username}/target/"
+
+	loginPath = "/login/"
+	gamePath  = "/game/"
+	homePath  = "/"
 )
 
 //This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -67,10 +69,13 @@ func StartServer() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(usersGetPath, UserHandler()).Methods("GET")
 	r.HandleFunc(usersPath, UserHandler()).Methods("POST", "DELETE")
+	r.HandleFunc(usersUsernamePath, UserHandler()).Methods("GET")
+	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET")
+
 	r.HandleFunc(loginPath, SessionHandler()).Methods("POST", "DELETE")
-	r.HandleFunc(gamePath, GameHandler()).Methods("POST")
+	// r.HandleFunc(gamePath, GameHandler()).Methods("POST")
+	// Fuck you Taylor, this will be used again
 	http.Handle("/", r)
 	http.ListenAndServe(":8000", nil)
 }

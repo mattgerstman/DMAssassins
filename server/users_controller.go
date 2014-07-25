@@ -9,33 +9,35 @@ import (
 	//"github.com/gorilla/schema"
 )
 
-// GET function for /users/{email} returns a user's information
+// GET function for /users/{username} returns a user's information
 // Need to add permissions to this on a per user basis
 func getUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
-	email := vars["email"]
+	username := vars["username"]
+	fmt.Println(username)
 
-	if email == "" {
-		msg := "Missing Parameter: email."
+	if username == "" {
+		msg := "Missing Parameter: username."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	return GetUserByEmail(email)
+	return GetUserByUsername(username)
 }
 
 // Create user, need to create an auth token system for signups
 func postUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
-	email := r.PostFormValue("email")
+	username := r.PostFormValue("username")
 	password := r.PostFormValue("password")
+	email := r.PostFormValue("email")
 	secret := r.PostFormValue("secret")
 
 	missingParam := ""
 	switch {
-	case email == "":
-		missingParam = "email"
+	case username == "":
+		missingParam = "username"
 	case password == "":
 		missingParam = "password"
 	case secret == "":
@@ -46,7 +48,7 @@ func postUser(r *http.Request) (*User, *ApplicationError) {
 	if missingParam != "" {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	return NewUser(email, password, secret)
+	return NewUser(username, email, password, secret)
 }
 
 // Kill a target, delete User may eventually be used by an admin

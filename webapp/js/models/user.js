@@ -7,7 +7,7 @@ var app = app || {};
 	
 	app.User = Backbone.Model.extend({
 		defaults: {
-			'email' : 'mattgerstman@gmail.com',
+			'email' : 'Matt',
 			'properties': {
 				'name' : 'Jimmy',
 				'facebook': 'http://facebook.com',
@@ -22,7 +22,7 @@ var app = app || {};
         },
 		urlRoot: WEB_ROOT + 'users/',
 		initialize: function() {
-			this.url = this.urlRoot + this.get('properties').name
+			this.url = this.urlRoot + this.get('email')
 			this.fetch()
 		}
 	})

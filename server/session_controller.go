@@ -12,9 +12,9 @@ var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 // Create a session this will probably be rewritten later with basic auth
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
-	email := r.FormValue("email")
+	username := r.FormValue("username")
 	password := r.FormValue("password")
-	user, err := GetUserByEmail(email)
+	user, err := GetUserByUsername(username)
 
 	if err != nil {
 		return nil, err
