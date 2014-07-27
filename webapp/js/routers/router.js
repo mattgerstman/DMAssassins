@@ -5,39 +5,31 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 	app.Routers.Router = Backbone.Router.extend({
 		routes: {
 			'' : 'index',
-			'target' : 'target'
+			'target' : 'target',
+			'my_profile' : 'my_profile'
 		},
 		initialize: function() {
-			app.session = app.session || {};
-			app.session.email="Matt"
 			this.appView = new app.Views.AppView();
 			this.appView.render();	
-//			this.navView = new app.NavView();
-//			this.navView.render()
-
 		},
 		index : function() {
 			this.currentView = new app.Views.LoginView();
-			this.currentView.render();
-//			this.target()
+			this.currentView.render();			
+			//this.target()
 		},
 		target : function() {
-			console.log('target');
 			this.navView = new app.Views.NavView();
-			this.navView.render();
-			this.currentView = new app.Views.TargetView({'username' : 'Matt'});
-			this.currentView.render()
-			console.log(this.currentView.model);
-			this.currentView.model.fetch({
-				success: function (data) {
-	                console.log(data);
-	                // Note that we could also 'recycle' the same instance of EmployeeFullView
-	                // instead of creating new instances
-					}
-				}
-            )
+			this.navView.render()
+			console.log('target');
+			this.currentView = new app.Views.TargetView({'username' : 'Jimmy'});
 			this.render();
 			this.navView.highlight('#nav_target')
+		},
+		my_profile : function() {
+			console.log('profile');			
+			this.currentView = new app.Views.ProfileView({'username' : 'Matt'});
+			this.render();
+			this.navView.highlight('#nav_my_profile')
 		},
 		render : function(){
 			this.appView.renderPage(this.currentView)

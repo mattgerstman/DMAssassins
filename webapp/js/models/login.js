@@ -13,7 +13,19 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 			FB.getLoginStatus(function(response){
 				  if (response.status === 'connected') {
 				    // Logged into your app and Facebook.
+
+					console.log(response);
+					var url = WEB_ROOT+'session/';
+
+//					var authKey = Base64.encode(userID+':'+token);
+					var data =  {
+						'facebook_id': response.authResponse.userID,
+						'facebook_token' : response.authResponse.accessToken
+					}
+					console.log(data);
+					$.post(url, data, function(response){
 						console.log(response);
+					});
 
 
 				  } else if (response.status === 'not_authorized') {

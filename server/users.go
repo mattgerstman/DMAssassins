@@ -2,52 +2,49 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
-	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
 	"fmt"
 )
 
 type User struct {
-	User_id         string            `json:"user_id"`
-	Username        string            `json:"username"`
-	Email           string            `json:"email"`
-	Secret          string            `json:"secret"`
-	Properties      map[string]string `json:"properties"`
-	hashed_password []byte
-}
-
-// Function to clear user password from memory after login it
-func clear(b []byte) {
-	for i := 0; i < len(b); i++ {
-		b[i] = 0
-	}
-}
-
-// Encrypt a PW for storage
-func Crypt(password []byte) ([]byte, error) {
-	defer clear(password)
-	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	User_id     string            `json:"user_id"`
+	Username    string            `json:"username"`
+	Email       string            `json:"email"`
+	Secret      string            `json:"secret"`
+	Facebook_id string            `json:"facebook_id"`
+	Properties  map[string]string `json:"properties"`
 }
 
 // Add a user to the DB and return it as a user object
-func NewUser(username string, email, plainPW string, secret string) (*User, *ApplicationError) {
+func NewUser(username, email, secret, facebook_id string, properties map[string]string) (*User, *ApplicationError) {
+	user_id := uuid.New()
 
-	id := uuid.New()
-	password, err := Crypt([]byte(plainPW))
-
-	_, err = db.Exec(`INSERT INTO dm_users (user_id, username, email, password, secret) VALUES ($1,$2,$3,$4)`, id, username, email, password, secret)
+	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, secret, facebook_id) VALUES ($1,$2,$3,$4,$5)`, user_id, username, email, secret, facebook_id)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	return &User{id, username, email, secret, nil, password}, nil
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	if rowsAffected == 0 {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	user := &User{user_id, username, email, secret, facebook_id, properties}
+	for key, value := range properties {
+		user.SetUserProperty(key, value)
+	}
+	return user, nil
 }
 
 // Select a User from the DB by username and return it as a user object
 func GetUserByUsername(username string) (*User, *ApplicationError) {
-	var user_id, secret, email, hashed_password string
-	err := db.QueryRow(`SELECT user_id, secret, email, password FROM dm_users WHERE username = $1`, username).Scan(&user_id, &secret, &email, &hashed_password)
+	var user_id, secret, email, facebook_id string
+	err := db.QueryRow(`SELECT user_id, email, secret, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&user_id, &email, &secret, &facebook_id)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -55,42 +52,21 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	default:
-		user := &User{user_id, username, email, secret, nil, []byte(hashed_password)}
-		properties, appErr := user.GetUserProperties()
-		user.Properties = properties
-		if appErr != nil {
-			return nil, appErr
-		}
-		return user, nil
 	}
+
+	user := &User{user_id, username, email, secret, facebook_id, nil}
+	properties, appErr := user.GetUserProperties()
+	user.Properties = properties
+	if appErr != nil {
+		return nil, appErr
+	}
+	return user, nil
 }
 
 // Select a user from the db by user_id (uuid) and return it as a user object
 func GetUserById(user_id string) (*User, *ApplicationError) {
-	var username, email, secret, hashed_password string
-	err := db.QueryRow(`SELECT username, email, secret, password FROM dm_users WHERE user_id = $1`, user_id).Scan(&username, &email, &secret, &hashed_password)
-	switch {
-	case err == sql.ErrNoRows:
-		msg := "Invalid user: " + user_id
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUserId)
-	case err != nil:
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	default:
-		user := &User{user_id, username, email, secret, nil, []byte(hashed_password)}
-		properties, appErr := user.GetUserProperties()
-		user.Properties = properties
-		if appErr != nil {
-			return nil, appErr
-		}
-		return user, nil
-	}
-}
-
-func (user *User) GetTarget() (*User, *ApplicationError) {
-
-	var user_id, username, email string
-	err := db.QueryRow(`SELECT user_id, username, email FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.User_id).Scan(&user_id, &username, &email)
+	var username, secret, email, facebook_id string
+	err := db.QueryRow(`SELECT username, email, secret, facebook_id FROM dm_users WHERE user_id = $1`, user_id).Scan(&username, &email, &secret, &facebook_id)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -98,26 +74,37 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	default:
-		user := &User{user_id, username, email, "", nil, nil}
-		properties, appErr := user.GetUserProperties()
-		user.Properties = properties
-		if appErr != nil {
-			return nil, appErr
-		}
-		return user, nil
 	}
 
-	return nil, nil
+	user := &User{user_id, username, email, secret, facebook_id, nil}
+	properties, appErr := user.GetUserProperties()
+	user.Properties = properties
+	if appErr != nil {
+		return nil, appErr
+	}
+	return user, nil
 }
 
-// Confirm a password is equal to it's hashed version
-func (user *User) CheckPassword(bytePW []byte) bool {
+func (user *User) GetTarget() (*User, *ApplicationError) {
 
-	if bcrypt.CompareHashAndPassword(user.hashed_password, bytePW) == nil {
-		return true
+	var user_id, username, email, facebook_id string
+	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.User_id).Scan(&user_id, &username, &email, &facebook_id)
+	fmt.Println(err)
+	switch {
+	case err == sql.ErrNoRows:
+		msg := "Invalid user: " + username
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+	case err != nil:
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return false
+
+	target := &User{user_id, username, email, "", facebook_id, nil}
+	properties, appErr := target.GetUserProperties()
+	target.Properties = properties
+	if appErr != nil {
+		return nil, appErr
+	}
+	return target, nil
 }
 
 //Kills an Assassin's target, user must be logged in

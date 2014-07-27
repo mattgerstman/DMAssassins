@@ -13,8 +13,9 @@ const (
 	ErrCodeMissingParameter = 40002
 
 	// 401 - Unauthorized
-	ErrCodeNoSession     = 40100
-	ErrCodeInvalidSecret = 40101
+	ErrCodeNoSession      = 40100
+	ErrCodeInvalidSecret  = 40101
+	ErrCodeInvalidFBToken = 40101
 
 	// 404 - Not Found
 	ErrCodeInvalidMethod   = 40400

@@ -27,7 +27,7 @@ func getUserProperty(r *http.Request) (string, *ApplicationError) {
 	return user.GetUserProperty(key)
 }
 
-func postUserProperty(r *http.Request) (bool, *ApplicationError) {
+func postUserProperty(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	username := vars["username"]
@@ -37,12 +37,12 @@ func postUserProperty(r *http.Request) (bool, *ApplicationError) {
 	if value == "" {
 		msg := "Missing Parameter: value."
 		err := errors.New("Missing Parameter")
-		return false, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
 	user, err := GetUserByUsername(username)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	return user.SetUserProperty(key, value)
 }

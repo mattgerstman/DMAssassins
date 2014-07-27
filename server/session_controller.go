@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gorilla/sessions"
 	"net/http"
 )
@@ -12,33 +13,11 @@ var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 // Create a session this will probably be rewritten later with basic auth
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	user, err := GetUserByUsername(username)
+	facebook_id := r.FormValue("facebook_id")
+	facebook_token := r.FormValue("facebook_token")
+	user, err := GetUserFromFacebookData(facebook_id, facebook_token)
 
-	if err != nil {
-		return nil, err
-	}
-	bytePW := []byte(password)
-	valid := user.CheckPassword(bytePW)
-
-	if valid {
-		session, _ := store.Get(r, "DMAssassins")
-		session.Options = &sessions.Options{
-			Path:     "/",
-			MaxAge:   1800,
-			HttpOnly: true,
-		}
-		session.Values["user_id"] = user.User_id
-		session.Save(r, w)
-	}
-
-	return valid, nil
-}
-
-func getSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
-
-	return facebook()
+	return user, err
 }
 
 // Kill a session this will probably be rewritten later with basic auth
@@ -56,12 +35,11 @@ func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applic
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		fmt.Println("SessionHandler()")
 		var obj interface{}
 		var err *ApplicationError
 
 		switch r.Method {
-		case "GET":
-			obj, err = getSession(w, r)
 		case "POST":
 			obj, err = postSession(w, r)
 		case "DELETE":
@@ -75,3 +53,20 @@ func SessionHandler() http.HandlerFunc {
 		WriteObjToPayload(w, r, obj, err)
 	}
 }
+
+// if err != nil {
+// 	return nil, err
+// }
+// bytePW := []byte(password)
+// valid := user.CheckPassword(bytePW)
+
+// if valid {
+// 	session, _ := store.Get(r, "DMAssassins")
+// 	session.Options = &sessions.Options{
+// 		Path:     "/",
+// 		MaxAge:   1800,
+// 		HttpOnly: true,
+// 	}
+// 	session.Values["user_id"] = user.User_id
+// 	session.Save(r, w)
+// }

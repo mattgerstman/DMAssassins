@@ -37,7 +37,7 @@
 				<%
 								_.each(dropdown_items, function(dropdown_item) {
 				%>
-									<li id="nav_<%=dropdown_item.toLowerCase()%>" class="nav_item"><a href=<%=dropdown_item%>><%=dropdown_item%></a></li>
+									<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=<%=dropdown_item.toLowerCase().replace(' ','_')%>><%=dropdown_item%></a></li>
 				<%	
 								})
 				%>
@@ -47,7 +47,7 @@
 						}
 						else {
 				%>
-							<li id="nav_<%=item.toLowerCase()%>" class="nav_item"><a href=#<%=item.toLowerCase()%>><%=item%></a></li>
+							<li id="nav_<%=item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=#<%=item.toLowerCase().replace(' ','_')%>><%=item%></a></li>
 				<%  
 							}
 						})
@@ -68,7 +68,7 @@
 					<%
 									_.each(dropdown_items, function(dropdown_item) {
 					%>
-										<li id="nav_<%=dropdown_item.toLowerCase()%>" class="nav_item"><a href="#"><%=dropdown_item%></a></li>
+										<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=<%= dropdown_item.toLowerCase().replace(' ','_')%> ><%=dropdown_item%></a></li>
 					<%	
 									})
 					%>
@@ -78,7 +78,7 @@
 							}
 							else {
 					%>
-								<li id="nav_<%=item.toLowerCase()%>" class="nav_item"><a href="#"><%=item%></a></li>
+								<li id="nav_<%=item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=<%=item.toLowerCase().replace(' ','_') %>><%=item%></a></li>
 					<%  
 								}
 							})
@@ -141,6 +141,7 @@
   <script src="js/lib/backbone.js" type="text/javascript" ></script>
   <script src="js/lib/bootstrap.js" type="text/javascript" ></script>
   <script src="js/lib/facebook-sdk.js" type="text/javascript" ></script>
+  <script src="js/lib/base64.js" type="text/javascript" ></script>
 
 
   <script src="js/models/constants.js" type="text/javascript" ></script>

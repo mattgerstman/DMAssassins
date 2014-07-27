@@ -20,7 +20,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 	  },
 	  login: function(){
 		  this.model.login()
-		  app.Running.Router.navigate('target', true)
+		  //app.Running.Router.navigate('target', true)
 	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );

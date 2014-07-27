@@ -2,30 +2,39 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/getsentry/raven-go"
 	"strings"
 )
 
-func (user *User) SetUserProperty(key string, value string) (bool, *ApplicationError) {
+func (user *User) SetUserProperty(key string, value string) (*User, *ApplicationError) {
 	res, err := db.Exec(`UPDATE dm_user_properties SET value = $1 WHERE user_id = $2 AND key ILIKE $3`, value, user.User_id, key)
 	if err != nil {
-		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	if rowsAffected == 0 {
-		_, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`, user.User_id, key, value)
+		res, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`, user.User_id, key, value)
 		if err != nil {
-			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		if rowsAffected == 0 {
+			err = errors.New("Failed insert for " + key + " : " + value)
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 	}
 
 	//_, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1, $2, $3)`, user.User_id, key, value)
-
-	return true, nil
+	user.Properties[key] = value
+	return user, nil
 }
 
 func (user *User) GetUserProperty(key string) (string, *ApplicationError) {

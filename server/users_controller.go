@@ -20,30 +20,30 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	return GetUserByUsername(username)
 }
 
-// Create user, need to create an auth token system for signups
-func postUser(r *http.Request) (*User, *ApplicationError) {
-	r.ParseForm()
-	username := r.PostFormValue("username")
-	password := r.PostFormValue("password")
-	email := r.PostFormValue("email")
-	secret := r.PostFormValue("secret")
+// // Create user, need to create an auth token system for signups
+// func postUser(r *http.Request) (*User, *ApplicationError) {
+// 	r.ParseForm()
+// 	username := r.PostFormValue("username")
+// 	email := r.PostFormValue("email")
+// 	secret := r.PostFormValue("secret")
+// 	password := r.PostFormValue("faceb")
 
-	missingParam := ""
-	switch {
-	case username == "":
-		missingParam = "username"
-	case password == "":
-		missingParam = "password"
-	case secret == "":
-		missingParam = "secret"
-	}
-	msg := fmt.Sprintf("Missing Parameter: %s", missingParam)
-	err := errors.New("Missing Parameter")
-	if missingParam != "" {
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-	return NewUser(username, email, password, secret)
-}
+// 	missingParam := ""
+// 	switch {
+// 	case username == "":
+// 		missingParam = "username"
+// 	case password == "":
+// 		missingParam = "password"
+// 	case secret == "":
+// 		missingParam = "secret"
+// 	}
+// 	msg := fmt.Sprintf("Missing Parameter: %s", missingParam)
+// 	err := errors.New("Missing Parameter")
+// 	if missingParam != "" {
+// 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+// 	}
+// 	return NewUser(username, email, password, secret)
+// }
 
 // Kill a target, delete User may eventually be used by an admin
 func deleteUser(r *http.Request) (string, *ApplicationError) {
@@ -77,8 +77,8 @@ func UserHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getUser(r)
-		case "POST":
-			obj, err = postUser(r)
+		// case "POST":
+		// 	obj, err = postUser(r)
 		case "DELETE":
 			obj, err = deleteUser(r)
 		default:

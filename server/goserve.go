@@ -35,6 +35,7 @@ func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
 // It also logs errors to sentry with a stack trace.
 func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, err *ApplicationError) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
 		fmt.Println(err)
@@ -42,8 +43,6 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		LogWithSentry(err, nil, raven.ERROR, raven.NewHttp(r))
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 
 	var output map[string]interface{}
 	output = make(map[string]interface{})
@@ -74,7 +73,7 @@ func StartServer() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(usersPath, UserHandler()).Methods("POST", "DELETE")
+	r.HandleFunc(usersPath, UserHandler()).Methods("DELETE")
 	r.HandleFunc(usersUsernamePath, UserHandler()).Methods("GET")
 	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET", "POST")
 	r.HandleFunc(usersUsernamePropertyKeyPath, UserPropertyHandler()).Methods("GET", "POST")
