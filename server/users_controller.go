@@ -17,12 +17,6 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	username := vars["username"]
 	fmt.Println(username)
 
-	if username == "" {
-		msg := "Missing Parameter: username."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-
 	return GetUserByUsername(username)
 }
 
@@ -72,6 +66,7 @@ func deleteUser(r *http.Request) (string, *ApplicationError) {
 	return user.KillTarget(secret)
 }
 
+// Handler for /users/ and /users/{username}/
 func UserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

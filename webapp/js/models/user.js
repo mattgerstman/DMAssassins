@@ -1,20 +1,22 @@
 // js/models/user.js
 
-var app = app || {};
-
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
+var logged_in_user = 'Jimmy';
 (function() {
 	'use strict';
 	
-	app.User = Backbone.Model.extend({
+	app.Models.User = Backbone.Model.extend({
 		defaults: {
-			'email' : 'Matt',
+			'username' : '',
+			'email' : '',
 			'properties': {
-				'name' : 'Jimmy',
-				'facebook': 'http://facebook.com',
-				'twitter': 'http://twitter.com',
-				'photo_thumb' : 'https://graph.facebook.com/jimmyyisflyy/picture?width=300&height=300',
-				'photo' : 'https://graph.facebook.com/jimmyyisflyy/picture?width=1000'
+				'name' : '',
+				'facebook': '',
+				'twitter': '',
+				'photo_thumb' : '',
+				'photo' : ''
 			}
+
 		},
 		parse: function(response) {
                 // process response.meta when necessary...
@@ -22,8 +24,7 @@ var app = app || {};
         },
 		urlRoot: WEB_ROOT + 'users/',
 		initialize: function() {
-			this.url = this.urlRoot + this.get('email')
-			this.fetch()
+			this.url = this.urlRoot + this.get('username') + '/'
 		}
 	})
 })();

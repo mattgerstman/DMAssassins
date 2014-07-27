@@ -1,8 +1,8 @@
-var app = app || {};
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 
 (function($){
 	'use strict';
-	app.AppView = Backbone.View.extend({
+	app.Views.AppView = Backbone.View.extend({
 		
 		
 		el: '#app',

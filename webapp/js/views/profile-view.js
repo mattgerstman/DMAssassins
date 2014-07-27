@@ -1,10 +1,10 @@
-  // js/views/user.js
+  // js/views/profile-view.js
 
-var app = app || {};
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 
 (function($){
  'use strict';
-  app.UserView = Backbone.View.extend({
+  app.Views.ProfileView = Backbone.View.extend({
 	   
 	     
 	  template: _.template( $('#user-template').html() ),
@@ -20,9 +20,8 @@ var app = app || {};
 		  $('#photoModal').modal()  
 	  },
 	  
-	  model: new app.User(),
-	  
-	  initialize : function (){
+	  initialize : function (params){
+	  	this.model = new app.Models.User(params)
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },

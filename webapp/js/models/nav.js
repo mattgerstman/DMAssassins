@@ -1,11 +1,11 @@
 // js/models/nav.js
 
-var app = app || {};
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 
 (function() {
 	'use strict';
 	
-	app.Nav = Backbone.Model.extend({
+	app.Models.Nav = Backbone.Model.extend({
 		defaults: {
 			'left' : [
 				'Target',
@@ -25,6 +25,9 @@ var app = app || {};
 				'Logout'
 				
 			]
+		},
+		initialize: function(){
+			
 		}
 		
 	})

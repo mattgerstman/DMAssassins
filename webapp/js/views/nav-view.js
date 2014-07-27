@@ -1,10 +1,10 @@
 // js/views/nav-view.js
 
-var app = app || {};
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 
 (function($){
  'use strict';
-  app.NavView = Backbone.View.extend({
+  app.Views.NavView = Backbone.View.extend({
 	   
 	     
 	  template: _.template( $('#nav-template').html() ),
@@ -15,9 +15,9 @@ var app = app || {};
 	  events: {
 			'click li' : 'select'
 	  },	  
-	  model: new app.Nav(),
-	  
-	  initialize : function (){	  
+  
+	  initialize : function (params){	  
+	  	  this.model = new app.Models.Nav(params)
 		  this.listenTo(this.model, 'change', this.render)
 	  },
 	  

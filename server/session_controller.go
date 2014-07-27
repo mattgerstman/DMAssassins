@@ -36,6 +36,11 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	return valid, nil
 }
 
+func getSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
+
+	return facebook()
+}
+
 // Kill a session this will probably be rewritten later with basic auth
 func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	session, _ := store.Get(r, "DMAssassins")
@@ -55,6 +60,8 @@ func SessionHandler() http.HandlerFunc {
 		var err *ApplicationError
 
 		switch r.Method {
+		case "GET":
+			obj, err = getSession(w, r)
 		case "POST":
 			obj, err = postSession(w, r)
 		case "DELETE":

@@ -1,8 +1,8 @@
-var app = app || {};
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 
 (function(){
 
-	app.Router = Backbone.Router.extend({
+	app.Routers.Router = Backbone.Router.extend({
 		routes: {
 			'' : 'index',
 			'target' : 'target'
@@ -10,18 +10,22 @@ var app = app || {};
 		initialize: function() {
 			app.session = app.session || {};
 			app.session.email="Matt"
-			this.appView = new app.AppView();
-			this.navView = new app.NavView();
+			this.appView = new app.Views.AppView();
 			this.appView.render();	
-			this.navView.render();	
+//			this.navView = new app.NavView();
+//			this.navView.render()
+
 		},
 		index : function() {
-			console.log('index');
+			this.currentView = new app.Views.LoginView();
+			this.currentView.render();
 //			this.target()
 		},
 		target : function() {
 			console.log('target');
-			this.currentView = new app.UserView();
+			this.navView = new app.Views.NavView();
+			this.navView.render();
+			this.currentView = new app.Views.TargetView({'username' : 'Matt'});
 			this.currentView.render()
 			console.log(this.currentView.model);
 			this.currentView.model.fetch({

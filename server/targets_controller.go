@@ -22,7 +22,12 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	return GetUserTargetByUsername(username)
+	user, err := GetUserByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.GetTarget()
 }
 
 // Kill a target, delete User may eventually be used by an admin
@@ -41,12 +46,14 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 	return user.KillTarget(secret)
 }
 
+// Assigns targets, needs to be updated to only allow admins
 func postTarget(r *http.Request) (map[string]string, *ApplicationError) {
 
 	return AssignTargets()
 
 }
 
+// Handler for /user/{username}/target
 func TargetHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

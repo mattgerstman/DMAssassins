@@ -1,8 +1,7 @@
-var app = app || {};
-
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 $(function(){
 	'use strict';	
-	var router = new app.Router();
+	app.Running.Router = new app.Routers.Router();
 	Backbone.history.start();
 	
 });

@@ -6,8 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/getsentry/raven-go"
-	"strings"
 )
 
 type User struct {
@@ -46,33 +44,6 @@ func NewUser(username string, email, plainPW string, secret string) (*User, *App
 	return &User{id, username, email, secret, nil, password}, nil
 }
 
-func GetUserProperties(user_id string) (map[string]string, *ApplicationError) {
-
-	properties := make(map[string]string)
-
-	rows, err := db.Query(`SELECT key, value FROM dm_user_properties WHERE user_id = $1`, user_id)
-	switch {
-	case err == sql.ErrNoRows:
-		return nil, nil
-	case err != nil:
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	for rows.Next() {
-		var key, value string
-
-		err := rows.Scan(&key, &value)
-		if err == nil {
-			key = strings.ToLower(key)
-			properties[key] = value
-		} else {
-			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"user_id": user_id}, raven.WARNING)
-		}
-
-	}
-	return properties, nil
-}
-
 // Select a User from the DB by username and return it as a user object
 func GetUserByUsername(username string) (*User, *ApplicationError) {
 	var user_id, secret, email, hashed_password string
@@ -85,8 +56,13 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
-		properties, _ := GetUserProperties(user_id)
-		return &User{user_id, username, email, secret, properties, []byte(hashed_password)}, nil
+		user := &User{user_id, username, email, secret, nil, []byte(hashed_password)}
+		properties, appErr := user.GetUserProperties()
+		user.Properties = properties
+		if appErr != nil {
+			return nil, appErr
+		}
+		return user, nil
 	}
 }
 
@@ -101,15 +77,20 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
-		properties, _ := GetUserProperties(user_id)
-		return &User{user_id, username, email, secret, properties, []byte(hashed_password)}, nil
+		user := &User{user_id, username, email, secret, nil, []byte(hashed_password)}
+		properties, appErr := user.GetUserProperties()
+		user.Properties = properties
+		if appErr != nil {
+			return nil, appErr
+		}
+		return user, nil
 	}
 }
 
-func GetUserTargetByUsername(username string) (*User, *ApplicationError) {
+func (user *User) GetTarget() (*User, *ApplicationError) {
 
-	var user_id, target_username, email string
-	err := db.QueryRow(`SELECT user_id, username, email FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT user_id FROM dm_users WHERE username = $1))`, username).Scan(&user_id, &target_username, &email)
+	var user_id, username, email string
+	err := db.QueryRow(`SELECT user_id, username, email FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.User_id).Scan(&user_id, &username, &email)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -118,8 +99,13 @@ func GetUserTargetByUsername(username string) (*User, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	default:
-		properties, _ := GetUserProperties(user_id)
-		return &User{user_id, target_username, email, "", properties, nil}, nil
+		user := &User{user_id, username, email, "", nil, nil}
+		properties, appErr := user.GetUserProperties()
+		user.Properties = properties
+		if appErr != nil {
+			return nil, appErr
+		}
+		return user, nil
 	}
 
 	return nil, nil
