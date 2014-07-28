@@ -95,7 +95,7 @@
 	</script>
 
 	<script type="text/template" id="user-template">
-		<div class="user_view" class="container-fluid">
+		<div class="user_view container user_column">
 			 <div class="view text-center">
 			 	<div id="target_data">
 				   	<div class="row">
@@ -115,6 +115,12 @@
 					<a href="#" class="thumbnail">
 					   <img src=<%= properties.photo_thumb %>>
 					</a>
+				</div>
+				<div class="row">
+					<form class="form-inline" id="secret">
+						<input class="form-control" placeholder="Enter Secret" /><button type="button" id="kill" class="btn btn-danger">Kill Target</button>
+					</form>
+					
 				</div>
 			 </div>
 		</div>

@@ -62,7 +62,7 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 	properties := make(map[string]string)
 	properties["Facebook"] = facebook
 
-	picture := "https://graph.facebook.com/" + facebook_id
+	picture := "https://graph.facebook.com/" + facebook_id + "/picture"
 	properties["photo"] = picture + "?width=1000"
 	properties["photo_thumb"] = picture + "?width=300&height=300"
 

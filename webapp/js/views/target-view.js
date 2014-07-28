@@ -13,7 +13,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 	  
         // The DOM events specific to an item.
 		events: {
-	      'click .thumbnail': 'showFullImage'
+	      'click .thumbnail': 'showFullImage',
+	      'click #kill' : 'loadSecretInput'
 	    },
 	  
 	  showFullImage: function(){
@@ -26,7 +27,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },
-	  
+	  loadSecretInput: function() {
+		var secret = this.$el.find('#secret');
+		this.$el.find('#kill').fadeOut(function(){
+			secret.fadeIn()
+		});
+	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
 		return this;  

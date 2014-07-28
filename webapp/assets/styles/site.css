@@ -1,5 +1,8 @@
-.thumbnail {
+.user_column {
 	width:300px;
+}
+
+.thumbnail {
 	margin-left:auto;
 	margin-right:auto;
 }
@@ -7,3 +10,17 @@
 a, a:focus { outline: none; }
 
 
+#secret{
+	/* display:none; */
+}
+
+#secret .form-control {
+	width:190px;
+	float:left;
+	margin-left:5px;
+}
+
+#secret button {
+	margin-left:5px;
+	margin-right:5px;
+}

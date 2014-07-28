@@ -27,7 +27,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
 		},
 		my_profile : function() {
 			console.log('profile');			
-			this.currentView = new app.Views.ProfileView({'username' : 'Matt'});
+			this.currentView = new app.Views.ProfileView({'username' : 'MattGerstman'});
 			this.render();
 			this.navView.highlight('#nav_my_profile')
 		},

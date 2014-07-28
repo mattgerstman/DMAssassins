@@ -8,18 +8,13 @@ import (
 	"net/http"
 	//"github.com/gorilla/schema"
 )
-
+// Get a single user property
 func getUserProperty(r *http.Request) (string, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	username := vars["username"]
 	key := vars["key"]
 
-	if username == "" {
-		msg := "Missing Parameter: username."
-		err := errors.New("Missing Parameter")
-		return "", NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
 	user, err := GetUserByUsername(username)
 	if err != nil {
 		return "", err
@@ -27,6 +22,7 @@ func getUserProperty(r *http.Request) (string, *ApplicationError) {
 	return user.GetUserProperty(key)
 }
 
+// Set a single User Property
 func postUserProperty(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
@@ -46,6 +42,8 @@ func postUserProperty(r *http.Request) (*User, *ApplicationError) {
 	}
 	return user.SetUserProperty(key, value)
 }
+
+// Handler for User Property
 func UserPropertyHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

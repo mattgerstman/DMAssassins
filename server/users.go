@@ -55,8 +55,7 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 	}
 
 	user := &User{user_id, username, email, secret, facebook_id, nil}
-	properties, appErr := user.GetUserProperties()
-	user.Properties = properties
+	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -77,8 +76,7 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 	}
 
 	user := &User{user_id, username, email, secret, facebook_id, nil}
-	properties, appErr := user.GetUserProperties()
-	user.Properties = properties
+	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -99,8 +97,7 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 	}
 
 	target := &User{user_id, username, email, "", facebook_id, nil}
-	properties, appErr := target.GetUserProperties()
-	target.Properties = properties
+	_, appErr := target.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
