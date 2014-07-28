@@ -3,14 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/gorilla/sessions"
+	//"github.com/gorilla/sessions"
 	"net/http"
 )
 
 //yes i know i need a real secret key and i should read it from a config file
-var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
+// var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
 
-// Create a session this will probably be rewritten later with basic auth
+// Takes data from facebook and returns an authenticated user
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	facebook_id := r.FormValue("facebook_id")
@@ -20,17 +20,17 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	return user, err
 }
 
-// Kill a session this will probably be rewritten later with basic auth
-func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
-	session, _ := store.Get(r, "DMAssassins")
-	session.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   -1,
-		HttpOnly: true,
-	}
+// // Kill a session this will probably be rewritten later with basic auth
+// func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
+// 	session, _ := store.Get(r, "DMAssassins")
+// 	session.Options = &sessions.Options{
+// 		Path:     "/",
+// 		MaxAge:   -1,
+// 		HttpOnly: true,
+// 	}
 
-	return session.Save(r, w), nil
-}
+// 	return session.Save(r, w), nil
+// }
 
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -42,8 +42,8 @@ func SessionHandler() http.HandlerFunc {
 		switch r.Method {
 		case "POST":
 			obj, err = postSession(w, r)
-		case "DELETE":
-			obj, err = deleteSession(w, r)
+		// case "DELETE":
+		// 	obj, err = deleteSession(w, r)
 		default:
 			obj = nil
 			msg := "Not Found"
@@ -53,20 +53,3 @@ func SessionHandler() http.HandlerFunc {
 		WriteObjToPayload(w, r, obj, err)
 	}
 }
-
-// if err != nil {
-// 	return nil, err
-// }
-// bytePW := []byte(password)
-// valid := user.CheckPassword(bytePW)
-
-// if valid {
-// 	session, _ := store.Get(r, "DMAssassins")
-// 	session.Options = &sessions.Options{
-// 		Path:     "/",
-// 		MaxAge:   1800,
-// 		HttpOnly: true,
-// 	}
-// 	session.Values["user_id"] = user.User_id
-// 	session.Save(r, w)
-// }

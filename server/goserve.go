@@ -15,7 +15,6 @@ import (
 var db *sql.DB
 
 const (
-	usersPath                    = "/users/"
 	usersUsernamePath            = "/users/{username}/"
 	usersUsernameTargetPath      = "/users/{username}/target/"
 	usersUsernamePropertyPath    = "/users/{username}/property/"
@@ -73,12 +72,11 @@ func StartServer() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(usersPath, UserHandler()).Methods("DELETE")
 	r.HandleFunc(usersUsernamePath, UserHandler()).Methods("GET")
 	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET", "POST")
 	r.HandleFunc(usersUsernamePropertyKeyPath, UserPropertyHandler()).Methods("GET", "POST")
 
-	r.HandleFunc(sessionPath, SessionHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 	// r.HandleFunc(gamePath, GameHandler()).Methods("POST")
 	// Fuck you Taylor, this will be used again
 	http.Handle("/", r)

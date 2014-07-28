@@ -20,53 +20,7 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	return GetUserByUsername(username)
 }
 
-// // Create user, need to create an auth token system for signups
-// func postUser(r *http.Request) (*User, *ApplicationError) {
-// 	r.ParseForm()
-// 	username := r.PostFormValue("username")
-// 	email := r.PostFormValue("email")
-// 	secret := r.PostFormValue("secret")
-// 	password := r.PostFormValue("faceb")
-
-// 	missingParam := ""
-// 	switch {
-// 	case username == "":
-// 		missingParam = "username"
-// 	case password == "":
-// 		missingParam = "password"
-// 	case secret == "":
-// 		missingParam = "secret"
-// 	}
-// 	msg := fmt.Sprintf("Missing Parameter: %s", missingParam)
-// 	err := errors.New("Missing Parameter")
-// 	if missingParam != "" {
-// 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-// 	}
-// 	return NewUser(username, email, password, secret)
-// }
-
-// Kill a target, delete User may eventually be used by an admin
-func deleteUser(r *http.Request) (string, *ApplicationError) {
-	session, _ := store.Get(r, "DMAssassins")
-	logged_in_user, ok := session.Values["user_id"].(string)
-
-	if !ok || logged_in_user == "" {
-		msg := "Error: Not logged in"
-		err := errors.New("No session found for user")
-		return "", NewApplicationError(msg, err, ErrCodeNoSession)
-	}
-
-	r.ParseForm()
-	secret := r.FormValue("secret")
-
-	fmt.Println(secret)
-	//need to actually handle the case where the user doesn't exist
-	user, err := GetUserById(logged_in_user)
-	_ = err
-	return user.KillTarget(secret)
-}
-
-// Handler for /users/ and /users/{username}/
+// Handler for /users/{username}/
 func UserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -77,10 +31,6 @@ func UserHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getUser(r)
-		// case "POST":
-		// 	obj, err = postUser(r)
-		case "DELETE":
-			obj, err = deleteUser(r)
 		default:
 			obj = nil
 			msg := "Not Found"
