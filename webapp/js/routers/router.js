@@ -1,40 +1,53 @@
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}};
+var app = app || {
+  Models: {},
+  Views: {},
+  Routers: {},
+  Running: {},
+  Session: {}
+};
 
-(function(){
+(function() {
 
-	app.Routers.Router = Backbone.Router.extend({
-		routes: {
-			'' : 'index',
-			'target' : 'target',
-			'my_profile' : 'my_profile'
-		},
-		initialize: function() {
-			this.appView = new app.Views.AppView();
-			this.appView.render();	
-		},
-		index : function() {
-			this.currentView = new app.Views.LoginView();
-			this.currentView.render();			
-			//this.target()
-		},
-		target : function() {
-			this.navView = new app.Views.NavView();
-			this.navView.render()
-			console.log('target');
-			this.currentView = new app.Views.TargetView({'username' : 'Jimmy'});
-			this.render();
-			this.navView.highlight('#nav_target')
-		},
-		my_profile : function() {
-			console.log('profile');			
-			this.currentView = new app.Views.ProfileView({'username' : 'MattGerstman'});
-			this.render();
-			this.navView.highlight('#nav_my_profile')
-		},
-		render : function(){
-			this.appView.renderPage(this.currentView)
-		}
-		
-	})
+  app.Routers.Router = Backbone.Router.extend({
+    routes: {
+      '': 'index',
+      'target': 'target',
+      'my_profile': 'my_profile'
+    },
+    initialize: function() {
+      app.Running.appView = new app.Views.AppView();
+      app.Running.appView.render();
+      this.navigate('index')
+      //			app.Running.navView.render()
+    },
+    index: function() {
+      if (app.Session.user_id === undefined) {
+        app.Running.currentView = new app.Views.LoginView();
+        app.Running.currentView.render()
+      } else {
+        this.target();
+      }
+
+    },
+    target: function() {
+      app.Running.currentView = new app.Views.TargetView();
+      this.render();
+      app.Running.navView.highlight('#nav_target')
+    },
+    my_profile: function() {
+      app.Running.currentView = new app.Views.ProfileView();
+      this.render();
+      app.Running.navView.highlight('#nav_my_profile')
+    },
+    render: function() {
+      console.log('fragment');
+      console.log(Backbone.history.fragment);
+      if ((Backbone.history.fragment != '') && (app.Running.navView === undefined)) {
+        app.Running.navView = new app.Views.NavView();
+        app.Running.navView = app.Running.navView.render();
+      }
+      app.Running.appView.renderPage(app.Running.currentView)
+    }
+  })
 
 })()

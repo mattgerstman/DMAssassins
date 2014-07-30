@@ -60,7 +60,7 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 
 	// Set up user properties map, this will be inserted with the user
 	properties := make(map[string]string)
-	properties["Facebook"] = facebook
+	properties["Facebook"] = "https://facebook.com/" + facebook_id
 
 	picture := "https://graph.facebook.com/" + facebook_id + "/picture"
 	properties["photo"] = picture + "?width=1000"
@@ -95,10 +95,9 @@ func getUserFromFacebookId(facebook_id, facebook_token string) (*User, *Applicat
 		return nil, appErr
 	}
 	if test_id != facebook_id {
-		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)	
+		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 	return GetUserById(user_id)
-	
 
 }
 
@@ -123,7 +122,7 @@ func GetUserFromFacebookData(facebook_id, facebook_token string) (interface{}, *
 func GetFacebookIdFromToken(token string) (interface{}, *ApplicationError) {
 
 	session := getFacebookSession(token)
-	res, err := session.Get("/debug_token", fb.Params{"input_token": token})
+	res, err := session.Get("/debug_token", fb.Params{"input_token": token, "access_token": "643600385736129|b09q6IYK2a-P58UN64sDcp1KoIs"})
 	if err != nil {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
@@ -132,7 +131,7 @@ func GetFacebookIdFromToken(token string) (interface{}, *ApplicationError) {
 	err = res.DecodeField("data.user_id", &user_id)
 	if err != nil {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
-	}	
+	}
 	return user_id, nil
 
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"strings"
 )
+
 // Sets a single user property for a user
 func (user *User) SetUserProperty(key string, value string) (*User, *ApplicationError) {
 	// First attempt to update it if the property currently exists

@@ -14,7 +14,18 @@ import (
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
 	facebook_id := r.FormValue("facebook_id")
+	if facebook_id == "" {
+		msg := "Missing Parameter: facebook_id."
+		err := errors.New("Missing Parameter")
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 	facebook_token := r.FormValue("facebook_token")
+	if facebook_token == "" {
+		msg := "Missing Parameter: facebook_token."
+		err := errors.New("Missing Parameter")
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
 	user, err := GetUserFromFacebookData(facebook_id, facebook_token)
 
 	return user, err

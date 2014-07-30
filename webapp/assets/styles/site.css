@@ -1,26 +1,24 @@
 .user_column {
 	width:300px;
+	margin-left: auto;
+	margin-right: auto;
 }
-
+ 
 .thumbnail {
+	width:300px;
 	margin-left:auto;
 	margin-right:auto;
 }
 
 a, a:focus { outline: none; }
 
-
-#secret{
-	/* display:none; */
-}
-
-#secret .form-control {
+#kill_form .form-control {
 	width:190px;
 	float:left;
 	margin-left:5px;
 }
 
-#secret button {
+#kill_form button {
 	margin-left:5px;
 	margin-right:5px;
 }

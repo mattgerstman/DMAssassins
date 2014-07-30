@@ -18,31 +18,31 @@
   var breaker = {};
 
   // Save bytes in the minified (but not gzipped) version:
-  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+  var ArrayProto = Array.prototype,
+    ObjProto = Object.prototype,
+    FuncProto = Function.prototype;
 
   // Create quick reference variables for speed access to core prototypes.
-  var
-    push             = ArrayProto.push,
-    slice            = ArrayProto.slice,
-    concat           = ArrayProto.concat,
-    toString         = ObjProto.toString,
-    hasOwnProperty   = ObjProto.hasOwnProperty;
+  var push = ArrayProto.push,
+    slice = ArrayProto.slice,
+    concat = ArrayProto.concat,
+    toString = ObjProto.toString,
+    hasOwnProperty = ObjProto.hasOwnProperty;
 
   // All **ECMAScript 5** native function implementations that we hope to use
   // are declared here.
-  var
-    nativeForEach      = ArrayProto.forEach,
-    nativeMap          = ArrayProto.map,
-    nativeReduce       = ArrayProto.reduce,
-    nativeReduceRight  = ArrayProto.reduceRight,
-    nativeFilter       = ArrayProto.filter,
-    nativeEvery        = ArrayProto.every,
-    nativeSome         = ArrayProto.some,
-    nativeIndexOf      = ArrayProto.indexOf,
-    nativeLastIndexOf  = ArrayProto.lastIndexOf,
-    nativeIsArray      = Array.isArray,
-    nativeKeys         = Object.keys,
-    nativeBind         = FuncProto.bind;
+  var nativeForEach = ArrayProto.forEach,
+    nativeMap = ArrayProto.map,
+    nativeReduce = ArrayProto.reduce,
+    nativeReduceRight = ArrayProto.reduceRight,
+    nativeFilter = ArrayProto.filter,
+    nativeEvery = ArrayProto.every,
+    nativeSome = ArrayProto.some,
+    nativeIndexOf = ArrayProto.indexOf,
+    nativeLastIndexOf = ArrayProto.lastIndexOf,
+    nativeIsArray = Array.isArray,
+    nativeKeys = Object.keys,
+    nativeBind = FuncProto.bind;
 
   // Create a safe reference to the Underscore object for use below.
   var _ = function(obj) {
@@ -108,9 +108,11 @@
   // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
   _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
     var initial = arguments.length > 2;
-    if (obj == null) obj = [];
+    if (obj == null)
+      obj = [];
     if (nativeReduce && obj.reduce === nativeReduce) {
-      if (context) iterator = _.bind(iterator, context);
+      if (context)
+        iterator = _.bind(iterator, context);
       return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
     }
     each(obj, function(value, index, list) {
@@ -121,7 +123,8 @@
         memo = iterator.call(context, memo, value, index, list);
       }
     });
-    if (!initial) throw new TypeError(reduceError);
+    if (!initial)
+      throw new TypeError(reduceError);
     return memo;
   };
 
@@ -129,9 +132,11 @@
   // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
   _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
     var initial = arguments.length > 2;
-    if (obj == null) obj = [];
+    if (obj == null)
+      obj = [];
     if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
-      if (context) iterator = _.bind(iterator, context);
+      if (context)
+        iterator = _.bind(iterator, context);
       return initial ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
     }
     var length = obj.length;
@@ -148,7 +153,8 @@
         memo = iterator.call(context, memo, obj[index], index, list);
       }
     });
-    if (!initial) throw new TypeError(reduceError);
+    if (!initial)
+      throw new TypeError(reduceError);
     return memo;
   };
 
@@ -255,7 +261,8 @@
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.max.apply(Math, obj);
     }
-    var result = -Infinity, lastComputed = -Infinity;
+    var result = -Infinity,
+      lastComputed = -Infinity;
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       if (computed > lastComputed) {
@@ -271,7 +278,8 @@
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.min.apply(Math, obj);
     }
-    var result = Infinity, lastComputed = Infinity;
+    var result = Infinity,
+      lastComputed = Infinity;
     each(obj, function(value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
       if (computed < lastComputed) {
@@ -301,7 +309,8 @@
   // The internal `guard` argument allows it to work with `map`.
   _.sample = function(obj, n, guard) {
     if (n == null || guard) {
-      if (obj.length !== +obj.length) obj = _.values(obj);
+      if (obj.length !== +obj.length)
+        obj = _.values(obj);
       return obj[_.random(obj.length - 1)];
     }
     return _.shuffle(obj).slice(0, Math.max(0, n));
@@ -327,8 +336,8 @@
       var a = left.criteria;
       var b = right.criteria;
       if (a !== b) {
-        if (a > b || a === void 0) return 1;
-        if (a < b || b === void 0) return -1;
+        if (a > b || a === void0) return 1;
+        if (a < b || b === void0) return -1;
       }
       return left.index - right.index;
     }), 'value');
@@ -371,7 +380,8 @@
   _.sortedIndex = function(array, obj, iterator, context) {
     iterator = lookupIterator(iterator);
     var value = iterator.call(context, obj);
-    var low = 0, high = array.length;
+    var low = 0,
+      high = array.length;
     while (low < high) {
       var mid = (low + high) >>> 1;
       iterator.call(context, array[mid]) < value ? low = mid + 1 : high = mid;
@@ -400,7 +410,7 @@
   // values in the array. Aliased as `head` and `take`. The **guard** check
   // allows it to work with `_.map`.
   _.first = _.head = _.take = function(array, n, guard) {
-    if (array == null) return void 0;
+    if (array == null) return void0;
     if ((n == null) || guard) return array[0];
     if (n < 0) return [];
     return slice.call(array, 0, n);
@@ -417,7 +427,7 @@
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array. The **guard** check allows it to work with `_.map`.
   _.last = function(array, n, guard) {
-    if (array == null) return void 0;
+    if (array == null) return void0;
     if ((n == null) || guard) return array[array.length - 1];
     return slice.call(array, Math.max(array.length - n, 0));
   };
@@ -463,7 +473,8 @@
   // Split an array into two arrays: one whose elements all satisfy the given
   // predicate, and one whose elements all do not satisfy the predicate.
   _.partition = function(array, predicate) {
-    var pass = [], fail = [];
+    var pass = [],
+      fail = [];
     each(array, function(elem) {
       (predicate(elem) ? pass : fail).push(elem);
     });
@@ -512,7 +523,9 @@
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
     var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function(value){ return !_.contains(rest, value); });
+    return _.filter(array, function(value) {
+      return !_.contains(rest, value);
+    });
   };
 
   // Zip together multiple lists into a single array -- elements that share
@@ -550,7 +563,8 @@
   // for **isSorted** to use binary search.
   _.indexOf = function(array, item, isSorted) {
     if (array == null) return -1;
-    var i = 0, length = array.length;
+    var i = 0,
+      length = array.length;
     if (isSorted) {
       if (typeof isSorted == 'number') {
         i = (isSorted < 0 ? Math.max(0, length + isSorted) : isSorted);
@@ -560,7 +574,8 @@
       }
     }
     if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) if (array[i] === item) return i;
+    for (; i < length; i++)
+      if (array[i] === item) return i;
     return -1;
   };
 
@@ -572,7 +587,8 @@
       return hasIndex ? array.lastIndexOf(item, from) : array.lastIndexOf(item);
     }
     var i = (hasIndex ? from : array.length);
-    while (i--) if (array[i] === item) return i;
+    while (i--)
+      if (array[i] === item) return i;
     return -1;
   };
 
@@ -590,7 +606,7 @@
     var idx = 0;
     var range = new Array(length);
 
-    while(idx < length) {
+    while (idx < length) {
       range[idx++] = start;
       start += step;
     }
@@ -602,7 +618,7 @@
   // ------------------
 
   // Reusable constructor function for prototype setting.
-  var ctor = function(){};
+  var ctor = function() {};
 
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
@@ -610,7 +626,8 @@
   _.bind = function(func, context) {
     var args, bound;
     if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw new TypeError;
+    if (!_.isFunction(func))
+      throw new TypeError;
     args = slice.call(arguments, 2);
     return bound = function() {
       if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
@@ -632,7 +649,8 @@
       var position = 0;
       var args = boundArgs.slice();
       for (var i = 0, length = args.length; i < length; i++) {
-        if (args[i] === _) args[i] = arguments[position++];
+        if (args[i] === _)
+          args[i] = arguments[position++];
       }
       while (position < arguments.length) args.push(arguments[position++]);
       return func.apply(this, args);
@@ -644,8 +662,11 @@
   // defined on an object belong to it.
   _.bindAll = function(obj) {
     var funcs = slice.call(arguments, 1);
-    if (funcs.length === 0) throw new Error('bindAll must be passed function names');
-    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    if (funcs.length === 0)
+      throw new Error('bindAll must be passed function names');
+    each(funcs, function(f) {
+      obj[f] = _.bind(obj[f], obj);
+    });
     return obj;
   };
 
@@ -663,7 +684,9 @@
   // it with the arguments supplied.
   _.delay = function(func, wait) {
     var args = slice.call(arguments, 2);
-    return setTimeout(function(){ return func.apply(null, args); }, wait);
+    return setTimeout(function() {
+      return func.apply(null, args);
+    }, wait);
   };
 
   // Defers a function, scheduling it to run after the current call stack has
@@ -690,7 +713,8 @@
     };
     return function() {
       var now = _.now();
-      if (!previous && options.leading === false) previous = now;
+      if (!previous && options.leading === false)
+        previous = now;
       var remaining = wait - (now - previous);
       context = this;
       args = arguments;
@@ -795,7 +819,8 @@
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
     var keys = [];
-    for (var key in obj) if (_.has(obj, key)) keys.push(key);
+    for (var key in obj)
+      if (_.has(obj, key)) keys.push(key);
     return keys;
   };
 
@@ -858,17 +883,19 @@
     var copy = {};
     var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
     each(keys, function(key) {
-      if (key in obj) copy[key] = obj[key];
+      if (key in obj)
+        copy[key] = obj[key];
     });
     return copy;
   };
 
-   // Return a copy of the object without the blacklisted properties.
+  // Return a copy of the object without the blacklisted properties.
   _.omit = function(obj) {
     var copy = {};
     var keys = concat.apply(ArrayProto, slice.call(arguments, 1));
     for (var key in obj) {
-      if (!_.contains(keys, key)) copy[key] = obj[key];
+      if (!_.contains(keys, key))
+        copy[key] = obj[key];
     }
     return copy;
   };
@@ -878,7 +905,8 @@
     each(slice.call(arguments, 1), function(source) {
       if (source) {
         for (var prop in source) {
-          if (obj[prop] === void 0) obj[prop] = source[prop];
+          if (obj[prop] === void0)
+            obj[prop] = source[prop];
         }
       }
     });
@@ -907,8 +935,10 @@
     // A strict comparison is necessary because `null == undefined`.
     if (a == null || b == null) return a === b;
     // Unwrap any wrapped objects.
-    if (a instanceof _) a = a._wrapped;
-    if (b instanceof _) b = b._wrapped;
+    if (a instanceof _)
+      a = a._wrapped;
+    if (b instanceof _)
+      b = b._wrapped;
     // Compare `[[Class]]` names.
     var className = toString.call(a);
     if (className != toString.call(b)) return false;
@@ -931,9 +961,9 @@
       // RegExps are compared by their source patterns and flags.
       case '[object RegExp]':
         return a.source == b.source &&
-               a.global == b.global &&
-               a.multiline == b.multiline &&
-               a.ignoreCase == b.ignoreCase;
+        a.global == b.global &&
+        a.multiline == b.multiline &&
+        a.ignoreCase == b.ignoreCase;
     }
     if (typeof a != 'object' || typeof b != 'object') return false;
     // Assume equality for cyclic structures. The algorithm for detecting cyclic
@@ -946,16 +976,18 @@
     }
     // Objects with different constructors are not equivalent, but `Object`s
     // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
+    var aCtor = a.constructor,
+      bCtor = b.constructor;
     if (aCtor !== bCtor && !(_.isFunction(aCtor) && (aCtor instanceof aCtor) &&
-                             _.isFunction(bCtor) && (bCtor instanceof bCtor))
-                        && ('constructor' in a && 'constructor' in b)) {
+      _.isFunction(bCtor) && (bCtor instanceof bCtor))
+      && ('constructor' in a && 'constructor' in b)) {
       return false;
     }
     // Add the first object to the stack of traversed objects.
     aStack.push(a);
     bStack.push(b);
-    var size = 0, result = true;
+    var size = 0,
+      result = true;
     // Recursively compare objects and arrays.
     if (className == '[object Array]') {
       // Compare array lengths to determine if a deep comparison is necessary.
@@ -1001,7 +1033,8 @@
   _.isEmpty = function(obj) {
     if (obj == null) return true;
     if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-    for (var key in obj) if (_.has(obj, key)) return false;
+    for (var key in obj)
+      if (_.has(obj, key)) return false;
     return true;
   };
 
@@ -1065,7 +1098,7 @@
 
   // Is a given variable undefined?
   _.isUndefined = function(obj) {
-    return obj === void 0;
+    return obj === void0;
   };
 
   // Shortcut function for checking if an object has a given property directly
@@ -1090,7 +1123,7 @@
   };
 
   _.constant = function(value) {
-    return function () {
+    return function() {
       return value;
     };
   };
@@ -1130,7 +1163,9 @@
   };
 
   // A (possibly faster) way to get the current timestamp as an integer.
-  _.now = Date.now || function() { return new Date().getTime(); };
+  _.now = Date.now || function() {
+    return new Date().getTime();
+  };
 
   // List of HTML entities for escaping.
   var entityMap = {
@@ -1146,7 +1181,7 @@
 
   // Regexes containing the keys and values listed immediately above.
   var entityRegexes = {
-    escape:   new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
+    escape: new RegExp('[' + _.keys(entityMap.escape).join('') + ']', 'g'),
     unescape: new RegExp('(' + _.keys(entityMap.unescape).join('|') + ')', 'g')
   };
 
@@ -1163,7 +1198,7 @@
   // If the value of the named `property` is a function then invoke it with the
   // `object` as context; otherwise, return it.
   _.result = function(object, property) {
-    if (object == null) return void 0;
+    if (object == null) return void0;
     var value = object[property];
     return _.isFunction(value) ? value.call(object) : value;
   };
@@ -1191,9 +1226,9 @@
   // By default, Underscore uses ERB-style template delimiters, change the
   // following template settings to use alternative delimiters.
   _.templateSettings = {
-    evaluate    : /<%([\s\S]+?)%>/g,
-    interpolate : /<%=([\s\S]+?)%>/g,
-    escape      : /<%-([\s\S]+?)%>/g
+    evaluate: /<%([\s\S]+?)%>/g,
+    interpolate: /<%=([\s\S]+?)%>/g,
+    escape: /<%-([\s\S]+?)%>/g
   };
 
   // When customizing `templateSettings`, if you don't want to define an
@@ -1204,11 +1239,11 @@
   // Certain characters need to be escaped so that they can be put into a
   // string literal.
   var escapes = {
-    "'":      "'",
-    '\\':     '\\',
-    '\r':     'r',
-    '\n':     'n',
-    '\t':     't',
+    "'": "'",
+    '\\': '\\',
+    '\r': 'r',
+    '\n': 'n',
+    '\t': 't',
     '\u2028': 'u2028',
     '\u2029': 'u2029'
   };
@@ -1234,7 +1269,9 @@
     var source = "__p+='";
     text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
       source += text.slice(index, offset)
-        .replace(escaper, function(match) { return '\\' + escapes[match]; });
+      .replace(escaper, function(match) {
+        return '\\' + escapes[match];
+      });
 
       if (escape) {
         source += "'+\n((__t=(" + escape + "))==null?'':_.escape(__t))+\n'";
@@ -1251,11 +1288,12 @@
     source += "';\n";
 
     // If a variable is not specified, place data values in local scope.
-    if (!settings.variable) source = 'with(obj||{}){\n' + source + '}\n';
+    if (!settings.variable)
+      source = 'with(obj||{}){\n' + source + '}\n';
 
     source = "var __t,__p='',__j=Array.prototype.join," +
-      "print=function(){__p+=__j.call(arguments,'');};\n" +
-      source + "return __p;\n";
+    "print=function(){__p+=__j.call(arguments,'');};\n" +
+    source + "return __p;\n";
 
     try {
       render = new Function(settings.variable || 'obj', '_', source);
@@ -1300,7 +1338,8 @@
     _.prototype[name] = function() {
       var obj = this._wrapped;
       method.apply(obj, arguments);
-      if ((name == 'shift' || name == 'splice') && obj.length === 0) delete obj[0];
+      if ((name == 'shift' || name == 'splice') && obj.length === 0)
+        delete obj[0];
       return result.call(this, obj);
     };
   });
@@ -1325,7 +1364,6 @@
     value: function() {
       return this._wrapped;
     }
-
   });
 
   // AMD registration happens at the end for compatibility with AMD loaders

@@ -34,6 +34,7 @@ func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
 // It also logs errors to sentry with a stack trace.
 func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, err *ApplicationError) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
@@ -65,6 +66,32 @@ func connect() (*sql.DB, error) {
 	return db, err
 }
 
+func CatchAllHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//fmt.Println(r)
+		fmt.Println("Catch All")
+		WriteObjToPayload(w, r, nil, nil)
+	}
+}
+
+func corsHandler(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			//fmt.Println("CORS")
+			fmt.Println(r)
+			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Secret")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+			//handle preflight in here
+			//fmt.Println(w)
+		} else {
+			h.ServeHTTP(w, r)
+		}
+	}
+}
+
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
 	connect()
@@ -73,12 +100,13 @@ func StartServer() {
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
 	r.HandleFunc(usersUsernamePath, UserHandler()).Methods("GET")
-	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET", "POST")
+	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(usersUsernamePropertyKeyPath, UserPropertyHandler()).Methods("GET", "POST")
 
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
+	r.HandleFunc("/{path:.*}", CatchAllHandler())
 	// r.HandleFunc(gamePath, GameHandler()).Methods("POST")
 	// Fuck you Taylor, this will be used again
-	http.Handle("/", r)
+	http.Handle("/", corsHandler(r))
 	http.ListenAndServe(":8000", nil)
 }

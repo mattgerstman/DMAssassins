@@ -15,13 +15,6 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	username := vars["username"]
-
-	if username == "" {
-		msg := "Missing Parameter: username."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-
 	user, err := GetUserByUsername(username)
 	if err != nil {
 		return nil, err
@@ -33,16 +26,25 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 // Kill a target, delete User may eventually be used by an admin
 func deleteTarget(r *http.Request) (string, *ApplicationError) {
 
+	fmt.Println(r)
 	vars := mux.Vars(r)
 	username := vars["username"]
 
 	r.ParseForm()
-	secret := r.FormValue("secret")
+	secret := r.Header.Get("Secret")
+
+	if secret == "" {
+		msg := "Missing Parameter: secret."
+		err := errors.New("Missing Parameter")
+		return "", NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 
 	fmt.Println(secret)
 	//need to actually handle the case where the user doesn't exist
 	user, err := GetUserByUsername(username)
-	_ = err
+	if err != nil {
+		return "", err
+	}
 	return user.KillTarget(secret)
 }
 
@@ -64,6 +66,8 @@ func TargetHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getTarget(r)
+		case "POST":
+			obj, err = postTarget(r)
 		case "DELETE":
 			obj, err = deleteTarget(r)
 		default:

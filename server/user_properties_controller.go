@@ -8,6 +8,7 @@ import (
 	"net/http"
 	//"github.com/gorilla/schema"
 )
+
 // Get a single user property
 func getUserProperty(r *http.Request) (string, *ApplicationError) {
 	r.ParseForm()

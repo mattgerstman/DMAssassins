@@ -94,8 +94,8 @@
 			
 	</script>
 
-	<script type="text/template" id="user-template">
-		<div class="user_view container user_column">
+	<script type="text/template" id="target-template">
+		<div class="user_view container">
 			 <div class="view text-center">
 			 	<div id="target_data">
 				   	<div class="row">
@@ -107,20 +107,52 @@
 					<div class="row">
 					 	<label>Facebook:</label> <%= properties.facebook %>
 					</div>
-					<div class="row">
+					<!--div class="row">
 					 	<label>Twitter:</label> <%= properties.twitter %>
-					</div>
+					</div-->
 				</div>
 				<div class="row">
 					<a href="#" class="thumbnail">
 					   <img src=<%= properties.photo_thumb %>>
 					</a>
 				</div>
-				<div class="row">
-					<form class="form-inline" id="secret">
-						<input class="form-control" placeholder="Enter Secret" /><button type="button" id="kill" class="btn btn-danger">Kill Target</button>
+				<div class="row user_column">
+					<form class="form-inline" id="kill_form">
+						<input class="form-control" placeholder="Enter Secret" id="secret"/><button type="button" id="kill" class="btn btn-danger">Kill Target</button>
 					</form>
 					
+				</div>
+			 </div>
+		</div>
+		<div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
+		  <div class="modal-dialog">
+		 	<img class="img-responsive" src=<%= properties.photo %> />   
+		  </div>
+		</div>
+		
+	</script>
+
+	<script type="text/template" id="profile-template">
+		<div class="user_view container">
+			 <div class="view text-center">
+			 	<div id="target_data">
+				   	<div class="row">
+						<label>Name:</label> <%= properties.name %>
+					</div>
+					<div class="row">
+					 	<label>Email:</label> <%= email %>
+					</div>
+					<div class="row">
+					 	<label>Facebook:</label> <%= properties.facebook %>
+					</div>
+					<!--div class="row">
+					 	<label>Twitter:</label> <%= properties.twitter %>
+					</div-->
+				</div>
+				<div class="row">
+					<a href="#" class="thumbnail">
+					   <img src=<%= properties.photo_thumb %>>
+					</a>
 				</div>
 			 </div>
 		</div>
@@ -138,6 +170,7 @@
 			<img src=<%= logo %> id="#logo" class="center-block img-responsive" />
 			<button class="btn btn-facebook btn-lg center-block hidden-xs"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
 			<button class="btn btn-facebook btn-sm center-block visible-xs-block"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
+
 		</div>
 		<div class="col-md-2"></div>
 	</script>

@@ -114,7 +114,7 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	var target_secret string
 	// Grab the target's secret and user_id for comparison/use below
-	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret, old_target_id)
+	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret, &old_target_id)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
