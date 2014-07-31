@@ -12,7 +12,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Running.appView = new app.Views.AppView();
 			app.Running.appView.render();				
 			this.navigate('index')
-//			app.Running.navView.render()
 		},
 		index : function() {
 			if (app.Session.user_id === undefined)

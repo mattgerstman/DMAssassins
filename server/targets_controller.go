@@ -31,7 +31,7 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 	username := vars["username"]
 
 	r.ParseForm()
-	secret := r.Header.Get("Secret")
+	secret := r.Header.Get("X-DMAssassins-Secret")
 
 	if secret == "" {
 		msg := "Missing Parameter: secret."

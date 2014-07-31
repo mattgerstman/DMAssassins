@@ -82,7 +82,7 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 			fmt.Println(r)
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Secret")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 			//handle preflight in here
 			//fmt.Println(w)

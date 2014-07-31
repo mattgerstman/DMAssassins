@@ -37,7 +37,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		var url = WEB_ROOT + 'users/' +  + '/target/'
 		var view = this;
 		this.model.destroy({
-			headers: {Secret: secret},
+			headers: {X-DMAssassins-Secret: secret},
 			success: function(){
 				view.initialize()
 				view.render()
