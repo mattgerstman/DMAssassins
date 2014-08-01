@@ -10,19 +10,20 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		initialize: function() {
 			app.Running.appView = new app.Views.AppView();
-			app.Running.appView.render();				
-			this.navigate('index')
-		},
-		index : function() {
-			if (app.Session.user_id === undefined)
+			app.Running.appView.render();	
+			if (localStorage.getItem('logged_in') === "true")
 			{
-				app.Running.currentView = new app.Views.LoginView();
-				app.Running.currentView.render()
+				this.navigate('target');
 			}
 			else
-			{
-				this.target();
-			}
+			{	
+				this.navigate('index');
+			}		
+		},
+		index : function() {
+
+			app.Running.currentView = new app.Views.LoginView();
+			app.Running.currentView.render()				
 				
 		},
 		target : function() {
@@ -46,8 +47,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				app.Running.navView = app.Running.navView.render();
 			}
 			app.Running.appView.renderPage(app.Running.currentView)
+			app.Running.currentView.model.fetch();
+		}/*
+,
+		reload : function(){
+			console.log('reload');
+			if (Backbone.history.fragment != '') {
+				app.Running.currentView.model.changeUser(app.Session.username);	
+			}
+			
 		}
-		
+*/
 	})
 
 })()

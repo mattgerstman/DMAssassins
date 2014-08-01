@@ -27,7 +27,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  	'type' : 'target'
 	  	}
 	  	this.model = new app.Models.User(params)
-		this.model.fetch()
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)
 //		  this.listenTo(this.model, 'destroy', )		  		  
@@ -37,30 +36,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		var url = WEB_ROOT + 'users/' +  + '/target/'
 		var view = this;
 		this.model.destroy({
-			headers: {X-DMAssassins-Secret: secret},
+			headers: {'X-DMAssassins-Secret': secret},
 			success: function(){
 				view.initialize()
 				view.render()
 			}
 			
 			})
-/*
-		var settings = {
-			type: 'POST',
-			data: {secret:secret, _method:'DELETE'},
-			complete:function(response){
-				console.log(response)
-			}
-		}
-		console.log(settings)
-		$.ajax(url,settings)
-*/
+
 
 	  },
 	  render: function(){
-//	  	this.$el.hide()
 		this.$el.html( this.template ( this.model.attributes ) );
-//		this.$el.fadeIn(250);
 		return this;  
 	  }	    
   })

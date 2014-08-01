@@ -18,7 +18,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 					console.log(response);
 					parent.createSession(response);
-
+					
 //					var authKey = Base64.encode(userID+':'+token);
 
 
@@ -40,7 +40,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			})
 
 		},
-		createSession: function(response) {
+		createSession: function(response, callback) {
 			var url = WEB_ROOT+'session/';
 			var data =  {
 				'facebook_id': response.authResponse.userID,
@@ -49,9 +49,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			console.log(data);
 			$.post(url, data, function(response){
 				app.Session.username = response.response.username;
-				console.log(response.response.username);
-				console.log(app.Session.username);
-				app.Running.Router.navigate('target', true)
+
+				//localStorage.setItem('logged_in', true);
+				if (callback !== undefined) {
+					console.log(callback);
+					callback()
+				} else {
+					app.Running.Router.navigate('target')
+//					app.Running.Router.target()
+				}
+
+
+				
 			});
 
 		}

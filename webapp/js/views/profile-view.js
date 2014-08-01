@@ -27,7 +27,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  	}
 
 	  	this.model = new app.Models.User(params)
-		this.model.fetch()
+
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },

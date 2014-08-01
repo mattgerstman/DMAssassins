@@ -1,3 +1,5 @@
+var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     // The response object is returned with a status field that lets the
@@ -6,23 +8,20 @@
     // for FB.getLoginStatus().
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
-	  app.Running.currentView.model.createSession(response);
-    } else if (response.status === 'not_authorized') {
-      // The person is logged into Facebook, but not your app.
+
+		  app.Running.LoginModel = new app.Models.Login()
+		  app.Running.LoginModel.createSession(response, function(){
+//	  		  app.Running.Router.reload();
+		  });
+
+
     } else {
-      // The person is not logged into Facebook, so we're not sure if
-      // they are logged into this app or not.
+		app.Running.Router.navigate('index')
     }
+    
   }
 
-  // This function is called when someone finishes with the Login
-  // Button.  See the onlogin handler attached to it in the sample
-  // code below.
-  function checkLoginState() {
-    FB.getLoginStatus(function(response) {
-      statusChangeCallback(response);
-    });
-  }
+
 
   window.fbAsyncInit = function() {
   FB.init({
@@ -33,6 +32,8 @@
     version    : 'v2.0', // use version 2.0
     status	   : true
   });
+  
+  app.Running.FB = FB;
 
   // Now that we've initialized the JavaScript SDK, we call 
   // FB.getLoginStatus().  This function gets the state of the
@@ -46,9 +47,9 @@
   //
   // These three cases are handled in the callback function.
 
-  FB.getLoginStatus(function(response) {
-    statusChangeCallback(response);
-  });
+	  FB.getLoginStatus(function(response) {
+	    statusChangeCallback(response);
+	  });
 
   };
 
@@ -60,4 +61,3 @@
     js.src = "//connect.facebook.net/en_US/sdk/debug.js";
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
-

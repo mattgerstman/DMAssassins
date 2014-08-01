@@ -38,7 +38,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 // 		Path:     "/",
 // 		MaxAge:   -1,
 // 		HttpOnly: true,
-// 	}
+// 	}`
 
 // 	return session.Save(r, w), nil
 // }

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	fb "github.com/huandu/facebook"
+	"github.com/polds/imgbase64"
 )
 
 // Returns an authenticated facebook session with app id/secret
@@ -63,8 +64,16 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 	properties["Facebook"] = "https://facebook.com/" + facebook_id
 
 	picture := "https://graph.facebook.com/" + facebook_id + "/picture"
-	properties["photo"] = picture + "?width=1000"
-	properties["photo_thumb"] = picture + "?width=300&height=300"
+	photo := picture + "?width=1000"
+	imgbase64.SetDefaultImage(photo)
+	img := imgbase64.FromRemote(photo)
+	properties["photo"] = img
+
+	photo_thumb := picture + "?width=300&height=300"
+	imgbase64.SetDefaultImage(photo_thumb)
+	img_thumb := imgbase64.FromRemote(photo_thumb)
+	properties["photo_thumb"] = img_thumb
+
 
 	properties["first_name"] = first_name
 	properties["last_name"] = last_name

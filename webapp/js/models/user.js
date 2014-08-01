@@ -13,8 +13,8 @@ var logged_in_user = 'Jimmy';
 				'name' : '',
 				'facebook': '',
 				'twitter': '',
-				'photo_thumb' : '',
-				'photo' : ''
+				'photo_thumb' : SPY,
+				'photo' : SPY
 			}
 
 		},
@@ -27,6 +27,11 @@ var logged_in_user = 'Jimmy';
 			this.idAttribute = 'username' 
 			var trailing = this.get('type') == 'target' ? 'target/' : '';
 			this.url = this.urlRoot + this.get('username') + '/' + trailing;
+		},
+		changeUser : function(username) {
+			var trailing = this.get('type') == 'target' ? 'target/' : '';
+			this.url = this.urlRoot + username + '/' + trailing;
+			this.fetch();
 		}
 	})
 })();

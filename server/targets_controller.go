@@ -50,9 +50,7 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 
 // Assigns targets, needs to be updated to only allow admins
 func postTarget(r *http.Request) (map[string]string, *ApplicationError) {
-
 	return AssignTargets()
-
 }
 
 // Handler for /user/{username}/target

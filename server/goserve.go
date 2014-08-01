@@ -66,14 +66,17 @@ func connect() (*sql.DB, error) {
 	return db, err
 }
 
+// Catch all, This will eventually return a 404 but right now I'm using it to get request information
 func CatchAllHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		//fmt.Println(r)
 		fmt.Println("Catch All")
-		WriteObjToPayload(w, r, nil, nil)
+		fmt.Println(r)
+		WriteObjToPayload(w, r, r, nil)
 	}
 }
+
+// Handles CORS, eventually I'll strip it down to exactly the headers/origins I need
 
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
