@@ -13,7 +13,7 @@ import (
 )
 
 var db *sql.DB
-
+var SentryClient *raven.Client
 const (
 	usersUsernamePath            = "/users/{username}/"
 	usersUsernameTargetPath      = "/users/{username}/target/"
@@ -61,7 +61,7 @@ func HomeHandler() http.HandlerFunc {
 // Connects to the database, needs to be updated to read from an ini file
 func connect() (*sql.DB, error) {
 	var err error
-	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable")
+	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable&user=dmassassins")
 	fmt.Println(err)
 	return db, err
 }
@@ -95,8 +95,15 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 	}
 }
 
+func loadSentry() (*raven.Client, error){
+	sentryDSN = "https://b622b0f1b57b4c01bb76ed1da2a22d5b:9a6d3a8e9e5f42de8f184c4b1a6f64ce@app.getsentry.com/27710"
+	SentryClient, err := raven.NewClient(sentryDSN, nil)
+	return SentryClient, err
+}
+
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
+	SentryClient, _ = loadSentry()
 	connect()
 	defer db.Close()
 
