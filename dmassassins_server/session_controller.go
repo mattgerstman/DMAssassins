@@ -27,7 +27,6 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	}
 
 	user, err := GetUserFromFacebookData(facebook_id, facebook_token)
-
 	return user, err
 }
 

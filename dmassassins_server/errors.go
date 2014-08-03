@@ -61,13 +61,19 @@ func CheckError(msg string, err error, code int) *ApplicationError {
 
 // LogWithSentry sends error report to sentry and records event id and error name to the logs
 func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, interfaces ...raven.Interface) {
+<<<<<<< HEAD:dmassassins_server/errors.go
 	client, _ := raven.NewClient(Config.SentryDSN, tags)
 
+=======
+	
+>>>>>>> FETCH_HEAD:server/errors.go
 	passthrough := append(interfaces, appErr.Exception)
 
 	packet := raven.NewPacket(appErr.Error(), passthrough...)
 	packet.Level = level
-	eventID, _ := client.Capture(packet, nil)
+	packet.AddTags(tags)
+	eventID, err := SentryClient.Capture(packet, nil)
+	fmt.Println(err)
 	message := fmt.Sprintf("Error event with id \"%s\" - %s", eventID, appErr.Error())
 	log.Println(message)
 }
