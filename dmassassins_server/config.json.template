@@ -1,0 +1,7 @@
+{
+	"FBAppId": "",
+	"FBAppSecret" :"",
+	"FBUserAccessToken" : "",
+	"DatabaseURL": "postgres://localhost?dbname=dmassassins&sslmode=disable",
+	"SentryDSN" : ""
+}

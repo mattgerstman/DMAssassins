@@ -13,7 +13,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Running.appView.render();	
 			if (localStorage.getItem('logged_in') === "true")
 			{
-				this.navigate('target');
+				this.navigate('target', true);
 			}
 			else
 			{	

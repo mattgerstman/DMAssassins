@@ -41,7 +41,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 		},
 		createSession: function(response, callback) {
-			var url = WEB_ROOT+'session/';
+			var url = config.WEB_ROOT+'session/';	
 			var data =  {
 				'facebook_id': response.authResponse.userID,
 				'facebook_token' : response.authResponse.accessToken
@@ -50,12 +50,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			$.post(url, data, function(response){
 				app.Session.username = response.response.username;
 
-				//localStorage.setItem('logged_in', true);
+				localStorage.setItem('logged_in', true);
 				if (callback !== undefined) {
 					console.log(callback);
 					callback()
 				} else {
-					app.Running.Router.navigate('target')
+					app.Running.Router.navigate('target', true)
 //					app.Running.Router.target()
 				}
 

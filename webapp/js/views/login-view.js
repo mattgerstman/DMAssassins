@@ -19,8 +19,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  
 	  },
 	  login: function(){
-	  		console.log('login');
-		  this.model.login()
+  		console.log('login');
+  		this.model.login()
 	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );

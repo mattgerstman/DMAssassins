@@ -22,7 +22,7 @@ var logged_in_user = 'Jimmy';
                 // process response.meta when necessary...
                 return response.response;
         },
-		urlRoot: WEB_ROOT + 'users/',
+		urlRoot: config.WEB_ROOT + 'users/',
 		initialize: function() {
 			this.idAttribute = 'username' 
 			var trailing = this.get('type') == 'target' ? 'target/' : '';

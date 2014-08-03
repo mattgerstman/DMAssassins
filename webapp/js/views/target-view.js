@@ -33,7 +33,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  kill: function() {
 		var secret = this.$el.find('#secret').val();
-		var url = WEB_ROOT + 'users/' +  + '/target/'
+		var url = config.WEB_ROOT + 'users/' +  + '/target/'
 		var view = this;
 		this.model.destroy({
 			headers: {'X-DMAssassins-Secret': secret},
