@@ -9,6 +9,7 @@ import (
 
 type User struct {
 	User_id     string            `json:"user_id"`
+	Assassin    string            `json:"assassin"`
 	Username    string            `json:"username"`
 	Email       string            `json:"email"`
 	Secret      string            `json:"secret"`
@@ -34,7 +35,7 @@ func NewUser(username, email, secret, facebook_id string, properties map[string]
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, username, email, secret, facebook_id, properties}
+	user := &User{user_id, "", username, email, secret, facebook_id, properties}
 	for key, value := range properties {
 		user.SetUserProperty(key, value)
 	}
@@ -54,7 +55,7 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, username, email, secret, facebook_id, nil}
+	user := &User{user_id, "", username, email, secret, facebook_id, nil}
 	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -75,7 +76,7 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, username, email, secret, facebook_id, nil}
+	user := &User{user_id, "", username, email, secret, facebook_id, nil}
 	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -96,7 +97,7 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	target := &User{user_id, username, email, "", facebook_id, nil}
+	target := &User{user_id, user.Username, username, email, "", facebook_id, nil}
 	_, appErr := target.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr

@@ -8,7 +8,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	   
 	     
 	  template: _.template( $('#profile-template').html() ),
-	  
 	  tagName: 'div',
 	  
         // The DOM events specific to an item.
@@ -21,12 +20,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  
 	  initialize : function (params){
-	  	var params = {
-		  	'username' : app.Session.username,
-		  	'type' : 'profile'
-	  	}
-
-	  	this.model = new app.Models.User(params)
+	  	this.model = app.Running.ProfileModel;
 
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  

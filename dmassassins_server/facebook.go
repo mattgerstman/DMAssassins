@@ -110,7 +110,7 @@ func getUserFromFacebookId(facebook_id, facebook_token string) (*User, *Applicat
 }
 
 // Returns a user based on facebook_id and facebook_token, if no user exists in the db one will be created
-func GetUserFromFacebookData(facebook_id, facebook_token string) (interface{}, *ApplicationError) {
+func GetUserFromFacebookData(facebook_id, facebook_token string) (*User, *ApplicationError) {
 
 	var user_id string
 	// See if we have a user with the given facebook_id/facebook_token in the db

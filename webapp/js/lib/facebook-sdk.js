@@ -1,25 +1,38 @@
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
+
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     // The response object is returned with a status field that lets the
     // app know the current login status of the person.
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
+    
+    if (!app.Session.get('authenticated'))
+    {
+    	console.log('no facebook response');
+	    return;
+    }
+    	
+    
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
 
-		  app.Running.LoginModel = new app.Models.Login()
-		  app.Running.LoginModel.createSession(response, function(){
+		  console.log('connected');
+		  app.Session.createSession(response, function(){
 //	  		  app.Running.Router.reload();
+				
 		  });
 
 
     } else {
-		app.Running.Router.navigate('index')
+		console.log('else');
+
+		app.Running.Router.navigate('login')
     }
     
   }
+
 
 
 
@@ -47,9 +60,11 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
   //
   // These three cases are handled in the callback function.
 
+
 	  FB.getLoginStatus(function(response) {
 	    statusChangeCallback(response);
 	  });
+
 
   };
 

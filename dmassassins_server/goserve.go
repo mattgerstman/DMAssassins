@@ -13,7 +13,7 @@ import (
 )
 
 var db *sql.DB
-var SentryClient *raven.Client
+
 const (
 	usersUsernamePath            = "/users/{username}/"
 	usersUsernameTargetPath      = "/users/{username}/target/"
@@ -61,11 +61,7 @@ func HomeHandler() http.HandlerFunc {
 // Connects to the database, needs to be updated to read from an ini file
 func connect() (*sql.DB, error) {
 	var err error
-<<<<<<< HEAD:dmassassins_server/goserve.go
 	db, err = sql.Open("postgres", Config.DatabaseURL)
-=======
-	db, err = sql.Open("postgres", "postgres://localhost?dbname=dmassassins&sslmode=disable&user=dmassassins")
->>>>>>> FETCH_HEAD:server/goserve.go
 	fmt.Println(err)
 	return db, err
 }
@@ -99,24 +95,13 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 	}
 }
 
-func loadSentry() (*raven.Client, error){
-	sentryDSN = "https://b622b0f1b57b4c01bb76ed1da2a22d5b:9a6d3a8e9e5f42de8f184c4b1a6f64ce@app.getsentry.com/27710"
-	SentryClient, err := raven.NewClient(sentryDSN, nil)
-	return SentryClient, err
-}
-
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
-<<<<<<< HEAD:dmassassins_server/goserve.go
 	_, err := connect()
 	if err != nil {
 		// add error here
 	}
 
-=======
-	SentryClient, _ = loadSentry()
-	connect()
->>>>>>> FETCH_HEAD:server/goserve.go
 	defer db.Close()
 
 	r := mux.NewRouter()

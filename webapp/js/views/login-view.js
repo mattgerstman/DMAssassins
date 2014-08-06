@@ -8,15 +8,15 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	   
 	     
 	  template: _.template( $('#login-template').html() ),
-	  el: '#login',
 	  
 	  events: {
 	  	'click .btn-facebook' : 'login'
 	  },
-	  model: new app.Models.Login(),
+
 	  
 	  initialize : function (){	  
-	  
+	  	console.log('yo');
+		this.model = app.Session;
 	  },
 	  login: function(){
   		console.log('login');

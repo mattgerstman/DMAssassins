@@ -75,6 +75,7 @@ func (user *User) GetUserProperties() (map[string]string, *ApplicationError) {
 		}
 
 	}
+	properties["name"] = properties["first_name"] + " " + properties["last_name"]
 	user.Properties = properties
 	return properties, nil
 }
