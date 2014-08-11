@@ -1,5 +1,73 @@
 package main
 
+import (
+	"code.google.com/p/go-uuid/uuid"
+)
+
+type Game struct {
+	Game_id   string `json:"game_id"`
+	Game_name string `json:"game_name"`
+	Started   bool   `json:"game_name"`
+}
+
+func (game *Game) StartGame() {
+		targets, appErr := game.AssignTargets();
+		if (appErr != nil) {
+			return appErr;
+		}
+		db.Query("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id);
+}
+
+func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	game_id := uuid.New()
+
+	newGame, err := db.Prepare(`INSERT INTO dm_games (game_id, game_name) VALUES ($1, $2)`)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	_, err = tx.Stmt(newGame).Exec(game_id, game_name)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	firstMapping, err := db.Prepare(`INSERT INTO dm_user_game_mapping (game_id, user_id) VALUES ($1, $2)`)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	_, err = tx.Stmt(firstMapping).Exec(game_id, user_id)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	setAdmin, err := db.Prepare(`UPDATE dm_users SET user_role = $1 WHERE user_id = $2`)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	role := "dm_admin"
+
+	_, err = tx.Stmt(setAdmin).Exec(user_id, role)
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	tx.Commit()
+	return &Game{game_id, game_name, false}, nil
+
+}
+
 // Assign all targets
 func AssignTargets() (map[string]string, *ApplicationError) {
 
