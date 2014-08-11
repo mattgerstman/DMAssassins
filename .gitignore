@@ -3,3 +3,5 @@ server/server
 webapp/js/config.js
 
 dmassassins_server/dmassassins_server
+
+dmassassins_server/config.json

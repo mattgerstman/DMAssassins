@@ -1,7 +1,0 @@
-{
-	"FBAppId": "649985815097586",
-	"FBAppSecret" :"8b6ef99c35b0ece612db096cb0d36e82",
-	"FBUserAccessToken" : "649985815097586|MxbY6yQCZxm0DC5xzc1-yiVqtsE",
-	"DatabaseURL": "postgres://localhost?dbname=dmassassins&sslmode=disable",
-	"SentryDSN" : "https://b622b0f1b57b4c01bb76ed1da2a22d5b:9a6d3a8e9e5f42de8f184c4b1a6f64ce@app.getsentry.com/27710"
-}
