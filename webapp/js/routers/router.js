@@ -8,7 +8,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			'login' : 'login',
 			'logout' : 'logout',
 			'target' : 'target',
-			'my_profile' : 'my_profile'
+			'my_profile' : 'my_profile',
+			'leaderboard' : 'leaderboard',
+			'rules' : 'rules'
+			
 		},
 		
 		// Routes that need authentication and if user is not authenticated
@@ -72,6 +75,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		my_profile : function() {
 			console.log('profile');			
 			app.Running.currentView = new app.Views.ProfileView();
+			app.Running.currentView.model.fetch();
+			this.render();
+		},
+		leaderboard: function(){
+			console.log('leaderboard');			
+			app.Running.currentView = new app.Views.LeaderboardView();
+			app.Running.currentView.model.fetch();
+			this.render();
+		},
+		rules : function() {
+			console.log('rules');			
+			app.Running.currentView = new app.Views.RulesView();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},

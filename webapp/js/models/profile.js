@@ -23,7 +23,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
         },
 		urlRoot: config.WEB_ROOT + 'users/',
 		initialize: function() {
-			this.idAttribute = 'username' 
+			this.idAttribute = 'username'
 			this.url = this.urlRoot + this.get('username') + '/';
 		},
 		changeUser : function(username) {
