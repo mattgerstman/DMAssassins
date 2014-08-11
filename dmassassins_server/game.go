@@ -11,11 +11,11 @@ type Game struct {
 }
 
 func (game *Game) StartGame() {
-		targets, appErr := game.AssignTargets();
-		if (appErr != nil) {
-			return appErr;
-		}
-		db.Query("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id);
+		// targets, appErr := game.AssignTargets();
+		// if (appErr != nil) {
+		// 	return appErr;
+		// }
+		// db.Query("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id);
 }
 
 func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
