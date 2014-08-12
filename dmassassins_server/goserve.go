@@ -21,6 +21,7 @@ const (
 	usersUsernamePropertyKeyPath = "/users/{username}/property/{key}/"
 	sessionPath                  = "/session/"
 	gamePath                     = "/game/"
+	gameStatePath                = "/game/{game_name}/"
 	homePath                     = "/"
 )
 
@@ -111,9 +112,11 @@ func StartServer() {
 	r.HandleFunc(usersUsernamePropertyKeyPath, UserPropertyHandler()).Methods("GET", "POST")
 
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
+
+	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
+	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
+
 	r.HandleFunc("/{path:.*}", CatchAllHandler())
-	// r.HandleFunc(gamePath, GameHandler()).Methods("POST")
-	// Fuck you Taylor, this will be used again
 	http.Handle("/", corsHandler(r))
 	http.ListenAndServe(":8000", nil)
 }

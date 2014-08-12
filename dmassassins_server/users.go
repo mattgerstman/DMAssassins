@@ -108,14 +108,12 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 //Kills an Assassin's target, user must be logged in
 func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
-	logged_in_user := user.User_id
-
 	old_target_id := ""
 	new_target_id := ""
 
 	var target_secret string
 	// Grab the target's secret and user_id for comparison/use below
-	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&target_secret, &old_target_id)
+	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, user.User_id).Scan(&target_secret, &old_target_id)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -149,7 +147,7 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 	}
 
 	// Get the old target's target to assign to the Assassin
-	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, logged_in_user).Scan(&new_target_id)
+	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, user.User_id).Scan(&new_target_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -157,7 +155,7 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	// Delete the row for the dead user's target
 	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`)
-	_, err = tx.Stmt(removeOldTarget).Exec(logged_in_user)
+	_, err = tx.Stmt(removeOldTarget).Exec(user.User_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -165,7 +163,7 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	// Set up the Assassin's new target
 	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`)
-	_, err = tx.Stmt(setNewTarget).Exec(new_target_id, logged_in_user)
+	_, err = tx.Stmt(setNewTarget).Exec(new_target_id, user.User_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)

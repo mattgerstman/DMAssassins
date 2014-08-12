@@ -49,9 +49,9 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 }
 
 // Assigns targets, needs to be updated to only allow admins
-func postTarget(r *http.Request) (map[string]string, *ApplicationError) {
-	return AssignTargets()
-}
+// func postTarget(r *http.Request) (map[string]string, *ApplicationError) {
+// 	return AssignTargets()
+// }
 
 // Handler for /user/{username}/target
 func TargetHandler() http.HandlerFunc {
@@ -64,8 +64,8 @@ func TargetHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getTarget(r)
-		case "POST":
-			obj, err = postTarget(r)
+		//case "POST":
+		//obj, err = postTarget(r)
 		case "DELETE":
 			obj, err = deleteTarget(r)
 		default:

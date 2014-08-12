@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
@@ -24,8 +25,9 @@ const (
 	ErrCodeInvalidUsername = 40401
 
 	// 500 - Internal Server Error
-	ErrCodeDatabase = 50001
-	ErrCodeSession  = 50002 // Malformed Session
+	ErrCodeDatabase               = 50001
+	ErrCodeDatabaseNoRowsAffected = 50002
+	ErrCodeSession                = 50010 // Malformed Session
 )
 
 // ApplicationError contains information about errors that arise while accessing resources.
@@ -55,6 +57,18 @@ func NewApplicationError(msg string, err error, code int) *ApplicationError {
 func CheckError(msg string, err error, code int) *ApplicationError {
 	if err != nil {
 		return NewApplicationError(msg, err, code)
+	}
+	return nil
+}
+
+func WereRowsAffected(res sql.Result, err error) *ApplicationError {
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
+	}
+
+	if rowsAffected == 0 {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return nil
 }

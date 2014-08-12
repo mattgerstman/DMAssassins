@@ -10,12 +10,64 @@ type Game struct {
 	Started   bool   `json:"game_name"`
 }
 
-func (game *Game) StartGame() {
-		// targets, appErr := game.AssignTargets();
-		// if (appErr != nil) {
-		// 	return appErr;
-		// }
-		// db.Query("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id);
+func GetGameList() ([]Game, *ApplicationError) {
+
+	rows, err := db.Query(`SELECT (game_id, game_name, started) FROM dm_games ORDER BY game_name`)
+
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	var games []Game
+	for rows.Next() {
+		var game_id, game_name string
+		var started bool
+		rows.Scan(&game_id, &game_name, &started)
+		game := Game{game_id, game_name, started}
+		games = append(games, game)
+	}
+	return games, nil
+}
+
+func GetGameByName(game_name string) (*Game, *ApplicationError) {
+	var game_id string
+	var started bool
+	err := db.QueryRow(`SELECT (game_id, started) FROM dm_games WHERE game_name = $1`, game_name).Scan(&game_id, &started)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return &Game{game_id, game_name, started}, nil
+}
+
+func (game *Game) End() *ApplicationError {
+
+	res, err := db.Exec("UPDATE dm_games SET started = false WHERE game_id = $1", game.Game_id)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	NoRowsAffected := WereRowsAffected(res, err)
+	if NoRowsAffected != nil {
+		return NoRowsAffected
+	}
+	game.Started = false
+	return nil
+}
+
+func (game *Game) Start() *ApplicationError {
+	_, appErr := game.AssignTargets()
+	if appErr != nil {
+		return appErr
+	}
+	res, err := db.Exec("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	NoRowsAffected := WereRowsAffected(res, err)
+	if NoRowsAffected != nil {
+		return NoRowsAffected
+	}
+	game.Started = true
+	return nil
 }
 
 func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
@@ -32,10 +84,11 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	_, err = tx.Stmt(newGame).Exec(game_id, game_name)
-	if err != nil {
+	res, err := tx.Stmt(newGame).Exec(game_id, game_name)
+	NoRowsAffected := WereRowsAffected(res, err)
+	if NoRowsAffected != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NoRowsAffected
 	}
 
 	firstMapping, err := db.Prepare(`INSERT INTO dm_user_game_mapping (game_id, user_id) VALUES ($1, $2)`)
@@ -58,10 +111,11 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 
 	role := "dm_admin"
 
-	_, err = tx.Stmt(setAdmin).Exec(user_id, role)
-	if err != nil {
+	res, err = tx.Stmt(setAdmin).Exec(user_id, role)
+	NoRowsAffected = WereRowsAffected(res, err)
+	if NoRowsAffected != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NoRowsAffected
 	}
 	tx.Commit()
 	return &Game{game_id, game_name, false}, nil
@@ -69,7 +123,7 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 }
 
 // Assign all targets
-func AssignTargets() (map[string]string, *ApplicationError) {
+func (game *Game) AssignTargets() (map[string]string, *ApplicationError) {
 
 	// Begin Transaction
 	tx, err := db.Begin()
@@ -78,21 +132,21 @@ func AssignTargets() (map[string]string, *ApplicationError) {
 	}
 
 	// Prepare statement to delete previous targets
-	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets`)
+	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute statement to delete previous targets
-	_, err = tx.Stmt(deleteTargets).Exec()
+	_, err = tx.Stmt(deleteTargets).Exec(game.Game_id)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_users ORDER BY random()`)
+	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.Game_id)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -123,14 +177,14 @@ func AssignTargets() (map[string]string, *ApplicationError) {
 		}
 
 		// Prepare the statement to insert the target row
-		insertTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id) VALUES ($1, $2)`)
+		insertTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
 		// Execute the statement to insert the target row
-		_, err = tx.Stmt(insertTarget).Exec(prev_user_id, user_id)
+		_, err = tx.Stmt(insertTarget).Exec(prev_user_id, user_id, game.Game_id)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -143,13 +197,13 @@ func AssignTargets() (map[string]string, *ApplicationError) {
 	}
 
 	// Prepare the statement to have the last user target the first
-	lastTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id) VALUES ($1, $2)`)
+	lastTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id) VALUES ($1, $2, $3)`)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to have the last user target the first
-	_, err = tx.Stmt(lastTarget).Exec(user_id, first_user_id)
+	_, err = tx.Stmt(lastTarget).Exec(user_id, first_user_id, game.Game_id)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
