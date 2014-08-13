@@ -61,7 +61,7 @@ func CheckError(msg string, err error, code int) *ApplicationError {
 	return nil
 }
 
-func WereRowsAffected(res sql.Result, err error) *ApplicationError {
+func WereRowsAffected(res sql.Result) *ApplicationError {
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)

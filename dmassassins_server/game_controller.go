@@ -24,7 +24,7 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 	return NewGame(game_name, user.User_id)
 }
 
-func getGame(r *http.Request) ([]Game, *ApplicationError) {
+func getGame(r *http.Request) ([]*Game, *ApplicationError) {
 	return GetGameList()
 }
 

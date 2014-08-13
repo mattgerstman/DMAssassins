@@ -7,23 +7,26 @@ import (
 type Game struct {
 	Game_id   string `json:"game_id"`
 	Game_name string `json:"game_name"`
-	Started   bool   `json:"game_name"`
+	Started   bool   `json:"game_started"`
 }
 
-func GetGameList() ([]Game, *ApplicationError) {
+func GetGameList() ([]*Game, *ApplicationError) {
 
-	rows, err := db.Query(`SELECT (game_id, game_name, started) FROM dm_games ORDER BY game_name`)
+	rows, err := db.Query(`SELECT game_id, game_name, game_started FROM dm_games ORDER BY game_name`)
 
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	var games []Game
+	var games []*Game
 	for rows.Next() {
 		var game_id, game_name string
 		var started bool
-		rows.Scan(&game_id, &game_name, &started)
-		game := Game{game_id, game_name, started}
+		err = rows.Scan(&game_id, &game_name, &started)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		game := &Game{game_id, game_name, started}
 		games = append(games, game)
 	}
 	return games, nil
@@ -32,7 +35,7 @@ func GetGameList() ([]Game, *ApplicationError) {
 func GetGameByName(game_name string) (*Game, *ApplicationError) {
 	var game_id string
 	var started bool
-	err := db.QueryRow(`SELECT (game_id, started) FROM dm_games WHERE game_name = $1`, game_name).Scan(&game_id, &started)
+	err := db.QueryRow(`SELECT game_id, started FROM dm_games WHERE game_name = $1`, game_name).Scan(&game_id, &started)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -45,7 +48,7 @@ func (game *Game) End() *ApplicationError {
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	NoRowsAffected := WereRowsAffected(res, err)
+	NoRowsAffected := WereRowsAffected(res)
 	if NoRowsAffected != nil {
 		return NoRowsAffected
 	}
@@ -62,7 +65,7 @@ func (game *Game) Start() *ApplicationError {
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	NoRowsAffected := WereRowsAffected(res, err)
+	NoRowsAffected := WereRowsAffected(res)
 	if NoRowsAffected != nil {
 		return NoRowsAffected
 	}
@@ -85,7 +88,7 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 	}
 
 	res, err := tx.Stmt(newGame).Exec(game_id, game_name)
-	NoRowsAffected := WereRowsAffected(res, err)
+	NoRowsAffected := WereRowsAffected(res)
 	if NoRowsAffected != nil {
 		tx.Rollback()
 		return nil, NoRowsAffected
@@ -111,8 +114,11 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 
 	role := "dm_admin"
 
-	res, err = tx.Stmt(setAdmin).Exec(user_id, role)
-	NoRowsAffected = WereRowsAffected(res, err)
+	res, err = tx.Stmt(setAdmin).Exec(role, user_id)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)	
+	}
+	NoRowsAffected = WereRowsAffected(res)
 	if NoRowsAffected != nil {
 		tx.Rollback()
 		return nil, NoRowsAffected
