@@ -34,9 +34,17 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 	secret := r.Header.Get("X-DMAssassins-Secret")
 
 	if secret == "" {
-		msg := "Missing Parameter: secret."
-		err := errors.New("Missing Parameter")
-		return "", NewApplicationError(msg, err, ErrCodeMissingParameter)
+		msg := "Missing Header: X-DMAssassins-Secret."
+		err := errors.New(msg)
+		return "", NewApplicationError(msg, err, ErrCodeMissingHeader)
+	}
+
+	game_id := r.Header.Get("X-DMAssassins-GameId")
+
+	if game_id == "" {
+		msg := "Missing Header: X-DMAssassins-GameId."
+		err := errors.New(msg)
+		return "", NewApplicationError(msg, err, ErrCodeMissingHeader)
 	}
 
 	fmt.Println(secret)
@@ -45,7 +53,7 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 	if err != nil {
 		return "", err
 	}
-	return user.KillTarget(secret)
+	return user.KillTarget(game_id, secret)
 }
 
 // Assigns targets, needs to be updated to only allow admins

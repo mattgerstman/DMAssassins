@@ -12,6 +12,8 @@ const (
 	// 400 - Bad Request
 	ErrCodeInvalidParameter = 40001
 	ErrCodeMissingParameter = 40002
+	ErrCodeInvalidHeader    = 40003
+	ErrCodeMissingHeader    = 40004
 
 	// 401 - Unauthorized
 	ErrCodeNoSession      = 40100

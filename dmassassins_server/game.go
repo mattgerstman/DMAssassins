@@ -32,6 +32,16 @@ func GetGameList() ([]*Game, *ApplicationError) {
 	return games, nil
 }
 
+func GetGameById(game_id string) (*Game, *ApplicationError) {
+	var game_name string
+	var started bool
+	err := db.QueryRow(`SELECT game_name, started FROM dm_games WHERE game_id = $1`, game_id).Scan(&game_name, &started)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return &Game{game_id, game_name, started}, nil
+}
+
 func GetGameByName(game_name string) (*Game, *ApplicationError) {
 	var game_id string
 	var started bool
@@ -48,9 +58,9 @@ func (game *Game) End() *ApplicationError {
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	NoRowsAffected := WereRowsAffected(res)
-	if NoRowsAffected != nil {
-		return NoRowsAffected
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
 	}
 	game.Started = false
 	return nil
@@ -65,9 +75,9 @@ func (game *Game) Start() *ApplicationError {
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	NoRowsAffected := WereRowsAffected(res)
-	if NoRowsAffected != nil {
-		return NoRowsAffected
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
 	}
 	game.Started = true
 	return nil
@@ -88,10 +98,10 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 	}
 
 	res, err := tx.Stmt(newGame).Exec(game_id, game_name)
-	NoRowsAffected := WereRowsAffected(res)
-	if NoRowsAffected != nil {
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
-		return nil, NoRowsAffected
+		return nil, NoRowsAffectedAppErr
 	}
 
 	firstMapping, err := db.Prepare(`INSERT INTO dm_user_game_mapping (game_id, user_id) VALUES ($1, $2)`)
@@ -116,12 +126,12 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 
 	res, err = tx.Stmt(setAdmin).Exec(role, user_id)
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)	
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	NoRowsAffected = WereRowsAffected(res)
-	if NoRowsAffected != nil {
+	NoRowsAffectedAppErr = WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
-		return nil, NoRowsAffected
+		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
 	return &Game{game_id, game_name, false}, nil

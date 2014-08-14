@@ -26,12 +26,25 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	user, _ := GetUserFromFacebookData(facebook_id, facebook_token)
-	target, _ := user.GetTarget()
+	user, appErr := GetUserFromFacebookData(facebook_id, facebook_token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	response := make(map[string]interface{})
+
+	response["user_id"] = user.User_id
+	token, appErr := user.GetHashedToken()
+	response["token"] = token
+
+	game, appErr := user.GetArbitraryGame()
+	response["game"] = game
+
+	target, appErr := user.GetTarget()
+
 	response["user"] = user
 	response["target"] = target
-	return response, nil
+	return response, appErr
 }
 
 // // Kill a session this will probably be rewritten later with basic auth

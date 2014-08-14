@@ -105,7 +105,18 @@ func getUserFromFacebookId(facebook_id, facebook_token string) (*User, *Applicat
 	if test_id != facebook_id {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
-	return GetUserById(user_id)
+
+	user, appErr := GetUserById(user_id)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	appErr = user.UpdateToken(facebook_token)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return user, nil
 
 }
 
@@ -135,11 +146,11 @@ func GetFacebookIdFromToken(token string) (interface{}, *ApplicationError) {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	var user_id string
-	err = res.DecodeField("data.user_id", &user_id)
+	var facebook_id string
+	err = res.DecodeField("data.user_id", &facebook_id)
 	if err != nil {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
-	return user_id, nil
+	return facebook_id, nil
 
 }

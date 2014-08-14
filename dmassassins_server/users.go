@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	//"crypto/sha1"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -105,15 +106,68 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 	return target, nil
 }
 
+func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
+	var game_id string
+	err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.User_id).Scan(&game_id)
+	switch {
+	case err == sql.ErrNoRows:
+		msg := "User: " + user.Username + " is not mapped to any games"
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+	case err != nil:
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return GetGameById(game_id)
+
+}
+
+func (user *User) UpdateToken(facebook_token string) *ApplicationError {
+
+	res, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.User_id)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
+	}
+
+	return nil
+}
+
+func Hash(plaintext string) (string, *ApplicationError) {
+	
+	// bv := []byte(plaintext)
+	// hasher := sha1.New()
+ //    hasher.Write(bv)
+ //    sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))	
+	// return sha, nil
+	return "", nil
+}
+
+func (user *User) GetHashedToken() (string, *ApplicationError) {
+	// var game_id string
+	// err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.User_id).Scan(&game_id)
+	// switch {
+	// case err == sql.ErrNoRows:
+	// 	msg := "User: " + user.Username + " is not mapped to any games"
+	// 	return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+	// case err != nil:
+	// 	return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	// }
+	// return GetGameById(game_id)
+	return "", nil
+
+}
+
 //Kills an Assassin's target, user must be logged in
-func (user *User) KillTarget(secret string) (string, *ApplicationError) {
+func (user *User) KillTarget(game_id, secret string) (string, *ApplicationError) {
 
 	old_target_id := ""
 	new_target_id := ""
 
 	var target_secret string
 	// Grab the target's secret and user_id for comparison/use below
-	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, user.User_id).Scan(&target_secret, &old_target_id)
+	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.User_id, game_id).Scan(&target_secret, &old_target_id)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -133,37 +187,37 @@ func (user *User) KillTarget(secret string) (string, *ApplicationError) {
 
 	}
 	// Prepare the statement to kill the old target
-	setDead, err := db.Prepare(`UPDATE dm_users SET alive = false WHERE user_id = $1`)
+	setDead, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to kill the old target
-	_, err = tx.Stmt(setDead).Exec(old_target_id)
+	_, err = tx.Stmt(setDead).Exec(old_target_id, game_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get the old target's target to assign to the Assassin
-	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1)`, user.User_id).Scan(&new_target_id)
+	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.User_id, game_id).Scan(&new_target_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Delete the row for the dead user's target
-	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1)`)
-	_, err = tx.Stmt(removeOldTarget).Exec(user.User_id)
+	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1 AND game_id = $2)`)
+	_, err = tx.Stmt(removeOldTarget).Exec(user.User_id, game_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Set up the Assassin's new target
-	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2`)
-	_, err = tx.Stmt(setNewTarget).Exec(new_target_id, user.User_id)
+	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2 AND game_id = $3`)
+	_, err = tx.Stmt(setNewTarget).Exec(new_target_id, user.User_id, game_id)
 	if err != nil {
 		tx.Rollback()
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
