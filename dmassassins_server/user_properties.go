@@ -10,7 +10,7 @@ import (
 // Sets a single user property for a user
 func (user *User) SetUserProperty(key string, value string) (*User, *ApplicationError) {
 	// First attempt to update it if the property currently exists
-	res, err := db.Exec(`UPDATE dm_user_properties SET value = $1 WHERE user_id = $2 AND key ILIKE $3`, value, user.User_id, key)
+	res, err := db.Exec(`UPDATE dm_user_properties SET value = $1 WHERE user_id = $2 AND key ILIKE $3`, value, user.UserId, key)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -22,7 +22,7 @@ func (user *User) SetUserProperty(key string, value string) (*User, *Application
 
 	// If no rows were affected insert the property
 	if rowsAffected == 0 {
-		res, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`, user.User_id, key, value)
+		res, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`, user.UserId, key, value)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -43,7 +43,7 @@ func (user *User) SetUserProperty(key string, value string) (*User, *Application
 // Get a single User Property from the db
 func (user *User) GetUserProperty(key string) (string, *ApplicationError) {
 	var property string
-	err := db.QueryRow(`SELECT value FROM dm_user_properties WHERE user_id = $1 AND key ILIKE $2`, user.User_id, key).Scan(&property)
+	err := db.QueryRow(`SELECT value FROM dm_user_properties WHERE user_id = $1 AND key ILIKE $2`, user.UserId, key).Scan(&property)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -55,7 +55,7 @@ func (user *User) GetUserProperties() (map[string]string, *ApplicationError) {
 
 	properties := make(map[string]string)
 
-	rows, err := db.Query(`SELECT key, value FROM dm_user_properties WHERE user_id = $1`, user.User_id)
+	rows, err := db.Query(`SELECT key, value FROM dm_user_properties WHERE user_id = $1`, user.UserId)
 	switch {
 	case err == sql.ErrNoRows:
 		return nil, nil
@@ -71,7 +71,7 @@ func (user *User) GetUserProperties() (map[string]string, *ApplicationError) {
 			properties[key] = value
 		} else {
 			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"user_id": user.User_id}, raven.WARNING)
+			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 		}
 
 	}

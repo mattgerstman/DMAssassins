@@ -5,9 +5,9 @@ import (
 )
 
 type Game struct {
-	Game_id   string `json:"game_id"`
-	Game_name string `json:"game_name"`
-	Started   bool   `json:"game_started"`
+	GameId   uuid.UUID `json:"game_id"`
+	GameName string `json:"game_name"`
+	Started  bool   `json:"game_started"`
 }
 
 func GetGameList() ([]*Game, *ApplicationError) {
@@ -20,41 +20,42 @@ func GetGameList() ([]*Game, *ApplicationError) {
 
 	var games []*Game
 	for rows.Next() {
-		var game_id, game_name string
+		var gameId uuid.UUID
+		var game_name string
 		var started bool
-		err = rows.Scan(&game_id, &game_name, &started)
+		err = rows.Scan(&gameId, &game_name, &started)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
-		game := &Game{game_id, game_name, started}
+		game := &Game{gameId, game_name, started}
 		games = append(games, game)
 	}
 	return games, nil
 }
 
-func GetGameById(game_id string) (*Game, *ApplicationError) {
+func GetGameById(gameId uuid.UUID) (*Game, *ApplicationError) {
 	var game_name string
 	var started bool
-	err := db.QueryRow(`SELECT game_name, started FROM dm_games WHERE game_id = $1`, game_id).Scan(&game_name, &started)
+	err := db.QueryRow(`SELECT game_name, started FROM dm_games WHERE game_id = $1`, gameId).Scan(&game_name, &started)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return &Game{game_id, game_name, started}, nil
+	return &Game{gameId, game_name, started}, nil
 }
 
 func GetGameByName(game_name string) (*Game, *ApplicationError) {
-	var game_id string
+	var gameId uuid.UUID
 	var started bool
-	err := db.QueryRow(`SELECT game_id, started FROM dm_games WHERE game_name = $1`, game_name).Scan(&game_id, &started)
+	err := db.QueryRow(`SELECT game_id, started FROM dm_games WHERE game_name = $1`, game_name).Scan(&gameId, &started)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return &Game{game_id, game_name, started}, nil
+	return &Game{gameId, game_name, started}, nil
 }
 
 func (game *Game) End() *ApplicationError {
 
-	res, err := db.Exec("UPDATE dm_games SET started = false WHERE game_id = $1", game.Game_id)
+	res, err := db.Exec("UPDATE dm_games SET started = false WHERE game_id = $1", game.GameId)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -71,7 +72,7 @@ func (game *Game) Start() *ApplicationError {
 	if appErr != nil {
 		return appErr
 	}
-	res, err := db.Exec("UPDATE dm_games SET started = true WHERE game_id = $1", game.Game_id)
+	res, err := db.Exec("UPDATE dm_games SET started = true WHERE game_id = $1", game.GameId)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -83,13 +84,13 @@ func (game *Game) Start() *ApplicationError {
 	return nil
 }
 
-func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
+func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	game_id := uuid.New()
+	gameId := uuid.NewUUID()
 
 	newGame, err := db.Prepare(`INSERT INTO dm_games (game_id, game_name) VALUES ($1, $2)`)
 	if err != nil {
@@ -97,7 +98,7 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	res, err := tx.Stmt(newGame).Exec(game_id, game_name)
+	res, err := tx.Stmt(newGame).Exec(gameId, game_name)
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
@@ -110,7 +111,7 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	_, err = tx.Stmt(firstMapping).Exec(game_id, user_id)
+	_, err = tx.Stmt(firstMapping).Exec(gameId, userId)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -124,7 +125,7 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 
 	role := "dm_admin"
 
-	res, err = tx.Stmt(setAdmin).Exec(role, user_id)
+	res, err = tx.Stmt(setAdmin).Exec(role, userId)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -134,12 +135,12 @@ func NewGame(game_name, user_id string) (*Game, *ApplicationError) {
 		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
-	return &Game{game_id, game_name, false}, nil
+	return &Game{gameId, game_name, false}, nil
 
 }
 
 // Assign all targets
-func (game *Game) AssignTargets() (map[string]string, *ApplicationError) {
+func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 
 	// Begin Transaction
 	tx, err := db.Begin()
@@ -155,38 +156,38 @@ func (game *Game) AssignTargets() (map[string]string, *ApplicationError) {
 	}
 
 	// Execute statement to delete previous targets
-	_, err = tx.Stmt(deleteTargets).Exec(game.Game_id)
+	_, err = tx.Stmt(deleteTargets).Exec(game.GameId)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.Game_id)
+	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.GameId)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	var user_id string
-	var prev_user_id string
-	var first_user_id string
-	targets := make(map[string]string) // Map to return targets
+	var userId uuid.UUID
+	var prevUserId uuid.UUID
+	var firstUserId uuid.UUID
+	targets := make(map[string]uuid.UUID) // Map to return targets
 
 	rows.Next()
-	err = rows.Scan(&first_user_id)
+	err = rows.Scan(&firstUserId)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	prev_user_id = first_user_id
+	prevUserId = firstUserId
 
 	// Loop through rows
 	for rows.Next() {
 
 		// Get the user_id from the row
-		err = rows.Scan(&user_id)
+		err = rows.Scan(&userId)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -200,16 +201,16 @@ func (game *Game) AssignTargets() (map[string]string, *ApplicationError) {
 		}
 
 		// Execute the statement to insert the target row
-		_, err = tx.Stmt(insertTarget).Exec(prev_user_id, user_id, game.Game_id)
+		_, err = tx.Stmt(insertTarget).Exec(prevUserId, userId, game.GameId)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
 		// Store the mapping to return
-		targets[prev_user_id] = user_id
+		targets[prevUserId.String()] = userId
 		// Increment to the next user
-		prev_user_id = user_id
+		prevUserId = userId
 	}
 
 	// Prepare the statement to have the last user target the first
@@ -219,12 +220,12 @@ func (game *Game) AssignTargets() (map[string]string, *ApplicationError) {
 	}
 
 	// Execute the statement to have the last user target the first
-	_, err = tx.Stmt(lastTarget).Exec(user_id, first_user_id, game.Game_id)
+	_, err = tx.Stmt(lastTarget).Exec(userId, firstUserId, game.GameId)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	targets[user_id] = first_user_id
+	targets[userId.String()] = firstUserId
 
 	tx.Commit()
 	return targets, nil

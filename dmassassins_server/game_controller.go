@@ -3,25 +3,24 @@ package main
 import (
 	"errors"
 	"net/http"
+	"code.google.com/p/go-uuid/uuid"
 )
 
 func postGame(r *http.Request) (*Game, *ApplicationError) {
 	r.ParseForm()
-	username := r.FormValue("username")
-	if username == "" {
-		msg := "Missing Parameter: username."
+	userId := uuid.Parse(r.FormValue("user_id"))
+	if userId == nil {
+		msg := "Missing Parameter: user_id."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	game_name := r.FormValue("game_name")
-	if game_name == "" {
+	gameName := r.FormValue("game_name")
+	if gameName == "" {
 		msg := "Missing Parameter: game_name."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	user, _ := GetUserByUsername(username)
-
-	return NewGame(game_name, user.User_id)
+	return NewGame(gameName, userId)
 }
 
 func getGame(r *http.Request) ([]*Game, *ApplicationError) {

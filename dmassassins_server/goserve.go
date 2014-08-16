@@ -15,14 +15,12 @@ import (
 var db *sql.DB
 
 const (
-	usersUsernamePath            = "/users/{username}/"
-	usersUsernameTargetPath      = "/users/{username}/target/"
-	usersUsernamePropertyPath    = "/users/{username}/property/"
-	usersUsernamePropertyKeyPath = "/users/{username}/property/{key}/"
-	sessionPath                  = "/session/"
-	gamePath                     = "/game/"
-	gameStatePath                = "/game/{game_name}/"
-	homePath                     = "/"
+	gamePath               = "/game/"
+	gameStatePath          = "/game/{game_id}/"
+	gameUsernamePath       = "/{game_id}/users/{user_id}/"
+	gameUsernameTargetPath = "/{game_id}/users/{user_id}/target/"
+	sessionPath            = "/session/"
+	homePath               = "/"
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -107,9 +105,8 @@ func StartServer() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(usersUsernamePath, UserHandler()).Methods("GET")
-	r.HandleFunc(usersUsernameTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
-	r.HandleFunc(usersUsernamePropertyKeyPath, UserPropertyHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameUsernamePath, UserHandler()).Methods("GET")
+	r.HandleFunc(gameUsernameTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 

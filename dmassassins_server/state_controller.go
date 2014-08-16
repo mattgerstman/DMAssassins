@@ -3,14 +3,15 @@ package main
 import (
 	"errors"
 	"github.com/gorilla/mux"
+	"code.google.com/p/go-uuid/uuid"
 	"net/http"
 )
 
 func postState(r *http.Request) (*Game, *ApplicationError) {
 	vars := mux.Vars(r)
-	game_name := vars["game_name"]
+	gameId := uuid.Parse(vars["game_id"])
 
-	game, appErr := GetGameByName(game_name)
+	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -25,9 +26,10 @@ func postState(r *http.Request) (*Game, *ApplicationError) {
 
 func getState(r *http.Request) (*Game, *ApplicationError) {
 	vars := mux.Vars(r)
-	game_name := vars["game_name"]
+	gameId := uuid.Parse(vars["game_id"])
 
-	game, appErr := GetGameByName(game_name)
+	game, appErr := GetGameById(gameId)
+
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -36,9 +38,10 @@ func getState(r *http.Request) (*Game, *ApplicationError) {
 
 func deleteState(r *http.Request) (*Game, *ApplicationError) {
 	vars := mux.Vars(r)
-	game_name := vars["game_name"]
+	gameId := uuid.Parse(vars["game_id"])
 
-	game, appErr := GetGameByName(game_name)
+	game, appErr := GetGameById(gameId)
+
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	fb "github.com/huandu/facebook"
 	"github.com/polds/imgbase64"
+	"code.google.com/p/go-uuid/uuid"
 )
 
 // Returns an authenticated facebook session with app id/secret
@@ -20,23 +21,23 @@ func getFacebookSession(token string) *fb.Session {
 
 // Creates a user from a facebook_auth token
 
-func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationError) {
+func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError) {
 
-	session := getFacebookSession(facebook_token)
+	session := getFacebookSession(facebookToken)
 	res, err := session.Get("/me/", fb.Params{})
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 	}
-	var first_name, last_name, email string
-	var facebook, facebook_id string
+	var firstName, lastName, email string
+	var facebook, facebookId string
 
 	// Decodes all the fields from the facebook session and puts them in variables to be used with the new user
-	err = res.DecodeField("first_name", &first_name)
+	err = res.DecodeField("first_name", &firstName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 	}
 
-	err = res.DecodeField("last_name", &last_name)
+	err = res.DecodeField("last_name", &lastName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 	}
@@ -51,19 +52,19 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 	}
 
-	err = res.DecodeField("id", &facebook_id)
+	err = res.DecodeField("id", &facebookId)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 	}
 
 	// Username's are a concatination of first/last names
-	username := first_name + last_name
+	username := firstName + lastName
 
 	// Set up user properties map, this will be inserted with the user
 	properties := make(map[string]string)
-	properties["Facebook"] = "https://facebook.com/" + facebook_id
+	properties["Facebook"] = "https://facebook.com/" + facebookId
 
-	picture := "https://graph.facebook.com/" + facebook_id + "/picture"
+	picture := "https://graph.facebook.com/" + facebookId + "/picture"
 	photo := picture + "?width=1000"
 	imgbase64.SetDefaultImage(photo)
 	img := imgbase64.FromRemote(photo)
@@ -74,10 +75,10 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 	img_thumb := imgbase64.FromRemote(photo_thumb)
 	properties["photo_thumb"] = img_thumb
 
-	properties["first_name"] = first_name
-	properties["last_name"] = last_name
+	properties["first_name"] = firstName
+	properties["last_name"] = lastName
 
-	user, appErr := NewUser(username, email, "muggle", facebook_id, properties)
+	user, appErr := NewUser(username, email, "muggle", facebookId, properties)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -88,30 +89,30 @@ func CreateUserFromFacebookToken(facebook_token string) (*User, *ApplicationErro
 
 // Get a user from the db by it's facebook_id, confirms that the id matches the id in the token
 // If there is no user in the DB with that facebook_id add them
-func getUserFromFacebookId(facebook_id, facebook_token string) (*User, *ApplicationError) {
-	var user_id string
-	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebook_id).Scan(&user_id)
+func getUserFromFacebookId(facebookId, facebookToken string) (*User, *ApplicationError) {
+	var userId uuid.UUID
+	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebookId).Scan(&userId)
 	switch {
 	case err == sql.ErrNoRows:
-		return CreateUserFromFacebookToken(facebook_token)
+		return CreateUserFromFacebookToken(facebookToken)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 
 	}
-	test_id, appErr := GetFacebookIdFromToken(facebook_token)
+	testId, appErr := GetFacebookIdFromToken(facebookToken)
 	if appErr != nil {
 		return nil, appErr
 	}
-	if test_id != facebook_id {
+	if testId != facebookId {
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	user, appErr := GetUserById(user_id)
+	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	appErr = user.UpdateToken(facebook_token)
+	appErr = user.UpdateToken(facebookToken)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -121,36 +122,36 @@ func getUserFromFacebookId(facebook_id, facebook_token string) (*User, *Applicat
 }
 
 // Returns a user based on facebook_id and facebook_token, if no user exists in the db one will be created
-func GetUserFromFacebookData(facebook_id, facebook_token string) (*User, *ApplicationError) {
+func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *ApplicationError) {
 
-	var user_id string
+	var userId uuid.UUID
 	// See if we have a user with the given facebook_id/facebook_token in the db
-	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebook_id, facebook_token).Scan(&user_id)
+	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebookId, facebookToken).Scan(&userId)
 	switch {
 	// If we have no user in the db check just the id and see if it's in the database
 	case err == sql.ErrNoRows:
-		return getUserFromFacebookId(facebook_id, facebook_token)
+		return getUserFromFacebookId(facebookId, facebookToken)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	//If we have a user_id from the db just return a user
-	return GetUserById(user_id)
+	return GetUserById(userId)
 }
 
 // Returns a user's facebook_id from their token
-func GetFacebookIdFromToken(token string) (interface{}, *ApplicationError) {
+func GetFacebookIdFromToken(token string) (string, *ApplicationError) {
 
 	session := getFacebookSession(token)
 	res, err := session.Get("/debug_token", fb.Params{"input_token": token, "access_token": Config.FBUserAccessToken})
 	if err != nil {
-		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	var facebook_id string
-	err = res.DecodeField("data.user_id", &facebook_id)
+	var facebookId string
+	err = res.DecodeField("data.user_id", &facebookId)
 	if err != nil {
-		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
-	return facebook_id, nil
+	return facebookId, nil
 
 }

@@ -13,31 +13,36 @@ import (
 // Takes data from facebook and returns an authenticated user
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()
-	facebook_id := r.FormValue("facebook_id")
-	if facebook_id == "" {
+	facebookId := r.FormValue("facebook_id")
+	if facebookId == "" {
 		msg := "Missing Parameter: facebook_id."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	facebook_token := r.FormValue("facebook_token")
-	if facebook_token == "" {
+	facebookToken := r.FormValue("facebook_token")
+	if facebookToken == "" {
 		msg := "Missing Parameter: facebook_token."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	user, appErr := GetUserFromFacebookData(facebook_id, facebook_token)
+	user, appErr := GetUserFromFacebookData(facebookId, facebookToken)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	response := make(map[string]interface{})
 
-	response["user_id"] = user.User_id
 	token, appErr := user.GetHashedToken()
+	if appErr != nil {
+		return nil, appErr
+	}
 	response["token"] = token
 
 	game, appErr := user.GetArbitraryGame()
+	if appErr != nil {
+		return nil, appErr
+	}
 	response["game"] = game
 
 	target, appErr := user.GetTarget()

@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
+	"code.google.com/p/go-uuid/uuid"
 	//"github.com/gorilla/schema"
 )
 
@@ -14,10 +15,9 @@ import (
 func getUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
-	username := vars["username"]
-	fmt.Println(username)
+	userId := uuid.Parse(vars["user_id"])
 
-	return GetUserByUsername(username)
+	return GetUserById(userId)
 }
 
 // Handler for /users/{username}/

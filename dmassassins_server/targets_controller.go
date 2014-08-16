@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"code.google.com/p/go-uuid/uuid"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -14,8 +15,8 @@ import (
 func getTarget(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
-	username := vars["username"]
-	user, err := GetUserByUsername(username)
+	userId := uuid.Parse(vars["user_id"])
+	user, err := GetUserById(userId)
 	if err != nil {
 		return nil, err
 	}
@@ -24,11 +25,12 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 }
 
 // Kill a target, delete User may eventually be used by an admin
-func deleteTarget(r *http.Request) (string, *ApplicationError) {
+func deleteTarget(r *http.Request) (uuid.UUID, *ApplicationError) {
 
 	fmt.Println(r)
 	vars := mux.Vars(r)
-	username := vars["username"]
+	
+	userId := uuid.Parse(vars["user_id"])
 
 	r.ParseForm()
 	secret := r.Header.Get("X-DMAssassins-Secret")
@@ -36,30 +38,17 @@ func deleteTarget(r *http.Request) (string, *ApplicationError) {
 	if secret == "" {
 		msg := "Missing Header: X-DMAssassins-Secret."
 		err := errors.New(msg)
-		return "", NewApplicationError(msg, err, ErrCodeMissingHeader)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingHeader)
 	}
 
-	game_id := r.Header.Get("X-DMAssassins-GameId")
+	gameId := uuid.Parse(vars["game_id"])
 
-	if game_id == "" {
-		msg := "Missing Header: X-DMAssassins-GameId."
-		err := errors.New(msg)
-		return "", NewApplicationError(msg, err, ErrCodeMissingHeader)
-	}
-
-	fmt.Println(secret)
-	//need to actually handle the case where the user doesn't exist
-	user, err := GetUserByUsername(username)
+	user, err := GetUserById(userId)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return user.KillTarget(game_id, secret)
+	return user.KillTarget(gameId, secret)
 }
-
-// Assigns targets, needs to be updated to only allow admins
-// func postTarget(r *http.Request) (map[string]string, *ApplicationError) {
-// 	return AssignTargets()
-// }
 
 // Handler for /user/{username}/target
 func TargetHandler() http.HandlerFunc {

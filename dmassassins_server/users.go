@@ -2,27 +2,27 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
-	//"crypto/sha1"
+	"crypto/sha1"
 	"database/sql"
 	"errors"
 	"fmt"
 )
 
 type User struct {
-	User_id     string            `json:"user_id"`
-	Assassin    string            `json:"assassin"`
-	Username    string            `json:"username"`
-	Email       string            `json:"email"`
-	Secret      string            `json:"secret"`
-	Facebook_id string            `json:"facebook_id"`
-	Properties  map[string]string `json:"properties"`
+	UserId     uuid.UUID            `json:"user_id"`
+	Assassin   string            `json:"assassin"`
+	Username   string            `json:"username"`
+	Email      string            `json:"email"`
+	Secret     string            `json:"secret"`
+	FacebookId string            `json:"facebook_id"`
+	Properties map[string]string `json:"properties"`
 }
 
 // Add a user to the DB and return it as a user object
-func NewUser(username, email, secret, facebook_id string, properties map[string]string) (*User, *ApplicationError) {
-	user_id := uuid.New()
+func NewUser(username, email, secret, facebookId string, properties map[string]string) (*User, *ApplicationError) {
+	userId := uuid.NewUUID()
 
-	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, secret, facebook_id) VALUES ($1,$2,$3,$4,$5)`, user_id, username, email, secret, facebook_id)
+	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, secret, facebook_id) VALUES ($1,$2,$3,$4,$5)`, userId, username, email, secret, facebookId)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -36,7 +36,7 @@ func NewUser(username, email, secret, facebook_id string, properties map[string]
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, "", username, email, secret, facebook_id, properties}
+	user := &User{userId, "", username, email, secret, facebookId, properties}
 	for key, value := range properties {
 		user.SetUserProperty(key, value)
 	}
@@ -45,8 +45,9 @@ func NewUser(username, email, secret, facebook_id string, properties map[string]
 
 // Select a User from the DB by username and return it as a user object
 func GetUserByUsername(username string) (*User, *ApplicationError) {
-	var user_id, secret, email, facebook_id string
-	err := db.QueryRow(`SELECT user_id, email, secret, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&user_id, &email, &secret, &facebook_id)
+	var userId uuid.UUID
+	var secret, email, facebookId string
+	err := db.QueryRow(`SELECT user_id, email, secret, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&userId, &email, &secret, &facebookId)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -56,7 +57,7 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, "", username, email, secret, facebook_id, nil}
+	user := &User{userId, "", username, email, secret, facebookId, nil}
 	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -65,9 +66,9 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 }
 
 // Select a user from the db by user_id (uuid) and return it as a user object
-func GetUserById(user_id string) (*User, *ApplicationError) {
-	var username, secret, email, facebook_id string
-	err := db.QueryRow(`SELECT username, email, secret, facebook_id FROM dm_users WHERE user_id = $1`, user_id).Scan(&username, &email, &secret, &facebook_id)
+func GetUserById(userId uuid.UUID) (*User, *ApplicationError) {
+	var username, secret, email, facebookId string
+	err := db.QueryRow(`SELECT username, email, secret, facebook_id FROM dm_users WHERE user_id = $1`, userId).Scan(&username, &email, &secret, &facebookId)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -77,7 +78,7 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{user_id, "", username, email, secret, facebook_id, nil}
+	user := &User{userId, "", username, email, secret, facebookId, nil}
 	_, appErr := user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -86,9 +87,9 @@ func GetUserById(user_id string) (*User, *ApplicationError) {
 }
 
 func (user *User) GetTarget() (*User, *ApplicationError) {
-
-	var user_id, username, email, facebook_id string
-	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.User_id).Scan(&user_id, &username, &email, &facebook_id)
+	var userId uuid.UUID
+	var username, email, facebookId string
+	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.UserId).Scan(&userId, &username, &email, &facebookId)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -98,7 +99,7 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	target := &User{user_id, user.Username, username, email, "", facebook_id, nil}
+	target := &User{userId, user.Username, username, email, "", facebookId, nil}
 	_, appErr := target.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -107,8 +108,8 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 }
 
 func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
-	var game_id string
-	err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.User_id).Scan(&game_id)
+	var gameId uuid.UUID
+	err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.UserId).Scan(&gameId)
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "User: " + user.Username + " is not mapped to any games"
@@ -116,13 +117,13 @@ func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return GetGameById(game_id)
+	return GetGameById(gameId)
 
 }
 
 func (user *User) UpdateToken(facebook_token string) *ApplicationError {
 
-	res, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.User_id)
+	res, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.UserId)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -134,96 +135,86 @@ func (user *User) UpdateToken(facebook_token string) *ApplicationError {
 	return nil
 }
 
-func Hash(plaintext string) (string, *ApplicationError) {
-	
-	// bv := []byte(plaintext)
-	// hasher := sha1.New()
- //    hasher.Write(bv)
- //    sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))	
-	// return sha, nil
-	return "", nil
+func Sha1Hash(plaintext string) string {
+	bv := []byte(plaintext)
+	sha := sha1.Sum(bv)
+	return string(sha[:sha1.Size])
 }
 
 func (user *User) GetHashedToken() (string, *ApplicationError) {
-	// var game_id string
-	// err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.User_id).Scan(&game_id)
-	// switch {
-	// case err == sql.ErrNoRows:
-	// 	msg := "User: " + user.Username + " is not mapped to any games"
-	// 	return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
-	// case err != nil:
-	// 	return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	// }
-	// return GetGameById(game_id)
-	return "", nil
+	var facebook_token string
+	err := db.QueryRow(`SELECT facebook_token FROM dm_users WHERE user_id = $1`, user.UserId).Scan(&facebook_token)
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return Sha1Hash(facebook_token), nil
 
 }
 
 //Kills an Assassin's target, user must be logged in
-func (user *User) KillTarget(game_id, secret string) (string, *ApplicationError) {
+func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *ApplicationError) {
 
-	old_target_id := ""
-	new_target_id := ""
+	var oldTargetId, newTargetId  uuid.UUID
 
-	var target_secret string
+	var targetSecret string
 	// Grab the target's secret and user_id for comparison/use below
-	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.User_id, game_id).Scan(&target_secret, &old_target_id)
+	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.UserId, gameId).Scan(&targetSecret, &oldTargetId)
 	if err != nil {
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Start a transaction so we can rollback if something blows up
 	tx, err := db.Begin()
 	if err != nil {
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Confirm the user entered the right secret
-	if secret != target_secret {
+	if secret != targetSecret {
 		// If secret is invalid throw an error
 		msg := fmt.Sprintf("Invalid secret: %s", secret)
 		err := errors.New("Invalid Secret")
-		return "", NewApplicationError(msg, err, ErrCodeInvalidSecret)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidSecret)
 
 	}
 	// Prepare the statement to kill the old target
 	setDead, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
 		tx.Rollback()
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to kill the old target
-	_, err = tx.Stmt(setDead).Exec(old_target_id, game_id)
+	_, err = tx.Stmt(setDead).Exec(oldTargetId, gameId)
 	if err != nil {
 		tx.Rollback()
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get the old target's target to assign to the Assassin
-	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.User_id, game_id).Scan(&new_target_id)
+	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.UserId, gameId).Scan(&newTargetId)
 	if err != nil {
 		tx.Rollback()
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Delete the row for the dead user's target
 	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1 AND game_id = $2)`)
-	_, err = tx.Stmt(removeOldTarget).Exec(user.User_id, game_id)
+	_, err = tx.Stmt(removeOldTarget).Exec(user.UserId, gameId)
 	if err != nil {
 		tx.Rollback()
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Set up the Assassin's new target
 	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2 AND game_id = $3`)
-	_, err = tx.Stmt(setNewTarget).Exec(new_target_id, user.User_id, game_id)
+	_, err = tx.Stmt(setNewTarget).Exec(newTargetId, user.UserId, gameId)
 	if err != nil {
 		tx.Rollback()
-		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	tx.Commit()
 
-	return new_target_id, nil
+	return newTargetId, nil
 }
