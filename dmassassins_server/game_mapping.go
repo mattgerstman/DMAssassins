@@ -15,33 +15,35 @@ type GameMapping struct {
 
 func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) {
 	var teamId uuid.UUID
-	var userRole string
+	var userRole, teamIdBuffer string
 	var kills int
 	var alive bool
 
-	err := db.QueryRow(`SELECT (team_id, user_role, kills, alive) FROM dm_user_game_mapping WHERE user_id = $1 AND game_id = $2`, userId, gameId).Scan(&teamId, &userRole, &kills, &alive)
+	err := db.QueryRow(`SELECT (team_id, user_role, kills, alive) FROM dm_user_game_mapping WHERE user_id = $1 AND game_id = $2`, userId.String(), gameId.String()).Scan(&teamIdBuffer, &userRole, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	teamId = uuid.Parse(teamIdBuffer)
 	return &GameMapping{userId, gameId, teamId, userRole, kills, alive}, nil
 }
 
 func (user *User) JoinGame(gameId uuid.UUID) (*GameMapping, *ApplicationError) {
 	var teamId uuid.UUID
-	var userRole string
+	var userRole, teamIdBuffer string
 	var kills int
 	var alive bool
 
-	err := db.QueryRow(`INSERT INTO dm_user_game_mapping (user_id, game_id) VALUES ($1, $2) RETURNING team_id, user_role, kills, alive`, user.UserId, gameId).Scan(&teamId, &userRole, &kills, &alive)
+	err := db.QueryRow(`INSERT INTO dm_user_game_mapping (user_id, game_id) VALUES ($1, $2) RETURNING team_id, user_role, kills, alive`, user.UserId.String(), gameId.String()).Scan(&teamIdBuffer, &userRole, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	teamId = uuid.Parse(teamIdBuffer)
 	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
 }
 
 func (gameMapping *GameMapping) JoinTeam(teamId uuid.UUID) *ApplicationError {
 
-	res, err := db.Exec(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE user_id = $2 AND game_id = $3`, teamId, gameMapping.UserId, gameMapping.GameId)
+	res, err := db.Exec(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE user_id = $2 AND game_id = $3`, teamId.String(), gameMapping.UserId.String(), gameMapping.GameId)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -54,7 +56,7 @@ func (gameMapping *GameMapping) JoinTeam(teamId uuid.UUID) *ApplicationError {
 
 func (gameMapping *GameMapping) ChangeRole(role string) *ApplicationError {
 
-	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId, gameMapping.GameId)
+	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

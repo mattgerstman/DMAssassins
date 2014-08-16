@@ -21,41 +21,45 @@ func GetGameList() ([]*Game, *ApplicationError) {
 	var games []*Game
 	for rows.Next() {
 		var gameId uuid.UUID
-		var game_name string
-		var started bool
-		err = rows.Scan(&gameId, &game_name, &started)
+		var gameIdBuffer string
+		var gameName string
+		var gameStarted bool
+		err = rows.Scan(&gameIdBuffer, &gameName, &gameStarted)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
-		game := &Game{gameId, game_name, started}
+		gameId = uuid.Parse(gameIdBuffer)
+		game := &Game{gameId, gameName, gameStarted}
 		games = append(games, game)
 	}
 	return games, nil
 }
 
 func GetGameById(gameId uuid.UUID) (*Game, *ApplicationError) {
-	var game_name string
-	var started bool
-	err := db.QueryRow(`SELECT game_name, started FROM dm_games WHERE game_id = $1`, gameId).Scan(&game_name, &started)
+	var gameName string
+	var gameStarted bool
+	err := db.QueryRow(`SELECT game_name, game_started FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&gameName, &gameStarted)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return &Game{gameId, game_name, started}, nil
+	return &Game{gameId, gameName, gameStarted}, nil
 }
 
-func GetGameByName(game_name string) (*Game, *ApplicationError) {
+func GetGameByName(gameName string) (*Game, *ApplicationError) {
 	var gameId uuid.UUID
-	var started bool
-	err := db.QueryRow(`SELECT game_id, started FROM dm_games WHERE game_name = $1`, game_name).Scan(&gameId, &started)
+	var gameIdBuffer string
+	var gameStarted bool
+	err := db.QueryRow(`SELECT game_id, game_started FROM dm_games WHERE game_name = $1`, gameName).Scan(&gameIdBuffer, &gameStarted)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return &Game{gameId, game_name, started}, nil
+	gameId = uuid.Parse(gameIdBuffer)
+	return &Game{gameId, gameName, gameStarted}, nil
 }
 
 func (game *Game) End() *ApplicationError {
 
-	res, err := db.Exec("UPDATE dm_games SET started = false WHERE game_id = $1", game.GameId)
+	res, err := db.Exec("UPDATE dm_games SET game_started = false WHERE game_id = $1", game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -72,7 +76,7 @@ func (game *Game) Start() *ApplicationError {
 	if appErr != nil {
 		return appErr
 	}
-	res, err := db.Exec("UPDATE dm_games SET started = true WHERE game_id = $1", game.GameId)
+	res, err := db.Exec("UPDATE dm_games SET game_started = true WHERE game_id = $1", game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -85,11 +89,11 @@ func (game *Game) Start() *ApplicationError {
 }
 
 func (game *Game) GetLeaderBoard(alive bool) {
-	_ := db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as dm_first_name, user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId, alive)
+	_, _ = db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as dm_first_name, user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId.String(), alive)
 	return
 }
 
-func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
+func NewGame(gameName string, userId uuid.UUID) (*Game, *ApplicationError) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -103,7 +107,7 @@ func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	res, err := tx.Stmt(newGame).Exec(gameId, game_name)
+	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName)
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
@@ -116,7 +120,7 @@ func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	_, err = tx.Stmt(firstMapping).Exec(gameId, userId)
+	_, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -130,7 +134,7 @@ func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
 
 	role := "dm_admin"
 
-	res, err = tx.Stmt(setAdmin).Exec(role, userId)
+	res, err = tx.Stmt(setAdmin).Exec(role, userId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -140,7 +144,7 @@ func NewGame(game_name string, userId uuid.UUID) (*Game, *ApplicationError) {
 		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
-	return &Game{gameId, game_name, false}, nil
+	return &Game{gameId, gameName, false}, nil
 
 }
 
@@ -161,38 +165,41 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 	}
 
 	// Execute statement to delete previous targets
-	_, err = tx.Stmt(deleteTargets).Exec(game.GameId)
+	_, err = tx.Stmt(deleteTargets).Exec(game.GameId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.GameId)
+	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	var userId uuid.UUID
-	var prevUserId uuid.UUID
-	var firstUserId uuid.UUID
+	var userIdBuffer, firstIdBuffer string
+	var userId, prevUserId, firstUserId uuid.UUID
+
 	targets := make(map[string]uuid.UUID) // Map to return targets
 
 	rows.Next()
-	err = rows.Scan(&firstUserId)
+
+	err = rows.Scan(&firstIdBuffer)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	firstUserId = uuid.Parse(firstIdBuffer)
 	prevUserId = firstUserId
 
 	// Loop through rows
 	for rows.Next() {
 
 		// Get the user_id from the row
-		err = rows.Scan(&userId)
+		err = rows.Scan(&userIdBuffer)
+		userId = uuid.Parse(userIdBuffer)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -206,7 +213,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 		}
 
 		// Execute the statement to insert the target row
-		_, err = tx.Stmt(insertTarget).Exec(prevUserId, userId, game.GameId)
+		_, err = tx.Stmt(insertTarget).Exec(prevUserId.String(), userId.String(), game.GameId.String())
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -225,7 +232,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 	}
 
 	// Execute the statement to have the last user target the first
-	_, err = tx.Stmt(lastTarget).Exec(userId, firstUserId, game.GameId)
+	_, err = tx.Stmt(lastTarget).Exec(userId, firstUserId.String(), game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

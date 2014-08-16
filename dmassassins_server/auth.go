@@ -107,7 +107,7 @@ func getRoleFromHeaders(r *http.Request) (string, *ApplicationError) {
 	gameId := uuid.Parse(vars["game_id"])
 
 	var facebookId, facebookToken, userRole string
-	err := db.QueryRow(`SELECT user.facebook_id, user.facebook_token, game.user_role FROM dm_users AS user, dm_user_game_mapping AS game WHERE user.user_id = game.user_id AND game.user_id = $1 AND game.game_id = $2`, userId, gameId).Scan(&facebookId, &facebookToken, &userRole)
+	err := db.QueryRow(`SELECT user.facebook_id, user.facebook_token, game.user_role FROM dm_users AS user, dm_user_game_mapping AS game WHERE user.user_id = game.user_id AND game.user_id = $1 AND game.game_id = $2`, userId.String(), gameId.String()).Scan(&facebookId, &facebookToken, &userRole)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

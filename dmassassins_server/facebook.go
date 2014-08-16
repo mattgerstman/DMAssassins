@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"fmt"
 	fb "github.com/huandu/facebook"
 	"github.com/polds/imgbase64"
 )
@@ -91,7 +92,11 @@ func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError
 // If there is no user in the DB with that facebook_id add them
 func getUserFromFacebookId(facebookId, facebookToken string) (*User, *ApplicationError) {
 	var userId uuid.UUID
-	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebookId).Scan(&userId)
+	var userIdBuffer string
+
+	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebookId).Scan(&userIdBuffer)
+	userId = uuid.Parse(userIdBuffer)
+
 	switch {
 	case err == sql.ErrNoRows:
 		return CreateUserFromFacebookToken(facebookToken)
@@ -125,8 +130,12 @@ func getUserFromFacebookId(facebookId, facebookToken string) (*User, *Applicatio
 func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *ApplicationError) {
 
 	var userId uuid.UUID
+	var userIdBuffer string
 	// See if we have a user with the given facebook_id/facebook_token in the db
-	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebookId, facebookToken).Scan(&userId)
+	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebookId, facebookToken).Scan(&userIdBuffer)
+	userId = uuid.Parse(userIdBuffer)
+
+	fmt.Println(userId)
 	switch {
 	// If we have no user in the db check just the id and see if it's in the database
 	case err == sql.ErrNoRows:
