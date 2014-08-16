@@ -1,13 +1,15 @@
 package main
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"github.com/gorilla/mux"
-	"code.google.com/p/go-uuid/uuid"
 	"net/http"
 )
 
 func postState(r *http.Request) (*Game, *ApplicationError) {
+	RequiresAdmin(r)
+
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 
@@ -37,6 +39,8 @@ func getState(r *http.Request) (*Game, *ApplicationError) {
 }
 
 func deleteState(r *http.Request) (*Game, *ApplicationError) {
+	RequiresAdmin(r)
+
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 

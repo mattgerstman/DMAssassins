@@ -9,7 +9,7 @@ import (
 )
 
 type User struct {
-	UserId     uuid.UUID            `json:"user_id"`
+	UserId     uuid.UUID         `json:"user_id"`
 	Assassin   string            `json:"assassin"`
 	Username   string            `json:"username"`
 	Email      string            `json:"email"`
@@ -154,7 +154,7 @@ func (user *User) GetHashedToken() (string, *ApplicationError) {
 //Kills an Assassin's target, user must be logged in
 func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *ApplicationError) {
 
-	var oldTargetId, newTargetId  uuid.UUID
+	var oldTargetId, newTargetId uuid.UUID
 
 	var targetSecret string
 	// Grab the target's secret and user_id for comparison/use below

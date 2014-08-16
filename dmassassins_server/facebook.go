@@ -1,10 +1,10 @@
 package main
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	fb "github.com/huandu/facebook"
 	"github.com/polds/imgbase64"
-	"code.google.com/p/go-uuid/uuid"
 )
 
 // Returns an authenticated facebook session with app id/secret

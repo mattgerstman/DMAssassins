@@ -1,12 +1,12 @@
 package main
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	"code.google.com/p/go-uuid/uuid"
 	//"github.com/gorilla/schema"
 )
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"code.google.com/p/go-uuid/uuid"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -29,7 +29,7 @@ func deleteTarget(r *http.Request) (uuid.UUID, *ApplicationError) {
 
 	fmt.Println(r)
 	vars := mux.Vars(r)
-	
+
 	userId := uuid.Parse(vars["user_id"])
 
 	r.ParseForm()

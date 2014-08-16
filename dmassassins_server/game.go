@@ -6,8 +6,8 @@ import (
 
 type Game struct {
 	GameId   uuid.UUID `json:"game_id"`
-	GameName string `json:"game_name"`
-	Started  bool   `json:"game_started"`
+	GameName string    `json:"game_name"`
+	Started  bool      `json:"game_started"`
 }
 
 func GetGameList() ([]*Game, *ApplicationError) {

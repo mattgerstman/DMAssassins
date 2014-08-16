@@ -7,9 +7,6 @@ import (
 	"net/http"
 )
 
-//yes i know i need a real secret key and i should read it from a config file
-// var store = sessions.NewCookieStore([]byte("some-thing-very-secret"))
-
 // Takes data from facebook and returns an authenticated user
 func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
 	r.ParseForm()

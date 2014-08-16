@@ -1,9 +1,9 @@
 package main
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"net/http"
-	"code.google.com/p/go-uuid/uuid"
 )
 
 func postGame(r *http.Request) (*Game, *ApplicationError) {
