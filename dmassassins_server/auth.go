@@ -63,6 +63,38 @@ func GetBasicAuth(r *http.Request) (userId uuid.UUID, token string, appErr *Appl
 	return userId, token, nil
 }
 
+func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
+	userId, token, appErr := GetBasicAuth(r)
+	if appErr != nil {
+		return appErr
+	}
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		return appErr
+	}
+
+	dbToken, appErr := user.GetToken()
+	if appErr != nil {
+		return appErr
+	}
+
+	if dbToken != token {
+		apiFacebookId, appErr := GetFacebookIdFromToken(token)
+		if appErr != nil {
+			return appErr
+		}
+		if apiFacebookId != user.FacebookId {
+			msg := "Permission Denied"
+			err := errors.New("Permission Denied")
+			return NewApplicationError(msg, err, ErrCodePermissionDenied)
+		}
+
+	}
+
+	return nil
+}
+
 func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 	var roles = map[string]int{
 		"dm_super_admin": RoleSuperAdmin,
@@ -73,52 +105,107 @@ func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 	return roles[role] >= roleId
 }
 
-func RequiresUser(r *http.Request, reqTeamId, reqUserId uuid.UUID) (isRightUser bool, appErr *ApplicationError) {
+func RequiresUser(r *http.Request) (appErr *ApplicationError) {
 	role, teamId, userId, appErr := getRoleFromRequest(r)
 	if appErr != nil {
-		return false, appErr
+		return appErr
 	}
 
+
+	vars := mux.Vars(r)
+	reqUserId := uuid.Parse(vars["user_id"])
 	if (uuid.Equal(userId, reqUserId)) || (reqUserId == nil) {
+		return nil
+	}
+
+	theyAre, appErr := isTeamCaptain(role, teamId, r)
+	if appErr != nil {
+		return appErr
+	}
+	if theyAre {
+		return nil
+	}
+
+	msg := "Permission Denied"
+	err := errors.New("Permission Denied")
+	return NewApplicationError(msg, err, ErrCodePermissionDenied)
+
+}
+
+func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (isRightCaptain bool, appErr *ApplicationError) {
+
+	if compareRole(role, RoleAdmin) {
 		return true, nil
 	}
 
-	return isTeamCaptain(role, teamId, reqTeamId), nil
-
-}
-
-func isTeamCaptain(role string, teamId, reqTeamId uuid.UUID) (isRightCaptain bool) {
-
-	if compareRole(role, RoleAdmin) {
-		return true
-	}
-
 	if !compareRole(role, RoleCaptain) {
-		return false
+		return false, nil
 	}
+
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+	gameId := uuid.Parse(vars["game_id"])
+
+	GameMapping, appErr := GetGameMapping(userId, gameId)
+	if appErr != nil {
+		return false, appErr
+	}
+	reqTeamId := GameMapping.TeamId
+
 	if (uuid.Equal(teamId, reqTeamId)) || (reqTeamId == nil) {
-		return true
+		return true, nil
 	}
-	return false
+	return false, nil
 
 }
 
-func RequiresCaptain(r *http.Request, reqTeamId uuid.UUID) (isRightCaptain bool, appErr *ApplicationError) {
+func RequiresCaptain(r *http.Request) (appErr *ApplicationError) {
 	role, teamId, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
-		return false, appErr
+		return appErr
 	}
-	return isTeamCaptain(role, teamId, reqTeamId), nil
+
+	theyAre, appErr := isTeamCaptain(role, teamId, r)
+	if appErr != nil {
+		return appErr
+	}
+	if theyAre {
+		return nil
+	}
+
+	msg := "Permission Denied"
+	err := errors.New("Permission Denied")
+	return NewApplicationError(msg, err, ErrCodePermissionDenied)
 
 }
 
-func RequiresAdmin(r *http.Request) (isRightAdmin bool, appErr *ApplicationError) {
+func RequiresAdmin(r *http.Request) (appErr *ApplicationError) {
 	role, _, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
-		return false, appErr
+		return appErr
 	}
-	return compareRole(role, RoleAdmin), nil
+	if compareRole(role, RoleAdmin) {
+		return nil
+	}
 
+	msg := "Permission Denied"
+	err := errors.New("Permission Denied")
+	return NewApplicationError(msg, err, ErrCodePermissionDenied)
+
+}
+
+func RequiresSuperAdmin(r *http.Request) (appErr *ApplicationError) {
+	role, _, _, appErr := getRoleFromRequest(r)
+	if appErr != nil {
+		return appErr
+	}
+	if compareRole(role, RoleSuperAdmin) {
+		return nil
+	}
+
+	msg := "Permission Denied"
+	err := errors.New("Permission Denied")
+	return NewApplicationError(msg, err, ErrCodePermissionDenied)
 }
 
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {

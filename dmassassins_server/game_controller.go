@@ -7,6 +7,11 @@ import (
 )
 
 func postGame(r *http.Request) (*Game, *ApplicationError) {
+	appErr := RequiresLogin(r)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	r.ParseForm()
 	userId := uuid.Parse(r.FormValue("user_id"))
 	if userId == nil {
@@ -24,6 +29,10 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 }
 
 func getGame(r *http.Request) ([]*Game, *ApplicationError) {
+	appErr := RequiresLogin(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 	return GetGameList()
 }
 

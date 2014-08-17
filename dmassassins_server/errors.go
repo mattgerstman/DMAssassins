@@ -18,7 +18,10 @@ const (
 	// 401 - Unauthorized
 	ErrCodeNoSession      = 40100
 	ErrCodeInvalidSecret  = 40101
-	ErrCodeInvalidFBToken = 40101
+	ErrCodeInvalidFBToken = 40102
+
+	// 403 - Forbidden
+	ErrCodePermissionDenied = 40300
 
 	// 404 - Not Found
 	ErrCodeInvalidMethod   = 40400

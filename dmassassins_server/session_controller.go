@@ -30,7 +30,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 
 	response := make(map[string]interface{})
 
-	token, appErr := user.GetHashedToken()
+	token, appErr := user.GetToken()
 	if appErr != nil {
 		return nil, appErr
 	}

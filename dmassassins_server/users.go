@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
-	"crypto/sha1"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -140,19 +139,13 @@ func (user *User) UpdateToken(facebook_token string) *ApplicationError {
 	return nil
 }
 
-func Sha1Hash(plaintext string) string {
-	bv := []byte(plaintext)
-	sha := sha1.Sum(bv)
-	return string(sha[:sha1.Size])
-}
-
-func (user *User) GetHashedToken() (string, *ApplicationError) {
-	var facebook_token string
-	err := db.QueryRow(`SELECT facebook_token FROM dm_users WHERE user_id = $1`, user.UserId.String()).Scan(&facebook_token)
+func (user *User) GetToken() (string, *ApplicationError) {
+	var facebookToken string
+	err := db.QueryRow(`SELECT facebook_token FROM dm_users WHERE user_id = $1`, user.UserId.String()).Scan(&facebookToken)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return Sha1Hash(facebook_token), nil
+	return facebookToken, nil
 
 }
 

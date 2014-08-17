@@ -8,7 +8,10 @@ import (
 )
 
 func postState(r *http.Request) (*Game, *ApplicationError) {
-	RequiresAdmin(r)
+	appErr := RequiresAdmin(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
@@ -27,6 +30,11 @@ func postState(r *http.Request) (*Game, *ApplicationError) {
 }
 
 func getState(r *http.Request) (*Game, *ApplicationError) {
+	appErr := RequiresLogin(r)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 
@@ -39,7 +47,10 @@ func getState(r *http.Request) (*Game, *ApplicationError) {
 }
 
 func deleteState(r *http.Request) (*Game, *ApplicationError) {
-	RequiresAdmin(r)
+	appErr := RequiresAdmin(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])

@@ -16,6 +16,10 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	appErr := RequiresUser(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	return GetUserById(userId)
 }
