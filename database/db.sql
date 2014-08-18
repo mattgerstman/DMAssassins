@@ -32,7 +32,8 @@ SET search_path = public, pg_catalog;
 CREATE TYPE dm_user_role AS ENUM (
     'dm_admin',
     'dm_captain',
-    'dm_user'
+    'dm_user',
+    'dm_super_admin'
 );
 
 
@@ -56,12 +57,29 @@ CREATE TABLE dm_games (
 ALTER TABLE public.dm_games OWNER TO dmassassins;
 
 --
+-- Name: dm_teams; Type: TABLE; Schema: public; Owner: Matthew; Tablespace: 
+--
+
+CREATE TABLE dm_teams (
+    team_id uuid NOT NULL,
+    game_id uuid,
+    team_name character varying(100)
+);
+
+
+ALTER TABLE public.dm_teams OWNER TO "Matthew";
+
+--
 -- Name: dm_user_game_mapping; Type: TABLE; Schema: public; Owner: dmassassins; Tablespace: 
 --
 
 CREATE TABLE dm_user_game_mapping (
     user_id uuid,
-    game_id uuid
+    game_id uuid,
+    alive boolean DEFAULT true,
+    kills integer DEFAULT 0,
+    user_role dm_user_role DEFAULT 'dm_user'::dm_user_role NOT NULL,
+    team_id uuid
 );
 
 
@@ -101,11 +119,9 @@ CREATE TABLE dm_users (
     user_id uuid NOT NULL,
     username character varying(256),
     secret character varying(100),
-    alive boolean DEFAULT true,
     email character varying(256) DEFAULT ''::character varying NOT NULL,
     facebook_id bigint,
-    facebook_token character varying,
-    user_role dm_user_role
+    facebook_token character varying
 );
 
 
@@ -116,6 +132,16 @@ ALTER TABLE public.dm_users OWNER TO dmassassins;
 --
 
 COPY dm_games (game_id, game_name, game_started) FROM stdin;
+9202fcd2-ccbd-42d4-8c54-99968a38e5e6	DMatUF	f
+1b29febd-d6c4-4b41-beee-356fa16cfe47	TriWizard Tournament	f
+\.
+
+
+--
+-- Data for Name: dm_teams; Type: TABLE DATA; Schema: public; Owner: Matthew
+--
+
+COPY dm_teams (team_id, game_id, team_name) FROM stdin;
 \.
 
 
@@ -123,7 +149,9 @@ COPY dm_games (game_id, game_name, game_started) FROM stdin;
 -- Data for Name: dm_user_game_mapping; Type: TABLE DATA; Schema: public; Owner: dmassassins
 --
 
-COPY dm_user_game_mapping (user_id, game_id) FROM stdin;
+COPY dm_user_game_mapping (user_id, game_id, alive, kills, user_role, team_id) FROM stdin;
+8e2b411d-783e-48cb-b2ad-800f3c08a3c4	1b29febd-d6c4-4b41-beee-356fa16cfe47	t	0	dm_user	\N
+ba900abd-fef3-4d3b-89b8-9151481221d4	1b29febd-d6c4-4b41-beee-356fa16cfe47	t	0	dm_user	\N
 \.
 
 
@@ -150,6 +178,8 @@ ba900abd-fef3-4d3b-89b8-9151481221d4	last_name	\\x47657273746d616e
 --
 
 COPY dm_user_targets (user_id, target_id, game_id) FROM stdin;
+8e2b411d-783e-48cb-b2ad-800f3c08a3c4	ba900abd-fef3-4d3b-89b8-9151481221d4	1b29febd-d6c4-4b41-beee-356fa16cfe47
+ba900abd-fef3-4d3b-89b8-9151481221d4	8e2b411d-783e-48cb-b2ad-800f3c08a3c4	1b29febd-d6c4-4b41-beee-356fa16cfe47
 \.
 
 
@@ -157,9 +187,9 @@ COPY dm_user_targets (user_id, target_id, game_id) FROM stdin;
 -- Data for Name: dm_users; Type: TABLE DATA; Schema: public; Owner: dmassassins
 --
 
-COPY dm_users (user_id, username, secret, alive, email, facebook_id, facebook_token, user_role) FROM stdin;
-ba900abd-fef3-4d3b-89b8-9151481221d4	MattGerstman	muggle	t	imatt711@me.com	10152622020481913	\N	\N
-8e2b411d-783e-48cb-b2ad-800f3c08a3c4	HarryPotter	muggle	t	harry_utaqjto_potter@tfbnw.net	334599530035888	\N	\N
+COPY dm_users (user_id, username, secret, email, facebook_id, facebook_token) FROM stdin;
+8e2b411d-783e-48cb-b2ad-800f3c08a3c4	HarryPotter	muggle	harry_utaqjto_potter@tfbnw.net	334599530035888	\N
+ba900abd-fef3-4d3b-89b8-9151481221d4	MattGerstman	muggle	imatt711@me.com	10152622020481913	CAAJPKJ2eMPIBAGm2rdUpgmDobK0YLdS3CzmWU888uzBEvWbpvbVGSt6rUQcExGKgk58LmKWBvtVQqyZCwzUrRsUkYyJZCDe7RSIEjKf919XnOc5d5E9T5AtzhSZC9veZBBfmJvXtuluXZCFMuJ5JjFB7v5IEmD2OymxtABMyt5l6WYXuUSMoLR7EwpSNvr994Hamai4tOjb6TKzY6bRZCva3k7OabZASD0ZD
 \.
 
 
@@ -169,6 +199,14 @@ ba900abd-fef3-4d3b-89b8-9151481221d4	MattGerstman	muggle	t	imatt711@me.com	10152
 
 ALTER TABLE ONLY dm_games
     ADD CONSTRAINT dm_games_pkey PRIMARY KEY (game_id);
+
+
+--
+-- Name: dm_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: Matthew; Tablespace: 
+--
+
+ALTER TABLE ONLY dm_teams
+    ADD CONSTRAINT dm_teams_pkey PRIMARY KEY (team_id);
 
 
 --
@@ -243,11 +281,27 @@ CREATE UNIQUE INDEX unique_user ON dm_user_targets USING btree (user_id);
 
 
 --
+-- Name: dm_teams_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: Matthew
+--
+
+ALTER TABLE ONLY dm_teams
+    ADD CONSTRAINT dm_teams_game_id_fkey FOREIGN KEY (game_id) REFERENCES dm_games(game_id);
+
+
+--
 -- Name: dm_user_game_mapping_game_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: dmassassins
 --
 
 ALTER TABLE ONLY dm_user_game_mapping
     ADD CONSTRAINT dm_user_game_mapping_game_id_fkey FOREIGN KEY (game_id) REFERENCES dm_games(game_id);
+
+
+--
+-- Name: dm_user_game_mapping_team_fkey; Type: FK CONSTRAINT; Schema: public; Owner: dmassassins
+--
+
+ALTER TABLE ONLY dm_user_game_mapping
+    ADD CONSTRAINT dm_user_game_mapping_team_fkey FOREIGN KEY (team_id) REFERENCES dm_teams(team_id);
 
 
 --
