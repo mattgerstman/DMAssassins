@@ -30,6 +30,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 
 	response := make(map[string]interface{})
 
+	response["user"] = user
 	token, appErr := user.GetToken()
 	if appErr != nil {
 		return nil, appErr
@@ -42,24 +43,10 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	}
 	response["game"] = game
 
-	target, appErr := user.GetTarget()
-
-	response["user"] = user
-	response["target"] = target
+	// target, appErr := user.GetTarget()
+	// response["target"] = target
 	return response, appErr
 }
-
-// // Kill a session this will probably be rewritten later with basic auth
-// func deleteSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
-// 	session, _ := store.Get(r, "DMAssassins")
-// 	session.Options = &sessions.Options{
-// 		Path:     "/",
-// 		MaxAge:   -1,
-// 		HttpOnly: true,
-// 	}`
-
-// 	return session.Save(r, w), nil
-// }
 
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

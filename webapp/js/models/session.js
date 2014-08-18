@@ -107,11 +107,14 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			});
 			login.done(function(response){
 				that.set('authenticated', true);
+
+				that.set('token', JSON.stringify(response.response.token));
 				that.set('user', JSON.stringify(response.response.user));
-				that.set('target', JSON.stringify(response.response.target));
+				that.set('game', JSON.stringify(response.response.game));
+
+				that.storeBasicAuth(response.response)
 				
 				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
-				app.Running.TargetModel = new app.Models.Target(that.get('target'))
 				
 				if(that.get('redirectFrom')){
 					var path = that.get('redirectFrom');
@@ -169,6 +172,21 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 */
 
 			Session.always(callback);
+		},
+		storeBasicAuth : function(data) {
+			
+			var user_id = data.user.user_id;
+			var token = data.token
+			var plainKey = user_id + ":" + token
+			var base64Key = Base64.encode(plainKey);
+			this.set('authKey', base64Key);
+			$.ajaxSetup({
+				headers: { 'Authorization': "Basic " + base64Key }
+			});
+			
+			this.set('user_id', user_id)
+			this.set('game_id', data.game.game_id)
+
 		}
 	});
 })()

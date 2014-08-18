@@ -69,6 +69,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		target : function() {
 			console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
+			app.Running.TargetModel.changeUser(app.Session.get('user_id'))
 			app.Running.currentView.model.fetch();
 			this.render();
 		},

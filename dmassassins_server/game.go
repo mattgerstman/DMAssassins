@@ -89,7 +89,7 @@ func (game *Game) Start() *ApplicationError {
 }
 
 func (game *Game) GetLeaderBoard(alive bool) {
-	_, _ = db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as dm_first_name, user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId.String(), alive)
+	_, _ = db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as first_name, dm_user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId.String(), alive)
 	return
 }
 

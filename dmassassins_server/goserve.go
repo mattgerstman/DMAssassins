@@ -31,23 +31,24 @@ func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
 
 // All HTTP requests should end up here, this function prints either an object or an error depending on the situation
 // It also logs errors to sentry with a stack trace.
-func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, err *ApplicationError) {
+func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, appErr *ApplicationError) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Content-Type", "application/json")
-	if err != nil {
+	if appErr != nil {
 		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
-		fmt.Println(err)
-		HttpErrorLogger(w, err.Msg, err.Code)
-		LogWithSentry(err, nil, raven.ERROR, raven.NewHttp(r))
+		fmt.Println(appErr)
+		HttpErrorLogger(w, appErr.Msg, appErr.Code)
+		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
 		return
 	}
 
 	var output map[string]interface{}
 	output = make(map[string]interface{})
 	output["response"] = obj
-	encoder := json.NewEncoder(w)
-	encoder.Encode(output)
+
+	data, _ := json.Marshal(output)
+	w.Write(data)
 }
 
 // Handles requests to the direct path, currently does nothing
@@ -84,7 +85,7 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 			fmt.Println(r)
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, Authorization")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
 			//handle preflight in here
 			//fmt.Println(w)

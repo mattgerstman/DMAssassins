@@ -6,8 +6,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	
 	app.Models.Target = Backbone.Model.extend({
 		defaults: {
-			'assassin' : '',
+			'assassin_id' : '',
 			'username' : '',
+			'user_id' : '',
 			'email' : '',
 			'properties': {
 				'name' : '',
@@ -22,14 +23,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
                 // process response.meta when necessary...
                 return response.response;
         },
-		urlRoot: config.WEB_ROOT + 'users/',
+		urlRoot: config.WEB_ROOT,
 		initialize: function() {
-			this.idAttribute = 'assassin' 
-			this.url = this.urlRoot + this.get('assassin') + '/target/';
+			if (!this.get('assassin_id'))
+			{
+				this.assassin_id = app.Session.get('user_id');
+			}
+			this.idAttribute = 'assassin_id' 
+			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.assassin_id + '/target/';
 		},
-		changeUser : function(username) {
-			var trailing = this.get('type') == 'target' ? 'target/' : '';
-			this.url = this.urlRoot + username + '/' + trailing;
+		changeUser : function(assassin_id) {
+			this.assassin_id = assassin_id;
+			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.assassin_id + '/target/';			
 			this.fetch();
 		}
 	})

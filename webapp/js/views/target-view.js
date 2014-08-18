@@ -22,13 +22,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  
 	  initialize : function (){
 	  	this.model = app.Running.TargetModel;
-		  this.listenTo(this.model, 'change', this.render)
-		  this.listenTo(this.model, 'fetch', this.render)
-//		  this.listenTo(this.model, 'destroy', )		  		  
+	  	
+		this.listenTo(this.model, 'change', this.render)
+		this.listenTo(this.model, 'fetch', this.render)
 	  },
 	  kill: function() {
 		var secret = this.$el.find('#secret').val();
-		var url = config.WEB_ROOT + 'users/' +  + '/target/'
 		var view = this;
 		this.model.destroy({
 			headers: {'X-DMAssassins-Secret': secret},
@@ -37,9 +36,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				view.render()
 			}
 			
-			})
-
-
+		})
 	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
