@@ -185,7 +185,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			});
 			
 			this.set('user_id', user_id)
-			this.set('game_id', data.game.game_id)
+
+			var game_id = null
+			if (data.game != null) {
+				game_id = data.game.game_id
+			}
+			
+			this.set('game_id', game_id)
 
 		}
 	});

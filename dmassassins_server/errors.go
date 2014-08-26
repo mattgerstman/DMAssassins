@@ -23,11 +23,14 @@ const (
 	// 403 - Forbidden
 	ErrCodePermissionDenied = 40300
 
-	// 404 - Not Found
+	// 404 - Not Found -- Invalid Input
 	ErrCodeInvalidMethod   = 40400
 	ErrCodeInvalidEmail    = 40401
 	ErrCodeInvalidUserId   = 40402
-	ErrCodeInvalidUsername = 40401
+	ErrCodeInvalidUsername = 40403
+
+	// 404 - Not Found -- Valid Input
+	ErrCodeNoGameMappings = 40420
 
 	// 500 - Internal Server Error
 	ErrCodeDatabase               = 50001

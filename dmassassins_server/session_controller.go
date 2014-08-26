@@ -38,9 +38,10 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	response["token"] = token
 
 	game, appErr := user.GetArbitraryGame()
-	if appErr != nil {
+	if (appErr != nil) && (appErr.Code != ErrCodeNoGameMappings) {
 		return nil, appErr
 	}
+	appErr = nil
 	response["game"] = game
 
 	// target, appErr := user.GetTarget()

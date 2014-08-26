@@ -118,7 +118,7 @@ func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "User: " + user.Username + " is not mapped to any games"
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+		return nil, NewApplicationError(msg, err, ErrCodeNoGameMappings)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

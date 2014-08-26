@@ -4,7 +4,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	app.Routers.Router = app.Routers.BaseRouter.extend({
 		routes: {
-			'' : 'multigame',
+			'' : 'target',
 			'login' : 'login',
 			'logout' : 'logout',
 			'target' : 'target',
@@ -17,11 +17,14 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		
 		// Routes that need authentication and if user is not authenticated
 		// gets redirect to login page
-		requresAuth : ['#my_profile', '#target', ''],
-		noNav : ['#login', '#multigame', ''],
+		requiresJustAuth : ['#multigame'],
+		requiresGameAndAuth : ['#my_profile', '#target', '#', ''],
+		noNav : ['login', 'multigame'],
 		// Routes that should not be accessible if user is authenticated
 		// for example, login, register, forgetpasword ...
 		preventAccessWhenAuth : ['#login'],
+		redirectWithoutGame : '#multigame',
+		redirectWithoutAuth : '#login',
 		before : function(params, next){
 			//Checking if user is authenticated or not
 			//then check the path if the path requires authentication 
@@ -29,15 +32,24 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			var path = Backbone.history.location.hash;
 			console.log('path');
 			console.log(path);
-			var needAuth = _.contains(this.requresAuth, path);
-			var cancleAccess = _.contains(this.preventAccessWhenAuth, path);
-			if(needAuth && !isAuth){
+			var needGame = _.contains(this.requiresGameAndAuth, path);
+			var isGame   = app.Session.get('game_id');
+			var needAuth = _.contains(this.requiresAuthJustAuth, path);
+			var cancelAccess = _.contains(this.preventAccessWhenAuth, path);
+			
+			console.log('needGame: ', needGame);
+			console.log('isGame: ', isGame);
+			
+			if (needGame && (isGame == 'null')) {
+				Backbone.history.navigate(this.redirectWithoutGame, { trigger : true });
+			}
+			else if(needAuth && !isAuth){
 				//If user gets redirect to login because wanted to access
 				// to a route that requires login, save the path in session
 				// to redirect the user back to path after successful login
 				app.Session.set('redirectFrom', path);
-				Backbone.history.navigate('login', { trigger : true });
-			}else if(isAuth && cancleAccess){
+				Backbone.history.navigate(this.redirectWithoutAuth, { trigger : true });
+			}else if(isAuth && cancelAccess){
 				//User is authenticated and tries to go to login, register ...
 				// so redirect the user to home page
 				Backbone.history.navigate('', { trigger : true });
