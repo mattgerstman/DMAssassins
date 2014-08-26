@@ -19,6 +19,8 @@ const (
 	gameStatePath          = "/game/{game_id}/"
 	gameUsernamePath       = "/{game_id}/users/{user_id}/"
 	gameUsernameTargetPath = "/{game_id}/users/{user_id}/target/"
+	usernamePath           = "/users/{user_id}/"
+	usernameGamePath       = "/users/{user_id}/game/"
 	sessionPath            = "/session/"
 	homePath               = "/"
 )
@@ -106,11 +108,13 @@ func StartServer() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(gameUsernamePath, UserHandler()).Methods("GET")
+	r.HandleFunc(usernamePath, UserHandler()).Methods("GET")
+	r.HandleFunc(gameUsernamePath, GameMappingHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUsernameTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
+	r.HandleFunc(usernameGamePath, UserGameHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
 	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
 

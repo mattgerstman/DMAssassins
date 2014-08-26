@@ -1,28 +1,17 @@
-  // js/views/profile-view.js
+  // js/views/select-game-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 (function($){
  'use strict';
-  app.Views.ProfileView = Backbone.View.extend({
+  app.Views.SelectGameView = Backbone.View.extend({
 	   
 	     
-	  template: _.template( $('#profile-template').html() ),
+	  template: _.template( $('#select-game-template').html() ),
 	  tagName: 'div',
 	  
-        // The DOM events specific to an item.
-		events: {
-	      'click .thumbnail': 'showFullImage'
-	    },
-	  
-	  showFullImage: function(){
-	  		console.log('showFullImage');
-		  $('#photoModal').modal()  
-	  },
-	  
 	  initialize : function (params){
-	  	this.model = app.Running.ProfileModel;
-	  	console.log(this.model);
+	  	this.model = app.Running.GamesModel;
 
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  
@@ -31,6 +20,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  render: function(){
 //	  	this.$el.hide()
 		this.$el.html( this.template ( this.model.attributes ) );
+		this.model.fetch();
 //		this.$el.fadeIn(250);
 		return this;  
 	  }	    

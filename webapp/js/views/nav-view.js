@@ -17,12 +17,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },	  
   
 	  initialize : function (params){	  
-	  	  this.model = new app.Models.Nav(params)
+	  	  this.model = app.Running.NavModel;
 		  this.listenTo(this.model, 'change', this.render)
 	  },
 	  
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
+		if (app.Session.get('game'))
+		{
+			$('#game_header').text(app.Session.get('game').game_name);	
+		}
+		
 		return this;  
 	  },
 	  select: function(event){
@@ -31,6 +36,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	  },
 	  highlight: function(elem) {
+	  	if ($(elem).hasClass('dropdown_parent')) {
+		  	return;
+	  	}
 		$('.active').removeClass('active');
 		$(elem).addClass('active');
 	  }

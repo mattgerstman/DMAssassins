@@ -45,7 +45,8 @@ func NewUser(username, email, secret, facebookId string, properties map[string]s
 // Select a User from the DB by username and return it as a user object
 func GetUserByUsername(username string) (*User, *ApplicationError) {
 	var userId uuid.UUID
-	var secret, email, facebookId, userIdBuffer string
+	var secret, email, facebookId string
+	var userIdBuffer sql.NullString
 	err := db.QueryRow(`SELECT user_id, email, secret, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&userIdBuffer, &email, &secret, &facebookId)
 	fmt.Println(err)
 	switch {
@@ -56,7 +57,7 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	userId = uuid.Parse(userIdBuffer)
+	userId = uuid.Parse(userIdBuffer.String)
 
 	user := &User{userId, "", username, email, secret, facebookId, nil}
 	_, appErr := user.GetUserProperties()
@@ -89,7 +90,8 @@ func GetUserById(userId uuid.UUID) (*User, *ApplicationError) {
 
 func (user *User) GetTarget() (*User, *ApplicationError) {
 	var targetId uuid.UUID
-	var username, email, facebookId, targetIdBuffer string
+	var username, email, facebookId string
+	var targetIdBuffer sql.NullString
 	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.UserId.String()).Scan(&targetIdBuffer, &username, &email, &facebookId)
 	fmt.Println(err)
 	switch {
@@ -100,7 +102,7 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	targetId = uuid.Parse(targetIdBuffer)
+	targetId = uuid.Parse(targetIdBuffer.String)
 	target := &User{targetId, user.Username, username, email, "", facebookId, nil}
 	_, appErr := target.GetUserProperties()
 	if appErr != nil {
@@ -111,7 +113,7 @@ func (user *User) GetTarget() (*User, *ApplicationError) {
 
 func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
 	var gameId uuid.UUID
-	var gameIdBuffer string
+	var gameIdBuffer sql.NullString
 	err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.UserId.String()).Scan(&gameIdBuffer)
 	switch {
 	case err == sql.ErrNoRows:
@@ -120,7 +122,7 @@ func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	gameId = uuid.Parse(gameIdBuffer)
+	gameId = uuid.Parse(gameIdBuffer.String)
 	return GetGameById(gameId)
 
 }
@@ -153,14 +155,15 @@ func (user *User) GetToken() (string, *ApplicationError) {
 func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *ApplicationError) {
 
 	var oldTargetId, newTargetId uuid.UUID
-	var targetSecret, oldTargetIdBuffer, newTargetIdBuffer string
+	var targetSecret string
+	var oldTargetIdBuffer, newTargetIdBuffer sql.NullString
 	// Grab the target's secret and user_id for comparison/use below
 	err := db.QueryRow(`SELECT secret, user_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2)`, user.UserId.String(), gameId.String()).Scan(&targetSecret, &oldTargetIdBuffer)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	oldTargetId = uuid.Parse(oldTargetIdBuffer)
+	oldTargetId = uuid.Parse(oldTargetIdBuffer.String)
 
 	// Start a transaction so we can rollback if something blows up
 	tx, err := db.Begin()
@@ -196,7 +199,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *Appli
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	newTargetId = uuid.Parse(newTargetIdBuffer)
+	newTargetId = uuid.Parse(newTargetIdBuffer.String)
 	// Delete the row for the dead user's target
 	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = (SELECT target_id from dm_user_targets WHERE user_id = $1 AND game_id = $2)`)
 	_, err = tx.Stmt(removeOldTarget).Exec(user.UserId.String(), gameId.String())

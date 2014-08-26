@@ -92,10 +92,10 @@ func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError
 // If there is no user in the DB with that facebook_id add them
 func getUserFromFacebookId(facebookId, facebookToken string) (*User, *ApplicationError) {
 	var userId uuid.UUID
-	var userIdBuffer string
+	var userIdBuffer sql.NullString
 
 	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebookId).Scan(&userIdBuffer)
-	userId = uuid.Parse(userIdBuffer)
+	userId = uuid.Parse(userIdBuffer.String)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -130,10 +130,10 @@ func getUserFromFacebookId(facebookId, facebookToken string) (*User, *Applicatio
 func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *ApplicationError) {
 
 	var userId uuid.UUID
-	var userIdBuffer string
+	var userIdBuffer sql.NullString
 	// See if we have a user with the given facebook_id/facebook_token in the db
 	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebookId, facebookToken).Scan(&userIdBuffer)
-	userId = uuid.Parse(userIdBuffer)
+	userId = uuid.Parse(userIdBuffer.String)
 
 	fmt.Println(userId)
 	switch {

@@ -2,17 +2,19 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"database/sql"
 )
 
 type Game struct {
-	GameId   uuid.UUID `json:"game_id"`
-	GameName string    `json:"game_name"`
-	Started  bool      `json:"game_started"`
+	GameId      uuid.UUID `json:"game_id"`
+	GameName    string    `json:"game_name"`
+	Started     bool      `json:"game_started"`
+	HasPassword bool      `json:"game_has_password"`
 }
 
 func GetGameList() ([]*Game, *ApplicationError) {
 
-	rows, err := db.Query(`SELECT game_id, game_name, game_started FROM dm_games ORDER BY game_name`)
+	rows, err := db.Query(`SELECT game_id, game_name, game_started, game_password FROM dm_games ORDER BY game_name`)
 
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -21,15 +23,21 @@ func GetGameList() ([]*Game, *ApplicationError) {
 	var games []*Game
 	for rows.Next() {
 		var gameId uuid.UUID
-		var gameIdBuffer string
+		var gameIdBuffer, gamePasswordBuffer sql.NullString
 		var gameName string
 		var gameStarted bool
-		err = rows.Scan(&gameIdBuffer, &gameName, &gameStarted)
+		err = rows.Scan(&gameIdBuffer, &gameName, &gameStarted, &gamePasswordBuffer)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
-		gameId = uuid.Parse(gameIdBuffer)
-		game := &Game{gameId, gameName, gameStarted}
+
+		hasPassword := false
+		if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
+			hasPassword = true
+		}
+
+		gameId = uuid.Parse(gameIdBuffer.String)
+		game := &Game{gameId, gameName, gameStarted, hasPassword}
 		games = append(games, game)
 	}
 	return games, nil
@@ -38,23 +46,37 @@ func GetGameList() ([]*Game, *ApplicationError) {
 func GetGameById(gameId uuid.UUID) (*Game, *ApplicationError) {
 	var gameName string
 	var gameStarted bool
-	err := db.QueryRow(`SELECT game_name, game_started FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&gameName, &gameStarted)
+	var gamePasswordBuffer sql.NullString
+	err := db.QueryRow(`SELECT game_name, game_started, game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&gameName, &gameStarted, &gamePasswordBuffer)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return &Game{gameId, gameName, gameStarted}, nil
+
+	hasPassword := false
+	if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
+		hasPassword = true
+	}
+
+	return &Game{gameId, gameName, gameStarted, hasPassword}, nil
 }
 
 func GetGameByName(gameName string) (*Game, *ApplicationError) {
 	var gameId uuid.UUID
-	var gameIdBuffer string
+	var gameIdBuffer sql.NullString
 	var gameStarted bool
-	err := db.QueryRow(`SELECT game_id, game_started FROM dm_games WHERE game_name = $1`, gameName).Scan(&gameIdBuffer, &gameStarted)
+	var gamePasswordBuffer sql.NullString
+	err := db.QueryRow(`SELECT game_id, game_started, game_password FROM dm_games WHERE game_name = $1`, gameName).Scan(&gameIdBuffer, &gameStarted, &gamePasswordBuffer)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	gameId = uuid.Parse(gameIdBuffer)
-	return &Game{gameId, gameName, gameStarted}, nil
+	gameId = uuid.Parse(gameIdBuffer.String)
+
+	hasPassword := false
+	if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
+		hasPassword = true
+	}
+
+	return &Game{gameId, gameName, gameStarted, hasPassword}, nil
 }
 
 func (game *Game) End() *ApplicationError {
@@ -88,26 +110,61 @@ func (game *Game) Start() *ApplicationError {
 	return nil
 }
 
+func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
+
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1`, user.UserId)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	var games []*Game
+	for rows.Next() {
+		var gameId uuid.UUID
+		var gameIdBuffer, gamePasswordBuffer sql.NullString
+		var gameName string
+		var gameStarted bool
+
+		err = rows.Scan(&gameIdBuffer, &gameName, &gameStarted, &gamePasswordBuffer)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		gameId = uuid.Parse(gameIdBuffer.String)
+
+		hasPassword := false
+		if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
+			hasPassword = true
+		}
+
+		game := &Game{gameId, gameName, gameStarted, hasPassword}
+		games = append(games, game)
+	}
+	return games, nil
+}
+
 func (game *Game) GetLeaderBoard(alive bool) {
 	_, _ = db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as first_name, dm_user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId.String(), alive)
 	return
 }
 
-func NewGame(gameName string, userId uuid.UUID) (*Game, *ApplicationError) {
+func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *ApplicationError) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	gameId := uuid.NewUUID()
+	var gamePasswordBuffer sql.NullString
+	if gamePassword != "" {
+		gamePasswordBuffer.String = gamePassword
+		gamePasswordBuffer.Valid = true
+	}
 
-	newGame, err := db.Prepare(`INSERT INTO dm_games (game_id, game_name) VALUES ($1, $2)`)
+	newGame, err := db.Prepare(`INSERT INTO dm_games (game_id, game_name, game_password) VALUES ($1, $2, $3)`)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName)
+	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, gamePasswordBuffer)
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
@@ -144,7 +201,11 @@ func NewGame(gameName string, userId uuid.UUID) (*Game, *ApplicationError) {
 		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
-	return &Game{gameId, gameName, false}, nil
+	hasPassword := false
+	if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
+		hasPassword = true
+	}
+	return &Game{gameId, gameName, false, hasPassword}, nil
 
 }
 
@@ -178,7 +239,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	var userIdBuffer, firstIdBuffer string
+	var userIdBuffer, firstIdBuffer sql.NullString
 	var userId, prevUserId, firstUserId uuid.UUID
 
 	targets := make(map[string]uuid.UUID) // Map to return targets
@@ -191,7 +252,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	firstUserId = uuid.Parse(firstIdBuffer)
+	firstUserId = uuid.Parse(firstIdBuffer.String)
 	prevUserId = firstUserId
 
 	// Loop through rows
@@ -199,7 +260,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 
 		// Get the user_id from the row
 		err = rows.Scan(&userIdBuffer)
-		userId = uuid.Parse(userIdBuffer)
+		userId = uuid.Parse(userIdBuffer.String)
 		if err != nil {
 			tx.Rollback()
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

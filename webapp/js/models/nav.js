@@ -14,6 +14,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				'Rules'],
 			'right' : [			
 				{
+					'Game' : [
+						'Triwizard Tournament'
+					],
 					'Admin' : [
 						'Users',
 						'Teams',

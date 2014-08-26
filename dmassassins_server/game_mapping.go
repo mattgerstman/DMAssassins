@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"database/sql"
 )
 
 type GameMapping struct {
@@ -15,7 +16,8 @@ type GameMapping struct {
 
 func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) {
 	var teamId uuid.UUID
-	var userRole, teamIdBuffer string
+	var userRole string
+	var teamIdBuffer sql.NullString
 	var kills int
 	var alive bool
 
@@ -23,13 +25,14 @@ func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) 
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	teamId = uuid.Parse(teamIdBuffer)
+	teamId = uuid.Parse(teamIdBuffer.String)
 	return &GameMapping{userId, gameId, teamId, userRole, kills, alive}, nil
 }
 
 func (user *User) JoinGame(gameId uuid.UUID) (*GameMapping, *ApplicationError) {
 	var teamId uuid.UUID
-	var userRole, teamIdBuffer string
+	var userRole string
+	var teamIdBuffer sql.NullString
 	var kills int
 	var alive bool
 
@@ -37,7 +40,7 @@ func (user *User) JoinGame(gameId uuid.UUID) (*GameMapping, *ApplicationError) {
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	teamId = uuid.Parse(teamIdBuffer)
+	teamId = uuid.Parse(teamIdBuffer.String)
 	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
 }
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func postGame(r *http.Request) (*Game, *ApplicationError) {
+func postGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -19,19 +19,22 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	gameName := r.FormValue("game_name")
-	if gameName == "" {
-		msg := "Missing Parameter: game_name."
+	gameId := uuid.Parse(r.FormValue("game_id"))
+	if gameId == nil {
+		msg := "Missing Parameter: game_id."
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	gamePassword := r.FormValue("game_password")
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		return nil, appErr
+	}
 
-	return NewGame(gameName, userId, gamePassword)
+	return user.JoinGame(gameId)
 }
 
-func getGame(r *http.Request) ([]*Game, *ApplicationError) {
+func getGameMapping(r *http.Request) ([]*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		//return nil, appErr
@@ -40,7 +43,7 @@ func getGame(r *http.Request) ([]*Game, *ApplicationError) {
 }
 
 // Handler for /game path
-func GameHandler() http.HandlerFunc {
+func GameMappingHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -48,10 +51,10 @@ func GameHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getGame(r)
+			obj, err = getGameMapping(r)
 
 		case "POST":
-			obj, err = postGame(r)
+			obj, err = postGameMapping(r)
 		default:
 			obj = nil
 			msg := "Not Found"

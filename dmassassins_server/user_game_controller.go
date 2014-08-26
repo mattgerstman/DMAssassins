@@ -3,10 +3,11 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func postGame(r *http.Request) (*Game, *ApplicationError) {
+func postUserGame(r *http.Request) (*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -25,22 +26,28 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-
-	gamePassword := r.FormValue("game_password")
-
-	return NewGame(gameName, userId, gamePassword)
+	return nil, nil
+	//return NewGame(gameName, userId)
 }
 
-func getGame(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
+	appErr := RequiresUser(r)
 	if appErr != nil {
-		//return nil, appErr
+		return nil, appErr
 	}
-	return GetGameList()
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return user.GetGamesForUser()
 }
 
 // Handler for /game path
-func GameHandler() http.HandlerFunc {
+func UserGameHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -48,10 +55,10 @@ func GameHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getGame(r)
+			obj, err = getUserGame(r)
 
 		case "POST":
-			obj, err = postGame(r)
+			obj, err = postUserGame(r)
 		default:
 			obj = nil
 			msg := "Not Found"

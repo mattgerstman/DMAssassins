@@ -4,11 +4,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	app.Routers.Router = app.Routers.BaseRouter.extend({
 		routes: {
-			'' : 'target',
+			'' : 'multigame',
 			'login' : 'login',
 			'logout' : 'logout',
 			'target' : 'target',
 			'my_profile' : 'my_profile',
+			'multigame' : 'multigame',
 			'leaderboard' : 'leaderboard',
 			'rules' : 'rules'
 			
@@ -17,7 +18,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		// Routes that need authentication and if user is not authenticated
 		// gets redirect to login page
 		requresAuth : ['#my_profile', '#target', ''],
-
+		noNav : ['#login', '#multigame', ''],
 		// Routes that should not be accessible if user is authenticated
 		// for example, login, register, forgetpasword ...
 		preventAccessWhenAuth : ['#login'],
@@ -66,6 +67,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Session.clear()
 			this.navigate('login', true)
 		},
+		multigame : function() {
+			app.Running.currentView = new app.Views.SelectGameView();
+			this.render();
+		},
 		target : function() {
 			console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
@@ -93,16 +98,16 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		render : function(){
 			var fragment = Backbone.history.fragment;
-			if ((fragment != 'login') && (app.Running.navView === undefined))
+			if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (app.Running.navView === undefined))
 			{
 				app.Running.navView = new app.Views.NavView();
 				app.Running.navView = app.Running.navView.render();
 			}
-			else if ((Backbone.history.fragment == 'login') && (app.Running.navView !== undefined))
+			else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.navView !== undefined))
 			{
 				app.Running.navView.remove();
 			}
-			if (app.Running.navView !== undefined)
+			if ((app.Running.navView !== undefined) && (this.noNav.indexOf(Backbone.history.fragment) == -1))
 			{
 				console.log(fragment);
 				if (fragment === '')

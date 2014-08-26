@@ -5,8 +5,11 @@ $(function(){
 	app.Running.appView = new app.Views.AppView();
 	app.Running.appView.render();	
 
-	app.Session = new app.Models.Session();
 
+	app.Session = new app.Models.Session();
+	app.Running.GamesModel = new app.Models.Games();
+
+	app.Running.NavModel = new app.Models.Nav();
 	app.Running.ProfileModel = new app.Models.Profile(app.Session.get('user'))
 	app.Running.TargetModel = new app.Models.Target(app.Session.get('target'))
 	app.Running.LeaderboardModel = new app.Models.Leaderboard();
