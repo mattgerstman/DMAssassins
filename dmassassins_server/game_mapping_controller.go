@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -12,34 +13,28 @@ func postGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
 		return nil, appErr
 	}
 
-	r.ParseForm()
-	userId := uuid.Parse(r.FormValue("user_id"))
-	if userId == nil {
-		msg := "Missing Parameter: user_id."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-	gameId := uuid.Parse(r.FormValue("game_id"))
-	if gameId == nil {
-		msg := "Missing Parameter: game_id."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+	gameId := uuid.Parse(vars["game_id"])
+	gamePassword := r.FormValue("game_password")
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	return user.JoinGame(gameId)
+	return user.JoinGame(gameId, gamePassword)
 }
 
-func getGameMapping(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+func getGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
+	appErr := RequiresUser(r)
 	if appErr != nil {
-		//return nil, appErr
+		return nil, appErr
 	}
-	return GetGameList()
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+	gameId := uuid.Parse(vars["game_id"])
+	return GetGameMapping(userId, gameId)
 }
 
 // Handler for /game path

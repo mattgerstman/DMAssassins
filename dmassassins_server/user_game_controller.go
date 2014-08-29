@@ -31,7 +31,7 @@ func postUserGame(r *http.Request) (*Game, *ApplicationError) {
 }
 
 func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresUser(r)
+	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

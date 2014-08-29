@@ -34,8 +34,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		changeUser : function(assassin_id) {
 			this.assassin_id = assassin_id;
-			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.assassin_id + '/target/';			
-			this.fetch();
+			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.assassin_id + '/target/';
 		}
 	})
 })();

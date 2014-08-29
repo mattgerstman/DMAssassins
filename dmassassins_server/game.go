@@ -112,7 +112,7 @@ func (game *Game) Start() *ApplicationError {
 
 func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
 
-	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1`, user.UserId)
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1)`, user.UserId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -183,7 +183,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *Ap
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	setAdmin, err := db.Prepare(`UPDATE dm_users SET user_role = $1 WHERE user_id = $2`)
+	setAdmin, err := db.Prepare(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -191,7 +191,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *Ap
 
 	role := "dm_admin"
 
-	res, err = tx.Stmt(setAdmin).Exec(role, userId.String())
+	res, err = tx.Stmt(setAdmin).Exec(role, userId.String(), gameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

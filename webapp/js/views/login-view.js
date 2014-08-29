@@ -15,7 +15,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	  
 	  initialize : function (){	  
-	  	console.log('yo');
+	  	//console.log('yo');
 		this.model = app.Session;
 	  },
 	  login: function(){

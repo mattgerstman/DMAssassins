@@ -24,8 +24,8 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 	if err != nil {
 		return nil, err
 	}
-
-	return user.GetTarget()
+	gameId := uuid.Parse(vars["game_id"])
+	return user.GetTarget(gameId)
 }
 
 // Kill a target, delete User may eventually be used by an admin

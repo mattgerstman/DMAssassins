@@ -22,7 +22,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  
 	  initialize : function (params){
 	  	this.model = app.Running.ProfileModel;
-	  	console.log(this.model);
+//	  	console.log(this.model);
 
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  

@@ -88,11 +88,11 @@ func GetUserById(userId uuid.UUID) (*User, *ApplicationError) {
 	return user, nil
 }
 
-func (user *User) GetTarget() (*User, *ApplicationError) {
+func (user *User) GetTarget(gameId uuid.UUID) (*User, *ApplicationError) {
 	var targetId uuid.UUID
 	var username, email, facebookId string
 	var targetIdBuffer sql.NullString
-	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1)`, user.UserId.String()).Scan(&targetIdBuffer, &username, &email, &facebookId)
+	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1 AND game_id = $2)`, user.UserId.String(), gameId.String()).Scan(&targetIdBuffer, &username, &email, &facebookId)
 	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
@@ -142,12 +142,12 @@ func (user *User) UpdateToken(facebook_token string) *ApplicationError {
 }
 
 func (user *User) GetToken() (string, *ApplicationError) {
-	var facebookToken string
+	var facebookToken sql.NullString
 	err := db.QueryRow(`SELECT facebook_token FROM dm_users WHERE user_id = $1`, user.UserId.String()).Scan(&facebookToken)
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return facebookToken, nil
+	return facebookToken.String, nil
 
 }
 

@@ -25,11 +25,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		urlRoot: config.WEB_ROOT,
 		initialize: function() {
 			this.idAttribute = 'username'
-			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.get('user_id') + '/';
-		},
-		changeUser : function(username) {
-			this.url = this.urlRoot + app.Session.get('game_id')  + '/users/' + this.get('user_id') + '/';
-			this.fetch();
+			this.url = this.urlRoot  + 'users/' + this.get('user_id') + '/';
 		}
 	})
 })();

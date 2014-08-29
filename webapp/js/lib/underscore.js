@@ -1,4 +1,4 @@
-//     Underscore.js 1.6.0
+//     Underscore.js 1.7.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
@@ -52,9 +52,11 @@
   }
 
   // Current version.
-  _.VERSION = '1.6.0';
+  _.VERSION = '1.7.0';
 
-  // Internal function: creates a callback bound to its context if supplied
+  // Internal function that returns an efficient (for current engines) version
+  // of the passed-in callback, to be repeatedly applied in other Underscore
+  // functions.
   var createCallback = function(func, context, argCount) {
     if (context === void 0) return func;
     switch (argCount == null ? 3 : argCount) {
@@ -76,8 +78,10 @@
     };
   };
 
-  // An internal function to generate lookup iterators.
-  var lookupIterator = function(value, context, argCount) {
+  // A mostly-internal function to generate callbacks that can be applied
+  // to each element in a collection, returning the desired result — either
+  // identity, an arbitrary callback, a property matcher, or a property accessor.
+  _.iteratee = function(value, context, argCount) {
     if (value == null) return _.identity;
     if (_.isFunction(value)) return createCallback(value, context, argCount);
     if (_.isObject(value)) return _.matches(value);
@@ -90,37 +94,34 @@
   // The cornerstone, an `each` implementation, aka `forEach`.
   // Handles raw objects in addition to array-likes. Treats all
   // sparse array-likes as if they were dense.
-  _.each = _.forEach = function(obj, iterator, context) {
+  _.each = _.forEach = function(obj, iteratee, context) {
     if (obj == null) return obj;
-    iterator = createCallback(iterator, context);
+    iteratee = createCallback(iteratee, context);
     var i, length = obj.length;
     if (length === +length) {
       for (i = 0; i < length; i++) {
-        iterator(obj[i], i, obj);
+        iteratee(obj[i], i, obj);
       }
     } else {
       var keys = _.keys(obj);
       for (i = 0, length = keys.length; i < length; i++) {
-        iterator(obj[keys[i]], keys[i], obj);
+        iteratee(obj[keys[i]], keys[i], obj);
       }
     }
     return obj;
   };
 
-  // Return the results of applying the iterator to each element.
-  _.map = _.collect = function(obj, iterator, context) {
+  // Return the results of applying the iteratee to each element.
+  _.map = _.collect = function(obj, iteratee, context) {
     if (obj == null) return [];
-    iterator = lookupIterator(iterator, context);
-    var length = obj.length,
-        currentKey, keys;
-    if (length !== +length) {
-      keys = _.keys(obj);
-      length = keys.length;
-    }
-    var results = Array(length);
+    iteratee = _.iteratee(iteratee, context);
+    var keys = obj.length !== +obj.length && _.keys(obj),
+        length = (keys || obj).length,
+        results = Array(length),
+        currentKey;
     for (var index = 0; index < length; index++) {
       currentKey = keys ? keys[index] : index;
-      results[index] = iterator(obj[currentKey], currentKey, obj);
+      results[index] = iteratee(obj[currentKey], currentKey, obj);
     }
     return results;
   };
@@ -129,43 +130,37 @@
 
   // **Reduce** builds up a single result from a list of values, aka `inject`,
   // or `foldl`.
-  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+  _.reduce = _.foldl = _.inject = function(obj, iteratee, memo, context) {
     if (obj == null) obj = [];
-    iterator = createCallback(iterator, context, 4);
-    var index = 0, length = obj.length,
-        currentKey, keys;
-    if (length !== +length) {
-      keys = _.keys(obj);
-      length = keys.length;
-    }
+    iteratee = createCallback(iteratee, context, 4);
+    var keys = obj.length !== +obj.length && _.keys(obj),
+        length = (keys || obj).length,
+        index = 0, currentKey;
     if (arguments.length < 3) {
-      if (!length) throw TypeError(reduceError);
+      if (!length) throw new TypeError(reduceError);
       memo = obj[keys ? keys[index++] : index++];
     }
     for (; index < length; index++) {
       currentKey = keys ? keys[index] : index;
-      memo = iterator(memo, obj[currentKey], currentKey, obj);
+      memo = iteratee(memo, obj[currentKey], currentKey, obj);
     }
     return memo;
   };
 
   // The right-associative version of reduce, also known as `foldr`.
-  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+  _.reduceRight = _.foldr = function(obj, iteratee, memo, context) {
     if (obj == null) obj = [];
-    iterator = createCallback(iterator, context, 4);
-    var index = obj.length,
-        currentKey, keys;
-    if (index !== +index) {
-      keys = _.keys(obj);
-      index = keys.length;
-    }
+    iteratee = createCallback(iteratee, context, 4);
+    var keys = obj.length !== + obj.length && _.keys(obj),
+        index = (keys || obj).length,
+        currentKey;
     if (arguments.length < 3) {
-      if (!index) throw TypeError(reduceError);
+      if (!index) throw new TypeError(reduceError);
       memo = obj[keys ? keys[--index] : --index];
     }
     while (index--) {
       currentKey = keys ? keys[index] : index;
-      memo = iterator(memo, obj[currentKey], currentKey, obj);
+      memo = iteratee(memo, obj[currentKey], currentKey, obj);
     }
     return memo;
   };
@@ -173,7 +168,7 @@
   // Return the first value which passes a truth test. Aliased as `detect`.
   _.find = _.detect = function(obj, predicate, context) {
     var result;
-    predicate = lookupIterator(predicate, context);
+    predicate = _.iteratee(predicate, context);
     _.some(obj, function(value, index, list) {
       if (predicate(value, index, list)) {
         result = value;
@@ -188,7 +183,7 @@
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
     if (obj == null) return results;
-    predicate = lookupIterator(predicate, context);
+    predicate = _.iteratee(predicate, context);
     _.each(obj, function(value, index, list) {
       if (predicate(value, index, list)) results.push(value);
     });
@@ -197,20 +192,17 @@
 
   // Return all the elements for which a truth test fails.
   _.reject = function(obj, predicate, context) {
-    return _.filter(obj, _.negate(lookupIterator(predicate)), context);
+    return _.filter(obj, _.negate(_.iteratee(predicate)), context);
   };
 
   // Determine whether all of the elements match a truth test.
   // Aliased as `all`.
   _.every = _.all = function(obj, predicate, context) {
     if (obj == null) return true;
-    predicate = lookupIterator(predicate, context);
-    var length = obj.length;
-    var index, currentKey, keys;
-    if (length !== +length) {
-      keys = _.keys(obj);
-      length = keys.length;
-    }
+    predicate = _.iteratee(predicate, context);
+    var keys = obj.length !== +obj.length && _.keys(obj),
+        length = (keys || obj).length,
+        index, currentKey;
     for (index = 0; index < length; index++) {
       currentKey = keys ? keys[index] : index;
       if (!predicate(obj[currentKey], currentKey, obj)) return false;
@@ -222,13 +214,10 @@
   // Aliased as `any`.
   _.some = _.any = function(obj, predicate, context) {
     if (obj == null) return false;
-    predicate = lookupIterator(predicate, context);
-    var length = obj.length;
-    var index, currentKey, keys;
-    if (length !== +length) {
-      keys = _.keys(obj);
-      length = keys.length;
-    }
+    predicate = _.iteratee(predicate, context);
+    var keys = obj.length !== +obj.length && _.keys(obj),
+        length = (keys || obj).length,
+        index, currentKey;
     for (index = 0; index < length; index++) {
       currentKey = keys ? keys[index] : index;
       if (predicate(obj[currentKey], currentKey, obj)) return true;
@@ -271,10 +260,10 @@
   };
 
   // Return the maximum element (or element-based computation).
-  _.max = function(obj, iterator, context) {
+  _.max = function(obj, iteratee, context) {
     var result = -Infinity, lastComputed = -Infinity,
         value, computed;
-    if (iterator == null && obj != null) {
+    if (iteratee == null && obj != null) {
       obj = obj.length === +obj.length ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
         value = obj[i];
@@ -283,9 +272,9 @@
         }
       }
     } else {
-      iterator = lookupIterator(iterator, context);
+      iteratee = _.iteratee(iteratee, context);
       _.each(obj, function(value, index, list) {
-        computed = iterator(value, index, list);
+        computed = iteratee(value, index, list);
         if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
           result = value;
           lastComputed = computed;
@@ -296,10 +285,10 @@
   };
 
   // Return the minimum element (or element-based computation).
-  _.min = function(obj, iterator, context) {
+  _.min = function(obj, iteratee, context) {
     var result = Infinity, lastComputed = Infinity,
         value, computed;
-    if (iterator == null && obj != null) {
+    if (iteratee == null && obj != null) {
       obj = obj.length === +obj.length ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
         value = obj[i];
@@ -308,9 +297,9 @@
         }
       }
     } else {
-      iterator = lookupIterator(iterator, context);
+      iteratee = _.iteratee(iteratee, context);
       _.each(obj, function(value, index, list) {
-        computed = iterator(value, index, list);
+        computed = iteratee(value, index, list);
         if (computed < lastComputed || computed === Infinity && result === Infinity) {
           result = value;
           lastComputed = computed;
@@ -345,14 +334,14 @@
     return _.shuffle(obj).slice(0, Math.max(0, n));
   };
 
-  // Sort the object's values by a criterion produced by an iterator.
-  _.sortBy = function(obj, iterator, context) {
-    iterator = lookupIterator(iterator, context);
+  // Sort the object's values by a criterion produced by an iteratee.
+  _.sortBy = function(obj, iteratee, context) {
+    iteratee = _.iteratee(iteratee, context);
     return _.pluck(_.map(obj, function(value, index, list) {
       return {
         value: value,
         index: index,
-        criteria: iterator(value, index, list)
+        criteria: iteratee(value, index, list)
       };
     }).sort(function(left, right) {
       var a = left.criteria;
@@ -367,11 +356,11 @@
 
   // An internal function used for aggregate "group by" operations.
   var group = function(behavior) {
-    return function(obj, iterator, context) {
+    return function(obj, iteratee, context) {
       var result = {};
-      iterator = lookupIterator(iterator, context);
+      iteratee = _.iteratee(iteratee, context);
       _.each(obj, function(value, index) {
-        var key = iterator(value, index, obj);
+        var key = iteratee(value, index, obj);
         behavior(result, value, key);
       });
       return result;
@@ -399,13 +388,13 @@
 
   // Use a comparator function to figure out the smallest index at which
   // an object should be inserted so as to maintain order. Uses binary search.
-  _.sortedIndex = function(array, obj, iterator, context) {
-    iterator = lookupIterator(iterator, context, 1);
-    var value = iterator(obj);
+  _.sortedIndex = function(array, obj, iteratee, context) {
+    iteratee = _.iteratee(iteratee, context, 1);
+    var value = iteratee(obj);
     var low = 0, high = array.length;
     while (low < high) {
-      var mid = (low + high) >>> 1;
-      if (iterator(array[mid]) < value) low = mid + 1; else high = mid;
+      var mid = low + high >>> 1;
+      if (iteratee(array[mid]) < value) low = mid + 1; else high = mid;
     }
     return low;
   };
@@ -427,7 +416,7 @@
   // Split a collection into two arrays: one whose elements all satisfy the given
   // predicate, and one whose elements all do not satisfy the predicate.
   _.partition = function(obj, predicate, context) {
-    predicate = lookupIterator(predicate, context);
+    predicate = _.iteratee(predicate, context);
     var pass = [], fail = [];
     _.each(obj, function(value, key, obj) {
       (predicate(value, key, obj) ? pass : fail).push(value);
@@ -508,14 +497,14 @@
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
   // Aliased as `unique`.
-  _.uniq = _.unique = function(array, isSorted, iterator, context) {
+  _.uniq = _.unique = function(array, isSorted, iteratee, context) {
     if (array == null) return [];
-    if (_.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
+    if (!_.isBoolean(isSorted)) {
+      context = iteratee;
+      iteratee = isSorted;
       isSorted = false;
     }
-    if (iterator) iterator = lookupIterator(iterator, context);
+    if (iteratee != null) iteratee = _.iteratee(iteratee, context);
     var result = [];
     var seen = [];
     for (var i = 0, length = array.length; i < length; i++) {
@@ -523,8 +512,8 @@
       if (isSorted) {
         if (!i || seen !== value) result.push(value);
         seen = value;
-      } else if (iterator) {
-        var computed = iterator(value, i, array);
+      } else if (iteratee) {
+        var computed = iteratee(value, i, array);
         if (_.indexOf(seen, computed) < 0) {
           seen.push(computed);
           result.push(value);
@@ -574,10 +563,16 @@
     if (array == null) return [];
     var length = _.max(arguments, 'length').length;
     var results = Array(length);
-    for (var i = 0; i < length; i++) {
-      results[i] = _.pluck(arguments, i);
+    while (length-- > 0) {
+      results[length] = _.pluck(arguments, length);
     }
     return results;
+  };
+
+  // Complement of _.zip. Unzip accepts an array of arrays and groups
+  // each array's elements on shared indices
+  _.unzip = function(array) {
+    return _.zip.apply(null, array);
   };
 
   // Converts lists into objects. Pass either a single array of `[key, value]`
@@ -657,7 +652,7 @@
   _.bind = function(func, context) {
     var args, bound;
     if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
-    if (!_.isFunction(func)) throw TypeError('Bind must be called on a function');
+    if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
     args = slice.call(arguments, 2);
     bound = function() {
       if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
@@ -692,7 +687,7 @@
   // defined on an object belong to it.
   _.bindAll = function(obj) {
     var i, length = arguments.length, key;
-    if (length <= 1) throw Error('bindAll must be passed function names');
+    if (length <= 1) throw new Error('bindAll must be passed function names');
     for (i = 1; i < length; i++) {
       key = arguments[i];
       obj[key] = _.bind(obj[key], obj);
@@ -840,8 +835,9 @@
     return function() {
       if (--times > 0) {
         memo = func.apply(this, arguments);
+      } else {
+        func = null;
       }
-      else func = null;
       return memo;
     };
   };
@@ -912,25 +908,27 @@
     for (var i = 1, length = arguments.length; i < length; i++) {
       source = arguments[i];
       for (prop in source) {
-        obj[prop] = source[prop];
+        if (hasOwnProperty.call(source, prop)) {
+            obj[prop] = source[prop];
+        }
       }
     }
     return obj;
   };
 
   // Return a copy of the object only containing the whitelisted properties.
-  _.pick = function(obj, iterator, context) {
+  _.pick = function(obj, iteratee, context) {
     var result = {}, key;
     if (obj == null) return result;
-    if (_.isFunction(iterator)) {
-      iterator = createCallback(iterator, context);
+    if (_.isFunction(iteratee)) {
+      iteratee = createCallback(iteratee, context);
       for (key in obj) {
         var value = obj[key];
-        if (iterator(value, key, obj)) result[key] = value;
+        if (iteratee(value, key, obj)) result[key] = value;
       }
     } else {
       var keys = concat.apply([], slice.call(arguments, 1));
-      obj = Object(obj);
+      obj = new Object(obj);
       for (var i = 0, length = keys.length; i < length; i++) {
         key = keys[i];
         if (key in obj) result[key] = obj[key];
@@ -940,16 +938,16 @@
   };
 
    // Return a copy of the object without the blacklisted properties.
-  _.omit = function(obj, iterator, context) {
-    if (_.isFunction(iterator)) {
-      iterator = _.negate(iterator);
+  _.omit = function(obj, iteratee, context) {
+    if (_.isFunction(iteratee)) {
+      iteratee = _.negate(iteratee);
     } else {
       var keys = _.map(concat.apply([], slice.call(arguments, 1)), String);
-      iterator = function(value, key) {
+      iteratee = function(value, key) {
         return !_.contains(keys, key);
       };
     }
-    return _.pick(obj, iterator, context);
+    return _.pick(obj, iteratee, context);
   };
 
   // Fill in a given object with default properties.
@@ -1012,7 +1010,20 @@
         // of `NaN` are not equivalent.
         return +a === +b;
     }
-    if (typeof a != 'object' || typeof b != 'object') return false;
+
+    var areArrays = className === '[object Array]';
+    if (!areArrays) {
+      if (typeof a != 'object' || typeof b != 'object') return false;
+
+      // Objects with different constructors are not equivalent, but `Object`s or `Array`s
+      // from different frames are.
+      var aCtor = a.constructor, bCtor = b.constructor;
+      if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+                               _.isFunction(bCtor) && bCtor instanceof bCtor)
+                          && ('constructor' in a && 'constructor' in b)) {
+        return false;
+      }
+    }
     // Assume equality for cyclic structures. The algorithm for detecting cyclic
     // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
     var length = aStack.length;
@@ -1021,24 +1032,13 @@
       // unique nested structures.
       if (aStack[length] === a) return bStack[length] === b;
     }
-    // Objects with different constructors are not equivalent, but `Object`s
-    // from different frames are.
-    var aCtor = a.constructor, bCtor = b.constructor;
-    if (
-      aCtor !== bCtor &&
-      // Handle Object.create(x) cases
-      'constructor' in a && 'constructor' in b &&
-      !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
-        _.isFunction(bCtor) && bCtor instanceof bCtor)
-    ) {
-      return false;
-    }
+
     // Add the first object to the stack of traversed objects.
     aStack.push(a);
     bStack.push(b);
     var size, result;
     // Recursively compare objects and arrays.
-    if (className === '[object Array]') {
+    if (areArrays) {
       // Compare array lengths to determine if a deep comparison is necessary.
       size = a.length;
       result = size === b.length;
@@ -1114,10 +1114,10 @@
     };
   }
 
-  // Optimize `isFunction` if appropriate.
+  // Optimize `isFunction` if appropriate. Work around an IE 11 bug.
   if (typeof /./ !== 'function') {
     _.isFunction = function(obj) {
-      return typeof obj === 'function';
+      return typeof obj == 'function' || false;
     };
   }
 
@@ -1146,6 +1146,11 @@
     return obj === void 0;
   };
 
+  // Is a given variable a string representation of a falsey variable?
+  _.isFalseyString = function(obj) {
+    return obj === '' || obj === '0' || obj === 'false' || obj === 'NaN' || obj === 'undefined' || obj == 'null';
+  };
+
   // Shortcut function for checking if an object has a given property directly
   // on itself (in other words, not on a prototype).
   _.has = function(obj, key) {
@@ -1162,11 +1167,12 @@
     return this;
   };
 
-  // Keep the identity function around for default iterators.
+  // Keep the identity function around for default iteratees.
   _.identity = function(value) {
     return value;
   };
 
+  // Predicate-generating functions. Often useful outside of Underscore.
   _.constant = function(value) {
     return function() {
       return value;
@@ -1186,7 +1192,7 @@
     var pairs = _.pairs(attrs), length = pairs.length;
     return function(obj) {
       if (obj == null) return !length;
-      obj = Object(obj);
+      obj = new Object(obj);
       for (var i = 0; i < length; i++) {
         var pair = pairs[i], key = pair[0];
         if (pair[1] !== obj[key] || !(key in obj)) return false;
@@ -1196,10 +1202,10 @@
   };
 
   // Run a function **n** times.
-  _.times = function(n, iterator, context) {
+  _.times = function(n, iteratee, context) {
     var accum = Array(Math.max(0, n));
-    iterator = createCallback(iterator, context, 1);
-    for (var i = 0; i < n; i++) accum[i] = iterator(i);
+    iteratee = createCallback(iteratee, context, 1);
+    for (var i = 0; i < n; i++) accum[i] = iteratee(i);
     return accum;
   };
 
@@ -1294,7 +1300,9 @@
   // JavaScript micro-templating, similar to John Resig's implementation.
   // Underscore templating handles arbitrary delimiters, preserves whitespace,
   // and correctly escapes quotes within interpolated code.
-  _.template = function(text, data, settings) {
+  // NB: `oldSettings` only exists for backwards compatibility.
+  _.template = function(text, settings, oldSettings) {
+    if (!settings && oldSettings) settings = oldSettings;
     settings = _.defaults({}, settings, _.templateSettings);
 
     // Combine delimiters into one regular expression via alternation.
@@ -1332,13 +1340,12 @@
       source + 'return __p;\n';
 
     try {
-      var render = Function(settings.variable || 'obj', '_', source);
+      var render = new Function(settings.variable || 'obj', '_', source);
     } catch (e) {
       e.source = source;
       throw e;
     }
 
-    if (data) return render(data, _);
     var template = function(data) {
       return render.call(this, data, _);
     };
@@ -1364,8 +1371,8 @@
   // underscore functions. Wrapped objects may be chained.
 
   // Helper function to continue chaining intermediate results.
-  var result = function(obj) {
-    return this._chain ? _(obj).chain() : obj;
+  var result = function(instance, obj) {
+    return instance._chain ? _(obj).chain() : obj;
   };
 
   // Add your own custom functions to the Underscore object.
@@ -1375,7 +1382,7 @@
       _.prototype[name] = function() {
         var args = [this._wrapped];
         push.apply(args, arguments);
-        return result.call(this, func.apply(_, args));
+        return result(this, func.apply(_, args));
       };
     });
   };
@@ -1390,7 +1397,7 @@
       var obj = this._wrapped;
       method.apply(obj, arguments);
       if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
-      return result.call(this, obj);
+      return result(this, obj);
     };
   });
 
@@ -1398,7 +1405,7 @@
   _.each(['concat', 'join', 'slice'], function(name) {
     var method = ArrayProto[name];
     _.prototype[name] = function() {
-      return result.call(this, method.apply(this._wrapped, arguments));
+      return result(this, method.apply(this._wrapped, arguments));
     };
   });
 

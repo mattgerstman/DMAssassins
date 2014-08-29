@@ -10,7 +10,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
     
     if (!app.Session.get('authenticated'))
     {
-    	console.log('no facebook response');
+    	//console.log('no facebook response');
 	    return;
     }
     	
@@ -18,7 +18,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
 
-		  console.log('connected');
+		  //console.log('connected');
 		  app.Session.createSession(response, function(){
 //	  		  app.Running.Router.reload();
 				
@@ -26,7 +26,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 
     } else {
-		console.log('else');
+		//console.log('else');
 
 		app.Running.Router.navigate('login')
     }
@@ -73,6 +73,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
     var js, fjs = d.getElementsByTagName(s)[0];
     if (d.getElementById(id)) return;
     js = d.createElement(s); js.id = id;
-    js.src = "//connect.facebook.net/en_US/sdk/debug.js";
+	js.src = "//connect.facebook.net/en_US/sdk.js";
+//    js.src = "//connect.facebook.net/en_US/sdk/debug.js";
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));

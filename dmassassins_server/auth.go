@@ -90,7 +90,6 @@ func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 			err := errors.New("Permission Denied")
 			return NewApplicationError(msg, err, ErrCodePermissionDenied)
 		}
-
 	}
 
 	return nil
@@ -207,6 +206,21 @@ func RequiresSuperAdmin(r *http.Request) (appErr *ApplicationError) {
 	err := errors.New("Permission Denied")
 	return NewApplicationError(msg, err, ErrCodePermissionDenied)
 }
+
+// func validateFacebookToken(facebookToken, token, facebookId string) *ApplicationError {
+// 	if facebookToken == token {
+// 		return nil
+// 	}
+
+// 	apiFacebookId, appErr := GetFacebookIdFromToken(token)
+// 	if appErr != nil {
+// 		return appErr
+// 	}
+// 	if apiFacebookId != facebookId {
+// 		return NewApplicationError("Invalid Token", err, ErrCodeInvalidFBToken)
+// 	}
+
+// }
 
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {
 	userId, token, appErr := GetBasicAuth(r)

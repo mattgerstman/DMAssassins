@@ -110,8 +110,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 				that.set('token', JSON.stringify(response.response.token));
 				that.set('user', JSON.stringify(response.response.user));
-				that.set('game', JSON.stringify(response.response.game));
-
+				that.setGame(response.response.game);
 				that.storeBasicAuth(response.response)
 				
 				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
@@ -130,7 +129,14 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			
 
 		},
-
+		setGame: function(game) {
+			if (!game)
+			{
+				return;
+			}
+			this.set('game_id', game.game_id)
+			this.set('game', JSON.stringify(game));
+		},
 		logout : function(callback){
 			var that = this;
 			$.ajax({
@@ -176,22 +182,19 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		storeBasicAuth : function(data) {
 			
 			var user_id = data.user.user_id;
+			this.set('user_id', user_id)
+
 			var token = data.token
 			var plainKey = user_id + ":" + token
 			var base64Key = Base64.encode(plainKey);
 			this.set('authKey', base64Key);
+			this.setAuthHeader();	
+		},
+		setAuthHeader: function(){
+			var base64Key = this.get('authKey');
 			$.ajaxSetup({
 				headers: { 'Authorization': "Basic " + base64Key }
 			});
-			
-			this.set('user_id', user_id)
-
-			var game_id = null
-			if (data.game != null) {
-				game_id = data.game.game_id
-			}
-			
-			this.set('game_id', game_id)
 
 		}
 	});
