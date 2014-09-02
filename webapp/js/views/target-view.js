@@ -1,4 +1,5 @@
-  // js/views/user-view.js
+// target view
+// js/views/target-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
@@ -15,17 +16,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	      'click .thumbnail': 'showFullImage',
 	      'click #kill' : 'kill'
 	    },
-	  
+	  // loads picture in a modal window
 	  showFullImage: function(){
 		  $('#photoModal').modal()  
 	  },
-	  
+	  // constructor
 	  initialize : function (){
 	  	this.model = app.Running.TargetModel;
 	  	
 		this.listenTo(this.model, 'change', this.render)
 		this.listenTo(this.model, 'fetch', this.render)
 	  },
+	  // kills your target
 	  kill: function() {
 		var secret = this.$el.find('#secret').val();
 		var view = this;

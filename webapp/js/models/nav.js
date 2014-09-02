@@ -6,6 +6,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	'use strict';
 	
 	app.Models.Nav = Backbone.Model.extend({
+		
+		// Nav setup for top bar, currently there is no serverside representation of this
 		defaults: {
 			'left' : [
 				'Target',
@@ -14,7 +16,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				'Rules'],
 			'right' : [			
 				{
-					'Game' : [
+					'Games' : [
 						'Join Another Game'
 					],
 					'Admin' : [

@@ -1,10 +1,13 @@
-// js/models/user.js
+// Model for user profile
+// js/models/profile.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 (function() {
 	'use strict';
 	
 	app.Models.Profile = Backbone.Model.extend({
+
+		// default profile properties
 		defaults: {
 			'user_id' : '',
 			'username' : '',
@@ -18,14 +21,16 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}
 
 		},
-		parse: function(response) {
-                // process response.meta when necessary...
-                return response.response;
+		
+		// parses the api wrapper, automatically called by fetch()
+		parse: function(response) {                
+               return response.response;
         },
-		urlRoot: config.WEB_ROOT,
+        
+        // loaded on initialization
 		initialize: function() {
 			this.idAttribute = 'username'
-			this.url = this.urlRoot  + 'users/' + this.get('user_id') + '/';
+			this.url = config.WEB_ROOT  + 'users/' + this.get('user_id') + '/';
 		}
 	})
 })();

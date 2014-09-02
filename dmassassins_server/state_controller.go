@@ -8,7 +8,10 @@ import (
 )
 
 func postState(r *http.Request) (*Game, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+	var appErr *ApplicationError
+	appErr = nil
+
+	//appErr := RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

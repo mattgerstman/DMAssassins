@@ -1,3 +1,4 @@
+// Rules model, loads rules from the db so that admins can define custom rules per game
 // js/models/user.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};

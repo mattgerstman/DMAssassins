@@ -17,6 +17,7 @@ var db *sql.DB
 const (
 	gamePath               = "/game/"
 	gameStatePath          = "/game/{game_id}/"
+	gameLeaderboardPath    = "/game/{game_id}/leaderboard/"
 	gameUsernamePath       = "/{game_id}/users/{user_id}/"
 	gameUsernameTargetPath = "/{game_id}/users/{user_id}/target/"
 	usernamePath           = "/users/{user_id}/"
@@ -117,6 +118,7 @@ func StartServer() {
 	r.HandleFunc(usernameGamePath, UserGameHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
 	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
+	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 
 	r.HandleFunc("/{path:.*}", CatchAllHandler())
 	http.Handle("/", corsHandler(r))

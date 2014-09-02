@@ -1,4 +1,5 @@
-  // js/views/profile-view.js
+// displays user profile
+// js/views/profile-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
@@ -7,34 +8,28 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
   app.Views.ProfileView = Backbone.View.extend({
 	   
 	     
-	  template: _.template( $('#profile-template').html() ),
-	  tagName: 'div',
+	  	template: _.template( $('#profile-template').html() ),
+	 	tagName: 'div',
 	  
         // The DOM events specific to an item.
 		events: {
-	      'click .thumbnail': 'showFullImage'
-	    },
+		  'click .thumbnail': 'showFullImage'
+		},
 	  
-	  showFullImage: function(){
-	  		console.log('showFullImage');
-		  $('#photoModal').modal()  
-	  },
-	  
-	  initialize : function (params){
-	  	this.model = app.Running.ProfileModel;
-//	  	console.log(this.model);
-
-		  this.listenTo(this.model, 'change', this.render)
-		  this.listenTo(this.model, 'fetch', this.render)		  
-	  },
+		// load profile picture in modal window
+	 	showFullImage: function() {
+		 	$('#photoModal').modal()  
+		},
+		// constructor
+		initialize : function (params){
+			this.model = app.Running.ProfileModel;		
+			this.listenTo(this.model, 'change', this.render)
+			this.listenTo(this.model, 'fetch', this.render)		  
+		},
 	  
 	  render: function(){
-//	  	this.$el.hide()
 		this.$el.html( this.template ( this.model.attributes ) );
-//		this.$el.fadeIn(250);
 		return this;  
-	  }	    
- 
-  })
-  
+	  }	     
+  })  
 })(jQuery);

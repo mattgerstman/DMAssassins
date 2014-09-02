@@ -1,3 +1,4 @@
+// shows the login screen
 // js/views/login-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
@@ -12,16 +13,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  events: {
 	  	'click .btn-facebook' : 'login'
 	  },
-
 	  
 	  initialize : function (){	  
 	  	//console.log('yo');
 		this.model = app.Session;
 	  },
+	  // call the model login function
 	  login: function(){
-  		console.log('login');
+  		//console.log('login');
   		this.model.login()
 	  },
+	  // render the login page
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
 		return this;  

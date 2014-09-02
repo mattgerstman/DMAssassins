@@ -15,7 +15,7 @@ $(function(){
 	app.Running.NavModel = new app.Models.Nav();
 	app.Running.ProfileModel = new app.Models.Profile(app.Session.get('user'))
 	
-	app.Running.TargetModel = new app.Models.Target(app.Session.get('target'))
+	app.Running.TargetModel = new app.Models.Target({assassin_id: user_id})
 	app.Running.LeaderboardModel = new app.Models.Leaderboard();
 	app.Running.RulesModel = new app.Models.Rules();
 	

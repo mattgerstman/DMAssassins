@@ -112,7 +112,7 @@ func (game *Game) Start() *ApplicationError {
 
 func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
 
-	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1)`, user.UserId.String())
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -138,11 +138,6 @@ func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
 		games = append(games, game)
 	}
 	return games, nil
-}
-
-func (game *Game) GetLeaderBoard(alive bool) {
-	_, _ = db.Query(`SELECT map.user_id, map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as first_name, dm_user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND game_id = $1 AND alive = $2 ORDER BY kills`, game.GameId.String(), alive)
-	return
 }
 
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *ApplicationError) {
@@ -233,7 +228,7 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_users WHERE game_id = $1 ORDER BY random()`, game.GameId.String())
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -287,13 +282,13 @@ func (game *Game) AssignTargets() (map[string]uuid.UUID, *ApplicationError) {
 	}
 
 	// Prepare the statement to have the last user target the first
-	lastTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id) VALUES ($1, $2, $3)`)
+	lastTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to have the last user target the first
-	_, err = tx.Stmt(lastTarget).Exec(userId, firstUserId.String(), game.GameId.String())
+	_, err = tx.Stmt(lastTarget).Exec(userId.String(), firstUserId.String(), game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

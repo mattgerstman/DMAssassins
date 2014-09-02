@@ -1,4 +1,5 @@
-  // js/views/profile-view.js
+// displays rules for a game
+// js/views/profile-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
@@ -18,9 +19,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  
 	  render: function(){
-//	  	this.$el.hide()
 		this.$el.html( this.template ( this.model.attributes ) );
-//		this.$el.fadeIn(250);
 		return this;  
 	  }	    
  

@@ -1,4 +1,5 @@
-  // js/views/profile-view.js
+// shows the list of high scores
+// js/views/leaderboard-view.js
 
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
@@ -10,6 +11,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  template: _.template( $('#leaderboard-template').html() ),
 	  tagName: 'div',
 	  
+	  // constructor
 	  initialize : function (params){
 	  	this.model = app.Running.LeaderboardModel;
 
@@ -17,10 +19,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },
 	  
+	  // renderer
 	  render: function(){
-//	  	this.$el.hide()
 		this.$el.html( this.template ( this.model.attributes ) );
-//		this.$el.fadeIn(250);
 		return this;  
 	  }	    
  

@@ -1,8 +1,12 @@
+// Handles all the URL *Magic*
+// js/routers/router.js
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 (function(){
 
 	app.Routers.Router = app.Routers.BaseRouter.extend({
+	
+		// All the routes
 		routes: {
 			'' : 'target',
 			'login' : 'login',
@@ -12,38 +16,60 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			'multigame' : 'multigame',
 			'leaderboard' : 'leaderboard',
 			'join_game' : 'join_game',
-			'rules' : 'rules'
+			'rules' : 'rules',
+			'switch_game' : 'switch_game'
 			
 		},
 		
-		// Routes that need authentication and if user is not authenticated
-		// gets redirect to login page
+		// routes that require we have a game that has been started
 		requiresGameStarted : ['#target', '#', ''],
+		
+		// routes that require just authentication
 		requiresJustAuth : ['#multigame'],
-		requiresGameAndAuth : ['#my_profile', '#join_game'],
+		
+		// routes that require we have a game and we're authenticated
+		requiresGameAndAuth : ['#my_profile', '#join_game', '#leaderboard', '#rules'],
+		
+		// routes that should hide the nav bar
 		noNav : ['login', 'multigame'],
-		// Routes that should not be accessible if user is authenticated
-		// for example, login, register, forgetpasword ...
+		
+		// routes that a logged in user can't access
 		preventAccessWhenAuth : ['#login'],
+		
+		// place to redirect users for requiresGameAndAuth
 		redirectWithoutGame : '#multigame',
+		
+		// place to redirect users who aren't logged in
 		redirectWithoutAuth : '#login',
+		
+		// place to redirect logged in users who don't have a started game
 		redirectWithoutGameStarted : 'my_profile',
 		before : function(params, next){
-			//Checking if user is authenticated or not
-			//then check the path if the path requires authentication 
+
+			// is the user authenticated
 			var isAuth = app.Session.get('authenticated');
 			var path = Backbone.history.location.hash;
-			//console.log('path');
-			//console.log(path);
+			
+			// do we need a game and authentication
 			var needGameAndAuth = _.contains(this.requiresGameAndAuth, path);
+			
+			// do we need authentication
 			var needAuth 		= _.contains(this.requiresJustAuth, path);
 
+			// should we prevent this page if authorized
 			var cancelAccess 	= _.contains(this.preventAccessWhenAuth, path);
+			
+			// does this route need a running game
 			var needStarted 	= _.contains(this.requiresGameStarted, path);
-			var isGame   		= app.Session.get('game_id') !== null;
-			var isStarted 		= app.Session.get('game') && (app.Session.get('game').game_started === 'true');
+			
+			// is there a game
+			var isGame   		= app.Session.get('game') !== null;
+			
+			// is the game started
+			var isStarted 		= app.Session.get('game') && (app.Session.get('game').game_started);
 
 /*
+			Variables I use when shit's not routing properly
 			console.log('path:', path);
 			console.log('needGameAndAuth: ', needGameAndAuth);
 			console.log('isGame: ', isGame);
@@ -51,58 +77,51 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			console.log('needAuth: ', needAuth);
 			console.log('isAuth: ', isAuth);
 			console.log('cancelAccess: ', cancelAccess);
-*/
+/**/
 
-
-
+			// Do we need authentication
 			if((needAuth || needGameAndAuth) && !isAuth){
-				//If user gets redirect to login because wanted to access
-				// to a route that requires login, save the path in session
-				// to redirect the user back to path after successful login
-				app.Session.set('redirectFrom', path);
+				app.Session.set('redirect_from', path);
 				Backbone.history.navigate(this.redirectWithoutAuth, { trigger : true });
 			}
+			// do we need authentication and a game
 			else if (needGameAndAuth && !isGame) {
 				Backbone.history.navigate(this.redirectWithoutGame, { trigger : true });
 			}
+			// do we need a game and is it started
 			else if (needStarted && !isStarted) {
 				Backbone.history.navigate(this.redirectWithoutGameStarted, { trigger : true });
 			}
-			else if(isAuth && cancelAccess){
-				//User is authenticated and tries to go to login, register ...
-				// so redirect the user to home page
-				Backbone.history.navigate('', { trigger : true });
-			}else{
+			// are they logged in and trying to hit the login page
+			else if(isAuth && cancelAccess) {
+				Backbone.history.navigate('', { trigger : true });			
+			// nothing is wrong! let them pass.	
+			} else {
 				//No problem handle the route
 				return next();
 			}			
 		},
-
+		// called after we're done routing, unused but build into the baserouter so we're leaving it
 		after : function(){
 			//empty
 		},
-		initialize: function() {
-			if (app.Session.get('authenticated') !== true)
-			{
-				//console.log('not authenticated');
-				//this.navigate('login', true)
-			}
-		},	
+		// login route
 		login : function() {
-			
 			app.Running.currentView = new app.Views.LoginView();
-			this.render();
-				
+			this.render();				
 		},
+		// logout route
 		logout : function() {
 			app.Session.clear()
 			this.navigate('login', true)
 		},
+		// game selection route
 		multigame : function() {
 			app.Running.currentView = new app.Views.SelectGameView();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		// target route
 		target : function() {
 			//console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
@@ -110,31 +129,42 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		// join a new game route
 		join_game: function() {
 			app.Running.currentView = new app.Views.SelectGameView();
 			this.render();
-			app.Running.currentView.load_join_game('target');				
+			app.Running.NavGameView.showJoinGame();
+			app.Running.currentView.loadJoinGame('target');				
 		},
+		// profile route
 		my_profile : function() {
 			//console.log('profile');			
 			app.Running.currentView = new app.Views.ProfileView();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		// leaderboard route
 		leaderboard: function(){
 			//console.log('leaderboard');			
 			app.Running.currentView = new app.Views.LeaderboardView();
+			app.Running.currentView.model.loadGame();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		// rules route
 		rules : function() {
 			//console.log('rules');			
 			app.Running.currentView = new app.Views.RulesView();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		switch_game: function() {
+		  	history.back();
+		},
+		// render function, also determines weather or not to render the nav
 		render : function(){
 			var fragment = Backbone.history.fragment;
+			// if it's a view with a nav and we don't have one, make one
 			if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (!app.Running.navView))
 			{
 				app.Running.navView = new app.Views.NavView();
@@ -143,11 +173,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				app.Running.NavGameView.model.fetch();
 				app.Running.NavGameView.render();
 			}
+			// if it explicitely shouldn't have a nav and we have one kill it
 			else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.navView))
 			{
 				app.Running.navView.$el.html('');
 				app.Running.navView = null;
 			}
+			// if we have a nav and highlight the nav item
 			if ((app.Running.navView) && (this.noNav.indexOf(Backbone.history.fragment) == -1))
 			{
 				//console.log(fragment);
@@ -156,20 +188,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 					
 				app.Running.navView.highlight('#nav_'+fragment)	
 			}
+			
+			// render our page within the app
 			app.Running.appView.renderPage(app.Running.currentView)			
-		},
-		fetchError : function(error){
-			//If during fetching data from server, session expired
-			// and server send 401, call getAuth to get the new CSRF
-			// and reset the session settings and then redirect the user
-			// to login
-			if(error.status === 401){
-				Session.getAuth(function(){
-					Backbone.history.navigate('login', { trigger : true });
-				});
-			}
-		}
-		
+		}		
 	})
 
 })()

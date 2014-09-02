@@ -210,7 +210,15 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *Appli
 
 	// Set up the Assassin's new target
 	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2 AND game_id = $3`)
-	_, err = tx.Stmt(setNewTarget).Exec(newTargetId, user.UserId.String(), gameId.String())
+	_, err = tx.Stmt(setNewTarget).Exec(newTargetId.String(), user.UserId.String(), gameId.String())
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Update kill count
+	updateKills, err := db.Prepare(`UPDATE dm_user_game_mapping SET kills = kills + 1 WHERE user_id = $1 AND game_id = $2`)
+	_, err = tx.Stmt(updateKills).Exec(user.UserId.String(), gameId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

@@ -64,13 +64,13 @@
 								_.each(item, function(dropdown_items, dropdown_title) {
 					%>
 								
-								<li class="nav_item dropdown_parent">
+								<li class="nav_item dropdown_parent" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_parent">
 									<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header"><%=dropdown_title%></span><span class="caret"></span></a>
 									<ul class="dropdown-menu" role="menu" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_dropdown">
 					<%
 										_.each(dropdown_items, function(dropdown_item) {
 					%>
-											<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=#<%=dropdown_item.toLowerCase().replace(' ','_')%> ><%=dropdown_item%></a></li>
+											<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" dropdown="<%=dropdown_title.toLowerCase().replace(' ','_')%>" class="nav_item dropdown_item"><a href=#<%=dropdown_item.toLowerCase().replace(' ','_')%> ><%=dropdown_item%></a></li>
 					<%	
 										})
 					%>	
@@ -106,11 +106,12 @@
 		<%
 		_.each(games, function(game) {
 		%>
-			<li id="nav_<%=game.game_id %>" class="nav_item"><a game_id="<%=game.game_id %>" class="switch_game" href="#switch_game"><%=game.game_name%></a></li>
+			<li id="nav_<%=game.game_id %>" class="nav_item dropdown_item" dropdown="games"><a game_id="<%=game.game_id %>" class="switch_game" href="#switch_game"><%=game.game_name%></a></li>
 		<%
 		})
 		%>
-		<li id="nav_join_game" class="nav_item"><a href="#join_game">Join Another Game</a></li>
+		<li id="nav_create_game" class="nav_item dropdown_item" dropdown="games"><a href="#create_game">Create New Game</a></li>
+		<li id="nav_join_game" class="nav_item dropdown_item" dropdown="games"><a href="#join_game">Join New Game</a></li>
 	</script>
 
 	<script type="text/template" id="target-template">
@@ -126,9 +127,6 @@
 					<div class="row">
 					 	<label>Facebook:</label> <%= properties.facebook %>
 					</div>
-					<!--div class="row">
-					 	<label>Twitter:</label> <%= properties.twitter %>
-					</div-->
 				</div>
 				<div class="row">
 					<a class="thumbnail">
@@ -164,9 +162,6 @@
 					<div class="row">
 					 	<label>Facebook:</label> <%= properties.facebook %>
 					</div>
-					<!--div class="row">
-					 	<label>Twitter:</label> <%= properties.twitter %>
-					</div-->
 				</div>
 				<div class="row">
 					<a class="thumbnail">

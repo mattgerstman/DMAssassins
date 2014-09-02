@@ -1,3 +1,6 @@
+// Manages all local storage information and helps keep various models in sync
+// js/models/session
+
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 (function(){
@@ -7,45 +10,38 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		url : config.WEB_ROOT+'session/',
 
 		initialize : function(){
-			//Ajax Request Configuration
-			//To Set The CSRF Token To Request Header
-/*
-			$.ajaxSetup({
-				headers : {
-					'X-CSRF-Token' : csrf
-				}
-			});
-*/
-
-			//Check for sessionStorage support
+		
+			// Check for localstorage support
 			if(Storage && sessionStorage){
 				this.supportStorage = true;
 			}
 		},
 
-		get : function(key){
-			if(this.supportStorage){
+		// returns data stored in the session
+		get : function(key) {
+			if (this.supportStorage) {
 				var data = sessionStorage.getItem(key);
 				if(data && data[0] === '{'){
 					return JSON.parse(data);
-				}else{
+				} else {
 					return data;
 				}
-			}else{
+			} else {
 				return Backbone.Model.prototype.get.call(this, key);
 			}
 		},
 
-
-		set : function(key, value){
-			if(this.supportStorage){
+		// sets a session variable
+		set : function(key, value) {
+			if(this.supportStorage) {
 				sessionStorage.setItem(key, value);
-			}else{
+			} else {
 				Backbone.Model.prototype.set.call(this, key, value);
 			}
 			return this;
 		},
 
+		// unsets a session 
 		unset : function(key){
 			if(this.supportStorage){
 				sessionStorage.removeItem(key);
@@ -55,13 +51,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			return this;	
 		},
 
+		// clears all data from the session
 		clear : function(){
-			if(this.supportStorage){
+			if(this.supportStorage) {
 				sessionStorage.clear();  
-			}else{
+			} else {
 				Backbone.Model.prototype.clear(this);
 			}
 		},
+		
+		// calls the facebook login function and handles it appropriately
+		// if they are logged into facebook and connected to the app a session is created automatically
+		// otherwise a popup will appear and handle the session situation
 		login: function(){
 
 			var parent = this;
@@ -69,23 +70,25 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			FB.getLoginStatus(function(response){
 				  if (response.status === 'connected') {
 				    // Logged into your app and Facebook.
-
-					console.log(response);
+					//console.log(response);
 					parent.createSession(response);
-					
-//					var authKey = Base64.encode(userID+':'+token);
 
 
 				  } else if (response.status === 'not_authorized') {
+
 				    // The person is logged into Facebook, but not your app.
 				    FB.login(function(response){
     					parent.createSession(response);
+    					
+    					// scope are the facebook permissions we're requesting 
 				    }, {scope:'public_profile,email,user_friends,user_photos'})
 				    
 				  } else {
 
 					    FB.login(function(response){
 	    					parent.createSession(response);
+	    					
+	    					// scope are the facebook permissions we're requesting
 					    }, {scope:'public_profile,email,user_friends,user_photos'})
 
 				    // The person is not logged into Facebook, so we're not sure if
@@ -94,49 +97,61 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			})
 
 		},
-		createSession: function(response, callback) {
+		
+		// takes a facebook response and creates a session from it
+		createSession: function(response) {
 			var data =  {
 				'facebook_id': response.authResponse.userID,
 				'facebook_token' : response.authResponse.accessToken
 			}
+			
 			var that = this;
+			
+			// performs the ajax request to the server to get session data
 			var login = $.ajax({
 				url : this.url,
 				data : data,
 				type : 'POST'
 			});
+			
+			// after the ajax request run this function
 			login.done(function(response){
+
+				// store a goto boolean to determine if we're authenticated
 				that.set('authenticated', true);
 
-				that.set('token', JSON.stringify(response.response.token));
+				// store the user in a session, this is game agnostic so it especially fits here
 				that.set('user', JSON.stringify(response.response.user));
-				that.setGame(response.response.game);
+				
+				// store the current game in the session
+				that.set('game', JSON.stringify(response.response.game))
+				
+				// store the basic auth token in the session in case we need to reload it on app launch
 				that.storeBasicAuth(response.response)
 				
+				// load the profile model for the user
 				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
 				
-				if(that.get('redirectFrom')){
-					var path = that.get('redirectFrom');
-					that.unset('redirectFrom');
+				// if the user attempted to come in from a path send them there now
+				if (that.get('redirect_from')) {
+					var path = that.get('redirect_from');
+					that.unset('redirect_from');
 					Backbone.history.navigate(path, { trigger : true });
-				}else{
+					
+				// otherwise take them to the index
+				} else {
 					Backbone.history.navigate('', { trigger : true });
 				}
 			});
+			
+			// if theres a login error direct them to the login screen
 			login.fail(function(){
 				Backbone.history.navigate('login', { trigger : true });
 			});
 			
 
 		},
-		setGame: function(game) {
-			if (!game)
-			{
-				return;
-			}
-			this.set('game_id', game.game_id)
-			this.set('game', JSON.stringify(game));
-		},
+		// clear all the session data and post it to the server
 		logout : function(callback){
 			var that = this;
 			$.ajax({
@@ -153,32 +168,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				callback();
 			});
 		},
-
-
-		getAuth : function(callback){
-
-			this.login()
-/*
-			var that = this;
-			var Session = this.fetch();
-			
-			
-
-			Session.done(function(response){
-				that.set('authenticated', true);
-				that.set('user', JSON.stringify(response.user));
-			});
-
-			Session.fail(function(response){
-				response = JSON.parse(response.responseText);
-				that.clear();
-				csrf = response.csrf !== csrf ? response.csrf : csrf;
-				that.initialize();
-			});
-*/
-
-			Session.always(callback);
-		},
+		
+		// stores all the basic auth variables in the session
 		storeBasicAuth : function(data) {
 			
 			var user_id = data.user.user_id;
@@ -190,6 +181,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			this.set('authKey', base64Key);
 			this.setAuthHeader();	
 		},
+		
+		// sets the Basic Auth header for all ajax requests
 		setAuthHeader: function(){
 			var base64Key = this.get('authKey');
 			$.ajaxSetup({
