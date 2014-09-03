@@ -8,16 +8,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	
 		// All the routes
 		routes: {
-			'' : 'target',
-			'login' : 'login',
-			'logout' : 'logout',
-			'target' : 'target',
-			'my_profile' : 'my_profile',
-			'multigame' : 'multigame',
-			'leaderboard' : 'leaderboard',
-			'join_game' : 'join_game',
-			'rules' : 'rules',
-			'switch_game' : 'switch_game'
+			'' 				: 'target',
+			'login' 		: 'login',
+			'logout' 		: 'logout',
+			'target' 		: 'target',
+			'my_profile' 	: 'my_profile',
+			'multigame' 	: 'multigame',
+			'leaderboard' 	: 'leaderboard',
+			'create_game'	: 'create_game',
+			'join_game' 	: 'join_game',
+			'rules' 		: 'rules',
+			'switch_game' 	: 'switch_game'
 			
 		},
 		
@@ -129,12 +130,19 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		// create a new game route
+		create_game: function() {
+			app.Running.currentView = new app.Views.SelectGameView();
+			this.render();
+			app.Running.NavGameView.showCreateGame();
+			app.Running.currentView.showCreateGame();		
+		},
 		// join a new game route
 		join_game: function() {
 			app.Running.currentView = new app.Views.SelectGameView();
 			this.render();
 			app.Running.NavGameView.showJoinGame();
-			app.Running.currentView.loadJoinGame('target');				
+			app.Running.currentView.loadJoinGame();				
 		},
 		// profile route
 		my_profile : function() {

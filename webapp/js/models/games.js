@@ -74,6 +74,11 @@ var app = app || {
 		// sets the model to only get games for a particular user
 		loadUser: function(user_id) {
 			this.user_id = user_id;
+			if (user_id === null)
+			{
+				this.url = config.WEB_ROOT + 'game/';
+				return;
+			}
 			this.url = config.WEB_ROOT + 'users/' + this.user_id + '/game/';
 		}
 	})

@@ -31,22 +31,24 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  // shows the create game subview
 	  showCreateGame: function(){
+	  		$('.logo').addClass('hide');
 			$('#create-or-join').addClass('hide');
 			$('#create-game').addClass('select-game-active');
 			$('#create-game').removeClass('hide');
 	  },
 	  // shows the join game subview
 	  showJoinGame: function(){
+			$('.logo').addClass('hide');
 			$('#create-or-join').addClass('hide');
 			$('#join-game').addClass('select-game-active');
 			$('#join-game').removeClass('hide');
 	  },
 	  // cancels the game creation/selection
 	  goBack: function(){
-		  if (this.loaded_from != 'login')
+		  if (app.Session.get('authenticated'))
 		  {
 		  		// im sure theres a back function, find it
-			  Backbone.history.navigate(this.loaded_from, { trigger : true });
+			  Backbone.history.back;
 			  return;
 		  }
 		  $('.select-game-active').addClass('hide').removeClass('select-game-active');
@@ -64,9 +66,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			this.model.create(name, password);
 	  },
 	  // loads the join game later view
-	  loadJoinGame: function(loaded_from){
-	  	this.loaded_from = loaded_from;
-	  	this.model.set('user_id', null);
+	  loadJoinGame: function(){
+	  	this.model.loadUser(null);
+	  	this.model.fetch();
 		this.showJoinGame();	
 
 	  },

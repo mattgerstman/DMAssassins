@@ -36,9 +36,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  showJoinGame: function() {
 		  var game_id = app.Session.get('game').game_id;
 		  $('#nav_'+game_id).removeClass('hide');
-//		  $('#games_header').text('Create or Join Game');
+		  $('#games_header').text('Join New Game');
 		  
 	  },
+	  
+	  	  
+	  showCreateGame: function() {
+		  var game_id = app.Session.get('game').game_id;
+		  $('#nav_'+game_id).removeClass('hide');
+		  $('#games_header').text('Create New Game');
+		  
+	  },	  
 	  // select a game from the dropdown
 	  select: function(event){
 	  	var game_id = $(event.target).attr('game_id');	
