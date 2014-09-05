@@ -42,7 +42,6 @@ func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
 	if appErr != nil {
 		return nil, appErr
 	}
-
 	return user.GetGamesForUser()
 }
 

@@ -69,18 +69,6 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (*GameMapping,
 	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
 }
 
-func (gameMapping *GameMapping) JoinTeam(teamId uuid.UUID) *ApplicationError {
-
-	res, err := db.Exec(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE user_id = $2 AND game_id = $3`, teamId.String(), gameMapping.UserId.String(), gameMapping.GameId)
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
-	}
-	return nil
-}
 
 func (gameMapping *GameMapping) ChangeRole(role string) *ApplicationError {
 

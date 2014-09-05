@@ -9,11 +9,10 @@ var app = app || {
 };
 (function() {
 	'use strict';
-	app.Models.Games = Backbone.Model.extend({
+	app.Models.SelectGames = Backbone.Model.extend({
 	
 		// default properties with a fake game
 		defaults: {
-			user_id: null,
 			games: [{
 				game_id: '',
 				game_name: 'Triwizard Tournament',
@@ -24,7 +23,7 @@ var app = app || {
 		
 		// handle on initiliazation
 		initialize: function() {
-			this.url = config.WEB_ROOT + 'game/' + this.user_id
+			this.url = config.WEB_ROOT + 'game/'
 		},
 		
 		// automatically called by fetch() to place a wrapper around the response
@@ -70,16 +69,8 @@ var app = app || {
 				that.trigger('game-change');
 			})
 		},
-		
-		// sets the model to only get games for a particular user
-		loadUser: function(user_id) {
-			this.user_id = user_id;
-			if (user_id === null)
-			{
-				this.url = config.WEB_ROOT + 'game/';
-				return;
-			}
-			this.url = config.WEB_ROOT + 'users/' + this.user_id + '/game/';
+		setUser: function(user_id) {
+			this.url = config.WEB_ROOT + 'users/' + user_id + '/game/reverse/';
 		}
 	})
 })();

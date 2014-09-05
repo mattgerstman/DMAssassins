@@ -15,15 +15,20 @@ import (
 var db *sql.DB
 
 const (
-	gamePath               = "/game/"
-	gameStatePath          = "/game/{game_id}/"
-	gameLeaderboardPath    = "/game/{game_id}/leaderboard/"
-	gameUsernamePath       = "/{game_id}/users/{user_id}/"
-	gameUsernameTargetPath = "/{game_id}/users/{user_id}/target/"
-	usernamePath           = "/users/{user_id}/"
-	usernameGamePath       = "/users/{user_id}/game/"
-	sessionPath            = "/session/"
-	homePath               = "/"
+	gamePath                = "/game/"
+	gameStatePath           = "/game/{game_id}/"
+	gameLeaderboardPath     = "/game/{game_id}/leaderboard/"
+	gameUsernamePath        = "/{game_id}/users/{user_id}/"
+	gameUsernameTargetPath  = "/{game_id}/users/{user_id}/target/"
+	gameTeamPath            = "/game/{game_id}/team/"
+	teamIdPath              = "/team/{team_id}"
+	usernamePath            = "/users/{user_id}/"
+	usernameGamePath        = "/users/{user_id}/game/"
+	usernameGameReversePath = "/users/{user_id}/game/reverse/"
+	usernameTeamPath        = "/users/{user_id}/team/"
+
+	sessionPath = "/session/"
+	homePath    = "/"
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -116,9 +121,14 @@ func StartServer() {
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
 	r.HandleFunc(usernameGamePath, UserGameHandler()).Methods("POST", "GET", "DELETE")
+	r.HandleFunc(usernameGameReversePath, UserGameReverseHandler()).Methods("GET")
 	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
 	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
+
+	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
+	r.HandleFunc(teamIdPath, TeamIdHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(usernameTeamPath, UserTeamHandler()).Methods("GET", "POST", "DELETE")
 
 	r.HandleFunc("/{path:.*}", CatchAllHandler())
 	http.Handle("/", corsHandler(r))

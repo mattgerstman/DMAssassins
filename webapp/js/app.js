@@ -1,7 +1,10 @@
 var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 $(function(){
-	'use strict';	
+	'use strict';
+	
+
+		
 	app.Running.appView = new app.Views.AppView();
 	app.Running.appView.render();	
 
@@ -9,8 +12,10 @@ $(function(){
 	app.Session = new app.Models.Session();
 	app.Session.setAuthHeader();
 	
+	app.Running.SelectGamesModel = new app.Models.SelectGames();
+
 	var user_id = app.Session.get('user_id');
-	app.Running.GamesModel = new app.Models.Games({user_id:user_id});
+	app.Running.UserGamesModel = new app.Models.UserGames({user_id: user_id});	
 
 	app.Running.NavModel = new app.Models.Nav();
 	app.Running.ProfileModel = new app.Models.Profile(app.Session.get('user'))

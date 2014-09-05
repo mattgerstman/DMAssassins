@@ -29,6 +29,8 @@ const (
 	ErrCodeInvalidEmail    = 40401
 	ErrCodeInvalidUserId   = 40402
 	ErrCodeInvalidUsername = 40403
+	ErrCodeInvalidTeamId   = 40404
+	ErrCodeInvalidGameId   = 40405
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420
@@ -77,7 +79,7 @@ func WereRowsAffected(res sql.Result) *ApplicationError {
 	}
 
 	if rowsAffected == 0 {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
 	}
 	return nil
 }

@@ -116,6 +116,19 @@ func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	return parseGameRows(rows)
+}
+
+func (user *User) GetNewGamesForUser() ([]*Game, *ApplicationError) {
+
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id NOT IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return parseGameRows(rows)
+}
+
+func parseGameRows(rows *sql.Rows) ([]*Game, *ApplicationError) {
 	var games []*Game
 	for rows.Next() {
 		var gameId uuid.UUID
@@ -123,7 +136,7 @@ func (user *User) GetGamesForUser() ([]*Game, *ApplicationError) {
 		var gameName string
 		var gameStarted bool
 
-		err = rows.Scan(&gameIdBuffer, &gameName, &gameStarted, &gamePasswordBuffer)
+		err := rows.Scan(&gameIdBuffer, &gameName, &gameStarted, &gamePasswordBuffer)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}

@@ -24,7 +24,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  loaded_from : 'login',
 	  // constructor
 	  initialize : function (params){
-		  this.model = app.Running.GamesModel;
+		  this.model = app.Running.SelectGamesModel;
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)	
 		  this.listenTo(this.model, 'finish_set_game', this.finish)	  
@@ -48,8 +48,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  if (app.Session.get('authenticated'))
 		  {
 		  		// im sure theres a back function, find it
-			  Backbone.history.back;
-			  return;
+		  		history.back();
+		  		return;
 		  }
 		  $('.select-game-active').addClass('hide').removeClass('select-game-active');
 		  $('#create-or-join').removeClass('hide');
@@ -66,10 +66,15 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			this.model.create(name, password);
 	  },
 	  // loads the join game later view
-	  loadJoinGame: function(){
-	  	this.model.loadUser(null);
-	  	this.model.fetch();
-		this.showJoinGame();	
+	  loadJoinGame: function(user_id){
+	  	var that = this;
+	  	that.showJoinGame();
+	  	this.model.setUser(user_id);
+	  	this.model.fetch({
+	  		success: function(){
+				that.showJoinGame();  	
+	  		}
+	  	});
 
 	  },
 	  // posts to the join game model
@@ -82,6 +87,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  // finish up and navigate to your profile
 	  finish: function(){
+	  		app.Running.UserGamesModel.switchGame(app.Session.get('game').game_id);
 			Backbone.history.navigate('my_profile', { trigger : true });  
 	  },
 	  // toggles the password entry field on create game

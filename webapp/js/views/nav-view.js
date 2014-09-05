@@ -21,7 +21,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  initialize : function (){	  
 	  	  this.model = app.Running.NavModel;
 		  this.listenTo(this.model, 'change', this.render)
-		  this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
+		  this.listenTo(app.Running.UserGamesModel, 'game-change', this.handleTarget)
 	  },
 	  
 	  // if we don't have a target hide that view
@@ -54,12 +54,22 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  
 	  handleTarget: function(){
-		if (!app.Running.TargetModel.get('user_id'))
-		{
-			  this.hideTarget();
-			  return;
-		}
-		this.showTarget();
+	  	var that = this;
+	  
+	  	app.Running.TargetModel.changeGame(app.Session.get('game').game_id);		
+		app.Running.TargetModel.fetch({
+			success: function(model, error) {
+				that.showTarget();				
+			},
+			error: function(model, error) {
+				if (error.status == 404){
+					app.Running.TargetModel.set('user_id', null);					
+				}
+				that.hideTarget();
+			}
+		
+		});
+				
 	  },
 	  
 	  // hides the target nav item

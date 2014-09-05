@@ -100,6 +100,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		
 		// takes a facebook response and creates a session from it
 		createSession: function(response) {
+
 			var data =  {
 				'facebook_id': response.authResponse.userID,
 				'facebook_token' : response.authResponse.accessToken
@@ -131,17 +132,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				
 				// load the profile model for the user
 				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
-				
-				// if the user attempted to come in from a path send them there now
-				if (that.get('redirect_from')) {
-					var path = that.get('redirect_from');
-					that.unset('redirect_from');
-					Backbone.history.navigate(path, { trigger : true });
-					
-				// otherwise take them to the index
-				} else {
-					Backbone.history.navigate('', { trigger : true });
+				app.Running.TargetModel = new app.Models.Target({assassin_id: that.get('user').user_id})
+				if (app.Running.NavGameView !== undefined) {
+					app.Running.NavGameView.render();
 				}
+				
+				Backbone.history.navigate(Backbone.history.fragment, { trigger : true });
+				
 			});
 			
 			// if theres a login error direct them to the login screen

@@ -22,9 +22,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		// called automatically by fetch() to remove the wrapper
 		parse: function(response) {
-                return response.response;
-        },
-        
+			return response.response;
+        },       
         // consstructor
 		initialize: function() {
 			if (!this.get('assassin_id'))
@@ -41,13 +40,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		
 		// change the user who's target we're getting
-		changeUser : function(assassin_id) {
-			this.assassin_id = assassin_id;
-			var game_id = null;
-			if (app.Session.get('game'))
-			{
-				game_id = app.Session.get('game').game_id;
-			}
+		changeGame : function(game_id) {
 			this.url = config.WEB_ROOT + game_id  + '/users/' + this.get('assassin_id') + '/target/';
 		}
 	})

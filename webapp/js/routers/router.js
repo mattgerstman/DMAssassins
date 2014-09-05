@@ -6,6 +6,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	app.Routers.Router = app.Routers.BaseRouter.extend({
 	
+		// Sometime we wanna go back and tis is the only wat to do that.
+		history: [],
 		// All the routes
 		routes: {
 			'' 				: 'target',
@@ -21,7 +23,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			'switch_game' 	: 'switch_game'
 			
 		},
-		
 		// routes that require we have a game that has been started
 		requiresGameStarted : ['#target', '#', ''],
 		
@@ -33,7 +34,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		
 		// routes that should hide the nav bar
 		noNav : ['login', 'multigame'],
-		
+			
 		// routes that a logged in user can't access
 		preventAccessWhenAuth : ['#login'],
 		
@@ -70,7 +71,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			var isStarted 		= app.Session.get('game') && (app.Session.get('game').game_started);
 
 /*
-			Variables I use when shit's not routing properly
+			Variables I use when shit's not routing properly /**//*/
 			console.log('path:', path);
 			console.log('needGameAndAuth: ', needGameAndAuth);
 			console.log('isGame: ', isGame);
@@ -103,8 +104,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}			
 		},
 		// called after we're done routing, unused but build into the baserouter so we're leaving it
-		after : function(){
-			//empty
+		after: function(){
+			this.history.push(Backbone.history.fragment);
+		},
+		// go to the previous
+		back: function(){
+			this.history.pop();
+			history.back();
 		},
 		// login route
 		login : function() {
@@ -126,7 +132,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		target : function() {
 			//console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
-			app.Running.TargetModel.changeUser(app.Session.get('user_id'))
+			app.Running.TargetModel.changeGame(app.Session.get('game').game_id);
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
@@ -134,15 +140,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		create_game: function() {
 			app.Running.currentView = new app.Views.SelectGameView();
 			this.render();
-			app.Running.NavGameView.showCreateGame();
 			app.Running.currentView.showCreateGame();		
 		},
 		// join a new game route
 		join_game: function() {
 			app.Running.currentView = new app.Views.SelectGameView();
 			this.render();
-			app.Running.NavGameView.showJoinGame();
-			app.Running.currentView.loadJoinGame();				
+			app.Running.currentView.loadJoinGame(app.Session.get('user_id'));
 		},
 		// profile route
 		my_profile : function() {
@@ -166,8 +170,16 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
+		preventSwitchGameBack : ['join_game', 'create_game'],
 		switch_game: function() {
-		  	history.back();
+			var lastFragment = this.history[this.history.length - 1];
+			if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
+				Backbone.history.navigate('my_profile', { trigger : true });	
+				return;
+			}
+			
+			this.back();
+			
 		},
 		// render function, also determines weather or not to render the nav
 		render : function(){
@@ -194,7 +206,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				if (fragment === '')
 					fragment = 'target';
 					
-				app.Running.navView.highlight('#nav_'+fragment)	
+				app.Running.navView.highlight('#nav_'+fragment)
+				app.Running.NavGameView.updateText();
 			}
 			
 			// render our page within the app
