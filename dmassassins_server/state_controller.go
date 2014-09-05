@@ -18,6 +18,11 @@ func postState(r *http.Request) (*Game, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
@@ -40,6 +45,11 @@ func getState(r *http.Request) (*Game, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 
 	game, appErr := GetGameById(gameId)
 
@@ -57,6 +67,11 @@ func deleteState(r *http.Request) (*Game, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 
 	game, appErr := GetGameById(gameId)
 

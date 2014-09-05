@@ -15,7 +15,17 @@ func postGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	gamePassword := r.FormValue("game_password")
 
 	user, appErr := GetUserById(userId)
@@ -33,7 +43,17 @@ func getGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
 	}
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	return GetGameMapping(userId, gameId)
 }
 

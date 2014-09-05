@@ -15,7 +15,11 @@ func postGameTeam(r *http.Request) (*Team, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
-
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		return nil, appErr
@@ -33,6 +37,12 @@ func getGameTeam(r *http.Request) ([]*Team, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
+
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		return nil, appErr

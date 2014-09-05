@@ -3,7 +3,6 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-	"errors"
 )
 
 type GameMapping struct {
@@ -31,22 +30,13 @@ func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) 
 }
 
 func CheckPassword(gameId uuid.UUID, testPassword string) *ApplicationError {
-	var gamePasswordBuffer sql.NullString
-	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&gamePasswordBuffer)
+	var hashedPassword []byte
+	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&hashedPassword)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	if !gamePasswordBuffer.Valid || (gamePasswordBuffer.String == "") {
-		return nil
-	}
-	gamePassword := gamePasswordBuffer.String
-	if gamePassword == testPassword {
-		return nil
-	}
-	msg := "Invalid Game Password: " + testPassword
-	err = errors.New(msg)
-	return NewApplicationError(msg, err, ErrCodeInvalidGamePassword)
 
+	return CheckPasswordHash(hashedPassword, testPassword)
 }
 
 func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (*GameMapping, *ApplicationError) {

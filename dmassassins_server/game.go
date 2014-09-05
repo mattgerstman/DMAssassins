@@ -2,7 +2,10 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
+	"errors"
+	"strings"
 )
 
 type Game struct {
@@ -153,18 +156,45 @@ func parseGameRows(rows *sql.Rows) ([]*Game, *ApplicationError) {
 	return games, nil
 }
 
+func CheckPasswordHash(hashedPassword []byte, plainPw string) *ApplicationError {
+	if hashedPassword == nil {
+		return nil
+	}
+
+	bytePW := []byte(strings.TrimSpace(plainPw))
+	err := bcrypt.CompareHashAndPassword(hashedPassword, bytePW)
+	if err != nil {
+		msg := "Invalid Game Password: " + plainPw
+		err = errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeInvalidGamePassword)
+	}
+	return nil
+}
+
+func Crypt(plainPw string) ([]byte, *ApplicationError) {
+	if plainPw == "" {
+		return nil, nil
+	}
+	bytePw := []byte(strings.TrimSpace(plainPw))
+	password, err := bcrypt.GenerateFromPassword(bytePw, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeWtf)
+	}
+	return password, nil
+}
+
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *ApplicationError) {
+	encryptedPassword, appErr := Crypt(gamePassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	gameId := uuid.NewUUID()
-	var gamePasswordBuffer sql.NullString
-	if gamePassword != "" {
-		gamePasswordBuffer.String = gamePassword
-		gamePasswordBuffer.Valid = true
-	}
 
 	newGame, err := db.Prepare(`INSERT INTO dm_games (game_id, game_name, game_password) VALUES ($1, $2, $3)`)
 	if err != nil {
@@ -172,7 +202,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *Ap
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, gamePasswordBuffer)
+	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, encryptedPassword)
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		tx.Rollback()
@@ -209,10 +239,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (*Game, *Ap
 		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
-	hasPassword := false
-	if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
-		hasPassword = true
-	}
+	hasPassword := encryptedPassword != nil
 	return &Game{gameId, gameName, false, hasPassword}, nil
 
 }

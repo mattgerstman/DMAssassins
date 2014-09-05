@@ -15,6 +15,11 @@ func postTeamId(r *http.Request) (*Team, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	teamId := uuid.Parse(vars["team_id"])
+	if teamId == nil {
+		msg := "Invalid UUID: team_id" + teamId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 
 	team, appErr := GetTeamById(teamId)
 	if appErr != nil {
@@ -33,6 +38,11 @@ func getTeamId(r *http.Request) (*Team, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	teamId := uuid.Parse(vars["team_id"])
+	if teamId == nil {
+		msg := "Invalid UUID: team_id" + teamId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 	return GetTeamById(teamId)
 }
 
@@ -44,6 +54,11 @@ func deleteTeamId(r *http.Request) *ApplicationError {
 
 	vars := mux.Vars(r)
 	teamId := uuid.Parse(vars["team_id"])
+	if teamId == nil {
+		msg := "Invalid UUID: team_id" + teamId.String()
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 	return DeleteTeam(teamId)
 }
 

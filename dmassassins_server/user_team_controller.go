@@ -15,6 +15,11 @@ func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
@@ -22,6 +27,11 @@ func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 	}
 
 	teamId := uuid.Parse(vars["team_id"])
+	if teamId == nil {
+		msg := "Invalid UUID: team_id" + teamId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 	return user.JoinTeam(teamId)
 }
 
@@ -45,12 +55,23 @@ func deleteUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 	vars := mux.Vars(r)
 
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	teamId := uuid.Parse(vars["team_id"])
+	if teamId == nil {
+		msg := "Invalid UUID: team_id" + teamId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 	return user.LeaveTeam(teamId)
 }
 

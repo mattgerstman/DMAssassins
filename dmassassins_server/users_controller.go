@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	//"github.com/gorilla/schema"
 )
 
 // GET function for /users/{username} returns a user's information
@@ -16,6 +15,11 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id " + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr

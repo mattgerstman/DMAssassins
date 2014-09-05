@@ -14,7 +14,16 @@ func getLeaderboard(r *http.Request) ([]*LeaderboardEntry, *ApplicationError) {
 	}
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
-	game, _ := GetGameById(gameId)
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
+	game, appErr := GetGameById(gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	return game.GetLeaderboard(true)
 }
 

@@ -15,9 +15,9 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 	r.ParseForm()
 	userId := uuid.Parse(r.FormValue("user_id"))
 	if userId == nil {
-		msg := "Missing Parameter: user_id."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		msg := "Invalid Parameter: user_id " + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
 	}
 	gameName := r.FormValue("game_name")
 	if gameName == "" {
@@ -34,7 +34,7 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 func getGame(r *http.Request) ([]*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
-		//return nil, appErr
+		return nil, appErr
 	}
 	return GetGameList()
 }

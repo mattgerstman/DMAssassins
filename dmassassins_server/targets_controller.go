@@ -20,22 +20,37 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	user, err := GetUserById(userId)
 	if err != nil {
 		return nil, err
 	}
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+	}
 	return user.GetTarget(gameId)
 }
 
 // Kill a target, delete User may eventually be used by an admin
 func deleteTarget(r *http.Request) (uuid.UUID, *ApplicationError) {
-	vars := mux.Vars(r)
-
-	userId := uuid.Parse(vars["user_id"])
 	appErr := RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
 	}
 
 	r.ParseForm()

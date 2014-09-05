@@ -14,6 +14,11 @@ func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
 	}
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
