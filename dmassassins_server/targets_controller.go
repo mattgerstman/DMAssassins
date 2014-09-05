@@ -7,13 +7,12 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
-	//"github.com/gorilla/schema"
 )
 
 // GET function for /users/{username}/target returns a user's information
 // Need to add permissions to this on a per user basis
-func getTarget(r *http.Request) (*User, *ApplicationError) {
-	appErr := RequiresUser(r)
+func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
+	appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -38,9 +37,9 @@ func getTarget(r *http.Request) (*User, *ApplicationError) {
 	return user.GetTarget(gameId)
 }
 
-// Kill a target, delete User may eventually be used by an admin
-func deleteTarget(r *http.Request) (uuid.UUID, *ApplicationError) {
-	appErr := RequiresUser(r)
+// DELETE - Kill a target, delete User may eventually be used by an admin
+func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError) {
+	appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}

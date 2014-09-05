@@ -7,7 +7,8 @@ import (
 	"net/http"
 )
 
-func getLeaderboard(r *http.Request) ([]*LeaderboardEntry, *ApplicationError) {
+// GET - Wrapper for GetUserLeaderboard
+func getLeaderboard(r *http.Request) ([]*UserLeaderboardEntry, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -24,7 +25,7 @@ func getLeaderboard(r *http.Request) ([]*LeaderboardEntry, *ApplicationError) {
 		return nil, appErr
 	}
 
-	return game.GetLeaderboard(true)
+	return game.GetUserLeaderboard(true)
 }
 
 // Handler for /game path

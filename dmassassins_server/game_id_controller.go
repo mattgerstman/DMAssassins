@@ -7,11 +7,12 @@ import (
 	"net/http"
 )
 
-func postState(r *http.Request) (*Game, *ApplicationError) {
+// POST - Starts a game
+func postGameId(r *http.Request) (*Game, *ApplicationError) {
 	var appErr *ApplicationError
 	appErr = nil
 
-	//appErr := RequiresAdmin(r)
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -37,7 +38,8 @@ func postState(r *http.Request) (*Game, *ApplicationError) {
 	return game, nil
 }
 
-func getState(r *http.Request) (*Game, *ApplicationError) {
+// GET - Gets a game
+func getGameId(r *http.Request) (*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -59,7 +61,8 @@ func getState(r *http.Request) (*Game, *ApplicationError) {
 	return game, nil
 }
 
-func deleteState(r *http.Request) (*Game, *ApplicationError) {
+// DELETE - Ends a game
+func deleteGameId(r *http.Request) (*Game, *ApplicationError) {
 	appErr := RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -88,7 +91,7 @@ func deleteState(r *http.Request) (*Game, *ApplicationError) {
 }
 
 // Handler for /game path
-func StateHandler() http.HandlerFunc {
+func gameIdHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -96,11 +99,11 @@ func StateHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getState(r)
+			obj, err = getGameId(r)
 		case "POST":
-			obj, err = postState(r)
+			obj, err = postGameId(r)
 		case "DELETE":
-			obj, err = deleteState(r)
+			obj, err = deleteGameId(r)
 		default:
 			obj = nil
 			msg := "Not Found"

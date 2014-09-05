@@ -2,13 +2,11 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	//"github.com/gorilla/sessions"
 	"net/http"
 )
 
-// Takes data from facebook and returns an authenticated user
-func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *ApplicationError) {
+// POST - Takes data from facebook and returns an authenticated user/game
+func postSession(w http.ResponseWriter, r *http.Request) (response map[string]interface{}, appErr *ApplicationError) {
 	r.ParseForm()
 	facebookId := r.FormValue("facebook_id")
 	if facebookId == "" {
@@ -28,7 +26,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 		return nil, appErr
 	}
 
-	response := make(map[string]interface{})
+	response = make(map[string]interface{})
 
 	response["user"] = user
 	token, appErr := user.GetToken()
@@ -49,7 +47,6 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		fmt.Println("SessionHandler()")
 		var obj interface{}
 		var err *ApplicationError
 

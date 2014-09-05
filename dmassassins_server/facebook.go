@@ -3,14 +3,14 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-	"fmt"
+
 	fb "github.com/huandu/facebook"
 	"github.com/polds/imgbase64"
 )
 
 // Returns an authenticated facebook session with app id/secret
 // Need to move app id/secret to config file
-func getFacebookSession(token string) *fb.Session {
+func getFacebookSession(token string) (fbSession *fb.Session) {
 
 	fb.Version = "v2.0"
 	var app = fb.New(Config.FBAppId, Config.FBAppSecret)
@@ -22,7 +22,7 @@ func getFacebookSession(token string) *fb.Session {
 
 // Creates a user from a facebook_auth token
 
-func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError) {
+func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *ApplicationError) {
 
 	session := getFacebookSession(facebookToken)
 	res, err := session.Get("/me/", fb.Params{})
@@ -79,7 +79,8 @@ func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError
 	properties["first_name"] = firstName
 	properties["last_name"] = lastName
 
-	user, appErr := NewUser(username, email, "muggle", facebookId, properties)
+	// Create user
+	user, appErr = NewUser(username, email, "muggle", facebookId, properties)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -90,20 +91,23 @@ func CreateUserFromFacebookToken(facebookToken string) (*User, *ApplicationError
 
 // Get a user from the db by it's facebook_id, confirms that the id matches the id in the token
 // If there is no user in the DB with that facebook_id add them
-func getUserFromFacebookId(facebookId, facebookToken string) (*User, *ApplicationError) {
+func getUserFromFacebookId(facebookId, facebookToken string) (user *User, appErr *ApplicationError) {
 	var userId uuid.UUID
 	var userIdBuffer sql.NullString
 
+	// See if we already have the facebook id in the database
 	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1`, facebookId).Scan(&userIdBuffer)
 	userId = uuid.Parse(userIdBuffer.String)
 
 	switch {
+	// If we don't have the user create it
 	case err == sql.ErrNoRows:
 		return CreateUserFromFacebookToken(facebookToken)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 
 	}
+	// Now lets confirm that the db and the facebook id in the token match
 	testId, appErr := GetFacebookIdFromToken(facebookToken)
 	if appErr != nil {
 		return nil, appErr
@@ -112,22 +116,25 @@ func getUserFromFacebookId(facebookId, facebookToken string) (*User, *Applicatio
 		return nil, NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	user, appErr := GetUserById(userId)
+	// Get the user object
+	user, appErr = GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// Set the user's facebook token to the most recent one
 	appErr = user.UpdateToken(facebookToken)
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// return the user
 	return user, nil
 
 }
 
 // Returns a user based on facebook_id and facebook_token, if no user exists in the db one will be created
-func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *ApplicationError) {
+func GetUserFromFacebookData(facebookId, facebookToken string) (user *User, appErr *ApplicationError) {
 
 	var userId uuid.UUID
 	var userIdBuffer sql.NullString
@@ -135,7 +142,6 @@ func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *Applicat
 	err := db.QueryRow(`SELECT user_id FROM dm_users WHERE facebook_id = $1 AND facebook_token = $2`, facebookId, facebookToken).Scan(&userIdBuffer)
 	userId = uuid.Parse(userIdBuffer.String)
 
-	fmt.Println(userId)
 	switch {
 	// If we have no user in the db check just the id and see if it's in the database
 	case err == sql.ErrNoRows:
@@ -148,15 +154,16 @@ func GetUserFromFacebookData(facebookId, facebookToken string) (*User, *Applicat
 }
 
 // Returns a user's facebook_id from their token
-func GetFacebookIdFromToken(token string) (string, *ApplicationError) {
+func GetFacebookIdFromToken(token string) (facebookId string, appErr *ApplicationError) {
 
+	// Query facebook session to make sure token is valid
 	session := getFacebookSession(token)
 	res, err := session.Get("/debug_token", fb.Params{"input_token": token, "access_token": Config.FBUserAccessToken})
 	if err != nil {
 		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	var facebookId string
+	// Decode the facebook Id from the sessoin data
 	err = res.DecodeField("data.user_id", &facebookId)
 	if err != nil {
 		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)

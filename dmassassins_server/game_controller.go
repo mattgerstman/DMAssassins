@@ -6,8 +6,9 @@ import (
 	"net/http"
 )
 
-func postGame(r *http.Request) (*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+// POST - Controller Wrapper for Game:NewGame
+func postGame(r *http.Request) (game *Game, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -19,6 +20,7 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
 	}
+
 	gameName := r.FormValue("game_name")
 	if gameName == "" {
 		msg := "Missing Parameter: game_name."
@@ -27,12 +29,12 @@ func postGame(r *http.Request) (*Game, *ApplicationError) {
 	}
 
 	gamePassword := r.FormValue("game_password")
-
 	return NewGame(gameName, userId, gamePassword)
 }
 
-func getGame(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+// GET - Controller wrapper for Game::GetGamesList
+func getGame(r *http.Request) (games []*Game, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func getNewUserGame(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+// GET - get games a user is not a part of so they can presumably join one
+func getNewUserGame(r *http.Request) (games []*Game, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func postGameTeam(r *http.Request) (*Team, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+// POST - Creates a team for a game
+func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -26,11 +27,12 @@ func postGameTeam(r *http.Request) (*Team, *ApplicationError) {
 	}
 
 	teamName := r.FormValue("team_name")
-	return game.CreateTeam(teamName)
+	return game.NewTeam(teamName)
 }
 
-func getGameTeam(r *http.Request) ([]*Team, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+// GET - Gets the list of temas for a game
+func getGameTeam(r *http.Request) (teams []*Team, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

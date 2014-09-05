@@ -15,7 +15,7 @@ var db *sql.DB
 
 const (
 	gamePath            = "/game/"
-	gameStatePath       = "/game/{game_id}/"
+	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameUserPath        = "/game/{game_id}/users/{user_id}/"
 	gameUserTargetPath  = "/game/{game_id}/users/{user_id}/target/"
@@ -42,8 +42,6 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Content-Type", "application/json")
 	if appErr != nil {
-		fmt.Println("Real Error\n") //debug line so I know errors I send vs ones from malformed paths
-		fmt.Println(appErr)
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
 		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
 		return
@@ -62,8 +60,7 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 }
 
 // Connects to the database, needs to be updated to read from an ini file
-func connect() (*sql.DB, error) {
-	var err error
+func connect() (db *sql.DB, err error) {
 	db, err = sql.Open("postgres", Config.DatabaseURL)
 	return db, err
 }
@@ -85,7 +82,8 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
-	_, err := connect()
+	var err error
+	db, err = connect()
 	if err != nil {
 		appErr := NewApplicationError("Could not connect to database", err, ErrCodeDatabase)
 		LogWithSentry(appErr, nil, raven.ERROR)
@@ -98,7 +96,7 @@ func StartServer() {
 
 	// Just Game
 	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
-	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
+	r.HandleFunc(gameIdPath, gameIdHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 
 	// Game then User

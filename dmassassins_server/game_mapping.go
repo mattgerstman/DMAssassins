@@ -14,13 +14,15 @@ type GameMapping struct {
 	alive    bool      `json:"alive"`
 }
 
-func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) {
+// Gets a game mapping from the database
+func GetGameMapping(userId, gameId uuid.UUID) (gameMapping *GameMapping, appErr *ApplicationError) {
 	var teamId uuid.UUID
 	var userRole string
 	var teamIdBuffer sql.NullString
 	var kills int
 	var alive bool
 
+	// Query the database
 	err := db.QueryRow(`SELECT team_id, user_role, kills, alive FROM dm_user_game_mapping WHERE user_id = $1 AND game_id = $2`, userId.String(), gameId.String()).Scan(&teamIdBuffer, &userRole, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -29,28 +31,20 @@ func GetGameMapping(userId, gameId uuid.UUID) (*GameMapping, *ApplicationError) 
 	return &GameMapping{userId, gameId, teamId, userRole, kills, alive}, nil
 }
 
-func CheckPassword(gameId uuid.UUID, testPassword string) *ApplicationError {
-	var hashedPassword []byte
-	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&hashedPassword)
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	return CheckPasswordHash(hashedPassword, testPassword)
-}
-
-func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (*GameMapping, *ApplicationError) {
+// Adds a user to a game (creates a new game mapping)
+func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (gameMapping *GameMapping, appErr *ApplicationError) {
 	var teamId uuid.UUID
 	var userRole string
 	var teamIdBuffer sql.NullString
 	var kills int
 	var alive bool
 
-	appErr := CheckPassword(gameId, gamePassword)
+	appErr = CheckPassword(gameId, gamePassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// Insert the GameMapping and get its default variables out of the database
 	err := db.QueryRow(`INSERT INTO dm_user_game_mapping (user_id, game_id) VALUES ($1, $2) RETURNING team_id, user_role, kills, alive`, user.UserId.String(), gameId.String()).Scan(&teamIdBuffer, &userRole, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -59,7 +53,8 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (*GameMapping,
 	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
 }
 
-func (gameMapping *GameMapping) ChangeRole(role string) *ApplicationError {
+// Changes a user's role within a game
+func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationError) {
 
 	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {

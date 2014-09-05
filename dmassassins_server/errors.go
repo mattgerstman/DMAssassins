@@ -51,29 +51,25 @@ type ApplicationError struct {
 }
 
 // Error returns a human-readable representation of a ApplicationError.
-func (err *ApplicationError) Error() string {
+func (err *ApplicationError) Error() (msg string) {
 	return err.Msg
 }
 
 var sentryDSN string
 
-func trace() *raven.Stacktrace {
+// Creates a raven stacktrace
+func trace() (stacktrace *raven.Stacktrace) {
 	return raven.NewStacktrace(0, 2, nil)
 }
 
-func NewApplicationError(msg string, err error, code int) *ApplicationError {
+// Converts an error to an Application Error with a user facing message
+func NewApplicationError(msg string, err error, code int) (appErr *ApplicationError) {
 	exception := raven.NewException(err, trace())
 	return &ApplicationError{msg, err, code, exception}
 }
 
-func CheckError(msg string, err error, code int) *ApplicationError {
-	if err != nil {
-		return NewApplicationError(msg, err, code)
-	}
-	return nil
-}
-
-func WereRowsAffected(res sql.Result) *ApplicationError {
+// Determines if rows were affected in a sql result, reduces boilerplate on errors
+func WereRowsAffected(res sql.Result) (appErr *ApplicationError) {
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
@@ -94,7 +90,10 @@ func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven
 	packet.Level = level
 	packet.AddTags(tags)
 	eventID, err := client.Capture(packet, nil)
-	fmt.Println(err)
+	if err == nil {
+		log.Print("Sentry failed to capture error below with message: ")
+		log.Println(err)
+	}
 	message := fmt.Sprintf("Error event with id \"%s\" - %s", eventID, appErr.Error())
 	log.Println(message)
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 	"os"
 )
 
@@ -16,12 +16,13 @@ type Configuration struct {
 
 var Config *Configuration
 
+// Loads config variables from file into global Config struct
 func LoadConfig() *ApplicationError {
 	file, _ := os.Open("config.json")
 	decoder := json.NewDecoder(file)
 	err := decoder.Decode(&Config)
 	if err != nil {
-		fmt.Println("error:", err)
+		log.Fatal("Failed to load config with message:", err)
 	}
 	return nil
 

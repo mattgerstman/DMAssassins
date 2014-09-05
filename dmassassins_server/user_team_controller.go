@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+// POST - Add a user to a team
+func postUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -21,6 +22,7 @@ func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
+	// Get the user obj
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
@@ -35,6 +37,7 @@ func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 	return user.JoinTeam(teamId)
 }
 
+// DROIDS
 // func getUserTeam(r *http.Request) (*Team, *ApplicationError) {
 // 	appErr := RequiresCaptain(r)
 // 	if appErr != nil {
@@ -46,8 +49,9 @@ func postUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 // 	return GetTeamById(teamId)
 // }
 
-func deleteUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+// DELETE - removes a user from a team
+func deleteUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -61,6 +65,7 @@ func deleteUserTeam(r *http.Request) (*GameMapping, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
+	// Get the user obj
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr

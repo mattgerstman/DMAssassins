@@ -11,7 +11,7 @@ import (
 
 // GET function for /users/{username} returns a user's information
 // Need to add permissions to this on a per user basis
-func getUser(r *http.Request) (*User, *ApplicationError) {
+func getUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	r.ParseForm()
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
@@ -20,7 +20,7 @@ func getUser(r *http.Request) (*User, *ApplicationError) {
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
 	}
-	appErr := RequiresLogin(r)
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

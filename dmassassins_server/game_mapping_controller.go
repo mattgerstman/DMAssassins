@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func postGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
-	appErr := RequiresLogin(r)
+// POST - Wrapper for GameMapping:JoinGame
+func postGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -36,8 +37,9 @@ func postGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
 	return user.JoinGame(gameId, gamePassword)
 }
 
-func getGameMapping(r *http.Request) (*GameMapping, *ApplicationError) {
-	appErr := RequiresUser(r)
+// GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
+func getGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+	appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}

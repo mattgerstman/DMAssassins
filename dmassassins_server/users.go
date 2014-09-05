@@ -18,37 +18,37 @@ type User struct {
 }
 
 // Add a user to the DB and return it as a user object
-func NewUser(username, email, secret, facebookId string, properties map[string]string) (*User, *ApplicationError) {
+func NewUser(username, email, secret, facebookId string, properties map[string]string) (user *User, appErr *ApplicationError) {
+	// Generate the UUID and insert it
 	userId := uuid.NewUUID()
-
 	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, secret, facebook_id) VALUES ($1,$2,$3,$4,$5)`, userId.String(), username, email, secret, facebookId)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	// Makes sure insert worked
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return nil, NoRowsAffectedAppErr
 	}
 
-	if rowsAffected == 0 {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
+	// Create user
+	user = &User{userId, "", username, email, secret, facebookId, properties}
 
-	user := &User{userId, "", username, email, secret, facebookId, properties}
+	// Set properties
 	for key, value := range properties {
 		user.SetUserProperty(key, value)
 	}
+
+	// Return user
 	return user, nil
 }
 
 // Select a User from the DB by username and return it as a user object
-func GetUserByUsername(username string) (*User, *ApplicationError) {
+func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 	var userId uuid.UUID
-	var secret, email, facebookId string
-	var userIdBuffer sql.NullString
+	var secret, email, facebookId, userIdBuffer string
 	err := db.QueryRow(`SELECT user_id, email, secret, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&userIdBuffer, &email, &secret, &facebookId)
-	fmt.Println(err)
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + username
@@ -57,10 +57,10 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	userId = uuid.Parse(userIdBuffer.String)
+	userId = uuid.Parse(userIdBuffer)
 
-	user := &User{userId, "", username, email, secret, facebookId, nil}
-	_, appErr := user.GetUserProperties()
+	user = &User{userId, "", username, email, secret, facebookId, nil}
+	_, appErr = user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -68,7 +68,7 @@ func GetUserByUsername(username string) (*User, *ApplicationError) {
 }
 
 // Select a user from the db by user_id (uuid) and return it as a user object
-func GetUserById(userId uuid.UUID) (*User, *ApplicationError) {
+func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	var username, secret, email, facebookId string
 	err := db.QueryRow(`SELECT username, email, secret, facebook_id FROM dm_users WHERE user_id = $1`, userId.String()).Scan(&username, &email, &secret, &facebookId)
 	fmt.Println(err)
@@ -80,20 +80,25 @@ func GetUserById(userId uuid.UUID) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	user := &User{userId, "", username, email, secret, facebookId, nil}
-	_, appErr := user.GetUserProperties()
+	// Create the user obj
+	user = &User{userId, "", username, email, secret, facebookId, nil}
+
+	// Add user properties
+	_, appErr = user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
 	return user, nil
 }
 
-func (user *User) GetTarget(gameId uuid.UUID) (*User, *ApplicationError) {
+// Gets a user's target for a game
+func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *ApplicationError) {
 	var targetId uuid.UUID
-	var username, email, facebookId string
-	var targetIdBuffer sql.NullString
+	var username, email, facebookId, targetIdBuffer string
+
+	// DB query
 	err := db.QueryRow(`SELECT user_id, username, email, facebook_id FROM dm_users WHERE user_id = (SELECT target_id FROM dm_user_targets WHERE user_id = $1 AND game_id = $2)`, user.UserId.String(), gameId.String()).Scan(&targetIdBuffer, &username, &email, &facebookId)
-	fmt.Println(err)
+
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + username
@@ -102,16 +107,20 @@ func (user *User) GetTarget(gameId uuid.UUID) (*User, *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	targetId = uuid.Parse(targetIdBuffer.String)
-	target := &User{targetId, user.Username, username, email, "", facebookId, nil}
-	_, appErr := target.GetUserProperties()
+	// Creates the target obj
+	targetId = uuid.Parse(targetIdBuffer)
+	target = &User{targetId, user.Username, username, email, "", facebookId, nil}
+
+	// gets properties for the target
+	_, appErr = target.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
 	return target, nil
 }
 
-func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
+// Gets an arbitrary game for a user to start off with
+func (user *User) GetArbitraryGame() (game *Game, appErr *ApplicationError) {
 	var gameId uuid.UUID
 	var gameIdBuffer sql.NullString
 	err := db.QueryRow(`SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY alive DESC LIMIT 1`, user.UserId.String()).Scan(&gameIdBuffer)
@@ -122,17 +131,21 @@ func (user *User) GetArbitraryGame() (*Game, *ApplicationError) {
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
 	gameId = uuid.Parse(gameIdBuffer.String)
 	return GetGameById(gameId)
 
 }
 
-func (user *User) UpdateToken(facebook_token string) *ApplicationError {
+// Updates a user's facebook token
+func (user *User) UpdateToken(facebook_token string) (appErr *ApplicationError) {
 
 	res, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.UserId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	// Make sure update worked
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		return NoRowsAffectedAppErr
@@ -141,7 +154,8 @@ func (user *User) UpdateToken(facebook_token string) *ApplicationError {
 	return nil
 }
 
-func (user *User) GetToken() (string, *ApplicationError) {
+// Gets a user's facebook token
+func (user *User) GetToken() (fbToken string, appErr *ApplicationError) {
 	var facebookToken sql.NullString
 	err := db.QueryRow(`SELECT facebook_token FROM dm_users WHERE user_id = $1`, user.UserId.String()).Scan(&facebookToken)
 	if err != nil {
@@ -152,7 +166,7 @@ func (user *User) GetToken() (string, *ApplicationError) {
 }
 
 //Kills an Assassin's target, user must be logged in
-func (user *User) KillTarget(gameId uuid.UUID, secret string) (uuid.UUID, *ApplicationError) {
+func (user *User) KillTarget(gameId uuid.UUID, secret string) (target_id uuid.UUID, appErr *ApplicationError) {
 
 	var oldTargetId, newTargetId uuid.UUID
 	var targetSecret string

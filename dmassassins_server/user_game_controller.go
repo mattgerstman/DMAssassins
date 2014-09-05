@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+// GET - gets a list of games a user is in
+func getUserGame(r *http.Request) (games []*Game, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

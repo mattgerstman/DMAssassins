@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-func postTeamId(r *http.Request) (*Team, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+// POST - rename a team
+func postTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -21,17 +22,22 @@ func postTeamId(r *http.Request) (*Team, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	team, appErr := GetTeamById(teamId)
+	team, appErr = GetTeamById(teamId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	teamName := r.FormValue("team_name")
-	return team.Rename(teamName)
+	appErr = team.Rename(teamName)
+	if appErr != nil {
+		return nil, appErr
+	}
+	return team, nil
 }
 
-func getTeamId(r *http.Request) (*Team, *ApplicationError) {
-	appErr := RequiresCaptain(r)
+// GET - get a team by its id
+func getTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
+	appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -46,8 +52,9 @@ func getTeamId(r *http.Request) (*Team, *ApplicationError) {
 	return GetTeamById(teamId)
 }
 
-func deleteTeamId(r *http.Request) *ApplicationError {
-	appErr := RequiresAdmin(r)
+// DELETE - deletes a team
+func deleteTeamId(r *http.Request) (appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
 	}
