@@ -39,6 +39,7 @@ const (
 	ErrCodeDatabase               = 50001
 	ErrCodeDatabaseNoRowsAffected = 50002
 	ErrCodeSession                = 50010 // Malformed Session
+	ErrCodeWtf                    = 50069
 )
 
 // ApplicationError contains information about errors that arise while accessing resources.

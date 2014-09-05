@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func getReverseUserGame(r *http.Request) ([]*Game, *ApplicationError) {
+func getNewUserGame(r *http.Request) ([]*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -24,7 +24,7 @@ func getReverseUserGame(r *http.Request) ([]*Game, *ApplicationError) {
 }
 
 // Handler for /game path
-func UserGameReverseHandler() http.HandlerFunc {
+func UserGameNewHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -32,7 +32,7 @@ func UserGameReverseHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getReverseUserGame(r)
+			obj, err = getNewUserGame(r)
 		default:
 			obj = nil
 			msg := "Not Found"

@@ -63,7 +63,7 @@ func UserTeamHandler() http.HandlerFunc {
 
 		switch r.Method {
 		//case "GET":
-			//obj, err = getTeamId(r)
+		//obj, err = getTeamId(r)
 		case "POST":
 			obj, err = postTeamId(r)
 		case "DELETE":

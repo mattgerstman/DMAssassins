@@ -3,32 +3,30 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	//"errors"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"log"
 	"net/http"
-	//"github.com/gorilla/schema"
 )
 
 var db *sql.DB
 
 const (
-	gamePath                = "/game/"
-	gameStatePath           = "/game/{game_id}/"
-	gameLeaderboardPath     = "/game/{game_id}/leaderboard/"
-	gameUsernamePath        = "/{game_id}/users/{user_id}/"
-	gameUsernameTargetPath  = "/{game_id}/users/{user_id}/target/"
-	gameTeamPath            = "/game/{game_id}/team/"
-	teamIdPath              = "/team/{team_id}"
-	usernamePath            = "/users/{user_id}/"
-	usernameGamePath        = "/users/{user_id}/game/"
-	usernameGameReversePath = "/users/{user_id}/game/reverse/"
-	usernameTeamPath        = "/users/{user_id}/team/"
-
-	sessionPath = "/session/"
-	homePath    = "/"
+	gamePath            = "/game/"
+	gameStatePath       = "/game/{game_id}/"
+	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
+	gameUserPath        = "/game/{game_id}/users/{user_id}/"
+	gameUserTargetPath  = "/game/{game_id}/users/{user_id}/target/"
+	gameTeamPath        = "/game/{game_id}/team/"
+	teamIdPath          = "/team/{team_id}"
+	userPath            = "/users/{user_id}/"
+	userGamePath        = "/users/{user_id}/game/"
+	userGameNewPath     = "/users/{user_id}/game/new/"
+	userTeamPath        = "/users/{user_id}/team/"
+	sessionPath         = "/session/"
+	homePath            = "/"
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -55,48 +53,30 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	output = make(map[string]interface{})
 	output["response"] = obj
 
-	data, _ := json.Marshal(output)
-	w.Write(data)
-}
-
-// Handles requests to the direct path, currently does nothing
-func HomeHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		WriteObjToPayload(w, r, nil, nil)
+	data, err := json.Marshal(output)
+	if err != nil {
+		appErr := NewApplicationError("Internal Error", err, ErrCodeWtf)
+		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
 	}
+	w.Write(data)
 }
 
 // Connects to the database, needs to be updated to read from an ini file
 func connect() (*sql.DB, error) {
 	var err error
 	db, err = sql.Open("postgres", Config.DatabaseURL)
-	fmt.Println(err)
 	return db, err
 }
 
-// Catch all, This will eventually return a 404 but right now I'm using it to get request information
-func CatchAllHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		fmt.Println("Catch All")
-		fmt.Println(r)
-		WriteObjToPayload(w, r, r, nil)
-	}
-}
-
 // Handles CORS, eventually I'll strip it down to exactly the headers/origins I need
-
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "OPTIONS" {
-			//fmt.Println("CORS")
 			fmt.Println(r)
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, Authorization")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-			//handle preflight in here
-			//fmt.Println(w)
 		} else {
 			h.ServeHTTP(w, r)
 		}
@@ -107,30 +87,43 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 func StartServer() {
 	_, err := connect()
 	if err != nil {
-		// add error here
+		appErr := NewApplicationError("Could not connect to database", err, ErrCodeDatabase)
+		LogWithSentry(appErr, nil, raven.ERROR)
+		log.Fatal("Could not connect to database")
 	}
 
 	defer db.Close()
 
 	r := mux.NewRouter()
-	r.HandleFunc(homePath, HomeHandler()).Methods("GET")
-	r.HandleFunc(usernamePath, UserHandler()).Methods("GET")
-	r.HandleFunc(gameUsernamePath, GameMappingHandler()).Methods("GET", "POST", "DELETE")
-	r.HandleFunc(gameUsernameTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 
-	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
-
-	r.HandleFunc(usernameGamePath, UserGameHandler()).Methods("POST", "GET", "DELETE")
-	r.HandleFunc(usernameGameReversePath, UserGameReverseHandler()).Methods("GET")
+	// Just Game
 	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
 	r.HandleFunc(gameStatePath, StateHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 
-	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
-	r.HandleFunc(teamIdPath, TeamIdHandler()).Methods("GET", "POST", "DELETE")
-	r.HandleFunc(usernameTeamPath, UserTeamHandler()).Methods("GET", "POST", "DELETE")
+	// Game then User
+	r.HandleFunc(gameUserPath, GameMappingHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 
-	r.HandleFunc("/{path:.*}", CatchAllHandler())
+	// Game then Team
+	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
+
+	// Just User
+	r.HandleFunc(userPath, UserHandler()).Methods("GET")
+
+	// User then Game
+	r.HandleFunc(userGamePath, UserGameHandler()).Methods("POST", "GET")
+	r.HandleFunc(userGameNewPath, UserGameNewHandler()).Methods("GET")
+
+	// User then Team
+	r.HandleFunc(userTeamPath, UserTeamHandler()).Methods("GET", "POST")
+
+	// Just Team
+	r.HandleFunc(teamIdPath, TeamIdHandler()).Methods("GET", "POST", "DELETE")
+
+	// Just Session
+	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
+
 	http.Handle("/", corsHandler(r))
 	http.ListenAndServe(":8000", nil)
 }

@@ -41,12 +41,9 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	if (appErr != nil) && (appErr.Code != ErrCodeNoGameMappings) {
 		return nil, appErr
 	}
-	appErr = nil
+	
 	response["game"] = game
-
-	// target, appErr := user.GetTarget()
-	// response["target"] = target
-	return response, appErr
+	return response, nil
 }
 
 func SessionHandler() http.HandlerFunc {
@@ -59,8 +56,6 @@ func SessionHandler() http.HandlerFunc {
 		switch r.Method {
 		case "POST":
 			obj, err = postSession(w, r)
-		// case "DELETE":
-		// 	obj, err = deleteSession(w, r)
 		default:
 			obj = nil
 			msg := "Not Found"

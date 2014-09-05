@@ -26,8 +26,7 @@ func postUserGame(r *http.Request) (*Game, *ApplicationError) {
 		err := errors.New("Missing Parameter")
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	return nil, nil
-	//return NewGame(gameName, userId)
+	return NewGame(gameName, userId)
 }
 
 func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {

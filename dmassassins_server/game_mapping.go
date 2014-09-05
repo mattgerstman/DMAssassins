@@ -69,7 +69,6 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (*GameMapping,
 	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
 }
 
-
 func (gameMapping *GameMapping) ChangeRole(role string) *ApplicationError {
 
 	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())

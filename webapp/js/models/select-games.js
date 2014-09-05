@@ -70,7 +70,7 @@ var app = app || {
 			})
 		},
 		setUser: function(user_id) {
-			this.url = config.WEB_ROOT + 'users/' + user_id + '/game/reverse/';
+			this.url = config.WEB_ROOT + 'users/' + user_id + '/game/new/';
 		}
 	})
 })();

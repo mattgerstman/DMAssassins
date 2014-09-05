@@ -82,9 +82,10 @@ func StateHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getState(r)
-
 		case "POST":
 			obj, err = postState(r)
+		case "DELETE":
+			obj, err = deleteState(r)
 		default:
 			obj = nil
 			msg := "Not Found"

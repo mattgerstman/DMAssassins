@@ -36,7 +36,7 @@ func getTeamId(r *http.Request) (*Team, *ApplicationError) {
 	return GetTeamById(teamId)
 }
 
-func deleteTeamId(r *http.Request) (*ApplicationError) {
+func deleteTeamId(r *http.Request) *ApplicationError {
 	appErr := RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
