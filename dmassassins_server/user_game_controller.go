@@ -7,28 +7,6 @@ import (
 	"net/http"
 )
 
-func postUserGame(r *http.Request) (*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	r.ParseForm()
-	userId := uuid.Parse(r.FormValue("user_id"))
-	if userId == nil {
-		msg := "Missing Parameter: user_id."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-	gameName := r.FormValue("game_name")
-	if gameName == "" {
-		msg := "Missing Parameter: game_name."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
-	return NewGame(gameName, userId)
-}
-
 func getUserGame(r *http.Request) ([]*Game, *ApplicationError) {
 	appErr := RequiresLogin(r)
 	if appErr != nil {
@@ -54,9 +32,6 @@ func UserGameHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getUserGame(r)
-
-		case "POST":
-			obj, err = postUserGame(r)
 		default:
 			obj = nil
 			msg := "Not Found"

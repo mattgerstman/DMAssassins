@@ -112,7 +112,7 @@ func StartServer() {
 	r.HandleFunc(userPath, UserHandler()).Methods("GET")
 
 	// User then Game
-	r.HandleFunc(userGamePath, UserGameHandler()).Methods("POST", "GET")
+	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET")
 	r.HandleFunc(userGameNewPath, UserGameNewHandler()).Methods("GET")
 
 	// User then Team

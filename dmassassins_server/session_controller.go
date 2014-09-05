@@ -41,7 +41,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (interface{}, *Applicat
 	if (appErr != nil) && (appErr.Code != ErrCodeNoGameMappings) {
 		return nil, appErr
 	}
-	
+
 	response["game"] = game
 	return response, nil
 }
