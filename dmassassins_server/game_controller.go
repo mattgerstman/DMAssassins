@@ -18,7 +18,7 @@ func postGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	if userId == nil {
 		msg := "Invalid Parameter: user_id " + userId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	gameName := r.FormValue("game_name")
@@ -58,7 +58,7 @@ func GameHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			tempErr := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, tempErr, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, tempErr, ErrCodeNotFoundMethod)
 		}
 		WriteObjToPayload(w, r, obj, err)
 	}

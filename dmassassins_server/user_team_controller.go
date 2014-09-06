@@ -37,17 +37,36 @@ func postUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 	return user.JoinTeam(teamId)
 }
 
-// DROIDS
-// func getUserTeam(r *http.Request) (*Team, *ApplicationError) {
-// 	appErr := RequiresCaptain(r)
-// 	if appErr != nil {
-// 		return nil, appErr
-// 	}
+// GET - gets a team for a user by game_id
+func getUserTeam(r *http.Request) (*Team, *ApplicationError) {
+	appErr := RequiresCaptain(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 
-// 	vars := mux.Vars(r)
-// 	teamId := uuid.Parse(vars["team_id"])
-// 	return GetTeamById(teamId)
-// }
+	vars := mux.Vars(r)
+
+	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
+	return user.GetTeamByGameId(gameId)
+}
 
 // DELETE - removes a user from a team
 func deleteUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
@@ -81,7 +100,7 @@ func deleteUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applicat
 }
 
 // Handler for /team path
-func UserTeamHandler() http.HandlerFunc {
+func GameUserTeamHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -98,7 +117,7 @@ func UserTeamHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			tempErr := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, tempErr, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, tempErr, ErrCodeNotFoundMethod)
 		}
 		WriteObjToPayload(w, r, obj, err)
 	}

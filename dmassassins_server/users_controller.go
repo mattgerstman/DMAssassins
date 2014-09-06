@@ -18,7 +18,7 @@ func getUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	if userId == nil {
 		msg := "Invalid UUID: user_id " + userId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	appErr = RequiresLogin(r)
 	if appErr != nil {
@@ -43,7 +43,7 @@ func UserHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			err := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, err, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, err, ErrCodeNotFoundMethod)
 
 		}
 		WriteObjToPayload(w, r, obj, err)

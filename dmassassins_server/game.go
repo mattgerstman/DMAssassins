@@ -211,7 +211,7 @@ func Crypt(plainPw string) (hashedPassword []byte, appErr *ApplicationError) {
 	bytePw := []byte(strings.TrimSpace(plainPw))
 	hashedPassword, err := bcrypt.GenerateFromPassword(bytePw, bcrypt.DefaultCost)
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeWtf)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
 	}
 	return hashedPassword, nil
 }

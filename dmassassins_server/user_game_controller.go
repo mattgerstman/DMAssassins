@@ -42,7 +42,7 @@ func UserGameHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			tempErr := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, tempErr, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, tempErr, ErrCodeNotFoundMethod)
 		}
 		WriteObjToPayload(w, r, obj, err)
 	}

@@ -10,36 +10,44 @@ import (
 // Error codes are multiples of http codes for easy mapping
 const (
 	// 400 - Bad Request
+	ErrCodeBadRequestWTF    = 40000
 	ErrCodeInvalidParameter = 40001
 	ErrCodeMissingParameter = 40002
 	ErrCodeInvalidHeader    = 40003
 	ErrCodeMissingHeader    = 40004
+	ErrCodeInvalidUUID      = 40005
 
 	// 401 - Unauthorized
-	ErrCodeNoSession           = 40100
-	ErrCodeInvalidSecret       = 40101
-	ErrCodeInvalidGamePassword = 40102
+	ErrCodeUnauthorizedWTF     = 40100
+	ErrCodeNoSession           = 40101
+	ErrCodeInvalidSecret       = 40102
+	ErrCodeInvalidGamePassword = 40103
 	ErrCodeInvalidFBToken      = 40120
 
+	// 402 - Payment Required
+	// Who the hell uses that?
+
 	// 403 - Forbidden
-	ErrCodePermissionDenied = 40300
+	ErrCodeForbiddenWTF     = 40300
+	ErrCodePermissionDenied = 40301
 
 	// 404 - Not Found -- Invalid Input
-	ErrCodeInvalidMethod   = 40400
-	ErrCodeInvalidEmail    = 40401
-	ErrCodeInvalidUserId   = 40402
-	ErrCodeInvalidUsername = 40403
-	ErrCodeInvalidTeamId   = 40404
-	ErrCodeInvalidGameId   = 40405
+	ErrCodeNotFoundWTF      = 40400
+	ErrCodeNotFoundMethod   = 40401
+	ErrCodeNotFoundEmail    = 40402
+	ErrCodeNotFoundUsername = 40403
+	ErrCodeNotFoundUserId   = 40004
+	ErrCodeNotFoundTeamId   = 40005
+	ErrCodeNotFoundGameId   = 40006
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420
 
 	// 500 - Internal Server Error
+	ErrCodeInternalServerWTF      = 50000
 	ErrCodeDatabase               = 50001
 	ErrCodeDatabaseNoRowsAffected = 50002
 	ErrCodeSession                = 50010 // Malformed Session
-	ErrCodeWtf                    = 50069
 )
 
 // ApplicationError contains information about errors that arise while accessing resources.

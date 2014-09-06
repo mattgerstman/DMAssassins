@@ -12,14 +12,25 @@ type Team struct {
 	TeamName string    `json:"team_name"`
 }
 
-// Gets a team by it's team id
+// Gets a team by it's team_id
 func GetTeamById(teamId uuid.UUID) (team *Team, appErr *ApplicationError) {
 	var gameIdBuffer, teamName string
-	err := db.QueryRow(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, teamId.String()).Scan(&gameIdBuffer, &teamName)
+	err := db.QueryRow(`SELECT team_id, team_name FROM dm_teams WHERE team_id = $1 ORDER BY team_name`, teamId.String()).Scan(&gameIdBuffer, &teamName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	gameId := uuid.Parse(gameIdBuffer)
+	return &Team{teamId, gameId, teamName}, nil
+}
+
+// Gets a team for a user by a game_id
+func (user *User) GetTeamByGameId(gameId uuid.UUID) (team *Team, appErr *ApplicationError) {
+	var teamIdBuffer, teamName string
+	err := db.QueryRow(`SELECT team_id, team_name FROM dm_teams WHERE team_id = (SELECT team_id FROM dm_user_game_mapping WHERE user_id = $1 AND game_id = $2)`, user.UserId.String(), gameId.String()).Scan(&teamIdBuffer, &teamName)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	teamId := uuid.Parse(teamIdBuffer)
 	return &Team{teamId, gameId, teamName}, nil
 }
 

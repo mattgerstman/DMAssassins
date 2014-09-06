@@ -19,12 +19,12 @@ const (
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameUserPath        = "/game/{game_id}/users/{user_id}/"
 	gameUserTargetPath  = "/game/{game_id}/users/{user_id}/target/"
+	gameUserTeamPath    = "/game/{user_id}/users/{user_id}/team/"
 	gameTeamPath        = "/game/{game_id}/team/"
 	teamIdPath          = "/team/{team_id}"
 	userPath            = "/users/{user_id}/"
 	userGamePath        = "/users/{user_id}/game/"
 	userGameNewPath     = "/users/{user_id}/game/new/"
-	userTeamPath        = "/users/{user_id}/team/"
 	sessionPath         = "/session/"
 	homePath            = "/"
 )
@@ -53,8 +53,10 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 
 	data, err := json.Marshal(output)
 	if err != nil {
-		appErr := NewApplicationError("Internal Error", err, ErrCodeWtf)
+		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
 		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
+		HttpErrorLogger(w, appErr.Msg, appErr.Code)
+		return
 	}
 	w.Write(data)
 }
@@ -102,6 +104,7 @@ func StartServer() {
 	// Game then User
 	r.HandleFunc(gameUserPath, GameMappingHandler()).Methods("GET", "POST")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "POST")
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
@@ -112,9 +115,6 @@ func StartServer() {
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET")
 	r.HandleFunc(userGameNewPath, UserGameNewHandler()).Methods("GET")
-
-	// User then Team
-	r.HandleFunc(userTeamPath, UserTeamHandler()).Methods("GET", "POST")
 
 	// Just Team
 	r.HandleFunc(teamIdPath, TeamIdHandler()).Methods("GET", "POST", "DELETE")

@@ -19,13 +19,13 @@ func postGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 	if userId == nil {
 		msg := "Invalid UUID: user_id" + userId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	gamePassword := r.FormValue("game_password")
 
@@ -48,13 +48,13 @@ func getGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *Applicat
 	if userId == nil {
 		msg := "Invalid UUID: user_id" + userId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	return GetGameMapping(userId, gameId)
 }
@@ -76,7 +76,7 @@ func GameMappingHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			tempErr := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, tempErr, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, tempErr, ErrCodeNotFoundMethod)
 		}
 		WriteObjToPayload(w, r, obj, err)
 	}

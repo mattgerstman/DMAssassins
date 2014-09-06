@@ -52,7 +52,7 @@ func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + username
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUsername)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -75,7 +75,7 @@ func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + username
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUserId)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -102,7 +102,7 @@ func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *Application
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "Invalid user: " + username
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUsername)
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUsername)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

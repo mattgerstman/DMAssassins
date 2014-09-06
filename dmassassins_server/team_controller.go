@@ -19,7 +19,7 @@ func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
@@ -42,7 +42,7 @@ func getGameTeam(r *http.Request) (teams []*Team, appErr *ApplicationError) {
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	game, appErr := GetGameById(gameId)
@@ -69,7 +69,7 @@ func GameTeamHandler() http.HandlerFunc {
 			obj = nil
 			msg := "Not Found"
 			tempErr := errors.New("Invalid Http Method")
-			err = NewApplicationError(msg, tempErr, ErrCodeInvalidMethod)
+			err = NewApplicationError(msg, tempErr, ErrCodeNotFoundMethod)
 		}
 		WriteObjToPayload(w, r, obj, err)
 	}

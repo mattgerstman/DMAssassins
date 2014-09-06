@@ -137,7 +137,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 					app.Running.NavGameView.render();
 				}
 				
-				Backbone.history.navigate(Backbone.history.fragment, { trigger : true });
+				if (Backbone.history.fragment != 'login')
+				{
+					Backbone.history.navigate(Backbone.history.fragment, { trigger : true });
+					return;	
+				}
+				Backbone.history.navigate('#', { trigger : true });
 				
 			});
 			
