@@ -62,7 +62,7 @@ ALTER TABLE public.dm_game_properties OWNER TO "Matthew";
 
 CREATE TABLE dm_games (
     game_id uuid NOT NULL,
-    game_name character varying(100),
+    game_name character varying(100) NOT NULL,
     game_started boolean DEFAULT false,
     game_password character varying(100) DEFAULT NULL::character varying
 );
@@ -76,7 +76,7 @@ ALTER TABLE public.dm_games OWNER TO dmassassins;
 
 CREATE TABLE dm_teams (
     team_id uuid NOT NULL,
-    game_id uuid,
+    game_id uuid NOT NULL,
     team_name character varying(100)
 );
 
@@ -88,8 +88,8 @@ ALTER TABLE public.dm_teams OWNER TO "Matthew";
 --
 
 CREATE TABLE dm_user_game_mapping (
-    user_id uuid,
-    game_id uuid,
+    user_id uuid NOT NULL,
+    game_id uuid NOT NULL,
     alive boolean DEFAULT true,
     kills integer DEFAULT 0,
     user_role dm_user_role DEFAULT 'dm_user'::dm_user_role NOT NULL,
@@ -104,8 +104,8 @@ ALTER TABLE public.dm_user_game_mapping OWNER TO dmassassins;
 --
 
 CREATE TABLE dm_user_properties (
-    user_id uuid,
-    key character varying(100),
+    user_id uuid NOT NULL,
+    key character varying(100) NOT NULL,
     value bytea
 );
 
@@ -131,10 +131,10 @@ ALTER TABLE public.dm_user_targets OWNER TO dmassassins;
 
 CREATE TABLE dm_users (
     user_id uuid NOT NULL,
-    username character varying(256),
-    secret character varying(100),
+    username character varying(256) NOT NULL,
+    secret character varying(100) NOT NULL,
     email character varying(256) DEFAULT ''::character varying NOT NULL,
-    facebook_id bigint,
+    facebook_id bigint NOT NULL,
     facebook_token character varying
 );
 
@@ -161,6 +161,8 @@ be54ad34-2df2-11e4-b458-685b35b45205	Quidditch World Cup	f	Money
 1b29febd-d6c4-4b41-beee-356fa16cfe47	TriWizard Tournament	t	\N
 a054b28c-2df2-11e4-b458-685b35b45205	TKE Homecoming	t	\N
 9202fcd2-ccbd-42d4-8c54-99968a38e5e6	DMatUF	t	\N
+1bd2618f-337c-11e4-8e1c-685b35b45205	Bance Darathon	f	\N
+66cbb5cf-337c-11e4-8e1c-685b35b45205	Tech Team	f	\N
 \.
 
 
@@ -169,6 +171,8 @@ a054b28c-2df2-11e4-b458-685b35b45205	TKE Homecoming	t	\N
 --
 
 COPY dm_teams (team_id, game_id, team_name) FROM stdin;
+fe9c4819-3509-11e4-9a6b-685b35b45205	9202fcd2-ccbd-42d4-8c54-99968a38e5e6	Tech
+02cb5f5d-350a-11e4-9a6b-685b35b45205	9202fcd2-ccbd-42d4-8c54-99968a38e5e6	Morale
 \.
 
 
@@ -192,6 +196,9 @@ a9e4701d-2f1d-11e4-9241-685b35b45205	a054b28c-2df2-11e4-b458-685b35b45205	t	0	dm
 cbbf936b-2f1d-11e4-9241-685b35b45205	a054b28c-2df2-11e4-b458-685b35b45205	t	0	dm_user	\N
 cbbf936b-2f1d-11e4-9241-685b35b45205	9202fcd2-ccbd-42d4-8c54-99968a38e5e6	t	0	dm_user	\N
 3bbab8e9-2f1d-11e4-9241-685b35b45205	9202fcd2-ccbd-42d4-8c54-99968a38e5e6	t	0	dm_user	\N
+5759a74a-2f1b-11e4-9241-685b35b45205	013b9efd-2df1-11e4-b458-685b35b45205	t	0	dm_user	\N
+5759a74a-2f1b-11e4-9241-685b35b45205	1bd2618f-337c-11e4-8e1c-685b35b45205	t	0	dm_admin	\N
+5759a74a-2f1b-11e4-9241-685b35b45205	66cbb5cf-337c-11e4-8e1c-685b35b45205	t	0	dm_admin	\N
 \.
 
 
@@ -258,7 +265,7 @@ COPY dm_users (user_id, username, secret, email, facebook_id, facebook_token) FR
 6ecafe42-2f1d-11e4-9241-685b35b45205	RyanLewis	muggle	ryan_kjvypqp_lewis@tfbnw.net	347343548763059	CAAJPKJ2eMPIBABoCmWzZAZBcv9RjZAyIsZCnFWlV5uSVq2ZCwxZCMSuZBw9jCf0H3hXEqXmGKknHEEaUjCUsz0rEO2exPVCfMTgLX4m5OdZCGXNZAHNa8KbVtBqgHxfY5cjggCOmMcilPH9jvZBZALvX6BhHFEHug98KqwdlJtlVpoV6D6mdMRDWiiVwDVyV6xBS9Cbrm11uiAIJsHILTG4jBO0ZBhRnDZBLwF5MZD
 a9e4701d-2f1d-11e4-9241-685b35b45205	HermioneGranger	muggle	hermione_duxhdpf_granger@tfbnw.net	1465920003684029	\N
 cbbf936b-2f1d-11e4-9241-685b35b45205	RonWeasley	muggle	ron_axfcske_weasley@tfbnw.net	280485012160129	CAAJPKJ2eMPIBAIYQ8VBraO0HE2mMkWdrs636FE1LzjrcGVVRV8zJz1PPM7xIUufkBnEi5xfGorTyHONxADZCOtwOZAd1NL67rqWJuNFsdNnGIFcYl04xg6jkCIt1I1livmJ1ZBfnjUrtZBmZBalWR8Lsi266eHg2sdx79ZAJZCmP8zvLTc8PfEfl4HleEfbVZB5ns7Nhf27n5ks37ZAb9xVrEPdFxuoC3KZAEZD
-5759a74a-2f1b-11e4-9241-685b35b45205	MattGerstman	muggle	imatt711@me.com	10152622020481913	CAAJPKJ2eMPIBAFmc12136b4rGCtX7xikREUcTxhsApUn1PEQdlF7079sJ2mPlBVrCBrhWSjfE8SCU673lX8OnwZAMdzRfmb639ZBPVlcZABInC6qiet9b9CfNErdvdqvkbKypKorlP8SpseCqHJNrCwNEUkH3x8QceMNMCZB5yhc0mhg6ccSF19Xo8CCXiLNaH8XsPLz4tl17aU7SyMYrEn0QH9rL6EZD
+5759a74a-2f1b-11e4-9241-685b35b45205	MattGerstman	muggle	imatt711@me.com	10152622020481913	CAAJPKJ2eMPIBANVGpvuCv6PIRbfXtXWfvAZBrv1GNtbkrgcyyKt82On1WlMqYidFffUGsC2YUc5ZArle8dKWzwsBZCcVQXZByHfYlvoHaKjDYGgQnmjyfyBoVrkgLPofSmeu6Yt8ejyRsFChXrtb697L31l7QjECRIRIsY96ekkE4jZCB8FGEfFq2KrqHXMbqKjMCcrBRdLAB1WcqOzsHTMqmY5kXS9IZD
 \.
 
 
@@ -284,6 +291,13 @@ ALTER TABLE ONLY dm_teams
 
 ALTER TABLE ONLY dm_users
     ADD CONSTRAINT dm_users_pkey PRIMARY KEY (user_id);
+
+
+--
+-- Name: dm_teams_game_id_team_name_idx; Type: INDEX; Schema: public; Owner: Matthew; Tablespace: 
+--
+
+CREATE UNIQUE INDEX dm_teams_game_id_team_name_idx ON dm_teams USING btree (game_id, team_name);
 
 
 --
