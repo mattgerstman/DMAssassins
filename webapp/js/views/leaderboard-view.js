@@ -18,10 +18,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  this.listenTo(this.model, 'change', this.render)
 		  this.listenTo(this.model, 'fetch', this.render)		  
 	  },
-	  
 	  // renderer
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
+		this.$el.find('#leaderboard_table').dataTable();		
 		return this;  
 	  }	    
  
