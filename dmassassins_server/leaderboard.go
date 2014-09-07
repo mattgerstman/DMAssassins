@@ -87,6 +87,7 @@ func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *Applicatio
 		userLeaderboard = append(userLeaderboard, entry)
 	}
 
+	// Set up the overall leaderboard object
 	leaderboard = &Leaderboard{teamsEnabled, userLeaderboard, teamKills}
 
 	return leaderboard, nil
