@@ -19,12 +19,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  // renderer
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
-		var that = this;
+		var numCols = this.model.get('teams_enabled') + 2;
 		var options = {
 			 paging:		false,
 			 searching: 	false,
 			 info: 		    false,
-			 order:			[[1+this.model.get('teams_enabled'), 'desc']]
+			 order:			[[numCols-1, 'desc'], [numCols, 'desc']]
 		};
 
 		this.$el.find('#user_leaderboard_table').dataTable(options);
