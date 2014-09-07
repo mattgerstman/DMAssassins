@@ -41,6 +41,7 @@ func getQuery(teamsEnabled bool) (query string) {
 // Returns the game leaderboard for user rankings
 func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *ApplicationError) {
 
+	//game.SetGameProperty("teams_enabled", "false")
 	teamsEnabledString, _ := game.GetGameProperty("teams_enabled")
 	teamsEnabled := teamsEnabledString == "true"
 

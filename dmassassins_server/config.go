@@ -18,9 +18,12 @@ var Config *Configuration
 
 // Loads config variables from file into global Config struct
 func LoadConfig() *ApplicationError {
-	file, _ := os.Open("config.json")
+	file, err := os.Open("config.json")
+	if err != nil {
+		log.Fatal("Failed to load config with message:", err)
+	}
 	decoder := json.NewDecoder(file)
-	err := decoder.Decode(&Config)
+	err = decoder.Decode(&Config)
 	if err != nil {
 		log.Fatal("Failed to load config with message:", err)
 	}

@@ -7,12 +7,15 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	
 	app.Models.Rules = Backbone.Model.extend({
 		defaults: {
-			rules : {
-				'Golden' : ['Don\'t be a dick', 'Don\'t kill Matt'],
-				'Safe Zones' : ['No killing on the third floor', 'No killing in Matt\'s house', 'The third floor corridor is off-limits to all those who do not wish to die a most painful death']
-			}
+			rules : 'yo'
 		},
-		url : config.WEB_ROOT+'rules/'
+		parse: function(response) {
+			return { rules: response.response }
+		},
+		initialize: function(){
+			this.url = config.WEB_ROOT+'game/'+app.Session.get('game').game_id+'/rules/'	
+		}
+		
 
 	})
 })();

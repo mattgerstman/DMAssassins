@@ -79,7 +79,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	properties["last_name"] = lastName
 
 	// Create user
-	user, appErr = NewUser(username, email, "muggle", facebookId, properties)
+	user, appErr = NewUser(username, email, facebookId, properties)
 	if appErr != nil {
 		return nil, appErr
 	}

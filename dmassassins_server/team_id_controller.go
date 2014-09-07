@@ -19,7 +19,7 @@ func postTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	if teamId == nil {
 		msg := "Invalid UUID: team_id" + teamId.String()
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	team, appErr = GetTeamById(teamId)
@@ -28,6 +28,12 @@ func postTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	}
 
 	teamName := r.FormValue("team_name")
+	if teamName == "" {
+		msg := "Missing Parameter: team_name"
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
 	appErr = team.Rename(teamName)
 	if appErr != nil {
 		return nil, appErr

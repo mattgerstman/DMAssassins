@@ -359,23 +359,8 @@
 	</script>
 
 	<script type="text/template" id="rules-template">
-		<%
-		_.each(rules, function(items, header) {						
-		%>
-		<h1><%=header%></h1>
-		<ul>
-			<%
-			_.each(items, function(item){
-			%>
-				<li><%=item%></li>
-			<%
-			})
-			%>
-		</ul>
-		<%
-		})
-		%>
-</script>
+		<%= rules %>
+	</script>
 	
   <script src="js/config.js" type="text/javascript" ></script>    
   <script src="js/lib/jquery-1.11.1.js" type="text/javascript" ></script>  

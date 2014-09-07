@@ -8,10 +8,7 @@ import (
 )
 
 // POST - Starts a game
-func postGameId(r *http.Request) (*Game, *ApplicationError) {
-	var appErr *ApplicationError
-	appErr = nil
-
+func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -25,7 +22,7 @@ func postGameId(r *http.Request) (*Game, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	game, appErr := GetGameById(gameId)
+	game, appErr = GetGameById(gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -39,8 +36,8 @@ func postGameId(r *http.Request) (*Game, *ApplicationError) {
 }
 
 // GET - Gets a game
-func getGameId(r *http.Request) (*Game, *ApplicationError) {
-	appErr := RequiresLogin(r)
+func getGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -53,7 +50,7 @@ func getGameId(r *http.Request) (*Game, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	game, appErr := GetGameById(gameId)
+	game, appErr = GetGameById(gameId)
 
 	if appErr != nil {
 		return nil, appErr
@@ -62,8 +59,8 @@ func getGameId(r *http.Request) (*Game, *ApplicationError) {
 }
 
 // DELETE - Ends a game
-func deleteGameId(r *http.Request) (*Game, *ApplicationError) {
-	appErr := RequiresAdmin(r)
+func deleteGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -76,7 +73,7 @@ func deleteGameId(r *http.Request) (*Game, *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	game, appErr := GetGameById(gameId)
+	game, appErr = GetGameById(gameId)
 
 	if appErr != nil {
 		return nil, appErr
@@ -91,7 +88,7 @@ func deleteGameId(r *http.Request) (*Game, *ApplicationError) {
 }
 
 // Handler for /game path
-func gameIdHandler() http.HandlerFunc {
+func GameIdHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}

@@ -20,7 +20,7 @@ func getUser(r *http.Request) (user *User, appErr *ApplicationError) {
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
-	appErr = RequiresLogin(r)
+	//appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

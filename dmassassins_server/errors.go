@@ -47,6 +47,7 @@ const (
 	ErrCodeInternalServerWTF      = 50000
 	ErrCodeDatabase               = 50001
 	ErrCodeDatabaseNoRowsAffected = 50002
+	ErrCodeFile                   = 50003
 	ErrCodeSession                = 50010 // Malformed Session
 )
 

@@ -147,17 +147,17 @@ func (user *User) JoinTeam(teamId uuid.UUID) (gameMapping *GameMapping, appErr *
 		return nil, NewApplicationError(msg, err, ErrCodeDatabase)
 	}
 
-	var userRole string
+	var userRole, secret string
 	var kills int
 	var alive bool
 
 	// Updates the user's game_mapping to include their new team id
-	err = db.QueryRow(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE game_id = $2 and user_id = $3 RETURNING user_role, kills, alive`, teamId.String(), gameId.String(), user.UserId.String()).Scan(&userRole, &kills, &alive)
+	err = db.QueryRow(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE game_id = $2 and user_id = $3 RETURNING user_role, secret, kills, alive`, teamId.String(), gameId.String(), user.UserId.String()).Scan(&userRole, &secret, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	return &GameMapping{user.UserId, gameId, teamId, userRole, kills, alive}, nil
+	return &GameMapping{user.UserId, gameId, teamId, userRole, secret, kills, alive}, nil
 
 }
 
@@ -177,17 +177,17 @@ func (user *User) LeaveTeam(teamId uuid.UUID) (gameMapping *GameMapping, appErr 
 		return nil, NewApplicationError(msg, err, ErrCodeDatabase)
 	}
 
-	var userRole string
+	var userRole, secret string
 	var kills int
 	var alive bool
 
 	// Sets the user's team_id to null
-	err = db.QueryRow(`UPDATE dm_user_game_mapping SET team_id = null WHERE game_id = $1 and user_id = $2 RETURNING user_role, kills, alive`, gameId.String(), user.UserId.String()).Scan(&userRole, &kills, &alive)
+	err = db.QueryRow(`UPDATE dm_user_game_mapping SET team_id = null WHERE game_id = $1 and user_id = $2 RETURNING user_role, secret, kills, alive`, gameId.String(), user.UserId.String()).Scan(&userRole, &secret, &kills, &alive)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	return &GameMapping{user.UserId, gameId, nil, userRole, kills, alive}, nil
+	return &GameMapping{user.UserId, gameId, nil, userRole, secret, kills, alive}, nil
 }
 
 // Rename a team

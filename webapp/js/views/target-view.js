@@ -39,6 +39,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}
 			
 		})
+		this.model.fetch()
 	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
