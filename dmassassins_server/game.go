@@ -9,10 +9,11 @@ import (
 )
 
 type Game struct {
-	GameId      uuid.UUID `json:"game_id"`
-	GameName    string    `json:"game_name"`
-	Started     bool      `json:"game_started"`
-	HasPassword bool      `json:"game_has_password"`
+	GameId      uuid.UUID         `json:"game_id"`
+	GameName    string            `json:"game_name"`
+	Started     bool              `json:"game_started"`
+	HasPassword bool              `json:"game_has_password"`
+	Properties  map[string]string `json:"game_properties"`
 }
 
 // Get all games
@@ -47,28 +48,13 @@ func GetGameById(gameId uuid.UUID) (game *Game, appErr *ApplicationError) {
 	}
 
 	// Return the game
-	return &Game{gameId, gameName, gameStarted, hasPassword}, nil
+	game = &Game{gameId, gameName, gameStarted, hasPassword, nil}
+	_, appErr = game.GetGameProperties()
+	if appErr != nil {
+		return nil, appErr
+	}
+	return game, nil
 }
-
-// DROIDS Likely removing this function, i'll let it sit for a while before I do that
-// func GetGameByName(gameName string) (*Game, *ApplicationError) {
-// 	var gameId uuid.UUID
-// 	var gameIdBuffer sql.NullString
-// 	var gameStarted bool
-// 	var gamePasswordBuffer sql.NullString
-// 	err := db.QueryRow(`SELECT game_id, game_started, game_password FROM dm_games WHERE game_name = $1`, gameName).Scan(&gameIdBuffer, &gameStarted, &gamePasswordBuffer)
-// 	if err != nil {
-// 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-// 	}
-// 	gameId = uuid.Parse(gameIdBuffer.String)
-
-// 	hasPassword := false
-// 	if (gamePasswordBuffer.Valid != false) && (gamePasswordBuffer.String != "") {
-// 		hasPassword = true
-// 	}
-
-// 	return &Game{gameId, gameName, gameStarted, hasPassword}, nil
-// }
 
 // End a game
 func (game *Game) End() (appErr *ApplicationError) {
@@ -161,7 +147,7 @@ func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
 
 		// Create the game struct and apparend it to the list
 		gameId = uuid.Parse(gameIdBuffer)
-		game := &Game{gameId, gameName, gameStarted, hasPassword}
+		game := &Game{gameId, gameName, gameStarted, hasPassword, nil}
 		games = append(games, game)
 	}
 	return games, nil
@@ -271,7 +257,13 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	tx.Commit()
 	hasPassword := encryptedPassword != nil
 
-	return &Game{gameId, gameName, false, hasPassword}, nil
+	game = &Game{gameId, gameName, false, hasPassword, nil}
+	_, appErr = game.GetGameProperties()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return game, nil
 
 }
 

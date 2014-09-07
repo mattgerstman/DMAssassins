@@ -65,6 +65,7 @@ var app = app || {
 		switchGame: function(game_id) {
 			var that = this;
 			$.get(config.WEB_ROOT + 'game/' + game_id + '/', function(response) {
+				console.log(response.response);
 				app.Session.set('game', JSON.stringify(response.response))
 				that.trigger('game-change');
 			})
