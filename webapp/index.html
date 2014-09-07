@@ -304,22 +304,25 @@
 	<script type="text/template" id="leaderboard-template">
 		<table class="stripe compact" id="user_leaderboard_table">
 			<thead>
-				<th style="width:<%=col_width%>%">Name</th>
-				<th style="width:<%=col_width%>%">Kills</th>
+				<th style="width:<%=user_col_width%>%">Name</th>
 				<% if (teams_enabled) { %>
-					<th style="width:<%=col_width%>%">Team</th>
+					<th style="width:<%=user_col_width%>%">Team</th>
 				<% } %>
+				<th style="width:<%=user_col_width%>%">Kills</th>
 			</thead>
 			<tbody>
 					<%
-					_.each(users, function(user) {						
+					_.each(users, function(user) {			
+						if (!user.alive) {
+							return;
+						}
 					%>
 					<tr>
 						<td><%=user.name%></td>
-						<td><%=user.kills%></td>
 						<% if (teams_enabled) { %>
 							<td><%= user.team_name %></td>
 						<% } %>
+						<td><%=user.kills%></td>						
 					</tr>					
 					<%
 					})
@@ -331,17 +334,20 @@
 				<thead>
 					<th>Team Name</th>
 					<th>Kills</th>
-					<th>Players Left</th>
-	
+					<th>Avg Kills</th>
+					<th>Total Players</th>
+					<th>Players Left</th>					
 				</thead>
 				<tbody>
 						<%
 						_.each(teams, function(team, name) {						
 						%>
 						<tr>
-							<td style="width:<%=col_width%>%"><%=name%></td>
-							<td style="width:<%=col_width%>%"><%=team.kills%></td>
-							<td style="width:<%=col_width%>%"><%=team.alive%></td>
+							<td style="width:<%=team_col_width%>%"><%=name%></td>
+							<td style="width:<%=team_col_width%>%"><%=parseFloat(team.kills/team.players).toFixed(2)%></td>
+							<td style="width:<%=team_col_width%>%"><%=team.kills%></td>
+							<td style="width:<%=team_col_width%>%"><%=team.players%></td>
+							<td style="width:<%=team_col_width%>%"><%=team.alive%></td>
 						</tr>					
 						<%
 						})

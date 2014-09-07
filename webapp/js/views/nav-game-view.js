@@ -47,12 +47,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  
 		  var game_name = app.Session.get('game').game_name;
 		  $('#games_header').text(game_name);
-	  		console.log(game_name)	
 	  	  var max = 9;	  
 		  if (game_name.length > max)
 		  {
 				game_name = game_name.substr(0,max-3) + '...';	  
-		  		console.log(game_name)
 		  }		  	
 		  $('#games_header_short').text(game_name);
 		  

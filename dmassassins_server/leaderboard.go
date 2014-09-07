@@ -9,12 +9,14 @@ type Leaderboard struct {
 type UserLeaderboardEntry struct {
 	Name     string `json:"name"`
 	Kills    int    `json:"kills"`
+	Alive bool `json:"alive"`
 	TeamName string `json:"team_name"`
 }
 
 type TeamLeaderboardEntry struct {
 	Kills int `json:"kills"`
 	Alive int `json:"alive"`
+	Players int `json:"players"`
 }
 
 func getQuery(teamsEnabled bool) (query string) {
@@ -67,9 +69,10 @@ func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *Applicatio
 
 		if teamsEnabled {
 			if teamKills[teamName] == nil {
-				teamKills[teamName] = &TeamLeaderboardEntry{0,0}
+				teamKills[teamName] = &TeamLeaderboardEntry{0,0,0}
 			}
 			teamKills[teamName].Kills += kills
+			teamKills[teamName].Players ++
 			if alive {
 				teamKills[teamName].Alive++
 			}
@@ -80,7 +83,7 @@ func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *Applicatio
 		name = firstName + " " + lastName
 
 		// Create the entry and append it
-		entry := &UserLeaderboardEntry{name, kills, teamName}
+		entry := &UserLeaderboardEntry{name, kills, alive, teamName}
 		userLeaderboard = append(userLeaderboard, entry)
 	}
 

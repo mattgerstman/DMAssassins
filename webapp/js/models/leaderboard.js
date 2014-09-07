@@ -8,7 +8,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	app.Models.Leaderboard = Backbone.Model.extend({
 		defaults: {
 			teams_enabled: true,
-			col_width:33.3333,
+			user_col_width:33.3333,
+			team_col_width:20,
 			users : [
 				{
 					name:"Matt",
@@ -30,7 +31,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		},
 		parse: function(response){
 			var data = response.response;
-			data.col_width = (100 / (2 + data.teams_enabled))
+			data.user_col_width = 100/3;
+			data.team_col_width = 20;
 			return data;
 		},
 		initialize: function(){
