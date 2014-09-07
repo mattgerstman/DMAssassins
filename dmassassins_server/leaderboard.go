@@ -1,21 +1,21 @@
 package main
 
 type Leaderboard struct {
-	TeamsEnabled bool                    `json:"teams_enabled"`
-	Users        []*UserLeaderboardEntry `json:"users"`
-	Teams        map[string]*TeamLeaderboardEntry          `json:"teams"`
+	TeamsEnabled bool                             `json:"teams_enabled"`
+	Users        []*UserLeaderboardEntry          `json:"users"`
+	Teams        map[string]*TeamLeaderboardEntry `json:"teams"`
 }
 
 type UserLeaderboardEntry struct {
 	Name     string `json:"name"`
 	Kills    int    `json:"kills"`
-	Alive bool `json:"alive"`
+	Alive    bool   `json:"alive"`
 	TeamName string `json:"team_name"`
 }
 
 type TeamLeaderboardEntry struct {
-	Kills int `json:"kills"`
-	Alive int `json:"alive"`
+	Kills   int `json:"kills"`
+	Alive   int `json:"alive"`
 	Players int `json:"players"`
 }
 
@@ -69,14 +69,14 @@ func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *Applicatio
 
 		if teamsEnabled {
 			if teamKills[teamName] == nil {
-				teamKills[teamName] = &TeamLeaderboardEntry{0,0,0}
+				teamKills[teamName] = &TeamLeaderboardEntry{0, 0, 0}
 			}
 			teamKills[teamName].Kills += kills
-			teamKills[teamName].Players ++
+			teamKills[teamName].Players++
 			if alive {
 				teamKills[teamName].Alive++
 			}
-			
+
 		}
 
 		// Concatenate first + last name
