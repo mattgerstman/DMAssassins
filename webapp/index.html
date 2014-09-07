@@ -68,7 +68,20 @@
 					%>
 								
 								<li class="nav_item dropdown_parent" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_parent">
-									<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header"><%=dropdown_title%></span><span class="caret"></span></a>
+									<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+										<div class="hidden-sm">
+											<span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header" >
+												<%=dropdown_title%>
+											</span>
+											<span class="caret"></span>										
+										</div>
+										<div  class="visible-sm">
+											<span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header_short">
+												<%=dropdown_title%>
+											</span>
+											<span class="caret"></span>
+										</div>
+									</a>
 									<ul class="dropdown-menu" role="menu" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_dropdown">
 					<%
 										_.each(dropdown_items, function(dropdown_item) {
@@ -289,10 +302,13 @@
 	</script>
 
 	<script type="text/template" id="leaderboard-template">
-		<table class="stripe compact" id="leaderboard_table">
+		<table class="stripe compact" id="user_leaderboard_table">
 			<thead>
-				<th>Name</th>
-				<th>Kills</th>
+				<th style="width:<%=col_width%>%">Name</th>
+				<th style="width:<%=col_width%>%">Kills</th>
+				<% if (teams_enabled) { %>
+					<th style="width:<%=col_width%>%">Team</th>
+				<% } %>
 			</thead>
 			<tbody>
 					<%
@@ -301,12 +317,38 @@
 					<tr>
 						<td><%=user.name%></td>
 						<td><%=user.kills%></td>
+						<% if (teams_enabled) { %>
+							<td><%= user.team_name %></td>
+						<% } %>
 					</tr>					
 					<%
 					})
 					%>
 			</tbody>
 		</table>
+		<% if (teams_enabled) { %>
+			<table class="stripe compact" id="team_leaderboard_table">
+				<thead>
+					<th>Team Name</th>
+					<th>Kills</th>
+					<th>Players Left</th>
+	
+				</thead>
+				<tbody>
+						<%
+						_.each(teams, function(team, name) {						
+						%>
+						<tr>
+							<td style="width:<%=col_width%>%"><%=name%></td>
+							<td style="width:<%=col_width%>%"><%=team.kills%></td>
+							<td style="width:<%=col_width%>%"><%=team.alive%></td>
+						</tr>					
+						<%
+						})
+						%>
+				</tbody>
+			</table>
+		<% } %>
 	</script>
 
 	<script type="text/template" id="rules-template">

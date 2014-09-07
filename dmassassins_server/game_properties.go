@@ -9,6 +9,7 @@ import (
 
 // Sets a single game property for a game
 func (game *Game) SetGameProperty(key string, value string) (appErr *ApplicationError) {
+
 	// First attempt to update it if the property currently exists
 	res, err := db.Exec(`UPDATE dm_game_properties SET value = $1 WHERE game_id = $2 AND key ILIKE $3`, value, game.GameId.String(), key)
 	if err != nil {
@@ -31,7 +32,7 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 		if rowsAffected == 0 {
-			err = errors.New("Failed insert for " + key + " : " + value)
+			err = errors.New("Failed insert for " + key + " : " + string(value))
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 	}
@@ -43,6 +44,9 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 // Get a single Game Property from the db
 func (game *Game) GetGameProperty(key string) (property string, appErr *ApplicationError) {
 	err := db.QueryRow(`SELECT value FROM dm_game_properties WHERE game_id = $1 AND key ILIKE $2`, game.GameId.String(), key).Scan(&property)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -64,7 +68,8 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 	}
 	// Loop through rows and add properties
 	for rows.Next() {
-		var key, value string
+		var key string
+		var value string
 
 		err := rows.Scan(&key, &value)
 		if err == nil {

@@ -3,7 +3,6 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-
 	fb "github.com/huandu/facebook"
 	"github.com/polds/imgbase64"
 )

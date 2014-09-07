@@ -32,18 +32,30 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  if (Backbone.history.fragment == 'join_game')
 		  {
 		  	this.showCurrentGame();
-			$('#games_header').text('Join New Game');
+			$('#games_header').text('Join Game');
+			$('#games_header_short').text('Join Game');
 			return;
 		  }
 		  
 		  if (Backbone.history.fragment == 'create_game')
 		  {
 		  	this.showCurrentGame();
-			$('#games_header').text('Create New Game');
+			$('#games_header').text('Create Game');
+			$('#games_header_short').text('Create Game');
 			return;
 		  }
-
-		  $('#games_header').text(app.Session.get('game').game_name);	
+		  
+		  var game_name = app.Session.get('game').game_name;
+		  $('#games_header').text(game_name);
+	  		console.log(game_name)	
+	  	  var max = 9;	  
+		  if (game_name.length > max)
+		  {
+				game_name = game_name.substr(0,max-3) + '...';	  
+		  		console.log(game_name)
+		  }		  	
+		  $('#games_header_short').text(game_name);
+		  
 		  var game_id = app.Session.get('game').game_id;
 		  $('#nav_'+game_id).addClass('hide');
 	  },

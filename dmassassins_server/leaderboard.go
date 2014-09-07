@@ -1,32 +1,90 @@
 package main
 
+type Leaderboard struct {
+	TeamsEnabled bool                    `json:"teams_enabled"`
+	Users        []*UserLeaderboardEntry `json:"users"`
+	Teams        map[string]*TeamLeaderboardEntry          `json:"teams"`
+}
+
 type UserLeaderboardEntry struct {
-	Name  string `json:"name"`
-	Kills int    `json:"kills"`
+	Name     string `json:"name"`
+	Kills    int    `json:"kills"`
+	TeamName string `json:"team_name"`
+}
+
+type TeamLeaderboardEntry struct {
+	Kills int `json:"kills"`
+	Alive int `json:"alive"`
+}
+
+func getQuery(teamsEnabled bool) (query string) {
+	query = `SELECT map.kills, map.alive, first_name.value as first_name, last_name.value as last_name`
+	if teamsEnabled {
+		query += `, team.team_name`
+	} else {
+		query += `, ''`
+	}
+	query += ` FROM dm_user_game_mapping as map, dm_user_properties as first_name, dm_user_properties as last_name`
+	if teamsEnabled {
+		query += `, dm_teams as team`
+	}
+	query += ` WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND map.game_id = $1`
+	if teamsEnabled {
+		query += ` AND (team.team_id = map.team_id)`
+	}
+	query += ` ORDER BY kills DESC`
+	return query
 }
 
 // Returns the game leaderboard for user rankings
-func (game *Game) GetUserLeaderboard(alive bool) (leaderboard []*UserLeaderboardEntry, appErr *ApplicationError) {
+func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *ApplicationError) {
+
+	teamsEnabledString, _ := game.GetGameProperty("teams_enabled")
+	teamsEnabled := teamsEnabledString == "true"
+
+	query := getQuery(teamsEnabled)
+
 	// Query the db
-	rows, err := db.Query(`SELECT map.kills, first_name.value as first_name, last_name.value as last_name FROM dm_user_game_mapping as map, dm_user_properties as first_name, dm_user_properties as last_name WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND game_id = $1 AND alive = $2 ORDER BY kills DESC`, game.GameId.String(), alive)
+	rows, err := db.Query(query, game.GameId.String())
+
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	teamKills := make(map[string]*TeamLeaderboardEntry)
+
+	var userLeaderboard []*UserLeaderboardEntry
+
 	// Loop through leaderboard
 	for rows.Next() {
-		var firstName, lastName, name string
+		var firstName, lastName, name, teamName string
 		var kills int
-		err = rows.Scan(&kills, &firstName, &lastName)
+		var alive bool
+		err = rows.Scan(&kills, &alive, &firstName, &lastName, &teamName)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
+		if teamsEnabled {
+			if teamKills[teamName] == nil {
+				teamKills[teamName] = &TeamLeaderboardEntry{0,0}
+			}
+			teamKills[teamName].Kills += kills
+			if alive {
+				teamKills[teamName].Alive++
+			}
+			
+		}
+
 		// Concatenate first + last name
 		name = firstName + " " + lastName
 
 		// Create the entry and append it
-		entry := &UserLeaderboardEntry{name, kills}
-		leaderboard = append(leaderboard, entry)
+		entry := &UserLeaderboardEntry{name, kills, teamName}
+		userLeaderboard = append(userLeaderboard, entry)
 	}
+
+	leaderboard = &Leaderboard{teamsEnabled, userLeaderboard, teamKills}
+
 	return leaderboard, nil
 }

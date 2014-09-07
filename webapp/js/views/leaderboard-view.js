@@ -19,11 +19,22 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  // renderer
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
-		this.$el.find('#leaderboard_table').dataTable({
+
+		var options = {
 			 paging:		false,
 			 searching: 	false,
-			 info: 		    false
-		});		
+			 info: 		    false,
+			 order:			[[1, 'desc']]
+		};
+		
+		if (this.model.get('teams_enabled'))
+		{
+			this.$el.find('#team_leaderboard_table').dataTable(options);
+		}
+
+		this.$el.find('#user_leaderboard_table').dataTable(options);	
+		
+
 		return this;  
 	  }	    
  
