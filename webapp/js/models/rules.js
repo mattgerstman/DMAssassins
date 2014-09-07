@@ -13,7 +13,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			return { rules: response.response }
 		},
 		initialize: function(){
-			this.url = config.WEB_ROOT+'game/'+app.Session.get('game').game_id+'/rules/'	
+			var game_id = null;
+			if (app.Session.get('game'))
+			{
+				game_id = game_id;
+			}
+			this.url = config.WEB_ROOT+'game/'+game_id+'/rules/'	
 		}
 		
 
