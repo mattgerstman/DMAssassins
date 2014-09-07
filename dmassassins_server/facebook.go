@@ -158,7 +158,7 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 
 	// Query facebook session to make sure token is valid
 	session := getFacebookSession(token)
-	res, err := session.Get("/debug_token", fb.Params{"input_token": token, "access_token": Config.FBUserAccessToken})
+	res, err := session.Get("/debug_token", fb.Params{"input_token": token})
 	if err != nil {
 		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}

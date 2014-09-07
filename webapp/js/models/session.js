@@ -148,6 +148,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			
 			// if theres a login error direct them to the login screen
 			login.fail(function(){
+				this.clear();
+				FB.getLoginStatus(function(response) {
+				    statusChangeCallback(response);
+				  });
 				Backbone.history.navigate('login', { trigger : true });
 			});
 			
