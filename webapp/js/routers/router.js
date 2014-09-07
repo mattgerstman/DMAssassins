@@ -167,6 +167,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		rules : function() {
 			//console.log('rules');			
 			app.Running.currentView = new app.Views.RulesView();
+			app.Running.currentView.model.loadGame();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
