@@ -34,7 +34,33 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
-	return user.GetTarget(gameId)
+
+
+	user, appErr = user.GetTarget(gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+
+	gameMapping, appErr := GetGameMapping(userId, gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+	user.Properties["team"] = ""
+
+	fmt.Println(gameMapping.TeamId.String());
+
+	if gameMapping.TeamId == nil {
+		return user, nil
+	}
+
+	team, appErr := GetTeamById(gameMapping.TeamId)
+	if appErr != nil {
+		return nil, appErr
+	}
+	user.Properties["team"]= team.TeamName
+
+	return user, nil
 }
 
 // DELETE - Kill a target, delete User may eventually be used by an admin

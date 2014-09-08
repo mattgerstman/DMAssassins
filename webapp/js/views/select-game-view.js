@@ -87,7 +87,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  // finish up and navigate to your profile
 	  finish: function(){
-	  		app.Running.UserGamesModel.switchGame(app.Session.get('game').game_id);
+	  		app.Running.UserGamesModel.switchGame(app.Session.getGameId());
 			Backbone.history.navigate('my_profile', { trigger : true });  
 	  },
 	  // toggles the password entry field on create game

@@ -21,7 +21,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}
 
 		},
-		
+				
 		// parses the api wrapper, automatically called by fetch()
 		parse: function(response) {                
                return response.response;
@@ -29,8 +29,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
         
         // loaded on initialization
 		initialize: function() {
-			this.idAttribute = 'username'
-			this.url = config.WEB_ROOT  + 'users/' + this.get('user_id') + '/';
+			this.idAttribute = 'user_id';
+			var game_id = app.Session.getGameId();
+			this.url = config.WEB_ROOT + 'game/' + game_id + '/users/' + this.get('user_id') + '/';
+		},
+		changeGame: function() {
+			var game_id = app.Session.getGameId();
+			this.url = config.WEB_ROOT + 'game/' + game_id + '/users/' + this.get('user_id') + '/';			
 		}
 	})
 })();

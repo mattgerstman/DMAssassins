@@ -13,19 +13,11 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			return { rules: response.response }
 		},
 		initialize: function(){
-			var game_id = null;
-			if (app.Session.get('game'))
-			{
-				game_id = game_id;
-			}
+			var game_id = app.Session.getGameId();
 			this.url = config.WEB_ROOT+'game/'+game_id+'/rules/'	
 		},
 		loadGame: function(){
-			var game_id = null;
-			if (app.Session.get('game'))
-			{
-				game_id = app.Session.get('game').game_id
-			}
+			var game_id = app.Session.getGameId();
 			this.url = config.WEB_ROOT + 'game/' + game_id + '/rules/'
 			
 		}

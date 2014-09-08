@@ -5,10 +5,11 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
+	"fmt"
 )
 
 // POST - Wrapper for GameMapping:JoinGame
-func postGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -38,8 +39,8 @@ func postGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 }
 
 // GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
-func getGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
-	appErr = RequiresUser(r)
+func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
+	//appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -50,17 +51,44 @@ func getGameMapping(r *http.Request) (gameMapping *GameMapping, appErr *Applicat
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
+
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
-	return GetGameMapping(userId, gameId)
+
+	user, appErr = GetUserById(userId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	gameMapping, appErr := GetGameMapping(userId, gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	user.Properties["secret"] = gameMapping.Secret
+	user.Properties["team"] = ""
+
+	fmt.Println(gameMapping.TeamId.String());
+
+	if gameMapping.TeamId == nil {
+		return user, nil
+	}
+
+	team, appErr := GetTeamById(gameMapping.TeamId)
+	if appErr != nil {
+		return nil, appErr
+	}
+	user.Properties["team"]= team.TeamName
+	
+	return user, nil
 }
 
 // Handler for /game path
-func GameMappingHandler() http.HandlerFunc {
+func GameUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -68,10 +96,10 @@ func GameMappingHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getGameMapping(r)
+			obj, err = getGameUser(r)
 
 		case "POST":
-			obj, err = postGameMapping(r)
+			obj, err = postGameUser(r)
 		default:
 			obj = nil
 			msg := "Not Found"

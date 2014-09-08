@@ -144,6 +144,11 @@
 					 	<label>Facebook:</label> <%= properties.facebook %>
 					</div>
 				</div>
+				<% if (properties.team) { %>				
+						<div class="row">
+						 	<label>Team:</label> <%= properties.team %>
+						</div>
+					<% } %>
 				<div class="row">
 					<a class="thumbnail">
 					   <img src=<%= properties.photo_thumb %>>
@@ -177,6 +182,17 @@
 					</div>
 					<div class="row">
 					 	<label>Facebook:</label> <%= properties.facebook %>
+					</div>
+					<% if (properties.team) { %>				
+						<div class="row">
+						 	<label>Team:</label> <%= properties.team %>
+						</div>
+					<% } %>
+					<div class="row">					 	
+					 	<div class="text-danger"><label>Secret:</label> <%= properties.secret %></div>
+					 	<p class="text-danger">
+					 		Give this to your assassin if they kill you.
+					 	</p>
 					</div>
 				</div>
 				<div class="row">

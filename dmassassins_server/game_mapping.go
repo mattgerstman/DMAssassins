@@ -76,11 +76,9 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	return nil
 }
 
-
-
 // Gets an arbitrary game for a user to start off with
 func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *ApplicationError) {
-	
+
 	var userRole, secret, gameIdBuffer string
 	var teamIdBuffer sql.NullString
 	var kills int

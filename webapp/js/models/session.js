@@ -60,6 +60,15 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}
 		},
 		
+		getGameId: function(){
+			var game = this.get('game');
+			if (game)
+			{
+				return game.game_id;
+			}
+			return null;
+		},
+		
 		// calls the facebook login function and handles it appropriately
 		// if they are logged into facebook and connected to the app a session is created automatically
 		// otherwise a popup will appear and handle the session situation
@@ -101,9 +110,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		// takes a facebook response and creates a session from it
 		createSession: function(response) {
 
+			var game_id = this.getGameId()
+
 			var data =  {
 				'facebook_id': response.authResponse.userID,
-				'facebook_token' : response.authResponse.accessToken
+				'facebook_token' : response.authResponse.accessToken,
+				'game_id' : game_id
 			}
 			
 			var that = this;
@@ -135,6 +147,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				app.Running.TargetModel = new app.Models.Target({assassin_id: that.get('user').user_id})
 				if (app.Running.NavGameView !== undefined) {
 					app.Running.NavGameView.render();
+				}
+				
+				var game_start = response.response.game.game_started;
+				var alive = response.response.game_mapping.alive;
+				if (!alive || !game_start)
+				{
+					app.Running.navView.disableTarget();
 				}
 				
 				if (Backbone.history.fragment != 'login')

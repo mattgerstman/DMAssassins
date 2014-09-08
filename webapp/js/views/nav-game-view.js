@@ -25,7 +25,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 	  },
 	  showCurrentGame: function() {
-  		  var game_id = app.Session.get('game').game_id;
+  		  var game_id = app.Session.getGameId();
 		  $('#nav_'+game_id).removeClass('hide');
 	  },
 	  updateText:function() {
@@ -54,7 +54,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		  }		  	
 		  $('#games_header_short').text(game_name);
 		  
-		  var game_id = app.Session.get('game').game_id;
+  		  var game_id = app.Session.getGameId();
 		  $('#nav_'+game_id).addClass('hide');
 	  },
 	  // loads the items into the dropdown and changes the dropdown title to the current game

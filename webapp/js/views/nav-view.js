@@ -56,16 +56,16 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  handleTarget: function(){
 	  	var that = this;
 	  
-	  	app.Running.TargetModel.changeGame(app.Session.get('game').game_id);		
+	  	app.Running.TargetModel.changeGame(app.Session.getGameId());		
 		app.Running.TargetModel.fetch({
 			success: function(model, error) {
-				that.showTarget();				
+				that.enableTarget();				
 			},
 			error: function(model, error) {
 				if (error.status == 404){
 					app.Running.TargetModel.set('user_id', null);					
 				}
-				that.hideTarget();
+				that.disableTarget();
 			}
 		
 		});
@@ -73,13 +73,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  
 	  // hides the target nav item
-	  hideTarget: function(){
-		  $('#nav_target').addClass('hide');
+	  enableTarget: function(){
+		  $('#nav_target').removeClass('disabled');
 	  },
 	  
 	  // shows the target nav item
-  	  showTarget: function(){
-		  $('#nav_target').removeClass('hide');
+  	  disableTarget: function(){
+		  $('#nav_target').addClass('disabled');
 	  }
 
   })

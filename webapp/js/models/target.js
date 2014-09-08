@@ -31,11 +31,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				this.assassin_id = app.Session.get('user_id');
 			}
 			this.idAttribute = 'assassin_id'
-			var game_id = null;
-			if (app.Session.get('game'))
-			{
-				game_id = game_id;
-			}
+			var game_id = app.Session.getGameId();
 			this.url = config.WEB_ROOT + "game/" + game_id  + '/users/' + this.get('assassin_id') + '/target/';
 		},
 		

@@ -44,8 +44,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		// place to redirect users who aren't logged in
 		redirectWithoutAuth : '#login',
 		
-		// place to redirect logged in users who don't have a started game
-		redirectWithoutGameStarted : 'my_profile',
 		before : function(params, next){
 
 			// is the user authenticated
@@ -92,7 +90,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}
 			// do we need a game and is it started
 			else if (needStarted && !isStarted) {
-				Backbone.history.navigate(this.redirectWithoutGameStarted, { trigger : true });
+				return;
 			}
 			// are they logged in and trying to hit the login page
 			else if(isAuth && cancelAccess) {
@@ -132,7 +130,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		target : function() {
 			//console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
-			app.Running.TargetModel.changeGame(app.Session.get('game').game_id);
+			app.Running.TargetModel.changeGame(app.Session.getGameId());
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
@@ -152,6 +150,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		my_profile : function() {
 			//console.log('profile');			
 			app.Running.currentView = new app.Views.ProfileView();
+			app.Running.currentView.model.changeGame();
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
