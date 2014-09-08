@@ -76,6 +76,14 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	return nil
 }
 
+func GetAssassin(userId uuid.UUID)( assassinId uuid.UUID, appErr *ApplicationError) {
+
+}
+
+func (gameMapping *GameMapping) LeaveGame() (appErr *ApplicationError) {
+	
+}
+
 // Gets an arbitrary game for a user to start off with
 func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *ApplicationError) {
 

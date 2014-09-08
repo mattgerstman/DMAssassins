@@ -147,7 +147,7 @@ func (user *User) GetToken() (fbToken string, appErr *ApplicationError) {
 }
 
 //Kills an Assassin's target, user must be logged in
-func (user *User) KillTarget(gameId uuid.UUID, secret string) (target_id uuid.UUID, appErr *ApplicationError) {
+func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount bool) (target_id uuid.UUID, appErr *ApplicationError) {
 
 	var oldTargetId, newTargetId uuid.UUID
 	var targetSecret string
@@ -210,6 +210,11 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string) (target_id uuid.UU
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	if incrementKillCount {
+		tx.Commit()
+		return newTargetId, nil
 	}
 
 	// Update kill count

@@ -153,9 +153,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				var alive = response.response.game_mapping.alive;
 				if (!alive || !game_start)
 				{
-					if (app.Running.navView !== undefined)
+					if (app.Running.navView)
 					{
-						app.Running.navView.disableTarget();	
+						app.Running.navView.disableTarget();
 					}				
 				}
 				

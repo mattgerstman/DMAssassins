@@ -210,6 +210,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 					fragment = 'target';
 					
 				app.Running.navView.highlight('#nav_'+fragment)
+				app.Running.navView.handleTarget();
 				app.Running.NavGameView.updateText();
 			}
 			

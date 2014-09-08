@@ -92,7 +92,7 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 		return nil, err
 	}
 	gameId := uuid.Parse(vars["game_id"])
-	return user.KillTarget(gameId, secret)
+	return user.KillTarget(gameId, secret, true)
 }
 
 // Handler for /user/{username}/target
