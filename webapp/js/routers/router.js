@@ -27,7 +27,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		requiresGameStarted : ['#target', '#', ''],
 		
 		// routes that require just authentication
-		requiresJustAuth : ['#multigame'],
+		requiresJustAuth : ['#multigame', ''],
 		
 		// routes that require we have a game and we're authenticated
 		requiresGameAndAuth : ['#my_profile', '#join_game', '#leaderboard', '#rules'],
@@ -40,6 +40,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		
 		// place to redirect users for requiresGameAndAuth
 		redirectWithoutGame : '#multigame',
+		
+		// place to redirect logged in users who don't have a started game
+		redirectWithoutGameStarted : 'my_profile',
 		
 		// place to redirect users who aren't logged in
 		redirectWithoutAuth : '#login',
@@ -89,8 +92,8 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				Backbone.history.navigate(this.redirectWithoutGame, { trigger : true });
 			}
 			// do we need a game and is it started
-			else if (needStarted && !isStarted) {
-				return;
+			else if (needStarted && !isStarted) {				
+				Backbone.history.navigate(this.redirectWithoutGameStarted, { trigger : true });				
 			}
 			// are they logged in and trying to hit the login page
 			else if(isAuth && cancelAccess) {

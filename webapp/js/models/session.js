@@ -153,7 +153,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				var alive = response.response.game_mapping.alive;
 				if (!alive || !game_start)
 				{
-					app.Running.navView.disableTarget();
+					if (app.Running.navView !== undefined)
+					{
+						app.Running.navView.disableTarget();	
+					}				
 				}
 				
 				if (Backbone.history.fragment != 'login')

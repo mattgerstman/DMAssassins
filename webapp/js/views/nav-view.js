@@ -34,12 +34,18 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  // select an item on the nav bar
 	  select: function(event){
 			var target = event.currentTarget;
+			if ($(target).hasClass('disabled'))
+		  	{
+			  	event.preventDefault();
+			  	return;
+		  	}
 			this.highlight(target)
 
 	  },
 	  
 	  // highlight an item on the nav bar and unhighlight the rest of them
 	  highlight: function(elem) {
+	  
 	  	if ($(elem).hasClass('dropdown_parent')) {
 		  	return;
 	  	}
