@@ -1,0 +1,21 @@
+{
+  "name": "bower_components",
+  "version": "0.5.0",
+  "homepage": "https://github.com/mattgerstman/DMAssassins",
+  "authors": [
+    "Matt Gerstman <mattgerstman@gmail.com>"
+  ],
+  "description": "DMAssassins Web Libraries",
+  "keywords": [
+    "DMAssassins"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

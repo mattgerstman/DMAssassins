@@ -1,7 +1,4 @@
-
-server/server
-webapp/js/config.js
-
 dmassassins_server/dmassassins_server
-
 dmassassins_server/config.json
+webapp/js/config.js
+webapp/bower_components

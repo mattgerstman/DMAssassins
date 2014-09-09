@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
-	"fmt"
 )
 
 // POST - Wrapper for GameMapping:JoinGame
@@ -72,8 +71,6 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	user.Properties["secret"] = gameMapping.Secret
 	user.Properties["team"] = ""
 
-	fmt.Println(gameMapping.TeamId.String());
-
 	if gameMapping.TeamId == nil {
 		return user, nil
 	}
@@ -82,10 +79,50 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	if appErr != nil {
 		return nil, appErr
 	}
-	user.Properties["team"]= team.TeamName
-	
+	user.Properties["team"] = team.TeamName
+
 	return user, nil
 }
+
+
+// DELETE - Lets a user quit the game
+func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
+	//appErr = RequiresUser(r)
+	if appErr != nil {
+		return appErr
+	}
+	vars := mux.Vars(r)
+	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		msg := "Invalid UUID: user_id" + userId.String()
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeInvalidUUID)
+	}
+
+	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid UUID: game_id" + gameId.String()
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeInvalidUUID)
+	}
+
+	gameMapping, appErr := GetGameMapping(userId, gameId)
+	if appErr != nil {
+		return appErr
+	}
+
+	r.ParseForm()
+	secret := r.Header.Get("X-DMAssassins-Secret")
+	if secret == "" {
+		msg := "Missing Header: X-DMAssassins-Secret."
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeMissingHeader)
+	}
+
+
+	return gameMapping.LeaveGame(secret)
+}
+
 
 // Handler for /game path
 func GameUserHandler() http.HandlerFunc {
@@ -97,9 +134,11 @@ func GameUserHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getGameUser(r)
-
 		case "POST":
 			obj, err = postGameUser(r)
+		case "DELETE":
+			err = deleteGameUser(r)
+
 		default:
 			obj = nil
 			msg := "Not Found"

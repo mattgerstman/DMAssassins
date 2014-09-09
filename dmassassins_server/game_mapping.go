@@ -76,12 +76,39 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	return nil
 }
 
-func GetAssassin(userId uuid.UUID)( assassinId uuid.UUID, appErr *ApplicationError) {
+// Gets a user's assassins
+func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *ApplicationError) {
+
+	var assassinIdBuffer string
+	// Query the targets table
+	err := db.QueryRow(`SELECT user_id from dm_user_targets WHERE target_id = $1 AND game_id = $2`, targetId.String(), gameId.String()).Scan(&assassinIdBuffer)
+	if err == sql.ErrNoRows {
+		msg := "Invalid target_id: " + targetId.String()
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUserId)
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Grab assassin Id
+	assassinId := uuid.Parse(assassinIdBuffer)
+
+	// Get the user through the normal routes
+	return GetUserById(assassinId)
 
 }
 
-func (gameMapping *GameMapping) LeaveGame() (appErr *ApplicationError) {
-	
+// Lets a user quit a game
+func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationError) {
+	// Get the user's assassin so we can have them "kill" their target
+	assassin, appErr := GetAssassin(gameMapping.UserId, gameMapping.GameId)
+	if appErr != nil {
+		return appErr
+	}
+
+	_, appErr = assassin.KillTarget(gameMapping.GameId, secret, false)
+	return appErr
+
 }
 
 // Gets an arbitrary game for a user to start off with

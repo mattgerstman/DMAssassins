@@ -35,12 +35,10 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-
 	user, appErr = user.GetTarget(gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
-
 
 	gameMapping, appErr := GetGameMapping(userId, gameId)
 	if appErr != nil {
@@ -48,7 +46,7 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 	}
 	user.Properties["team"] = ""
 
-	fmt.Println(gameMapping.TeamId.String());
+	fmt.Println(gameMapping.TeamId.String())
 
 	if gameMapping.TeamId == nil {
 		return user, nil
@@ -58,7 +56,7 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 	if appErr != nil {
 		return nil, appErr
 	}
-	user.Properties["team"]= team.TeamName
+	user.Properties["team"] = team.TeamName
 
 	return user, nil
 }
@@ -80,7 +78,6 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 
 	r.ParseForm()
 	secret := r.Header.Get("X-DMAssassins-Secret")
-
 	if secret == "" {
 		msg := "Missing Header: X-DMAssassins-Secret."
 		err := errors.New(msg)
