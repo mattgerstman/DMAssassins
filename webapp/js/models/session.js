@@ -205,7 +205,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 			var token = data.token
 			var plainKey = user_id + ":" + token
-			var base64Key = Base64.encode(plainKey);
+			var base64Key = window.btoa(plainKey);
 			this.set('authKey', base64Key);
 			this.setAuthHeader();	
 		},
