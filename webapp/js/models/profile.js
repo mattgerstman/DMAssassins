@@ -36,6 +36,20 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		changeGame: function() {
 			var game_id = app.Session.getGameId();
 			this.url = config.WEB_ROOT + 'game/' + game_id + '/users/' + this.get('user_id') + '/';			
-		}
+		},
+		quit: function(secret) {			
+			var that = this;
+			this.destroy({
+				headers: {'X-DMAssassins-Secret': secret},
+				success: function(){
+					if (!app.Running.UserGamesModel.loadArbitraryGame()) {
+						Backbone.history.navigate('#logout', { trigger : true });
+						return;
+					}
+
+				}
+				
+		})
+	  },
 	})
 })();

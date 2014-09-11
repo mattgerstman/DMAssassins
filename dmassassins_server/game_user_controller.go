@@ -17,13 +17,13 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + userId.String()
+		msg := "Invalid UUID: user_id" + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + gameId.String()
+		msg := "Invalid UUID: game_id" + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
@@ -84,7 +84,6 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	return user, nil
 }
 
-
 // DELETE - Lets a user quit the game
 func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
 	//appErr = RequiresUser(r)
@@ -119,10 +118,8 @@ func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
 		return NewApplicationError(msg, err, ErrCodeMissingHeader)
 	}
 
-
 	return gameMapping.LeaveGame(secret)
 }
-
 
 // Handler for /game path
 func GameUserHandler() http.HandlerFunc {

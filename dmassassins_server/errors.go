@@ -32,13 +32,14 @@ const (
 	ErrCodePermissionDenied = 40301
 
 	// 404 - Not Found -- Invalid Input
-	ErrCodeNotFoundWTF      = 40400
-	ErrCodeNotFoundMethod   = 40401
-	ErrCodeNotFoundEmail    = 40402
-	ErrCodeNotFoundUsername = 40403
-	ErrCodeNotFoundUserId   = 40004
-	ErrCodeNotFoundTeamId   = 40005
-	ErrCodeNotFoundGameId   = 40006
+	ErrCodeNotFoundWTF         = 40400
+	ErrCodeNotFoundMethod      = 40401
+	ErrCodeNotFoundEmail       = 40402
+	ErrCodeNotFoundUsername    = 40403
+	ErrCodeNotFoundUserId      = 40404
+	ErrCodeNotFoundTeamId      = 40405
+	ErrCodeNotFoundGameId      = 40406
+	ErrCodeNotFoundGameMapping = 40407
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420

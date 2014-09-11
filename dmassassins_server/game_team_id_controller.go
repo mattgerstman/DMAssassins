@@ -8,7 +8,7 @@ import (
 )
 
 // POST - rename a team
-func postTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
+func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -42,7 +42,7 @@ func postTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 }
 
 // GET - get a team by its id
-func getTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
+func getGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
@@ -59,7 +59,7 @@ func getTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 }
 
 // DELETE - deletes a team
-func deleteTeamId(r *http.Request) (appErr *ApplicationError) {
+func deleteGameTeamId(r *http.Request) (appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
@@ -76,7 +76,7 @@ func deleteTeamId(r *http.Request) (appErr *ApplicationError) {
 }
 
 // Handler for /team path
-func TeamIdHandler() http.HandlerFunc {
+func GameTeamIdHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -84,11 +84,11 @@ func TeamIdHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getTeamId(r)
+			obj, err = getGameTeamId(r)
 		case "POST":
-			obj, err = postTeamId(r)
+			obj, err = postGameTeamId(r)
 		case "DELETE":
-			obj, err = nil, deleteTeamId(r)
+			obj, err = nil, deleteGameTeamId(r)
 		default:
 			obj = nil
 			msg := "Not Found"

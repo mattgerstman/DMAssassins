@@ -41,19 +41,21 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	}
 	response["token"] = token
 
+	response["game_mapping"] = nil
+	response["game"] = nil
+
 	// If we have a gameId try to get the game mapping first from that
 	gameId := uuid.Parse(r.FormValue("game_id"))
 	var gameMapping *GameMapping
 	if gameId != nil {
-
 		gameMapping, appErr = GetGameMapping(user.UserId, gameId)
 		if appErr != nil {
-			return nil, appErr
+			if appErr.Code != ErrCodeNotFoundGameMapping {
+				return nil, appErr
+			}
+			return response, nil
 		}
 	}
-
-	response["game_mapping"] = nil
-	response["game"] = nil
 
 	// if we don't have an appropriate game mapping get an arbirtary one
 	if gameMapping == nil {

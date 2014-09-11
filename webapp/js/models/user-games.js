@@ -70,7 +70,15 @@ var app = app || {
 				that.trigger('game-change');
 			})
 		},
-		
+		// loads an arbitrary game (usually used after deletion)
+		loadArbitraryGame: function() {
+			var games = this.get('games');
+			if (games.length) {
+				this.switchGame(games[0].game_id)
+				return true;
+			}
+			return false;
+		},
 		// sets the model to only get games for a particular user
 		loadUser: function(user_id) {
 			this.user_id = user_id;

@@ -136,8 +136,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				// store the user in a session, this is game agnostic so it especially fits here
 				that.set('user', JSON.stringify(response.response.user));
 				
-				// store the current game in the session
-				that.set('game', JSON.stringify(response.response.game))
+
 				
 				// store the basic auth token in the session in case we need to reload it on app launch
 				that.storeBasicAuth(response.response)
@@ -148,6 +147,16 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				if (app.Running.NavGameView !== undefined) {
 					app.Running.NavGameView.render();
 				}
+		
+				
+				if (!response.response.game)
+				{
+					Backbone.history.navigate('#', { trigger : true });
+					return;
+				}
+				
+				// store the current game in the session
+				that.set('game', JSON.stringify(response.response.game))	
 				
 				var game_start = response.response.game.game_started;
 				var alive = response.response.game_mapping.alive;

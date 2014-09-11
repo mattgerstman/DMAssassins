@@ -224,7 +224,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	}
 
 	// Generate a UUID and execute the statement to insert the game into the db
-	gameId := uuid.NewUUID()
+	gameId := uuid.NewRandom()
 	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, encryptedPassword)
 	// Check to make sure the insert happened
 	NoRowsAffectedAppErr := WereRowsAffected(res)
@@ -291,7 +291,7 @@ func (game *Game) AssignTargets() (targets map[string]uuid.UUID, appErr *Applica
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = 1 ORDER BY random()`, game.GameId.String())
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

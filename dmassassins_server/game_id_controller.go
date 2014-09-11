@@ -9,7 +9,7 @@ import (
 
 // POST - Starts a game
 func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	//appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"fmt"
 )
 
 type GameMapping struct {
@@ -26,7 +27,7 @@ func GetGameMapping(userId, gameId uuid.UUID) (gameMapping *GameMapping, appErr 
 	// Query the database
 	err := db.QueryRow(`SELECT team_id, user_role, secret, kills, alive FROM dm_user_game_mapping WHERE user_id = $1 AND game_id = $2`, userId.String(), gameId.String()).Scan(&teamIdBuffer, &userRole, &secret, &kills, &alive)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, NewApplicationError("No Game Mappings", err, ErrCodeNotFoundGameMapping)
 	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -90,6 +91,7 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	fmt.Println(assassinIdBuffer)
 	// Grab assassin Id
 	assassinId := uuid.Parse(assassinIdBuffer)
 
@@ -98,17 +100,47 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 
 }
 
+// delete sthe actual game mapping from the db
+func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
+	res, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
+	}
+
+	// the game mapping no longer exists so  set it to nil
+	gameMapping = nil
+	return nil
+}
+
 // Lets a user quit a game
 func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationError) {
 	// Get the user's assassin so we can have them "kill" their target
+	fmt.Println("GetAssassin")
 	assassin, appErr := GetAssassin(gameMapping.UserId, gameMapping.GameId)
+	if appErr != nil && appErr.Code != ErrCodeNotFoundUserId {
+		return appErr
+	}
+
+	if appErr == nil {
+		fmt.Println("assassin Id" + assassin.UserId.String())
+		_, appErr = assassin.KillTarget(gameMapping.GameId, secret, false)
+		if appErr != nil {
+			return appErr
+		}
+	}
+
+	fmt.Println("delete game mapping")
+
+	appErr = gameMapping.delete()
 	if appErr != nil {
 		return appErr
 	}
 
-	_, appErr = assassin.KillTarget(gameMapping.GameId, secret, false)
-	return appErr
-
+	return nil
 }
 
 // Gets an arbitrary game for a user to start off with
@@ -122,7 +154,7 @@ func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *A
 	// Query the database
 	err := db.QueryRow(`SELECT game_id, team_id, user_role, secret, kills, alive FROM dm_user_game_mapping WHERE user_id = $1 ORDER BY user_role, alive LIMIT 1`, user.UserId.String()).Scan(&gameIdBuffer, &teamIdBuffer, &userRole, &secret, &kills, &alive)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, NewApplicationError("No Games", err, ErrCodeNoGameMappings)
 	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

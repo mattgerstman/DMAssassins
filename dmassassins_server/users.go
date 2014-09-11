@@ -19,7 +19,7 @@ type User struct {
 // Add a user to the DB and return it as a user object
 func NewUser(username, email, facebookId string, properties map[string]string) (user *User, appErr *ApplicationError) {
 	// Generate the UUID and insert it
-	userId := uuid.NewUUID()
+	userId := uuid.NewRandom()
 
 	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, facebook_id) VALUES ($1,$2,$3,$4)`, userId.String(), username, email, facebookId)
 	if err != nil {
@@ -73,7 +73,7 @@ func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	err := db.QueryRow(`SELECT username, email, facebook_id FROM dm_users WHERE user_id = $1`, userId.String()).Scan(&username, &email, &facebookId)
 	switch {
 	case err == sql.ErrNoRows:
-		msg := "Invalid user: " + username
+		msg := "Invalid user: " + userId.String()
 		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUserId)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

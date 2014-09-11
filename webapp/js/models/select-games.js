@@ -54,20 +54,10 @@ var app = app || {
 			var data = {
 				game_password: password
 			}
-			var join_url = config.WEB_ROOT + game_id + '/users/' + user_id + '/';
+			var join_url = config.WEB_ROOT + 'game/' + game_id + '/users/' + user_id + '/';
 			$.post(join_url, data, function(response) {
 				app.Session.set('game', JSON.stringify(response.response))
 				that.trigger('finish_set_game');
-			})
-		},
-		
-		// switch the active game in the view/session
-		switchGame: function(game_id) {
-			var that = this;
-			$.get(config.WEB_ROOT + 'game/' + game_id + '/', function(response) {
-				console.log(response.response);
-				app.Session.set('game', JSON.stringify(response.response))
-				that.trigger('game-change');
 			})
 		},
 		setUser: function(user_id) {

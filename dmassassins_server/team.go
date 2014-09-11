@@ -63,7 +63,7 @@ func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 // Creates a new team and returns it
 func (game *Game) NewTeam(teamName string) (team *Team, appErr *ApplicationError) {
 	// Generate a uuid and insert the team
-	teamId := uuid.NewUUID()
+	teamId := uuid.NewRandom()
 	res, err := db.Exec(`INSERT INTO dm_teams (team_id, game_id, team_name) VALUES ($1,$2,$3)`, teamId.String(), game.GameId.String(), teamName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

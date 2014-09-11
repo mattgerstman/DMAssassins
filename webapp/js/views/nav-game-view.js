@@ -45,7 +45,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			return;
 		  }
 		  
-		  var game_name = app.Session.get('game').game_name;
+		  var game = app.Session.get('game');
+		  if (!game)
+		  {
+			  return;
+		  }
+		  var game_name = game.game_name;
 		  $('#games_header').text(game_name);
 	  	  var max = 9;	  
 		  if (game_name.length > max)

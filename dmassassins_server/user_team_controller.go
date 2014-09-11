@@ -8,7 +8,7 @@ import (
 )
 
 // POST - Add a user to a team
-func postUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+func postGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -38,7 +38,7 @@ func postUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 }
 
 // GET - gets a team for a user by game_id
-func getUserTeam(r *http.Request) (*Team, *ApplicationError) {
+func getGameUserTeam(r *http.Request) (*Team, *ApplicationError) {
 	appErr := RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
@@ -69,7 +69,7 @@ func getUserTeam(r *http.Request) (*Team, *ApplicationError) {
 }
 
 // DELETE - removes a user from a team
-func deleteUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+func deleteGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -107,12 +107,12 @@ func GameUserTeamHandler() http.HandlerFunc {
 		var err *ApplicationError
 
 		switch r.Method {
-		//case "GET":
-		//obj, err = getTeamId(r)
+		case "GET":
+			obj, err = getGameUserTeam(r)
 		case "POST":
-			obj, err = postTeamId(r)
+			obj, err = postGameUserTeam(r)
 		case "DELETE":
-			obj, err = nil, deleteTeamId(r)
+			obj, err = deleteGameUserTeam(r)
 		default:
 			obj = nil
 			msg := "Not Found"

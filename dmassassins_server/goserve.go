@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	//	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -21,13 +21,14 @@ const (
 	gameUserTargetPath  = "/game/{game_id}/users/{user_id}/target/"
 	gameUserTeamPath    = "/game/{user_id}/users/{user_id}/team/"
 	gameTeamPath        = "/game/{game_id}/team/"
+	gameTeamIdPath      = "/game/{game_id}/team/{team_id}"
 	gameRulesPath       = "/game/{game_id}/rules/"
-	teamIdPath          = "/team/{team_id}"
-	userPath            = "/users/{user_id}/"
-	userGamePath        = "/users/{user_id}/game/"
-	userGameNewPath     = "/users/{user_id}/game/new/"
-	sessionPath         = "/session/"
-	homePath            = "/"
+
+	userPath        = "/users/{user_id}/"
+	userGamePath    = "/users/{user_id}/game/"
+	userGameNewPath = "/users/{user_id}/game/new/"
+	sessionPath     = "/session/"
+	homePath        = "/"
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -72,7 +73,7 @@ func connect() (db *sql.DB, err error) {
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "OPTIONS" {
-			fmt.Println(r)
+			//fmt.Println(r)
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, Authorization")
@@ -104,12 +105,13 @@ func StartServer() {
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 
 	// Game then User
-	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "POST")
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE")
 
 	// Just User
 	r.HandleFunc(userPath, UserHandler()).Methods("GET")
@@ -117,9 +119,6 @@ func StartServer() {
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET")
 	r.HandleFunc(userGameNewPath, UserGameNewHandler()).Methods("GET")
-
-	// Just Team
-	r.HandleFunc(teamIdPath, TeamIdHandler()).Methods("GET", "POST", "DELETE")
 
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
