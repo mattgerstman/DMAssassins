@@ -135,9 +135,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 
 				// store the user in a session, this is game agnostic so it especially fits here
 				that.set('user', JSON.stringify(response.response.user));
-				
-
-				
+					
 				// store the basic auth token in the session in case we need to reload it on app launch
 				that.storeBasicAuth(response.response)
 				
@@ -147,8 +145,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				if (app.Running.NavGameView !== undefined) {
 					app.Running.NavGameView.render();
 				}
-		
-				
+						
 				if (!response.response.game)
 				{
 					Backbone.history.navigate('#', { trigger : true });
@@ -192,18 +189,13 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			}).done(function(response){
 				//Clear all session data
 				that.clear();
-				//Set the new csrf token to csrf vaiable and
-				//call initialize to update the $.ajaxSetup 
-				// with new csrf
-				csrf = response.csrf;
 				that.initialize();
 				callback();
 			});
 		},
 		
 		// stores all the basic auth variables in the session
-		storeBasicAuth : function(data) {
-			
+		storeBasicAuth : function(data) {			
 			var user_id = data.user.user_id;
 			this.set('user_id', user_id)
 

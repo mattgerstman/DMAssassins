@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	//	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -72,8 +71,7 @@ func connect() (db *sql.DB, err error) {
 // Handles CORS, eventually I'll strip it down to exactly the headers/origins I need
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "OPTIONS" {
-			//fmt.Println(r)
+		if r.Method == "OPTIONS" {			
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, Authorization")

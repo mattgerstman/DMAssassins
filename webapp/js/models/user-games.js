@@ -24,7 +24,7 @@ var app = app || {
 		
 		// handle on initiliazation
 		initialize: function() {
-			this.url = config.WEB_ROOT + 'game/' + this.user_id
+			this.url = config.WEB_ROOT + 'users/' + this.user_id + '/game/';
 		},
 		
  		// automatically called by fetch() to place a wrapper around the response
