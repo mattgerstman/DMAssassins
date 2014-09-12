@@ -34,12 +34,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		this.model.destroy({
 			headers: {'X-DMAssassins-Secret': secret},
 			success: function(){
-				view.initialize()
-				view.render()
+				view.model.fetch();
 			}
 			
 		})
-		this.model.fetch()
 	  },
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );

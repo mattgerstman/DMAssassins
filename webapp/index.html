@@ -11,110 +11,84 @@
   <link rel="stylesheet" type="text/css" href="/bower_components/datatables/media/css/jquery.dataTables.css">
   <link rel="stylesheet" type="text/css" href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css">
   <link rel="stylesheet" type="text/css" href="assets/styles/site.css">    	
-	<script type="text/template" id="nav-template">
-	
-		<nav class="navbar navbar-default" role="navigation">
+  
+  <script type="text/template" id="nav-template">
+	<nav role="navigation" class="navbar navbar-default">
 		  <div class="container">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<button data-target="#bs-example-navbar-collapse-1" data-toggle="collapse" class="navbar-toggle" type="button">
 				<span class="sr-only">Toggle navigation</span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="#">DMAssassins</a>
+				<a href="#" class="navbar-brand">DMAssassins</a>
 			</div>
 		
 			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-				<%
-					_.each(left, function(item) {
-						if (typeof(item) == 'object') {
-							_.each(item, function(dropdown_items, dropdown_title) {
-				%>
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=dropdown_title%><span class="caret"></span></a>
-							<ul class="dropdown-menu" role="menu">
-				<%
-								_.each(dropdown_items, function(dropdown_item) {
-				%>
-									<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=#<%=dropdown_item.toLowerCase().replace(' ','_')%>><%=dropdown_item%></a></li>
-				<%	
-								})
-				%>
-							</ul>	
-				<%
-							})
-						}
-						else {
-				%>
-							<li id="nav_<%=item.toLowerCase().replace(' ','_') %>" class="nav_item"><a href=#<%=item.toLowerCase().replace(' ','_')%>><%=item%></a></li>
-				<%  
-							}
-						})
-				%>
-
-				</ul>
+					<li class="nav_item" id="nav_target"><a href="#target">Target</a></li>
+					<li class="nav_item" id="nav_my_profile"><a href="#my_profile">My Profile</a></li>
+					<li class="nav_item" id="nav_leaderboard"><a href="#leaderboard">Leaderboard</a></li>
+					<li class="nav_item" id="nav_rules"><a href="#rules">Rules</a></li>
+			</ul>
 							
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-	
-					<%
-						_.each(right, function(item) {
-							if (typeof(item) == 'object') {
-								_.each(item, function(dropdown_items, dropdown_title) {
-					%>
-								
-								<li class="nav_item dropdown_parent" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_parent">
-									<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-										<div class="hidden-sm">
-											<span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header" >
-												<%=dropdown_title%>
-											</span>
-											<span class="caret"></span>										
-										</div>
-										<div  class="visible-sm">
-											<span id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_header_short">
-												<%=dropdown_title%>
-											</span>
-											<span class="caret"></span>
-										</div>
-									</a>
-									<ul class="dropdown-menu" role="menu" id="<%=dropdown_title.toLowerCase().replace(' ','_')%>_dropdown">
-					<%
-										_.each(dropdown_items, function(dropdown_item) {
-					%>
-											<li id="nav_<%=dropdown_item.toLowerCase().replace(' ','_') %>" dropdown="<%=dropdown_title.toLowerCase().replace(' ','_')%>" class="nav_item dropdown_item"><a href=#<%=dropdown_item.toLowerCase().replace(' ','_')%> ><%=dropdown_item%></a></li>
-					<%	
-										})
-					%>	
-									</ul>
-								</li>
-					<%
-								})
-							}
-							else {
-					%>
-								<li id="nav_<%=item.toLowerCase().replace(' ','_') %>" class="nav_item">
-									<a href=#<%=item.toLowerCase().replace(' ','_') %>>
-										<%=item%>
-									</a>
-								</li>
-					<%  
-								}
-							})
-					%>
-	
-						 
-					</li>
-				</ul>
-			</div><!-- /.navbar-collapse -->
+			<ul class="nav navbar-nav navbar-right">
+				<li class="nav_item dropdown_parent" id="games_parent">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<div class="hidden-sm">
+							<span id="games_header">
+								Games
+							</span>
+							<span class="caret"></span>
+						</div>
+						<div class="visible-sm">
+							<span id="games_header_short">
+								Games
+							</span>
+							<span class="caret"></span>
+						</div>
+					</a> 
+					<ul class="dropdown-menu" role="menu" id="games_dropdown">
+					</ul>
+				</li>
+				<li id="admin_parent" class="nav_item dropdown_parent">
+					<a data-toggle="dropdown" class="dropdown-toggle" href="#">
+						<div class="hidden-sm">
+							<span id="admin_header">
+								Admin
+							</span>
+							<span class="caret"></span>										
+						</div>
+						<div class="visible-sm">
+							<span id="admin_header_short">
+								Admin
+							</span>
+							<span class="caret"></span>
+						</div>
+					</a>
+					<ul id="admin_dropdown" role="menu" class="dropdown-menu">
+						<li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Users</a></li>	
+						<li class="nav_item dropdown_item" dropdown="admin" id="nav_teams"><a href="#teams">Teams</a></li>	
+						<li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>	
+						<li class="nav_item dropdown_item" dropdown="admin" id="nav_twitter"><a href="#twitter">Twitter</a></li>	
+						<li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>		
+					</ul>
+				</li>	
+				<li class="nav_item" id="nav_logout">
+					<a href="#logout">
+						Logout
+					</a>
+				</li>
+			</ul>
+		</div><!-- /.navbar-collapse -->
 			
-		  </div><!-- /.container-fluid -->
-		</nav>
-			
-	</script>
+	  </div><!-- /.container-fluid -->
+	</nav>
+						
+</script>
 
 
 	<script type="text/template" id="nav-game-template">
