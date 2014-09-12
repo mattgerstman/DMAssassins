@@ -26,6 +26,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  	
 		this.listenTo(this.model, 'change', this.render)
 		this.listenTo(this.model, 'fetch', this.render)
+		//this.listenTo(app.Running.UserGamesModel, 'game-change', this.model.fetch)
 	  },
 	  // kills your target
 	  kill: function() {

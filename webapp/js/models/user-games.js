@@ -27,7 +27,7 @@ var app = app || {
 			this.url = config.WEB_ROOT + 'game/' + this.user_id
 		},
 		
-		// automatically called by fetch() to place a wrapper around the response
+ 		// automatically called by fetch() to place a wrapper around the response
 		parse: function(response) {
 			var wrapper = {
 				games: response.response

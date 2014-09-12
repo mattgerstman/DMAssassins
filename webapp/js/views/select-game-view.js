@@ -79,11 +79,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  // posts to the join game model
 	  joinGame: function(){
-	  		console.log('join');
-	  		var user_id = app.Session.get('user_id');
-		  	var game_id = $('#games option:selected').val();
-	  		var password = $('#join_game_password').val();
-			this.model.join(game_id, user_id, password);
+  		var user_id = app.Session.get('user_id');
+	  	var game_id = $('#games option:selected').val();
+  		var password = $('#join_game_password').val();
+		this.model.join(game_id, user_id, password);
 	  },
 	  // finish up and navigate to your profile
 	  finish: function(){

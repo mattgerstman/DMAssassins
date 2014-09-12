@@ -158,15 +158,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				// store the current game in the session
 				that.set('game', JSON.stringify(response.response.game))	
 				
-				var game_start = response.response.game.game_started;
-				var alive = response.response.game_mapping.alive;
-				if (!alive || !game_start)
+				if (app.Running.navView)
 				{
-					if (app.Running.navView)
-					{
-						app.Running.navView.disableTarget();
-					}				
-				}
+					app.Running.navView.render();
+				}				
 				
 				if (Backbone.history.fragment != 'login')
 				{

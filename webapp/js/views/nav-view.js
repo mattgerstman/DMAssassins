@@ -27,7 +27,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  // if we don't have a target hide that view
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
-
+        this.handleTarget();
 		return this;  
 	  },
 	  
@@ -80,12 +80,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  
 	  // hides the target nav item
 	  enableTarget: function(){
-		  $('#nav_target').removeClass('disabled');
+		  this.$el.find('#nav_target').removeClass('disabled');
 	  },
 	  
 	  // shows the target nav item
   	  disableTarget: function(){
-		  $('#nav_target').addClass('disabled');
+		  this.$el.find('#nav_target').addClass('disabled');
 	  }
 
   })
