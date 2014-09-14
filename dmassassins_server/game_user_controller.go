@@ -4,8 +4,8 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"github.com/gorilla/mux"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 // POST - Wrapper for GameMapping:JoinGame
@@ -30,8 +30,7 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 	}
 
 	gamePassword := r.Header.Get("X-DMAssassins-Game-Password")
-	log.Println(gamePassword);
-
+	log.Println(gamePassword)
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {

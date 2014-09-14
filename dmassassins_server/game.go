@@ -149,7 +149,6 @@ func CheckPasswordHash(hashedPassword []byte, plainPw string) (appErr *Applicati
 		return nil
 	}
 
-
 	// Convert to a bytearray and skip whitespace
 	bytePW := []byte(strings.TrimSpace(plainPw))
 	err := bcrypt.CompareHashAndPassword(hashedPassword, bytePW)

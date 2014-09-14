@@ -1,5 +1,11 @@
+//
+// js/models/session.js
+// dmassassins.js
+//
+// Copyright (c) 2014 Matt Gerstman
+// MIT License.
+//
 // Manages all local storage information and helps keep various models in sync
-// js/models/session
 
 var app = app || {
     Collections: {},
@@ -10,212 +16,227 @@ var app = app || {
     Session: {}
 };
 
-(function(){
+(function() {
 
-	app.Models.Session = Backbone.Model.extend({
-		
-		url : config.WEB_ROOT+'session/',
+    app.Models.Session = Backbone.Model.extend({
 
-		initialize : function(){
-		
-			// Check for localstorage support
-			if(Storage && sessionStorage){
-				this.supportStorage = true;
-			}
-		},
+        url: config.WEB_ROOT + 'session/',
 
-		// returns data stored in the session
-		get : function(key) {
-			if (this.supportStorage) {
-				var data = sessionStorage.getItem(key);
-				if(data && data[0] === '{'){
-					return JSON.parse(data);
-				} else {
-					return data;
-				}
-			} else {
-				return Backbone.Model.prototype.get.call(this, key);
-			}
-		},
+        initialize: function() {
 
-		// sets a session variable
-		set : function(key, value) {
-			if(this.supportStorage) {
-				sessionStorage.setItem(key, value);
-			} else {
-				Backbone.Model.prototype.set.call(this, key, value);
-			}
-			return this;
-		},
+            // Check for localstorage support
+            if (Storage && sessionStorage) {
+                this.supportStorage = true;
+            }
+        },
 
-		// unsets a session 
-		unset : function(key){
-			if(this.supportStorage){
-				sessionStorage.removeItem(key);
-			}else{
-				Backbone.Model.prototype.unset.call(this, key);
-			}
-			return this;	
-		},
+        // returns data stored in the session
+        get: function(key) {
+            if (this.supportStorage) {
+                var data = sessionStorage.getItem(key);
+                if (data && data[0] === '{') {
+                    return JSON.parse(data);
+                } else {
+                    return data;
+                }
+            } else {
+                return Backbone.Model.prototype.get.call(this, key);
+            }
+        },
 
-		// clears all data from the session
-		clear : function(){
-			if(this.supportStorage) {
-				sessionStorage.clear();  
-			} else {
-				Backbone.Model.prototype.clear(this);
-			}
-		},
-		// calls the facebook login function and handles it appropriately
-		// if they are logged into facebook and connected to the app a session is created automatically
-		// otherwise a popup will appear and handle the session situation
-		login: function(){
+        // sets a session variable
+        set: function(key, value) {
+            if (this.supportStorage) {
+                sessionStorage.setItem(key, value);
+            } else {
+                Backbone.Model.prototype.set.call(this, key, value);
+            }
+            return this;
+        },
 
-			var parent = this;
+        // unsets a session 
+        unset: function(key) {
+            if (this.supportStorage) {
+                sessionStorage.removeItem(key);
+            } else {
+                Backbone.Model.prototype.unset.call(this, key);
+            }
+            return this;
+        },
 
-			FB.getLoginStatus(function(response){
-				  if (response.status === 'connected') {
-				    // Logged into your app and Facebook.
-					//console.log(response);
-					parent.createSession(response);
+        // clears all data from the session
+        clear: function() {
+            if (this.supportStorage) {
+                sessionStorage.clear();
+            } else {
+                Backbone.Model.prototype.clear(this);
+            }
+        },
+        // calls the facebook login function and handles it appropriately
+        // if they are logged into facebook and connected to the app a session is created automatically
+        // otherwise a popup will appear and handle the session situation
+        login: function() {
+
+            var parent = this;
+
+            FB.getLoginStatus(function(response) {
+                if (response.status === 'connected') {
+                    // Logged into your app and Facebook.
+                    //console.log(response);
+                    parent.createSession(response);
 
 
-				  } else if (response.status === 'not_authorized') {
+                } else if (response.status === 'not_authorized') {
 
-				    // The person is logged into Facebook, but not your app.
-				    FB.login(function(response){
-    					parent.createSession(response);
-    					
-    					// scope are the facebook permissions we're requesting 
-				    }, {scope:'public_profile,email,user_friends,user_photos'})
-				    
-				  } else {
+                    // The person is logged into Facebook, but not your app.
+                    FB.login(function(response) {
+                        parent.createSession(response);
 
-					    FB.login(function(response){
-	    					parent.createSession(response);
-	    					
-	    					// scope are the facebook permissions we're requesting
-					    }, {scope:'public_profile,email,user_friends,user_photos'})
+                        // scope are the facebook permissions we're requesting 
+                    }, {
+                        scope: 'public_profile,email,user_friends,user_photos'
+                    })
 
-				    // The person is not logged into Facebook, so we're not sure if
-				    // they are logged into this app or not.
-				  }
-			})
+                } else {
 
-		},
-		
-		// takes a facebook response and creates a session from it
-		createSession: function(response) {
+                    FB.login(function(response) {
+                        parent.createSession(response);
+
+                        // scope are the facebook permissions we're requesting
+                    }, {
+                        scope: 'public_profile,email,user_friends,user_photos'
+                    })
+
+                    // The person is not logged into Facebook, so we're not sure if
+                    // they are logged into this app or not.
+                }
+            })
+
+        },
+
+        // takes a facebook response and creates a session from it
+        createSession: function(response) {
 
             var game = this.get('game');
-			var game_id = null;
-			if (game) {
-    			game_id = game.game_id
-			} 
+            var game_id = null;
+            if (game) {
+                game_id = game.game_id
+            }
 
-			var data =  {
-				'facebook_id': response.authResponse.userID,
-				'facebook_token' : response.authResponse.accessToken,
-				'game_id' : game_id
-			}
-			
-			var that = this;
-			
-			// performs the ajax request to the server to get session data
-			var login = $.ajax({
-				url : this.url,
-				data : data,
-				type : 'POST'
-			});
-			
-			// after the ajax request run this function
-			login.done(function(response){
+            var data = {
+                'facebook_id': response.authResponse.userID,
+                'facebook_token': response.authResponse.accessToken,
+                'game_id': game_id
+            }
 
-				// store a goto boolean to determine if we're authenticated
-				that.set('authenticated', true);
+            var that = this;
 
-				// store the user in a session, this is game agnostic so it especially fits here
-				that.set('user', JSON.stringify(response.user));
-					
-				// store the basic auth token in the session in case we need to reload it on app launch
-				that.storeBasicAuth(response)
-				
-				// load the profile model for the user
-				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
-				app.Running.TargetModel = new app.Models.Target({assassin_id: that.get('user').user_id})
-				if (app.Running.NavGameView !== undefined) {
-					app.Running.NavGameView.render();
-				}
-						
-				if (!response.game)
-				{
-					Backbone.history.navigate('#', { trigger : true });
-					return;
-				}
-				
-				// store the current game in the session
-				that.set('game', JSON.stringify(response.game))	
-				
+            // performs the ajax request to the server to get session data
+            var login = $.ajax({
+                url: this.url,
+                data: data,
+                type: 'POST'
+            });
+
+            // after the ajax request run this function
+            login.done(function(response) {
+
+                // store a goto boolean to determine if we're authenticated
+                that.set('authenticated', true);
+
+                // store the user in a session, this is game agnostic so it especially fits here
+                that.set('user', JSON.stringify(response.user));
+
+                // store the basic auth token in the session in case we need to reload it on app launch
+                that.storeBasicAuth(response)
+
+                // load the profile model for the user
+                app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
+                app.Running.TargetModel = new app.Models.Target({
+                    assassin_id: that.get('user').user_id
+                })
+                if (app.Running.NavGameView !== undefined) {
+                    app.Running.NavGameView.render();
+                }
+
+                if (!response.game) {
+                    Backbone.history.navigate('#', {
+                        trigger: true
+                    });
+                    return;
+                }
+
+                // store the current game in the session
+                that.set('game', JSON.stringify(response.game))
+
                 app.Running.NavGameView = new app.Views.NavGameView();
-                app.Running.NavGameView.collection.fetch({reset: true});
-				if (app.Running.navView)
-				{
-					app.Running.navView.render();
-				}				
-				
-				if (Backbone.history.fragment != 'login')
-				{
-					Backbone.history.navigate(Backbone.history.fragment, { trigger : true });
-					return;	
-				}
-				Backbone.history.navigate('#', { trigger : true });
-				
-			});
-			
-			// if theres a login error direct them to the login screen
-			login.fail(function(){
-				that.clear();
-				FB.getLoginStatus(function(response) {
-				    statusChangeCallback(response);
-				  });
-				Backbone.history.navigate('login', { trigger : true });
-			});
-			
+                app.Running.NavGameView.collection.fetch({
+                    reset: true
+                });
+                if (app.Running.navView) {
+                    app.Running.navView.render();
+                }
 
-		},
-		// clear all the session data and post it to the server
-		logout : function(callback){
-			var that = this;
-			$.ajax({
-				url : this.url + '/logout',
-				type : 'DELETE'
-			}).done(function(response){
-				//Clear all session data
-				that.clear();
-				that.initialize();
-				callback();
-			});
-		},
-		
-		// stores all the basic auth variables in the session
-		storeBasicAuth : function(data) {			
-			var user_id = data.user.user_id;
-			this.set('user_id', user_id)
+                if (Backbone.history.fragment != 'login') {
+                    Backbone.history.navigate(Backbone.history.fragment, {
+                        trigger: true
+                    });
+                    return;
+                }
+                Backbone.history.navigate('#', {
+                    trigger: true
+                });
 
-			var token = data.token
-			var plainKey = user_id + ":" + token
-			var base64Key = window.btoa(plainKey);
-			this.set('authKey', base64Key);
-			this.setAuthHeader();	
-		},
-		
-		// sets the Basic Auth header for all ajax requests
-		setAuthHeader: function(){
-			var base64Key = this.get('authKey');
-			$.ajaxSetup({
-				headers: { 'Authorization': "Basic " + base64Key }
-			});
+            });
 
-		}
-	});
+            // if theres a login error direct them to the login screen
+            login.fail(function() {
+                that.clear();
+                FB.getLoginStatus(function(response) {
+                    statusChangeCallback(response);
+                });
+                Backbone.history.navigate('login', {
+                    trigger: true
+                });
+            });
+
+
+        },
+        // clear all the session data and post it to the server
+        logout: function(callback) {
+            var that = this;
+            $.ajax({
+                url: this.url + '/logout',
+                type: 'DELETE'
+            }).done(function(response) {
+                //Clear all session data
+                that.clear();
+                that.initialize();
+                callback();
+            });
+        },
+
+        // stores all the basic auth variables in the session
+        storeBasicAuth: function(data) {
+            var user_id = data.user.user_id;
+            this.set('user_id', user_id)
+
+            var token = data.token
+            var plainKey = user_id + ":" + token
+            var base64Key = window.btoa(plainKey);
+            this.set('authKey', base64Key);
+            this.setAuthHeader();
+        },
+
+        // sets the Basic Auth header for all ajax requests
+        setAuthHeader: function() {
+            var base64Key = this.get('authKey');
+            $.ajaxSetup({
+                headers: {
+                    'Authorization': "Basic " + base64Key
+                }
+            });
+
+        }
+    });
 })()
