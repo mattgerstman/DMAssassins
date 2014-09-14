@@ -16,7 +16,7 @@ func getUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id " + userId.String()
+		msg := "Invalid UUID: user_id " + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
