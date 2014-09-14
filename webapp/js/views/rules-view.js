@@ -30,6 +30,7 @@ var app = app || {
 
             this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'fetch', this.render)
+            this.listenTo(this.model, 'set', this.render)
         },
 
         render: function() {

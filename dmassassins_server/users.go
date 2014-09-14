@@ -90,6 +90,44 @@ func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	return user, nil
 }
 
+func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
+
+	gameMapping, appErr := GetGameMapping(user.UserId, gameId)
+	if appErr != nil {
+		return appErr
+	}
+
+	user.Properties["secret"] = gameMapping.Secret
+	user.Properties["user_role"] = gameMapping.UserRole
+	user.Properties["team"] = ""
+
+	if gameMapping.TeamId == nil {
+		return nil
+	}
+
+	team, appErr := GetTeamById(gameMapping.TeamId)
+	if appErr != nil {
+		return nil
+	}
+	user.Properties["team"] = team.TeamName
+	return nil
+}
+
+func GetUserForGameById(userId, gameId uuid.UUID) (user *User, appErr *ApplicationError) {
+
+	user, appErr = GetUserById(userId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	appErr = user.GetUserGameProperties(gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	return user, nil
+}
+
 // Gets a user's target for a game
 func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *ApplicationError) {
 	var targetId uuid.UUID
@@ -101,7 +139,7 @@ func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *Application
 	switch {
 	case err == sql.ErrNoRows:
 		msg := "No Target"
-		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUsername)
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundTarget)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

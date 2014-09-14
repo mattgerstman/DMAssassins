@@ -41,8 +41,11 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	}
 	response["token"] = token
 
-	response["game_mapping"] = nil
+	// Set all of the following to nil if we don't have them yet
 	response["game"] = nil
+	response["games"] = nil
+	response["rules"] = nil
+	response["leaderboard"] = nil
 
 	// If we have a gameId try to get the game mapping first from that
 	gameId := uuid.Parse(r.FormValue("game_id"))
@@ -69,14 +72,48 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		}
 	}
 
-	response["game_mapping"] = gameMapping
 	// Get the game for whatever game mapping we're using
 	game, appErr := GetGameById(gameMapping.GameId)
 	if appErr != nil {
 		return nil, appErr
 	}
-
 	response["game"] = game
+
+	appErr = user.GetUserGameProperties(gameMapping.GameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+	response["user"] = user
+
+	// Get games user is a part of
+	games := make(map[string][]*Game)
+	member, appErr := user.GetGamesForUser()
+	if appErr != nil {
+		return nil, appErr
+	}
+	games["member"] = member
+
+	// Get available games to join
+	available, appErr := user.GetNewGamesForUser()
+	if appErr != nil {
+		return nil, appErr
+	}
+	games["available"] = available
+	response["games"] = games
+
+	target, appErr := user.GetTarget(game.GameId)
+	if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
+		return nil, appErr
+	}
+	response["target"] = target
+
+	// Get the Leaderboard for the game
+	leaderboard, appErr := game.GetLeaderboard()
+	if appErr != nil {
+		return nil, appErr
+	}
+	response["leaderboard"] = leaderboard
+
 	return response, nil
 }
 

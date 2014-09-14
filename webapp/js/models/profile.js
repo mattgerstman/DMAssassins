@@ -18,9 +18,9 @@
             'username': '',
             'email': '',
             'properties': {
-                'name': '',
-                'facebook': '',
-                'twitter': '',
+                'name': 'Loading..',
+                'facebook': 'Loading..',
+                'secret': 'Loading..',
                 'photo_thumb': SPY,
                 'photo': SPY
             }
@@ -32,13 +32,12 @@
             return config.WEB_ROOT + 'game/' + game_id + '/users/' + this.get('user_id') + '/';           
         },       
         joinGame: function(game_id, game_password) {
-            var that = this;
+            var that = this;            
             this.save(null, {
                 headers: {
                     'X-DMAssassins-Game-Password': game_password
                 },
                 success: function() {
-                    app.Running.Games.addGame(game_id);
                     that.trigger('join-game');
                     Backbone.history.navigate('my_profile', {
                         trigger: true

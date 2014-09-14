@@ -33,13 +33,19 @@ var app = app || {
 
         // constructor
         initialize: function() {
-            this.listenTo(app.Running.Games, 'game-change', this.handleTarget)
+            this.NavGameView = app.Running.NavGameView;
+            this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget)
+            this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
         },
 
         // if we don't have a target hide that view
         render: function() {
             this.$el.html(this.template());
             this.handleTarget();
+            
+            var selectedElem = this.$el.find('#nav_' + Backbone.history.fragment);
+            this.highlight(selectedElem);
+            
             if (app.Running.NavGameView)
                 app.Running.NavGameView.setElement(this.$('#games_dropdown')).render();
             return this;
@@ -74,26 +80,25 @@ var app = app || {
 
         handleTarget: function() {
             var game = app.Running.Games.getActiveGame();
+            if (!game)
+            {
+                this.disableTarget();
+                return;
+            }
             if (!game.get('game_started'))
             {
                 this.disableTarget();
                 return;
             }
-
-            var that = this;
             
-            app.Running.TargetModel.fetch({
-                success: function(model, error) {
-                    that.enableTarget();
-                },
-                error: function(model, error) {
-                    if (error.status == 404) {
-                        app.Running.TargetModel.set('user_id', null);
-                    }
-                    that.disableTarget();
-                }
-
-            });
+            if (!app.Running.TargetModel.get('user_id'))
+            {
+                this.disableTarget();
+                return;
+            }
+            
+            this.enableTarget();
+            return;
         },
 
         // hides the target nav item

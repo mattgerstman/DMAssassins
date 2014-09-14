@@ -9,7 +9,7 @@ import (
 type Configuration struct {
 	FBAppId           string
 	FBAppSecret       string
-	FBUserAccessToken string
+	FBAccessToken string
 	DatabaseURL       string
 	SentryDSN         string
 }

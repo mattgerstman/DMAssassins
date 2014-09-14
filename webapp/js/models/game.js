@@ -25,13 +25,21 @@ var app = app || {
             game_id: '',
             game_name: '',
             game_started: false,
-            game_has_password: false
+            game_has_password: false,
+            member: true
         },
 
         idAttribute: 'game_id',
-        urlRoot: config.WEB_ROOT + 'game/',
+        urlRoot: config.WEB_ROOT + 'users/',
         url: function() {
-            return this.urlRoot + this.get('game_id') + '/';
+            var url = this.urlRoot;
+            url += app.Session.get('user_id') + '/game/';            
+            var game_id = this.get('game_id');
+            if (!game_id)
+            {
+                return url;
+            }            
+            return url + game_id + '/';
         }
     })
 })();

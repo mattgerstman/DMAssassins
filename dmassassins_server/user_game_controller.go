@@ -10,7 +10,7 @@ import (
 
 type NewGamePost struct {
 	GameName     string `json:"game_name"`
-	GamePassword string `json:"game_id"`
+	GamePassword string `json:"game_password"`
 }
 
 // POST - Controller Wrapper for Game:NewGame

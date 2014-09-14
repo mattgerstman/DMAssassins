@@ -42,7 +42,7 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 
 // GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
 func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
-	//appErr = RequiresUser(r)
+	appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -61,28 +61,10 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	user, appErr = GetUserById(userId)
+	user, appErr = GetUserForGameById(userId, gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
-
-	gameMapping, appErr := GetGameMapping(userId, gameId)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	user.Properties["secret"] = gameMapping.Secret
-	user.Properties["team"] = ""
-
-	if gameMapping.TeamId == nil {
-		return user, nil
-	}
-
-	team, appErr := GetTeamById(gameMapping.TeamId)
-	if appErr != nil {
-		return nil, appErr
-	}
-	user.Properties["team"] = team.TeamName
 
 	return user, nil
 }

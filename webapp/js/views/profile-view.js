@@ -57,7 +57,7 @@ var app = app || {
             this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'fetch', this.render)
             this.listenTo(this.model, 'destroy', this.destroyCallback)
-            this.listenTo(app.Running.Games, 'game-change', this.model.fetch)
+            this.listenTo(this.model, 'set', this.render)
 
         },
         destroyCallback: function() {

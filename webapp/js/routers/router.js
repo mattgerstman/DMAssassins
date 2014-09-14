@@ -38,7 +38,7 @@ var app = app || {
 
         },
         // routes that require we have a game that has been started
-        requiresGameStarted: ['#target', '#', ''],
+        requiresTarget: ['#target', '#', ''],
 
         // routes that require just authentication
         requiresJustAuth: ['#multigame', ''],
@@ -77,13 +77,13 @@ var app = app || {
             var cancelAccess = _.contains(this.preventAccessWhenAuth, path);
 
             // does this route need a running game
-            var needStarted = _.contains(this.requiresGameStarted, path);
+            var needTarget = _.contains(this.requiresTarget, path);
 
             // is there a game
-            var isGame = app.Running.Games.getActiveGameId() !== null
+            var hasGame = app.Session.get('has_game');
 
             // is the game started
-            var isStarted = app.Running.Games.getActiveGame().get('game_started');
+            var hasTarget = app.Running.TargetModel.get('user_id') !== null;
 
             /*
 			Variables I use when shit's not routing properly /**/
@@ -105,14 +105,14 @@ var app = app || {
                 });
             }
             // do we need authentication and a game
-            else if (needGameAndAuth && !isGame) {
+            else if (needGameAndAuth && !hasGame) {
                 Backbone.history.navigate(this.redirectWithoutGame, {
                     trigger: true
                 });
             }
             // do we need a game and is it started
-            else if (needStarted && !isStarted) {
-                Backbone.history.navigate(this.redirectWithoutGameStarted, {
+            else if (needTarget && !hasTarget) {
+                Backbone.history.navigate(this.redirectWithoutTarget, {
                     trigger: true
                 });
             }
@@ -138,7 +138,8 @@ var app = app || {
         },
         // login route
         login: function() {
-            app.Running.currentView = new app.Views.LoginView();
+            var view = new app.Views.LoginView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
         },
         // logout route
@@ -148,54 +149,58 @@ var app = app || {
         },
         // game selection route
         multigame: function() {
-            app.Running.currentView = new app.Views.SelectGameView();
-            app.Running.currentView.model.fetch();
+            var view = new app.Views.SelectGameView();
+            app.Running.AppView.setCurrentView(view);
+            app.Running.currentView.collection.fetch();
             this.render();
         },
         // target route
         target: function() {
             //console.log('target');
-            app.Running.currentView = new app.Views.TargetView();
-            app.Running.currentView.model.fetch();
+            var view = new app.Views.TargetView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
         },
         // create a new game route
         create_game: function() {
-            app.Running.currentView = new app.Views.SelectGameView();
+            var view = new app.Views.SelectGameView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
             app.Running.currentView.showCreateGame();
         },
         // join a new game route
         join_game: function() {
-            app.Running.currentView = new app.Views.SelectGameView();
+            var view = new app.Views.SelectGameView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
             app.Running.currentView.loadJoinGame(app.Session.get('user_id'));
         },
         // profile route
         my_profile: function() {
             //console.log('profile');			
-            app.Running.currentView = new app.Views.ProfileView();
-            app.Running.currentView.model.fetch();
+            var view = new app.Views.ProfileView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
         },
         // leaderboard route
         leaderboard: function() {
             //console.log('leaderboard');			
-            app.Running.currentView = new app.Views.LeaderboardView();
+            var view = new app.Views.LeaderboardView();
+            app.Running.AppView.setCurrentView(view);
             app.Running.currentView.model.fetch();
             this.render();
         },
         // rules route
         rules: function() {
             //console.log('rules');			
-            app.Running.currentView = new app.Views.RulesView();
-            app.Running.currentView.model.fetch();
+            var view = new app.Views.RulesView();
+            app.Running.AppView.setCurrentView(view);
             this.render();
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {
             var lastFragment = this.history[this.history.length - 1];
-            if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
+            if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {             
                 Backbone.history.navigate('my_profile', {
                     trigger: true
                 });
@@ -203,39 +208,38 @@ var app = app || {
             }
 
             this.back();
-
         },
         // render function, also determines weather or not to render the nav
         render: function() {
             var fragment = Backbone.history.fragment;
             // if it's a view with a nav and we don't have one, make one
-            if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (!app.Running.navView)) {
-                app.Running.navView = new app.Views.NavView();
-                app.Running.navView = app.Running.navView.render();
+            if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (!app.Running.NavView)) {
                 if (!app.Running.NavGameView) {
-                    app.Running.NavGameView = new app.Views.NavGameView(app.Session.get('user_id'));
-                    //    				app.Running.NavGameView.model.fetch();
+                    app.Running.NavGameView = new app.Views.NavGameView();
                     app.Running.NavGameView.render();
                 }
+                app.Running.NavView = new app.Views.NavView();
+                app.Running.NavView = app.Running.NavView.render();
             }
             // if it explicitely shouldn't have a nav and we have one kill it
-            else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.navView)) {
-                app.Running.navView.$el.html('');
-                app.Running.navView = null;
+            else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.NavView)) {
+                app.Running.NavView.$el.html('');
+                app.Running.NavView = null;
+                app.Running.navGameView = null;
             }
             // if we have a nav and highlight the nav item
-            if ((app.Running.navView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
+            if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
                 //console.log(fragment);
                 if (fragment === '')
                     fragment = 'target';
 
-                app.Running.navView.highlight('#nav_' + fragment)
-                app.Running.navView.handleTarget();
+                app.Running.NavView.highlight('#nav_' + fragment)
+                app.Running.NavView.handleTarget();
                 app.Running.NavGameView.updateText();
             }
 
             // render our page within the app
-            app.Running.appView.renderPage(app.Running.currentView)
+            app.Running.AppView.renderPage(app.Running.currentView)
         }
     })
 

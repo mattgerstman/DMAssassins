@@ -100,7 +100,7 @@ var app = app || {
         joinGame: function() {
             var game_id = $('#games option:selected').val();
             var password = $('#join_game_password').val();
-            app.Running.ProfileModel.joinGame(game_id, password);
+            app.Running.Games.joinGame(game_id, password);
         },
         // finish up and navigate to your profile
         finish: function(game) {

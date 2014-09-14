@@ -28,6 +28,7 @@ var app = app || {
         initialize: function(params) {
             this.model = app.Running.LeaderboardModel;
             this.listenTo(this.model, 'change', this.render)
+            this.listenTo(this.model, 'reset', this.render)
             this.listenTo(this.model, 'fetch', this.render)
         },
         // renderer

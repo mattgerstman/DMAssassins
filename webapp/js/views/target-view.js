@@ -39,6 +39,7 @@ var app = app || {
             this.model = app.Running.TargetModel;
             this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'fetch', this.render)
+            this.listenTo(this.model, 'set', this.render)
         },
         // kills your target
         kill: function() {
