@@ -144,7 +144,7 @@ var app = app || {
                 var user 		 = response.user         || { user_id: null };
                 var target 		 = response.target       || { assassin_id: user.user_id };                
                 var leaderboard  = response.leaderboard  || {};
-                var rules		 = { rules: response.game.game_properties.rules };
+                var rules		 = { rules: (response.game.game_properties.rules || null) };
 
                 target.assassin_id = response.user.user_id;
 
