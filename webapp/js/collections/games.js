@@ -16,6 +16,9 @@ var app = app || {
         model: app.Models.Game,
 
         parse: function(response) {
+            if (!response) {
+                return null;
+            }
             var list = [];
             _.each(response.available, function(item){
                 item.member = false;
