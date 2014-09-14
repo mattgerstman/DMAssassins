@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// POST - Wrapper for GameMapping:JoinGame
-func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+// PUT - Wrapper for GameMapping:JoinGame
+func putGameUser(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -49,14 +49,14 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + userId.String()
+		msg := "Invalid UUID: user_id" + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + gameId.String()
+		msg := "Invalid UUID: game_id" + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
@@ -78,14 +78,14 @@ func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + userId.String()
+		msg := "Invalid UUID: user_id" + vars["user_id"]
 		err := errors.New(msg)
 		return NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + gameId.String()
+		msg := "Invalid UUID: game_id" + vars["game_id"]
 		err := errors.New(msg)
 		return NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
@@ -117,9 +117,7 @@ func GameUserHandler() http.HandlerFunc {
 		case "GET":
 			obj, err = getGameUser(r)
 		case "PUT":
-			obj, err = postGameUser(r)
-		case "POST":
-			obj, err = postGameUser(r)
+			obj, err = putGameUser(r)
 		case "DELETE":
 			err = deleteGameUser(r)
 

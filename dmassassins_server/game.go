@@ -5,8 +5,8 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
-	"strings"
 	"fmt"
+	"strings"
 )
 
 type Game struct {

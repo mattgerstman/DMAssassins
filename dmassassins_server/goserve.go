@@ -96,7 +96,7 @@ func StartServer() {
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 
 	// Game then User
-	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "POST", "DELETE", "PUT")
+	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "POST")
 
@@ -108,7 +108,7 @@ func StartServer() {
 	r.HandleFunc(userPath, UserHandler()).Methods("GET")
 
 	// User then Game
-	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "POST", "PUT")
+	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")
 
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
