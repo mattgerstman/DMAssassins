@@ -3,13 +3,17 @@ package main
 import (
 	"github.com/russross/blackfriday"
 	"io/ioutil"
+	"strings"
 )
 
-func loadDefaultRules() (rules string, appErr *ApplicationError) {
+func loadDefaultRules(adminEmail string) (rules string, appErr *ApplicationError) {
 
 	fileByte, _ := ioutil.ReadFile("rules.mdown")
 	output := blackfriday.MarkdownBasic(fileByte)
-	return string(output), nil
+	//%ADMINEMAIL%
+	outputString := string(output)
+	outputString = strings.Replace(outputString, `%ADMINEMAIL%`, adminEmail, -1)
+	return outputString, nil
 
 }
 
@@ -21,7 +25,12 @@ func (game *Game) GetRules() (rules string, appErr *ApplicationError) {
 	}
 
 	if rules == "" {
-		defaultRules, appErr := loadDefaultRules()
+		admin, appErr := game.GetAdmin()
+		if appErr != nil {
+			return "", appErr
+		}
+
+		defaultRules, appErr := loadDefaultRules(admin.Email)
 		if appErr != nil {
 			return "", appErr
 		}

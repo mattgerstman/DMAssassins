@@ -100,6 +100,27 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 
 }
 
+func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
+	var userIdBuffer string
+
+	// Query the database
+	err := db.QueryRow(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_admin' AND game_id = $1`, game.GameId.String()).Scan(&userIdBuffer)
+	if err == sql.ErrNoRows {
+		return nil, NewApplicationError("No Admin", err, ErrCodeNotFoundGameMapping)
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	userId := uuid.Parse(userIdBuffer)
+	if userId == nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return GetUserById(userId)
+}
+
+
 // delete sthe actual game mapping from the db
 func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
 	res, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
