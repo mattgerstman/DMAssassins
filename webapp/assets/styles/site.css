@@ -1,3 +1,9 @@
+body {
+	width:100%;
+}
+
+a, a:focus { outline: none; }
+
 .user_column {
 	width:300px;
 	margin-left: auto;
@@ -10,8 +16,6 @@
 	margin-right:auto;
 }
 
-a, a:focus { outline: none; }
-
 #kill_form .form-control {
 	width:190px;
 	float:left;
@@ -23,6 +27,3 @@ a, a:focus { outline: none; }
 	margin-right:5px;
 }
 
-body {
-	width:100%;
-}

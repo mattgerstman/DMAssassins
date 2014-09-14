@@ -9,9 +9,7 @@ var app = app || {
 
 $(function(){
 	'use strict';
-	
 
-		
 	app.Running.appView = new app.Views.AppView();
 	app.Running.appView.render();	
 
