@@ -38,14 +38,14 @@ func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
 	if appErr != nil {
 		return "", appErr
 	}
-	return "success", nil
+	return "", nil
 }
 
 // GET - Gets rules for a game
-func getGameRules(r *http.Request) (rules string, appErr *ApplicationError) {
+func getGameRules(r *http.Request) (rulesWrapper map[string]string, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
-		return "", appErr
+		return nil, appErr
 	}
 
 	vars := mux.Vars(r)
@@ -53,16 +53,23 @@ func getGameRules(r *http.Request) (rules string, appErr *ApplicationError) {
 	if gameId == nil {
 		msg := "Invalid UUID: game_id" + gameId.String()
 		err := errors.New(msg)
-		return "", NewApplicationError(msg, err, ErrCodeInvalidUUID)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	game, appErr := GetGameById(gameId)
-
 	if appErr != nil {
-		return "", appErr
+		return nil, appErr
 	}
 
-	return game.GetRules()
+	rules, appErr := game.GetRules()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	rulesWrapper = make(map[string]string)
+	rulesWrapper["rules"] = rules
+
+	return rulesWrapper, nil
 }
 
 // Handler for /game path

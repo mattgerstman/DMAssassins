@@ -1,6 +1,12 @@
-// Select Games Model, Handles game creation, selection, and joining
-// Focuses on game mappings on the server
+//
 // js/models/games.js
+// dmassassins.js
+//
+// Copyright (c) 2014 Matt Gerstman
+// MIT License.
+//
+// Single game model
+
 var app = app || {
     Collections: {},
     Models: {},
@@ -21,11 +27,11 @@ var app = app || {
             game_started: false,
             game_has_password: false
         },
-        
+
         idAttribute: 'game_id',
         urlRoot: config.WEB_ROOT + 'game/',
-        url : function() {                        
-            return this.urlRoot + this.get('game_id') +'/';
+        url: function() {
+            return this.urlRoot + this.get('game_id') + '/';
         }
     })
 })();

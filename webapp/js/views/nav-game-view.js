@@ -1,5 +1,12 @@
-// handles the game dropdown in the nav
+//
 // js/views/nav-game-view.js
+// dmassassins.js
+//
+// Copyright (c) 2014 Matt Gerstman
+// MIT License.
+//
+// handles the game dropdown in the nav
+
 
 var app = app || {
     Collections: {},
@@ -39,7 +46,7 @@ var app = app || {
             this.$el.find('#nav_' + game_id).removeClass('hide');
         },
         updateText: function() {
-            
+
             $('.game_name').removeClass('hide');
             if (Backbone.history.fragment == 'join_game') {
                 this.showCurrentGame();
@@ -69,8 +76,12 @@ var app = app || {
             this.$el.find('#nav_' + game_id).addClass('hide');
         },
         // loads the items into the dropdown and changes the dropdown title to the current game
-        render: function() {        
-            this.$el.html(this.template({games: _.where(this.collection.toJSON(), {member:true})}));
+        render: function() {
+            this.$el.html(this.template({
+                games: _.where(this.collection.toJSON(), {
+                    member: true
+                })
+            }));
             this.updateText();
             return this;
 

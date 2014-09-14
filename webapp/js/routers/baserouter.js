@@ -1,3 +1,6 @@
+// Base Router
+// Provided From https://github.com/DanialK/advanced-security-in-backbone
+
 var app = app || {
     Collections: {},
     Models: {},
