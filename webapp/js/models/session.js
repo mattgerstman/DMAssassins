@@ -138,13 +138,17 @@ var app = app || {
             login.done(function(response) {
 
                 // store all reponse data in the new session immediately 
-                var parsedGames  = app.Running.Games.parse(response.games);    
-                var games 		 = parsedGames           || {};
-                var game 		 = response.game         || { game_id: null };
-                var user 		 = response.user         || { user_id: null };
-                var target 		 = response.target       || { assassin_id: user.user_id };                
-                var leaderboard  = response.leaderboard  || {};
-                var rules		 = { rules: (response.game.game_properties.rules || null) };
+                var parsedGames    = app.Running.Games.parse(response.games);    
+                var games 		   = parsedGames           || {};
+                var game 		   = response.game         || { game_id: null };
+                var user 		   = response.user         || { user_id: null };
+                var target 		   = response.target       || { assassin_id: user.user_id };                
+                var leaderboard    = response.leaderboard  || {};        
+                var rules          = null;
+                if (game)
+                {
+                    rules = {rules: game.game_properties.rules};
+                }
 
                 target.assassin_id = response.user.user_id;
 
