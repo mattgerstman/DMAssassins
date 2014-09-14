@@ -82,7 +82,7 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 
 	var assassinIdBuffer string
 	// Query the targets table
-	err := db.QueryRow(`SELECT user_id from dm_user_targets WHERE target_id = $1 AND game_id = $2`, targetId.String(), gameId.String()).Scan(&assassinIdBuffer)
+	err := db.QueryRow(`SELECT user_id from dm_user_targets WHERE target_id = $1 AND game_id = $2 LIMIT 1`, targetId.String(), gameId.String()).Scan(&assassinIdBuffer)
 	if err == sql.ErrNoRows {
 		msg := "Invalid target_id: " + targetId.String()
 		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUserId)
@@ -119,7 +119,6 @@ func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 
 	return GetUserById(userId)
 }
-
 
 // delete sthe actual game mapping from the db
 func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {

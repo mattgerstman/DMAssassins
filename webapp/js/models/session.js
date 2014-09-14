@@ -34,7 +34,7 @@ var app = app || {
         get: function(key) {
             if (this.supportStorage) {
                 var data = sessionStorage.getItem(key);
-                if (data && data[0] === '{') {
+                if (data && (data[0] === '{' || data[0] === '[')) {
                     return JSON.parse(data);
                 } else {
                     return data;
@@ -117,11 +117,7 @@ var app = app || {
         // takes a facebook response and creates a session from it
         createSession: function(response) {
 
-            var game = this.get('game');
-            var game_id = null;
-            if (game) {
-                game_id = game.game_id
-            }
+            var game_id = this.get('game_id');
 
             var data = {
                 'facebook_id': response.authResponse.userID,
@@ -141,23 +137,21 @@ var app = app || {
             // after the ajax request run this function
             login.done(function(response) {
 
-                // store a goto boolean to determine if we're authenticated
-                that.set('authenticated', true);
+                // store all reponse data in the new session immediately 
+                var parsedGames  = app.Running.Games.parse(response.games);    
+                var games 		 = parsedGames           || {};
+                var game 		 = response.game         || { game_id: null };
+                var user 		 = response.user         || { user_id: null };
+                var target 		 = response.target       || { assassin_id: user.user_id };                
+                var leaderboard  = response.leaderboard  || {};
+                var rules		 = { rules: response.game.game_properties.rules };
 
-                // store the user in a session, this is game agnostic so it especially fits here
-                that.set('user', JSON.stringify(response.user));
+                target.assassin_id = response.user.user_id;
 
                 // store the basic auth token in the session in case we need to reload it on app launch
-                that.storeBasicAuth(response)
+                that.storeSession(response)
 
-                // load the profile model for the user
-                app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
-                app.Running.TargetModel = new app.Models.Target({
-                    assassin_id: that.get('user').user_id
-                })
-                if (app.Running.NavGameView !== undefined) {
-                    app.Running.NavGameView.render();
-                }
+                app.Running.ProfileModel.set(user);
 
                 if (!response.game) {
                     Backbone.history.navigate('#', {
@@ -166,26 +160,35 @@ var app = app || {
                     return;
                 }
 
-                // store the current game in the session
-                that.set('game', JSON.stringify(response.game))
+                
+                app.Running.Games.reset(games);
+                app.Running.Games.setActiveGame(game.game_id, true);
 
-                app.Running.NavGameView = new app.Views.NavGameView();
-                app.Running.NavGameView.collection.fetch({
-                    reset: true
-                });
-                if (app.Running.navView) {
-                    app.Running.navView.render();
-                }
+                // reload the data for all models
+                app.Running.TargetModel.set(target);               
+                app.Running.LeaderboardModel.set(leaderboard);
+                app.Running.RulesModel.set(rules);
 
-                if (Backbone.history.fragment != 'login') {
-                    Backbone.history.navigate(Backbone.history.fragment, {
-                        trigger: true
-                    });
+                var targetURLs = app.Running.Router.requiresTarget;
+                var path = Backbone.history.fragment;
+
+                if ((path != 'login') && !_.contains(targetURLs, path)) {
+                    Backbone.history.loadUrl();
                     return;
                 }
-                Backbone.history.navigate('#', {
+
+                if (path == 'login' && app.Running.TargetModel.get('user_id')) {
+                    Backbone.history.navigate('#', {
+                        trigger: true
+                    });       
+                    return;
+                }
+
+                Backbone.history.navigate('#my_profile', {
                     trigger: true
-                });
+                });                
+                
+
 
             });
 
@@ -202,20 +205,12 @@ var app = app || {
 
 
         },
-        // clear all the session data and post it to the server
-        logout: function(callback) {
-            var that = this;
-            $.ajax({
-                url: this.url + '/logout',
-                type: 'DELETE'
-            }).done(function(response) {
-                //Clear all session data
-                that.clear();
-                that.initialize();
-                callback();
-            });
+        storeSession: function(data) {
+            // store a boolean to determine if we're authenticated
+            this.set('authenticated', true); 
+            this.set('has_game', data.game !== null);
+            this.storeBasicAuth(data);
         },
-
         // stores all the basic auth variables in the session
         storeBasicAuth: function(data) {
             var user_id = data.user.user_id;

@@ -63,6 +63,10 @@ var app = app || {
             }
 
             var game = this.collection.getActiveGame()
+            if (!game)
+            {
+                return;
+            }
 
             var game_name = game.get('game_name');
             $('#games_header').text(game_name);

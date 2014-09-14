@@ -28,60 +28,68 @@ var app = app || {
             return list;
         },
         comparator: 'game_name',
+        active_game: null,
         // handle on initiliazation
         url:function(){
             var user_id = app.Session.get('user_id');
             return config.WEB_ROOT + 'users/' + user_id + '/game/';
             
         },
-        initialize: function() {
-            
-            var sessionGame = app.Session.get('game');
-            if (sessionGame)
-            {
-                this.active_game = new app.Models.Game(sessionGame);
-                return;
-            }
-            
-            this.active_game = new app.Models.Game();
-            
-            
-        },
         addGame: function(game_id){
             var that = this;
             var game = new app.Models.Game({game_id: game_id});
-            game.fetch({success: function(yo){
-                console.log(yo);
+            game.fetch({success: function(){
                 that.add(game);
                 that.setActiveGame(game.get('game_id'));
             }})
         },
-        removeActiveGame: function(){
-            this.remove(this.active_game);
+        joinGame: function(game_id, password) {
+            this.setActiveGame(game_id).set('member', true);
+            app.Running.ProfileModel.joinGame(game_id, password);
+        },
+        setArbitraryActiveGame: function(silent) {
             var newGame = this.findWhere({game_started: true})
             if (!newGame)
             {
                 newGame = this.findWhere({game_started: false})
             }
-            this.setActiveGame(newGame);
+            this.setActiveGame(newGame, silent);
             return newGame;
         },
-        setActiveGame: function(game_id) {
+        removeActiveGame: function(){
+            this.remove(this.active_game);
+            return this.setArbitraryActiveGame();                
+        },
+        setActiveGame: function(game_id, silent) {
             var game = this.get(game_id);
             if (!game) {
                 return null;
             }
             this.active_game = game;
-            this.trigger('game-change');
-            app.Session.set('game', JSON.stringify(this.active_game));
+            app.Session.set('game_id', game_id);
+
+            if (silent === undefined || !silent)
+            {   
+                this.trigger('game-change');    
+            }
+            
             return this.active_game;
         },
-        getActiveGame: function() {        
+        getActiveGame: function() {    
+            if (!this.active_game)
+            {
+                this.setArbitraryActiveGame(true);
+            }    
             return this.active_game;
 
         },
-        getActiveGameId: function() {        
-            return this.active_game.get('game_id');
+        getActiveGameId: function() { 
+            var game = this.getActiveGame();
+            if (!game)
+            {
+                return null;
+            }
+            return game.get('game_id');
         }
 
         

@@ -12,7 +12,7 @@ import (
 // GET function for /users/{username}/target returns a user's information
 // Need to add permissions to this on a per user basis
 func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
-	appErr = RequiresUser(r)
+	//appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -27,6 +27,12 @@ var app = app || {
         // renders a page within the body of the app
         renderPage: function(page) {
             this.$body.html(page.render().el);
+        },
+        setCurrentView: function(view) {
+            if (app.Running.currentView)
+                app.Running.currentView.remove();
+            app.Running.currentView = view;
+
         }
     })
 })(jQuery);

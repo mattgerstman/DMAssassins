@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
+	"fmt"
 )
 
 type Game struct {
@@ -181,6 +182,7 @@ func Crypt(plainPw string) (hashedPassword []byte, appErr *ApplicationError) {
 // Creates a new game and saves it in the database
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game, appErr *ApplicationError) {
 	// Encrypt the game's password
+	fmt.Println(gamePassword)
 	encryptedPassword, appErr := Crypt(gamePassword)
 	if appErr != nil {
 		return nil, appErr

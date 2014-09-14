@@ -41,6 +41,7 @@ const (
 	ErrCodeNotFoundTeamId      = 40405
 	ErrCodeNotFoundGameId      = 40406
 	ErrCodeNotFoundGameMapping = 40407
+	ErrCodeNotFoundTarget      = 40408
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420
