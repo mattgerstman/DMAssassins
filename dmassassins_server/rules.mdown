@@ -29,4 +29,4 @@ There will be several plot twists that will change the game dynamic. You will be
 
 ##Cheating
 If a player is caught cheating they will be completely removed from the game.
-If someone refuses to give up their secret, you can contact the admin at [EnterAdminEmail@here.com](mailto:EnterAdminEmail@here.com).
+If someone refuses to give up their secret, you can contact the admin at [%ADMINEMAIL%](mailto:%ADMINEMAIL%).
