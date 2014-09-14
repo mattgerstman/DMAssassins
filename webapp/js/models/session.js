@@ -152,6 +152,12 @@ var app = app || {
 
                 target.assassin_id = response.user.user_id;
 
+                // reload the data for all models
+                app.Running.ProfileModel.set(user);
+                app.Running.TargetModel.set(target);               
+                app.Running.LeaderboardModel.set(leaderboard);
+                app.Running.RulesModel.set(rules);
+
                 // store the basic auth token in the session in case we need to reload it on app launch
                 that.storeSession(response)
                 if (!response.game) {
@@ -159,17 +165,9 @@ var app = app || {
                         trigger: true
                     });
                     return;
-                }
-
-                
+                }                
                 app.Running.Games.reset(games);
                 app.Running.Games.setActiveGame(game.game_id, true);
-
-                // reload the data for all models
-                app.Running.ProfileModel.set(user);
-                app.Running.TargetModel.set(target);               
-                app.Running.LeaderboardModel.set(leaderboard);
-                app.Running.RulesModel.set(rules);
 
                 var targetURLs = app.Running.Router.requiresTarget;
                 var path = Backbone.history.fragment;

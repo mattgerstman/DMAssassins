@@ -1,3 +1,6 @@
+DROP SCHEMA public cascade;
+CREATE SCHEMA public;
+
 --
 -- PostgreSQL database dump
 --
@@ -312,8 +315,6 @@ ALTER TABLE ONLY dm_user_targets
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM "Matthew";
-GRANT ALL ON SCHEMA public TO "Matthew";
 GRANT ALL ON SCHEMA public TO dmassassins;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
