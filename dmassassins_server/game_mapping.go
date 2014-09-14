@@ -143,6 +143,29 @@ func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationErr
 	return nil
 }
 
+// Get all games for a user
+func (user *User) GetGamesForUser() (games []*Game, appErr *ApplicationError) {
+
+	// Select game_ids from the dm_user_game_mapping table and use those to get the games
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	// convert the rows to an array of gamess
+	return parseGameRows(rows)
+}
+
+// Get all games a user is not present in so they can join one
+func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError) {
+
+	// Select game_ids from the dm_user_game_mapping table and skip those in the dm_games datable
+	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_started = false AND game_id NOT IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return parseGameRows(rows)
+}
+
 // Gets an arbitrary game for a user to start off with
 func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *ApplicationError) {
 

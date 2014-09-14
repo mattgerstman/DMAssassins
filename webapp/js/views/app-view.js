@@ -1,6 +1,13 @@
 // loads pages within the body of the app
 // js/views/app-view
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function($){
 	'use strict';

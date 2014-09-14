@@ -1,4 +1,13 @@
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
+
+
 
 
   // This is called with the results from from FB.getLoginStatus().

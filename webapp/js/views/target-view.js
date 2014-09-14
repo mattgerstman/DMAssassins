@@ -1,7 +1,14 @@
 // target view
 // js/views/target-view.js
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function($){
  'use strict';
@@ -22,11 +29,9 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  },
 	  // constructor
 	  initialize : function (){
-	  	this.model = app.Running.TargetModel;
-	  	
+	  	this.model = app.Running.TargetModel;	  	
 		this.listenTo(this.model, 'change', this.render)
 		this.listenTo(this.model, 'fetch', this.render)
-		//this.listenTo(app.Running.UserGamesModel, 'game-change', this.model.fetch)
 	  },
 	  // kills your target
 	  kill: function() {
@@ -36,8 +41,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			headers: {'X-DMAssassins-Secret': secret},
 			success: function(){
 				view.model.fetch();
-			}
-			
+			}			
 		})
 	  },
 	  render: function(){

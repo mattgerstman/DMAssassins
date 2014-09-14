@@ -100,7 +100,7 @@ func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *Application
 
 	switch {
 	case err == sql.ErrNoRows:
-		msg := "Invalid user: " + username
+		msg := "No Target"
 		return nil, NewApplicationError(msg, err, ErrCodeNotFoundUsername)
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

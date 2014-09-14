@@ -99,29 +99,6 @@ func (game *Game) Start() (appErr *ApplicationError) {
 	return nil
 }
 
-// Get all games for a user
-func (user *User) GetGamesForUser() (games []*Game, appErr *ApplicationError) {
-
-	// Select game_ids from the dm_user_game_mapping table and use those to get the games
-	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	// convert the rows to an array of gamess
-	return parseGameRows(rows)
-}
-
-// Get all games a user is not present in so they can join one
-func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError) {
-
-	// Select game_ids from the dm_user_game_mapping table and skip those in the dm_games datable
-	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id NOT IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	return parseGameRows(rows)
-}
-
 // Converts a set of game rows into an array of games
 // Rows MUST appear in the order game_id, game_name, game_started, game_password
 func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
@@ -161,7 +138,6 @@ func CheckPassword(gameId uuid.UUID, testPassword string) (appErr *ApplicationEr
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
 	return CheckPasswordHash(hashedPassword, testPassword)
 }
 
@@ -169,9 +145,10 @@ func CheckPassword(gameId uuid.UUID, testPassword string) (appErr *ApplicationEr
 // Returns an error if they don't match
 func CheckPasswordHash(hashedPassword []byte, plainPw string) (appErr *ApplicationError) {
 	// If they're both nil return true
-	if hashedPassword == nil && plainPw == "" {
+	if len(hashedPassword) == 0 && plainPw == "" {
 		return nil
 	}
+
 
 	// Convert to a bytearray and skip whitespace
 	bytePW := []byte(strings.TrimSpace(plainPw))
@@ -233,8 +210,14 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 		return nil, NoRowsAffectedAppErr
 	}
 
+	// Create a user secret for the game
+	secret, appErr := NewSecret()
+	if appErr != nil {
+		tx.Rollback()
+		return nil, appErr
+	}
 	// Prepare the statement to insert the game creator(admin) into the game
-	firstMapping, err := db.Prepare(`INSERT INTO dm_user_game_mapping (game_id, user_id, user_role) VALUES ($1, $2, $3)`)
+	firstMapping, err := db.Prepare(`INSERT INTO dm_user_game_mapping (game_id, user_id, user_role, secret) VALUES ($1, $2, $3, $4)`)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -242,7 +225,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 	// Executre the statement to insert the game creator(admin) into the game
 	role := "dm_admin"
-	res, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role)
+	res, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role, secret)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)

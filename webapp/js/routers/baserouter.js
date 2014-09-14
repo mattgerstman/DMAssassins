@@ -1,4 +1,11 @@
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function(){
 

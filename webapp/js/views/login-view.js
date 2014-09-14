@@ -1,7 +1,14 @@
 // shows the login screen
 // js/views/login-view.js
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function($){
  'use strict';

@@ -37,7 +37,7 @@ func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 
 // GET - Gets a game
 func getGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
-	appErr = RequiresLogin(r)
+	//appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

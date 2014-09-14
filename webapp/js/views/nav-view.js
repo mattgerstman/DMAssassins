@@ -1,7 +1,14 @@
 // handles the nav bar at the top
 // js/views/nav-view.js
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function($){
  'use strict';
@@ -21,13 +28,15 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  initialize : function (){	  
 	  	  this.model = app.Running.NavModel;
 		  this.listenTo(this.model, 'change', this.render)
-		  this.listenTo(app.Running.UserGamesModel, 'game-change', this.handleTarget)
+		  this.listenTo(app.Running.Games, 'game-change', this.handleTarget)
 	  },
 	  
 	  // if we don't have a target hide that view
 	  render: function(){
 		this.$el.html( this.template ( this.model.attributes ) );
         this.handleTarget();
+        if (app.Running.NavGameView)
+            app.Running.NavGameView.setElement(this.$('#games_dropdown')).render();
 		return this;  
 	  },
 	  
@@ -62,20 +71,20 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 	  handleTarget: function(){
 	  	var that = this;
 	  
-	  	app.Running.TargetModel.changeGame(app.Session.getGameId());		
-		app.Running.TargetModel.fetch({
-			success: function(model, error) {
-				that.enableTarget();				
-			},
-			error: function(model, error) {
-				if (error.status == 404){
-					app.Running.TargetModel.set('user_id', null);					
-				}
-				that.disableTarget();
-			}
-		
-		});
-				
+	  	if (app.Running.TargetModel.changeGame(app.Running.Games.getActiveGameId())) {
+               app.Running.TargetModel.fetch({
+    			success: function(model, error) {
+    				that.enableTarget();				
+    			},
+    			error: function(model, error) {
+    				if (error.status == 404){
+    					app.Running.TargetModel.set('user_id', null);					
+    				}
+    				that.disableTarget();
+    			}
+    		
+    		});
+        }				
 	  },
 	  
 	  // hides the target nav item

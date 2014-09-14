@@ -1,7 +1,14 @@
 // Manages all local storage information and helps keep various models in sync
 // js/models/session
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function(){
 
@@ -59,16 +66,6 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				Backbone.Model.prototype.clear(this);
 			}
 		},
-		
-		getGameId: function(){
-			var game = this.get('game');
-			if (game)
-			{
-				return game.game_id;
-			}
-			return null;
-		},
-		
 		// calls the facebook login function and handles it appropriately
 		// if they are logged into facebook and connected to the app a session is created automatically
 		// otherwise a popup will appear and handle the session situation
@@ -110,7 +107,11 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		// takes a facebook response and creates a session from it
 		createSession: function(response) {
 
-			var game_id = this.getGameId()
+            var game = this.get('game');
+			var game_id = null;
+			if (game) {
+    			game_id = game.game_id
+			} 
 
 			var data =  {
 				'facebook_id': response.authResponse.userID,
@@ -134,10 +135,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 				that.set('authenticated', true);
 
 				// store the user in a session, this is game agnostic so it especially fits here
-				that.set('user', JSON.stringify(response.response.user));
+				that.set('user', JSON.stringify(response.user));
 					
 				// store the basic auth token in the session in case we need to reload it on app launch
-				that.storeBasicAuth(response.response)
+				that.storeBasicAuth(response)
 				
 				// load the profile model for the user
 				app.Running.ProfileModel = new app.Models.Profile(that.get('user'))
@@ -146,15 +147,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 					app.Running.NavGameView.render();
 				}
 						
-				if (!response.response.game)
+				if (!response.game)
 				{
 					Backbone.history.navigate('#', { trigger : true });
 					return;
 				}
 				
 				// store the current game in the session
-				that.set('game', JSON.stringify(response.response.game))	
+				that.set('game', JSON.stringify(response.game))	
 				
+                app.Running.NavGameView = new app.Views.NavGameView();
+                app.Running.NavGameView.collection.fetch({reset: true});
 				if (app.Running.navView)
 				{
 					app.Running.navView.render();

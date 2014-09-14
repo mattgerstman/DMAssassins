@@ -1,6 +1,13 @@
 // Handles all the URL *Magic*
 // js/routers/router.js
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function(){
 
@@ -66,10 +73,10 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			var needStarted 	= _.contains(this.requiresGameStarted, path);
 			
 			// is there a game
-			var isGame   		= app.Session.get('game') !== null;
+			var isGame   		= app.Running.Games.getActiveGameId() !== null
 			
 			// is the game started
-			var isStarted 		= app.Session.get('game') && (app.Session.get('game').game_started);
+			var isStarted 		= app.Running.Games.getActiveGame().get('game_started');
 
 /*
 			Variables I use when shit's not routing properly /**//*/
@@ -133,7 +140,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		target : function() {
 			//console.log('target');
 			app.Running.currentView = new app.Views.TargetView();
-			app.Running.TargetModel.changeGame(app.Session.getGameId());
+			app.Running.TargetModel.changeGame(app.Running.Games.getActiveGameId());
 			app.Running.currentView.model.fetch();
 			this.render();
 		},
@@ -192,9 +199,12 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			{
 				app.Running.navView = new app.Views.NavView();
 				app.Running.navView = app.Running.navView.render();
-				app.Running.NavGameView = new app.Views.NavGameView(app.Session.get('user_id'));
-				app.Running.NavGameView.model.fetch();
-				app.Running.NavGameView.render();
+				if (!app.Running.NavGameView)
+				{
+    				app.Running.NavGameView = new app.Views.NavGameView(app.Session.get('user_id'));
+//    				app.Running.NavGameView.model.fetch();
+    				app.Running.NavGameView.render();   				
+				}
 			}
 			// if it explicitely shouldn't have a nav and we have one kill it
 			else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.navView))

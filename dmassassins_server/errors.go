@@ -16,6 +16,7 @@ const (
 	ErrCodeInvalidHeader    = 40003
 	ErrCodeMissingHeader    = 40004
 	ErrCodeInvalidUUID      = 40005
+	ErrCodeInvalidJSON      = 40006
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100

@@ -1,7 +1,14 @@
 // displays user profile
 // js/views/profile-view.js
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 
 (function($){
  'use strict';
@@ -25,7 +32,7 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 		// load quit confirm modal
 	 	showQuitModal: function() {
 	 		var templateVars = {
-		 		quit_game_name: app.Session.get('game').game_name
+		 		quit_game_name: app.Running.Games.getActiveGame().get('game_name')
 	 		}
 	 		var template = _.template( $('#quit-modal-template').html() )
 	 		var html = template(templateVars);
@@ -43,14 +50,20 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			this.listenTo(this.model, 'change', this.render)
 			this.listenTo(this.model, 'fetch', this.render)
 			this.listenTo(this.model, 'destroy', this.destroyCallback)  
+			this.listenTo(app.Running.Games, 'game-change', this.changeGame)  
+			
 		},
-	  destroyCallback: function() {
-		$('#quit_modal').modal('hide') 
-		this.once('game-change', this.model.fetch, app.Running.UserGamesModel)		
-	  },	  
-	  render: function(){
-		this.$el.html( this.template ( this.model.attributes ) );
-		return this;  
-	  }	     
+		changeGame: function(){
+    		this.model.changeGame();
+    		this.model.fetch();
+		},
+        destroyCallback: function() {
+		    $('#quit_modal').modal('hide')            
+		    $('.modal-backdrop').remove();
+        },	  
+        render: function(){
+		    this.$el.html( this.template ( this.model.attributes ) );
+            return this;  
+        }	     
   })  
 })(jQuery);

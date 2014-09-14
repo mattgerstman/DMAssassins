@@ -13,7 +13,6 @@ import (
 var db *sql.DB
 
 const (
-	gamePath            = "/game/"
 	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameUserPath        = "/game/{game_id}/users/{user_id}/"
@@ -23,11 +22,10 @@ const (
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}"
 	gameRulesPath       = "/game/{game_id}/rules/"
 
-	userPath        = "/users/{user_id}/"
-	userGamePath    = "/users/{user_id}/game/"
-	userGameNewPath = "/users/{user_id}/game/new/"
-	sessionPath     = "/session/"
-	homePath        = "/"
+	userPath     = "/users/{user_id}/"
+	userGamePath = "/users/{user_id}/game/"
+	sessionPath  = "/session/"
+	homePath     = "/"
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -48,11 +46,7 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		return
 	}
 
-	var output map[string]interface{}
-	output = make(map[string]interface{})
-	output["response"] = obj
-
-	data, err := json.Marshal(output)
+	data, err := json.Marshal(obj)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
 		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
@@ -71,11 +65,11 @@ func connect() (db *sql.DB, err error) {
 // Handles CORS, eventually I'll strip it down to exactly the headers/origins I need
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "OPTIONS" {			
+		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, Authorization")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, X-DMAssassins-Game-Password, Authorization")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		} else {
 			h.ServeHTTP(w, r)
 		}
@@ -94,16 +88,15 @@ func StartServer() {
 
 	defer db.Close()
 
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 
 	// Just Game
-	r.HandleFunc(gamePath, GameHandler()).Methods("POST", "GET")
 	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 
 	// Game then User
-	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "POST", "DELETE", "PUT")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "POST")
 
@@ -115,8 +108,7 @@ func StartServer() {
 	r.HandleFunc(userPath, UserHandler()).Methods("GET")
 
 	// User then Game
-	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET")
-	r.HandleFunc(userGameNewPath, UserGameNewHandler()).Methods("GET")
+	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "POST", "PUT")
 
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")

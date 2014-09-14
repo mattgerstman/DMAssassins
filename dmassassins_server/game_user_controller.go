@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
+	"log"
 )
 
 // POST - Wrapper for GameMapping:JoinGame
@@ -27,7 +28,10 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
-	gamePassword := r.FormValue("game_password")
+
+	gamePassword := r.Header.Get("X-DMAssassins-Game-Password")
+	log.Println(gamePassword);
+
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
@@ -131,6 +135,8 @@ func GameUserHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getGameUser(r)
+		case "PUT":
+			obj, err = postGameUser(r)
 		case "POST":
 			obj, err = postGameUser(r)
 		case "DELETE":

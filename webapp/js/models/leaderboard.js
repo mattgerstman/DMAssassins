@@ -1,7 +1,14 @@
 // Leaderboard model, displays high scores for a game
 // js/models/leaderboard.js
 
-var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
 (function() {
 	'use strict';
 	
@@ -30,17 +37,17 @@ var app = app || {Models:{}, Views:{}, Routers:{}, Running:{}, Session:{}};
 			]
 		},
 		parse: function(response){
-			var data = response.response;
+			var data = response;
 			data.user_col_width = 100/(3+this.get('teams_enabled'));
 			data.team_col_width = 20;
 			return data;
 		},
 		initialize: function(){
-			var game_id = app.Session.getGameId();
+			var game_id = app.Running.Games.getActiveGameId();
 			this.url = config.WEB_ROOT + 'game/' + game_id + '/leaderboard/'
 		},
 		loadGame: function(){
-			var game_id = app.Session.getGameId();
+			var game_id = app.Running.Games.getActiveGameId();
 			this.url = config.WEB_ROOT + 'game/' + game_id + '/leaderboard/'
 			
 		}
