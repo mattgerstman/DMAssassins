@@ -58,13 +58,13 @@ var app = app || {
         },
         // cancels the game creation/selection
         goBack: function() {
-            if (app.Session.get('authenticated')) {
-                // im sure theres a back function, find it
+            if (app.Session.get('has_game') == "true") {
                 history.back();
                 return;
             }
             $('.select-game-active').addClass('hide').removeClass('select-game-active');
             $('#create-or-join').removeClass('hide');
+            $('.logo').removeClass('hide');
         },
         // show the create game s ubview
         createGame: function() {
