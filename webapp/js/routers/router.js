@@ -80,7 +80,7 @@ var app = app || {
             var needTarget = _.contains(this.requiresTarget, path);
 
             // is there a game
-            var hasGame = app.Session.get('has_game');
+            var hasGame = app.Session.get('has_game') == "true";
 
             // is the game started
             var hasTarget = app.Running.TargetModel.get('user_id') !== null;
