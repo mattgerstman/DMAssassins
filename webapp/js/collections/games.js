@@ -29,9 +29,12 @@ var app = app || {
         },
         comparator: 'game_name',
         // handle on initiliazation
-        initialize: function() {
+        url:function(){
             var user_id = app.Session.get('user_id');
-            this.url = config.WEB_ROOT + 'users/' + user_id + '/game/';
+            return config.WEB_ROOT + 'users/' + user_id + '/game/';
+            
+        },
+        initialize: function() {
             
             var sessionGame = app.Session.get('game');
             if (sessionGame)
