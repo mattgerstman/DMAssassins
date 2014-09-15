@@ -83,7 +83,7 @@ var app = app || {
             var hasGame = app.Session.get('has_game') == "true";
 
             // is the game started
-            var hasTarget = app.Running.TargetModel.get('user_id') !== null;
+            var hasTarget = !!app.Running.TargetModel.get('user_id');
 
             /*
 			Variables I use when shit's not routing properly /**/

@@ -34,7 +34,7 @@ var app = app || {
         get: function(key) {
             if (this.supportStorage) {
                 var data = sessionStorage.getItem(key);
-                if (data && (data[0] === '{' || data[0] === '[')) {
+                if (data && data[0] === '{') {
                     return JSON.parse(data);
                 } else {
                     return data;
@@ -157,16 +157,10 @@ var app = app || {
                 app.Running.TargetModel.set(target);               
                 app.Running.LeaderboardModel.set(leaderboard);
                 app.Running.RulesModel.set(rules);
-
+                app.Running.Games.reset(games);
+                
                 // store the basic auth token in the session in case we need to reload it on app launch
                 that.storeSession(response)
-                if (!response.game) {
-                    Backbone.history.navigate('#multigame', {
-                        trigger: true
-                    });
-                    return;
-                }                
-                app.Running.Games.reset(games);
                 app.Running.Games.setActiveGame(game.game_id, true);
 
                 var targetURLs = app.Running.Router.requiresTarget;

@@ -15,15 +15,14 @@ var db *sql.DB
 const (
 	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
-	gameUserPath        = "/game/{game_id}/users/{user_id}/"
-	gameUserTargetPath  = "/game/{game_id}/users/{user_id}/target/"
-	gameUserTeamPath    = "/game/{user_id}/users/{user_id}/team/"
+	gameUserPath        = "/game/{game_id}/user/{user_id}/"
+	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
+	gameUserTeamPath    = "/game/{user_id}/user/{user_id}/team/"
 	gameTeamPath        = "/game/{game_id}/team/"
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}"
 	gameRulesPath       = "/game/{game_id}/rules/"
 
-	userPath     = "/users/{user_id}/"
-	userGamePath = "/users/{user_id}/game/"
+	userGamePath = "/user/{user_id}/game/"
 	sessionPath  = "/session/"
 	homePath     = "/"
 
@@ -125,9 +124,6 @@ func StartServer() {
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
 	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE")
-
-	// Just User
-	r.HandleFunc(userPath, UserHandler()).Methods("GET")
 
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")

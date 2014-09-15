@@ -61,7 +61,7 @@ func getGameRules(r *http.Request) (rulesWrapper map[string]string, appErr *Appl
 		return nil, appErr
 	}
 
-	rules, appErr := game.GetRules()
+	rules, appErr := game.GetHTMLRules()
 	if appErr != nil {
 		return nil, appErr
 	}

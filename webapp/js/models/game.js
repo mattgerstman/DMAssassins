@@ -30,7 +30,7 @@ var app = app || {
         },
 
         idAttribute: 'game_id',
-        urlRoot: config.WEB_ROOT + 'users/',
+        urlRoot: config.WEB_ROOT + 'user/',
         url: function() {
             var url = this.urlRoot;
             url += app.Session.get('user_id') + '/game/';            

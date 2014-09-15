@@ -5,7 +5,6 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -182,7 +181,6 @@ func Crypt(plainPw string) (hashedPassword []byte, appErr *ApplicationError) {
 // Creates a new game and saves it in the database
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game, appErr *ApplicationError) {
 	// Encrypt the game's password
-	fmt.Println(gamePassword)
 	encryptedPassword, appErr := Crypt(gamePassword)
 	if appErr != nil {
 		return nil, appErr
