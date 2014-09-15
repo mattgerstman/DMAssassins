@@ -26,6 +26,10 @@ const (
 	userGamePath = "/users/{user_id}/game/"
 	sessionPath  = "/session/"
 	homePath     = "/"
+
+	HttpReponseCodeOk        = 200
+	HttpResponseCodeCreated  = 201
+	HttpReponseCodeNoContent = 204
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
@@ -46,6 +50,17 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		return
 	}
 
+	httpCode := HttpReponseCodeOk
+
+	if obj == nil {
+		httpCode = HttpReponseCodeNoContent
+		w.Write(nil)
+	}
+
+	if (r.Method == "PUT") || (r.Method == "POST") {
+		httpCode = HttpResponseCodeCreated
+	}
+
 	data, err := json.Marshal(obj)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
@@ -53,7 +68,14 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
 		return
 	}
-	w.Write(data)
+	w.WriteHeader(httpCode)
+	_, err = w.Write(data)
+	if err != nil {
+		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
+		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
+		HttpErrorLogger(w, appErr.Msg, appErr.Code)
+		return
+	}
 }
 
 // Connects to the database, needs to be updated to read from an ini file
