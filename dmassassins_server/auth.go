@@ -17,6 +17,7 @@ const (
 	RoleUser       = 1
 )
 
+// Decode the Basic Auth header and return a userId and token to validate
 func GetBasicAuth(r *http.Request) (userId uuid.UUID, token string, appErr *ApplicationError) {
 	// Get the Authorization header.
 	authHeader := r.Header.Get("Authorization")
@@ -64,6 +65,7 @@ func GetBasicAuth(r *http.Request) (userId uuid.UUID, token string, appErr *Appl
 	return userId, token, nil
 }
 
+// Requires that a user is logged in
 func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 	userId, token, appErr := GetBasicAuth(r)
 	if appErr != nil {
@@ -80,21 +82,16 @@ func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
-	if dbToken != token {
-		apiFacebookId, appErr := GetFacebookIdFromToken(token)
-		if appErr != nil {
-			return appErr
-		}
-		if apiFacebookId != user.FacebookId {
-			msg := "Permission Denied"
-			err := errors.New("Permission Denied")
-			return NewApplicationError(msg, err, ErrCodePermissionDenied)
-		}
+	appErr = validateFacebookToken(dbToken, token, user.FacebookId)
+
+	if appErr != nil {
+		return appErr
 	}
 
 	return nil
 }
 
+// Compare two user roles by their int values
 func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 	var roles = map[string]int{
 		"dm_super_admin": RoleSuperAdmin,
@@ -105,6 +102,7 @@ func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 	return roles[role] >= roleId
 }
 
+// Requires the same user, captain for that team, or admin for that game
 func RequiresUser(r *http.Request) (appErr *ApplicationError) {
 	role, teamId, userId, appErr := getRoleFromRequest(r)
 	if appErr != nil {
@@ -113,114 +111,114 @@ func RequiresUser(r *http.Request) (appErr *ApplicationError) {
 
 	vars := mux.Vars(r)
 	reqUserId := uuid.Parse(vars["user_id"])
+
+	// If the userId's are equal or we're not requesting a user return no error
 	if (uuid.Equal(userId, reqUserId)) || (reqUserId == nil) {
 		return nil
 	}
 
-	theyAre, appErr := isTeamCaptain(role, teamId, r)
+	// Check if the auth token is for a team captain for theuse given
+	appErr = isTeamCaptain(role, teamId, r)
 	if appErr != nil {
 		return appErr
 	}
-	if theyAre {
-		return nil
-	}
+	return nil
+}
 
+// Standard permission denied application error
+func GetPermissionDeniedAppErr() (appErr *ApplicationError) {
 	msg := "Permission Denied"
 	err := errors.New("Permission Denied")
 	return NewApplicationError(msg, err, ErrCodePermissionDenied)
-
 }
 
-func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (isRightCaptain bool, appErr *ApplicationError) {
+// Check if a role/teamId match to be the team captain for the user_id/game_id in the request
+func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (appErr *ApplicationError) {
 
 	if compareRole(role, RoleAdmin) {
-		return true, nil
+		return nil
 	}
 
 	if !compareRole(role, RoleCaptain) {
-		return false, nil
+		return GetPermissionDeniedAppErr()
 	}
 
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	gameId := uuid.Parse(vars["game_id"])
 
+	// Get the game mapping for the necessary user
 	GameMapping, appErr := GetGameMapping(userId, gameId)
 	if appErr != nil {
-		return false, appErr
+		return appErr
 	}
+	// Team id we need to validate against
 	reqTeamId := GameMapping.TeamId
 
 	if (uuid.Equal(teamId, reqTeamId)) || (reqTeamId == nil) {
-		return true, nil
+		return nil
 	}
-	return false, nil
+	return GetPermissionDeniedAppErr()
 
 }
 
+// Requires the user is a team captain
 func RequiresCaptain(r *http.Request) (appErr *ApplicationError) {
 	role, teamId, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
 		return appErr
 	}
 
-	theyAre, appErr := isTeamCaptain(role, teamId, r)
+	appErr = isTeamCaptain(role, teamId, r)
 	if appErr != nil {
 		return appErr
 	}
-	if theyAre {
-		return nil
-	}
 
-	msg := "Permission Denied"
-	err := errors.New("Permission Denied")
-	return NewApplicationError(msg, err, ErrCodePermissionDenied)
-
+	return nil
 }
 
+// Requires the user is a game admin
 func RequiresAdmin(r *http.Request) (appErr *ApplicationError) {
 	role, _, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
 		return appErr
 	}
-	if compareRole(role, RoleAdmin) {
-		return nil
+	if !compareRole(role, RoleAdmin) {
+		return GetPermissionDeniedAppErr()
 	}
 
-	msg := "Permission Denied"
-	err := errors.New("Permission Denied")
-	return NewApplicationError(msg, err, ErrCodePermissionDenied)
+	return nil
 
 }
 
+// Requires the user is Matt Gerstman
 func RequiresSuperAdmin(r *http.Request) (appErr *ApplicationError) {
 	role, _, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
 		return appErr
 	}
-	if compareRole(role, RoleSuperAdmin) {
-		return nil
+	if !compareRole(role, RoleSuperAdmin) {
+		return GetPermissionDeniedAppErr()
 	}
-
-	msg := "Permission Denied"
-	err := errors.New("Permission Denied")
-	return NewApplicationError(msg, err, ErrCodePermissionDenied)
+	return nil
 }
 
-// func validateFacebookToken(facebookToken, token, facebookId string) *ApplicationError {
-// 	if facebookToken == token {
-// 		return nil
-// 	}
-
-// 	apiFacebookId, appErr := GetFacebookIdFromToken(token)
-// 	if appErr != nil {
-// 		return appErr
-// 	}
-// 	if apiFacebookId != facebookId {
-// 		return NewApplicationError("Invalid Token", err, ErrCodeInvalidFBToken)
-// 	}
-
-// }
+// Validates a db token/facebook id against the given token
+func validateFacebookToken(facebookToken, token, facebookId string) *ApplicationError {
+	if facebookToken == token {
+		return nil
+	}
+	apiFacebookId, appErr := GetFacebookIdFromToken(token)
+	if appErr != nil {
+		return appErr
+	}
+	if apiFacebookId != facebookId {
+		msg := "Invalid Token"
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeInvalidFBToken)
+	}
+	return nil
+}
 
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {
 	userId, token, appErr := GetBasicAuth(r)
@@ -237,14 +235,10 @@ func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, use
 		return "", nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	teamId = uuid.Parse(teamIdBuffer.String)
-	if facebookToken != token {
-		apiFacebookId, appErr := GetFacebookIdFromToken(token)
-		if appErr != nil {
-			return "", nil, nil, appErr
-		}
-		if apiFacebookId != facebookId {
-			return "", nil, nil, NewApplicationError("Invalid Token", err, ErrCodeInvalidFBToken)
-		}
+	appErr = validateFacebookToken(facebookToken, token, facebookId)
+	if appErr != nil {
+		return "", nil, nil, appErr
 	}
+
 	return userRole, teamId, userId, nil
 }
