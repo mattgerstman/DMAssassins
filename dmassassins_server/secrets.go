@@ -21,6 +21,8 @@ func NewSecret() (secret string, appErr *ApplicationError) {
 		return "", NewApplicationError("Internal Error", err, ErrCodeFile)
 	}
 
+	// Grab 3 words and string them together
+	// I'm using a permutation of the array because it's the simplest way i found to get three unique words from it
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i, j := range rand.Perm(len(words)) {
 		if i >= 3 {

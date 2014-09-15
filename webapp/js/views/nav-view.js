@@ -64,7 +64,6 @@ var app = app || {
 
         // highlight an item on the nav bar and unhighlight the rest of them
         highlight: function(elem) {
-
             if ($(elem).hasClass('dropdown_parent')) {
                 return;
             }

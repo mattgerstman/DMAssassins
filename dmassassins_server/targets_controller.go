@@ -3,13 +3,12 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
-	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
 )
 
-// GET function for /users/{username}/target returns a user's information
+// GET function for /user/{user_id}/target returns a user's information
 // Need to add permissions to this on a per user basis
 func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 	//appErr = RequiresUser(r)
@@ -45,8 +44,6 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 		return nil, appErr
 	}
 	user.Properties["team"] = ""
-
-	fmt.Println(gameMapping.TeamId.String())
 
 	if gameMapping.TeamId == nil {
 		return user, nil
@@ -92,19 +89,16 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 	return user.KillTarget(gameId, secret, true)
 }
 
-// Handler for /user/{username}/target
+// Handler for /user/{user_id}/target
 func TargetHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		fmt.Println("TargetHandler()")
 		var obj interface{}
 		var err *ApplicationError
 
 		switch r.Method {
 		case "GET":
 			obj, err = getTarget(r)
-		//case "POST":
-		//obj, err = postTarget(r)
 		case "DELETE":
 			obj, err = deleteTarget(r)
 		default:

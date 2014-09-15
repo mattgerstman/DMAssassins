@@ -67,8 +67,6 @@ func (err *ApplicationError) Error() (msg string) {
 	return err.Msg
 }
 
-var sentryDSN string
-
 // Creates a raven stacktrace
 func trace() (stacktrace *raven.Stacktrace) {
 	return raven.NewStacktrace(0, 2, nil)

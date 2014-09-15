@@ -39,8 +39,9 @@ var app = app || {
         // constructor
         initialize: function(params) {
             this.collection = app.Running.Games;
-            this.listenTo(this.collection, 'change', this.render)
+            this.listenTo(this.collection, 'reset', this.render)
             this.listenTo(this.collection, 'fetch', this.render)
+            this.listenTo(app.Running.ProfileModel, 'join-error-password', this.badPassword)
         },
         // shows the create game subview
         showCreateGame: function() {
@@ -101,6 +102,10 @@ var app = app || {
             var game_id = $('#games option:selected').val();
             var password = $('#join_game_password').val();
             app.Running.Games.joinGame(game_id, password);
+        },
+        badPassword: function(){
+            $('#join_password_block').addClass('has-error');
+            $('label[for=join_game_password]').text('Invalid Password');
         },
         // finish up and navigate to your profile
         finish: function(game) {

@@ -35,7 +35,7 @@ var app = app || {
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + "game/" + game_id + '/users/' + this.get('assassin_id') + '/target/';
+            return config.WEB_ROOT + "game/" + game_id + '/user/' + this.get('assassin_id') + '/target/';
         },
         // consstructor
         initialize: function() {

@@ -90,6 +90,7 @@ func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	return user, nil
 }
 
+// Gets game related properties for a user and loads them into the user.Properties map
 func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
 
 	gameMapping, appErr := GetGameMapping(user.UserId, gameId)
@@ -113,13 +114,15 @@ func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
 	return nil
 }
 
+// Gets a user in the context of a game with game related properties
 func GetUserForGameById(userId, gameId uuid.UUID) (user *User, appErr *ApplicationError) {
-
+	// Get the user
 	user, appErr = GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// Get the game related properties
 	appErr = user.GetUserGameProperties(gameId)
 	if appErr != nil {
 		return nil, appErr

@@ -29,19 +29,30 @@
         idAttribute : 'user_id',
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + 'game/' + game_id + '/users/' + this.get('user_id') + '/';           
+            return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';           
         },       
         joinGame: function(game_id, game_password) {
             var that = this;            
+            var last_game_id = app.Running.Games.getActiveGameId();
+            app.Running.Games.setActiveGame(game_id).set('member', true);
             this.save(null, {
                 headers: {
                     'X-DMAssassins-Game-Password': game_password
                 },
                 success: function() {
                     that.trigger('join-game');
+                    
+                    
                     Backbone.history.navigate('my_profile', {
                         trigger: true
                     });
+                },
+                error: function(that, response, options) {
+                    if (response.status == 401) {
+                        that.trigger('join-error-password');
+                        app.Running.Games.get(game_id).set('member', false);
+                        app.Running.Games.setActiveGame(last_game_id, true).set('member', true);
+                    }
                 }
             });
         },

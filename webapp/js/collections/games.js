@@ -35,7 +35,7 @@ var app = app || {
         // handle on initiliazation
         url:function(){
             var user_id = app.Session.get('user_id');
-            return config.WEB_ROOT + 'users/' + user_id + '/game/';
+            return config.WEB_ROOT + 'user/' + user_id + '/game/';
             
         },
         addGame: function(game_id){
@@ -47,8 +47,7 @@ var app = app || {
             }})
         },
         joinGame: function(game_id, password) {
-            this.setActiveGame(game_id).set('member', true);
-            app.Running.ProfileModel.joinGame(game_id, password);
+            app.Running.ProfileModel.joinGame(game_id, password);            
         },
         setArbitraryActiveGame: function(silent) {
             var newGame = this.findWhere({game_started: true})
@@ -70,6 +69,7 @@ var app = app || {
             }
             this.active_game = game;
             app.Session.set('game_id', game_id);
+            app.Session.set('has_game', true);
 
             if (silent === undefined || !silent)
             {   

@@ -20,8 +20,6 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.NavGameView = Backbone.View.extend({
-
-
         template: _.template($('#nav-game-template').html()),
         el: '#games_dropdown',
 
@@ -41,6 +39,21 @@ var app = app || {
             this.listenTo(this.collection, 'game-change', this.render);
 
         },
+        handleJoin: function () {
+            var availableGame = _.findWhere(this.collection.toJSON(), {member: false})
+            if (availableGame === undefined)
+            {
+                this.hideJoin();
+                return;
+            }
+            this.showJoin();
+        },
+        hideJoin: function () {
+            this.$el.find('#nav_join_game').addClass('hide');
+        },
+        showJoin: function () {
+            this.$el.find('#nav_join_game').removeClass('hide');
+        },
         showCurrentGame: function() {
             var game_id = app.Running.Games.getActiveGameId();
             this.$el.find('#nav_' + game_id).removeClass('hide');
@@ -50,31 +63,30 @@ var app = app || {
             $('.game_name').removeClass('hide');
             if (Backbone.history.fragment == 'join_game') {
                 this.showCurrentGame();
-                this.$el.find('#games_header').text('Join Game');
-                this.$el.find('#games_header_short').text('Join Game');
-                return;
+                $('#games_header').text('Join Game');
+                $('#games_header_short').text('Join Game');
+                return this;
             }
 
             if (Backbone.history.fragment == 'create_game') {
                 this.showCurrentGame();
-                this.$el.find('#games_header').text('Create Game');
-                this.$el.find('#games_header_short').text('Create Game');
-                return;
+                $('#games_header').text('Create Game');
+                $('#games_header_short').text('Create Game');
+                return this;
             }
 
             var game = this.collection.getActiveGame()
             if (!game)
             {
-                return;
+                return this;
             }
-
             var game_name = game.get('game_name');
             $('#games_header').text(game_name);
             var max = 9;
             if (game_name.length > max) {
                 game_name = game_name.substr(0, max - 3) + '...';
             }
-            this.$el.find('#games_header_short').text(game_name);
+            $('#games_header_short').text(game_name);
 
             var game_id = app.Running.Games.getActiveGameId();
             this.$el.find('#nav_' + game_id).addClass('hide');
@@ -86,6 +98,7 @@ var app = app || {
                     member: true
                 })
             }));
+            this.handleJoin();
             this.updateText();
             return this;
 

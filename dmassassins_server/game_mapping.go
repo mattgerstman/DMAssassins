@@ -3,7 +3,6 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-	"fmt"
 )
 
 type GameMapping struct {
@@ -91,7 +90,6 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	fmt.Println(assassinIdBuffer)
 	// Grab assassin Id
 	assassinId := uuid.Parse(assassinIdBuffer)
 
@@ -100,6 +98,7 @@ func GetAssassin(targetId, gameId uuid.UUID) (assassin *User, appErr *Applicatio
 
 }
 
+// Gets a game's admin
 func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 	var userIdBuffer string
 
@@ -139,21 +138,17 @@ func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
 // Lets a user quit a game
 func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationError) {
 	// Get the user's assassin so we can have them "kill" their target
-	fmt.Println("GetAssassin")
 	assassin, appErr := GetAssassin(gameMapping.UserId, gameMapping.GameId)
 	if appErr != nil && appErr.Code != ErrCodeNotFoundUserId {
 		return appErr
 	}
 
 	if appErr == nil {
-		fmt.Println("assassin Id" + assassin.UserId.String())
 		_, appErr = assassin.KillTarget(gameMapping.GameId, secret, false)
 		if appErr != nil {
 			return appErr
 		}
 	}
-
-	fmt.Println("delete game mapping")
 
 	appErr = gameMapping.delete()
 	if appErr != nil {
@@ -168,6 +163,9 @@ func (user *User) GetGamesForUser() (games []*Game, appErr *ApplicationError) {
 
 	// Select game_ids from the dm_user_game_mapping table and use those to get the games
 	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_id IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
+	if err == sql.ErrNoRows {
+		return nil, NewApplicationError("No Game Mappings", err, ErrCodeNoGameMappings)
+	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -180,6 +178,9 @@ func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError)
 
 	// Select game_ids from the dm_user_game_mapping table and skip those in the dm_games datable
 	rows, err := db.Query(`SELECT game.game_id, game.game_name, game.game_started, game_password FROM dm_games AS game WHERE game_started = false AND game_id NOT IN (SELECT game_id FROM dm_user_game_mapping WHERE user_id = $1) ORDER BY game_name`, user.UserId.String())
+	if err == sql.ErrNoRows {
+		return nil, NewApplicationError("No Game Mappings", err, ErrCodeNoGameMappings)
+	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

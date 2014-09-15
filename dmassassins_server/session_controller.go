@@ -43,9 +43,24 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 
 	// Set all of the following to nil if we don't have them yet
 	response["game"] = nil
-	response["games"] = nil
 	response["rules"] = nil
 	response["leaderboard"] = nil
+
+	// Get games user is a part of
+	games := make(map[string][]*Game)
+	member, appErr := user.GetGamesForUser()
+	if appErr != nil && appErr.Code != ErrCodeNoGameMappings {
+		return nil, appErr
+	}
+	games["member"] = member
+
+	// Get available games to join
+	available, appErr := user.GetNewGamesForUser()
+	if appErr != nil && appErr.Code != ErrCodeNoGameMappings {
+		return nil, appErr
+	}
+	games["available"] = available
+	response["games"] = games
 
 	// If we have a gameId try to get the game mapping first from that
 	gameId := uuid.Parse(r.FormValue("game_id"))
@@ -77,6 +92,9 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	game.GetHTMLRules()
+
 	response["game"] = game
 
 	appErr = user.GetUserGameProperties(gameMapping.GameId)
@@ -84,22 +102,6 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		return nil, appErr
 	}
 	response["user"] = user
-
-	// Get games user is a part of
-	games := make(map[string][]*Game)
-	member, appErr := user.GetGamesForUser()
-	if appErr != nil {
-		return nil, appErr
-	}
-	games["member"] = member
-
-	// Get available games to join
-	available, appErr := user.GetNewGamesForUser()
-	if appErr != nil {
-		return nil, appErr
-	}
-	games["available"] = available
-	response["games"] = games
 
 	target, appErr := user.GetTarget(game.GameId)
 	if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
@@ -117,6 +119,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	return response, nil
 }
 
+// Handler for the session controller
 func SessionHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 

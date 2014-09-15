@@ -19,6 +19,7 @@ type TeamLeaderboardEntry struct {
 	Players int `json:"players"`
 }
 
+// Get Query to generate leaderboard based on whether or not teams are enabled
 func getQuery(teamsEnabled bool) (query string) {
 	query = `SELECT map.kills, map.alive, first_name.value as first_name, last_name.value as last_name`
 	if teamsEnabled {
