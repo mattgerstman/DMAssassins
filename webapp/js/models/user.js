@@ -10,7 +10,7 @@
 (function() {
     'use strict';
 
-    app.Models.Profile = Backbone.Model.extend({
+    app.Models.User = Backbone.Model.extend({
 
         // default profile properties
         defaults: {
@@ -55,6 +55,14 @@
                     }
                 }
             });
+        },
+        getProperty: function(key){
+            var properties = this.get('properties');
+            if (!properties)
+                return null;
+            if (properties.key === undefined)
+                return null;
+            return properties.key;
         },
         quit: function(secret) {
             var that = this;
