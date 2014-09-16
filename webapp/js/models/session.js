@@ -153,7 +153,7 @@ var app = app || {
                 target.assassin_id = response.user.user_id;
 
                 // reload the data for all models
-                app.Running.ProfileModel.set(user);
+                app.Running.User.set(user);
                 app.Running.TargetModel.set(target);               
                 app.Running.LeaderboardModel.set(leaderboard);
                 app.Running.RulesModel.set(rules);

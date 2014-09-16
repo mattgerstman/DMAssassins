@@ -47,7 +47,7 @@ var app = app || {
             }})
         },
         joinGame: function(game_id, password) {
-            app.Running.ProfileModel.joinGame(game_id, password);            
+            app.Running.User.joinGame(game_id, password);            
         },
         setArbitraryActiveGame: function(silent) {
             var newGame = this.findWhere({game_started: true})

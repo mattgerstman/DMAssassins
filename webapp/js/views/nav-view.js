@@ -28,7 +28,7 @@ var app = app || {
         tagName: 'nav',
 
         events: {
-            'click li': 'select'
+            'click li a': 'select'
         },
 
         // constructor
@@ -36,6 +36,8 @@ var app = app || {
             this.NavGameView = app.Running.NavGameView;
             this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget)
             this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
+            this.listenTo(app.Running.User, 'fetch', this.handleAdmin)
+            this.listenTo(app.Running.User, 'change', this.handleAdmin)
         },
 
         // if we don't have a target hide that view
@@ -54,10 +56,11 @@ var app = app || {
         // select an item on the nav bar
         select: function(event) {
             var target = event.currentTarget;
-            if ($(target).hasClass('disabled')) {
+            if ($(target).hasClass('disabled') || $(target).hasClass('dropdown-toggle')) {
                 event.preventDefault();
                 return;
             }
+            $('.navbar-collapse.in').collapse('hide');
             this.highlight(target)
 
         },
@@ -76,7 +79,13 @@ var app = app || {
             $('.active').removeClass('active');
             $(elem).addClass('active');
         },
-
+        handleAdmin: function() {
+            var role = app.Running.User.getProperty('user_role');  
+            var allowed = AuthUtils.requiresCaptain(role);
+            if (!allowed) {
+                $('#admin_parent').hide();
+            }
+        },
         handleTarget: function() {
             var game = app.Running.Games.getActiveGame();
             if (!game)

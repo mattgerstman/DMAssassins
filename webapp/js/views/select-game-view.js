@@ -41,7 +41,7 @@ var app = app || {
             this.collection = app.Running.Games;
             this.listenTo(this.collection, 'reset', this.render)
             this.listenTo(this.collection, 'fetch', this.render)
-            this.listenTo(app.Running.ProfileModel, 'join-error-password', this.badPassword)
+            this.listenTo(app.Running.User, 'join-error-password', this.badPassword)
         },
         // shows the create game subview
         showCreateGame: function() {

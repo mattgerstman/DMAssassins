@@ -53,7 +53,7 @@ var app = app || {
         },
         // constructor
         initialize: function(params) {
-            this.model = app.Running.ProfileModel;
+            this.model = app.Running.User;
             this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'fetch', this.render)
             this.listenTo(this.model, 'destroy', this.destroyCallback)
