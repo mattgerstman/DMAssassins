@@ -27,6 +27,7 @@
     "datatables-bootstrap3": "*",
     "datatables": "~1.10.2",
     "fontawesome": "~4.2.0",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "query-ui": "~1.11.1"
   }
 }
