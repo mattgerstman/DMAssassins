@@ -34,6 +34,7 @@ var app = app || {
             'create_game': 'create_game',
             'join_game': 'join_game',
             'rules': 'rules',
+            'users': 'users',
             'switch_game': 'switch_game'
 
         },
@@ -196,6 +197,12 @@ var app = app || {
             var view = new app.Views.RulesView();
             app.Running.AppView.setCurrentView(view);
             this.render();
+        },
+        users: function() {
+            var view = new app.Views.AdminUsersView();
+            app.Running.AppView.setCurrentView(view);
+            app.Running.currentView.collection.fetch();
+            this.render(); 
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {

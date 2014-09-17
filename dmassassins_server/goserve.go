@@ -15,6 +15,7 @@ var db *sql.DB
 const (
 	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
+	gameUsersPath       = "/game/{game_id}/users/"
 	gameUserPath        = "/game/{game_id}/user/{user_id}/"
 	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTeamPath    = "/game/{user_id}/user/{user_id}/team/"
@@ -118,6 +119,7 @@ func StartServer() {
 
 	// Game then User
 	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT")
+	r.HandleFunc(gameUsersPath, GameUsersHandler()).Methods("GET", "DELETE", "PUT")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "POST")
 

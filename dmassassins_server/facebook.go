@@ -62,7 +62,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	// Set up user properties map, this will be inserted with the user
 	properties := make(map[string]string)
-	properties["Facebook"] = "https://facebook.com/" + facebookId
+	properties["facebook"] = "https://facebook.com/" + facebookId
 
 	picture := "https://graph.facebook.com/" + facebookId + "/picture"
 	photo := picture + "?width=1000"

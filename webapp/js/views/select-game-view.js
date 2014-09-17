@@ -37,7 +37,7 @@ var app = app || {
         // previous page, may depricate
         loaded_from: 'login',
         // constructor
-        initialize: function(params) {
+        initialize: function() {
             this.collection = app.Running.Games;
             this.listenTo(this.collection, 'reset', this.render)
             this.listenTo(this.collection, 'fetch', this.render)

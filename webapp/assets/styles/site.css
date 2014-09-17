@@ -16,13 +16,13 @@ a,a:focus {
 }
 
 .user-column {
-    width:300px;
+    max-width:300px;
     margin-left:auto;
     margin-right:auto
 }
 
 .thumbnail {
-    width:300px;
+    max-width:300px;
     margin-left:auto;
     margin-right:auto
 }
@@ -36,4 +36,8 @@ a,a:focus {
 .#kill-form button {
     margin-left:5px;
     margin-right:5px
+}
+
+.sortable div{
+    cursor: pointer;
 }
