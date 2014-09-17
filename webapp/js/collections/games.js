@@ -1,6 +1,5 @@
-// Select Games Model, Handles game creation, selection, and joining
-// Focuses on game mappings on the server
-// js/models/games.js
+// Games Collection, Handles all of the games a user has access to
+// js/collections/games.js
 var app = app || {
     Collections: {},
     Models: {},

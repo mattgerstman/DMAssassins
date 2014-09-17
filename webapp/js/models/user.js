@@ -60,9 +60,9 @@
             var properties = this.get('properties');
             if (!properties)
                 return null;
-            if (properties.key === undefined)
+            if (properties[key] === undefined)
                 return null;
-            return properties.key;
+            return properties[key];
         },
         quit: function(secret) {
             var that = this;

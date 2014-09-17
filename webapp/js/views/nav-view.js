@@ -38,12 +38,14 @@ var app = app || {
             this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
             this.listenTo(app.Running.User, 'fetch', this.handleAdmin)
             this.listenTo(app.Running.User, 'change', this.handleAdmin)
+            this.listenTo(app.Running.Games, 'game-change', this.handleAdmin)
         },
 
         // if we don't have a target hide that view
         render: function() {
             this.$el.html(this.template());
             this.handleTarget();
+            this.handleAdmin();
             
             var selectedElem = this.$el.find('#nav_' + Backbone.history.fragment);
             this.highlight(selectedElem);
@@ -82,9 +84,13 @@ var app = app || {
         handleAdmin: function() {
             var role = app.Running.User.getProperty('user_role');  
             var allowed = AuthUtils.requiresCaptain(role);
-            if (!allowed) {
-                $('#admin_parent').hide();
+            if (allowed) {
+                $('#admin_parent').removeClass('hide');
+                return;
             }
+            $('#admin_parent').addClass('hide');
+            return;
+            
         },
         handleTarget: function() {
             var game = app.Running.Games.getActiveGame();

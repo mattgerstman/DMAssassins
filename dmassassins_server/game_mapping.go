@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+ 	"strconv"
 )
 
 type GameMapping struct {
@@ -185,6 +186,72 @@ func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError)
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return parseGameRows(rows)
+}
+
+
+// Get all users for a game
+func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *ApplicationError) {
+	rows, err := db.Query(`SELECT users.user_id, users.email, map.team_id, map.user_role FROM dm_users AS users, dm_user_game_mapping AS map WHERE users.user_id = map.user_id AND map.game_id = $1`, game.GameId.String())
+	if err == sql.ErrNoRows {
+		return nil, NewApplicationError("No Users For Game", err, ErrCodeNoGameMappings)
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	var userIds []interface{}
+	users = make(map[string]*User)
+	// Loop through users
+	for rows.Next() {
+		var userIdBuffer, email, userRole string
+		var teamIdBuffer sql.NullString
+
+		// Scan in variables
+		err := rows.Scan(&userIdBuffer, &email, &teamIdBuffer, &userRole)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
+		// Organize user info
+		userId := uuid.Parse(userIdBuffer)
+		teamId := uuid.Parse(teamIdBuffer.String)
+		properties := make(map[string]string)
+		properties["team"] = teamId.String()
+
+		// Create the user struct and add it
+		user := &User{userId, "", email, "", properties}
+		users[userId.String()] = user
+		userIds = append(userIds, userId.String())
+	}
+
+	// Build Sql query for properties
+	max := len(userIds)
+	params := `$1`
+	for i:=0; i<max; i++ {
+		params += `, $` +  strconv.Itoa(i+1)
+	}
+	sql := `SELECT user_id, key, value FROM dm_user_properties WHERE user_id IN ( `+params+` )`
+
+	// Prepare Sql Query for properties
+	stmt, err := db.Prepare(sql)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute Sql Query for properties
+	rows, err = stmt.Query(userIds...)
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Add properties to users
+	for rows.Next() {
+		var userIdBuffer, key, value string
+		rows.Scan(&userIdBuffer, &key, &value)
+		users[userIdBuffer].Properties[key] = value
+	}
+
+	return users, nil
 }
 
 // Gets an arbitrary game for a user to start off with
