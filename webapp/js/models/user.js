@@ -1,11 +1,21 @@
 //
-// js/models/profile.js
+// js/models/user.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
 // MIT License.
 //
-// Profile model, manages logged in user
+// User model, manages single user
+
+var app = app || {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
+};
+
 
 (function() {
     'use strict';
@@ -16,7 +26,7 @@
         defaults: {
             'user_id': '',
             'username': '',
-            'email': '',
+            'email': 'Loading...',
             'properties': {
                 'name': 'Loading..',
                 'facebook': 'Loading..',

@@ -24,7 +24,8 @@ a,a:focus {
 .thumbnail {
     max-width:300px;
     margin-left:auto;
-    margin-right:auto
+    margin-right:auto;
+    cursor: pointer;
 }
 
 .kill-form .form-control {
@@ -38,6 +39,7 @@ a,a:focus {
     margin-right:5px
 }
 
-.sortable div{
-    cursor: pointer;
+
+.drop-hover {
+    background: black!important;
 }
