@@ -202,6 +202,7 @@ var app = app || {
             var view = new app.Views.AdminUsersView();
             app.Running.AppView.setCurrentView(view);
             app.Running.currentView.collection.fetch();
+            app.Running.Teams.fetch();
             this.render(); 
         },
         preventSwitchGameBack: ['join_game', 'create_game'],

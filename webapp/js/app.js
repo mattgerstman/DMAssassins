@@ -31,7 +31,9 @@ $(function() {
     app.Running.TargetModel = new app.Models.Target()
     app.Running.LeaderboardModel = new app.Models.Leaderboard();
     app.Running.RulesModel = new app.Models.Rules();
+
     app.Running.Users = new app.Collections.Users();
+    app.Running.Teams = new app.Collections.Teams();
 
     app.Running.User.listenTo(app.Running.Games, 'game-change', app.Running.User.fetch);
     app.Running.TargetModel.listenTo(app.Running.Games, 'game-change', app.Running.TargetModel.fetch);

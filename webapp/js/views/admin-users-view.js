@@ -32,6 +32,7 @@ var app = app || {
         // constructor
         initialize: function() {
             this.collection = app.Running.Users;
+            this.teams_view = new app.Views.AdminUsersTeamsView();
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(this.collection, 'change', this.render);
             this.listenTo(this.collection, 'reset', this.render);
@@ -39,9 +40,42 @@ var app = app || {
             this.listenTo(this.collection, 'add', this.render);
             this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
         },
+        makeSortable: function() {
+            var originalDimesions;
+            var startFunc = function(e, ui) {
+                ui.helper.find('.user_data').hide();
+                ui.helper.animate({
+                    width: 50,
+                    height: 50                    
+                }, 100);                
+            };
+            
+            this.$el.find('.sortable').sortable({
+                handle: '.thumbnail',
+                connectWith: '#team_list li',
+                tolerance: "pointer",
+                helper: 'clone',
+                forceHelperSize: true,
+                start: startFunc,
+                cursorAt: {left:40, top:25}
+            })
+            
+            this.$el.find('#team_list li').droppable({
+                hoverClass: 'drop-hover',
+                tolerance: "pointer",
+                drop: function(event, ui) {
+                    console.log('user_id');
+                    console.log(ui.helper.data('user_id'))
+                    console.log('team_id');
+                    console.log($(this).data('team_id'));
+                }
+            });
+
+        },
         render: function() {
             this.$el.html(this.template({users: this.collection.toJSON()} ));
-            this.$el.find('.sortable').sortable();
+            this.teams_view.setElement(this.$('#team_list')).render();
+            this.makeSortable();
             return this;
         }
     })
