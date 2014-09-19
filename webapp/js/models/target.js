@@ -28,7 +28,7 @@ var app = app || {
             'properties': {
                 'name': '',
                 'facebook': '',
-                'twitter': '',
+                'team':'No Team',
                 'photo_thumb': SPY,
                 'photo': SPY
             }

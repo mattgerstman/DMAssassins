@@ -3,7 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
- 	"strconv"
+	"strconv"
 )
 
 type GameMapping struct {
@@ -188,10 +188,14 @@ func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError)
 	return parseGameRows(rows)
 }
 
-
 // Get all users for a game
 func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *ApplicationError) {
-	rows, err := db.Query(`SELECT users.user_id, users.email, map.team_id, map.user_role FROM dm_users AS users, dm_user_game_mapping AS map WHERE users.user_id = map.user_id AND map.game_id = $1`, game.GameId.String())
+	teams, appErr := game.GetTeamsMap()
+	if appErr != nil && appErr.Code != ErrCodeNoTeams{
+		return nil, appErr
+	}
+
+	rows, err := db.Query(`SELECT users.user_id, users.email, users.facebook_id, map.team_id, map.user_role FROM dm_users AS users, dm_user_game_mapping AS map WHERE users.user_id = map.user_id AND map.game_id = $1`, game.GameId.String())
 	if err == sql.ErrNoRows {
 		return nil, NewApplicationError("No Users For Game", err, ErrCodeNoGameMappings)
 	}
@@ -203,11 +207,11 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	users = make(map[string]*User)
 	// Loop through users
 	for rows.Next() {
-		var userIdBuffer, email, userRole string
+		var userIdBuffer, email, facebookId, userRole string
 		var teamIdBuffer sql.NullString
 
 		// Scan in variables
-		err := rows.Scan(&userIdBuffer, &email, &teamIdBuffer, &userRole)
+		err := rows.Scan(&userIdBuffer, &email, &facebookId, &teamIdBuffer, &userRole)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -216,10 +220,18 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		userId := uuid.Parse(userIdBuffer)
 		teamId := uuid.Parse(teamIdBuffer.String)
 		properties := make(map[string]string)
-		properties["team"] = teamId.String()
+		
+		if teams != nil {
+			if team, ok := teams[teamId.String()]; ok {
+				properties["team"] = team.TeamName
+			} else {
+				properties["team"] = "No Team"
+			}
+			
+		}
 
 		// Create the user struct and add it
-		user := &User{userId, "", email, "", properties}
+		user := &User{userId, "", email, facebookId, properties}
 		users[userId.String()] = user
 		userIds = append(userIds, userId.String())
 	}
@@ -227,10 +239,10 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	// Build Sql query for properties
 	max := len(userIds)
 	params := `$1`
-	for i:=0; i<max; i++ {
-		params += `, $` +  strconv.Itoa(i+1)
+	for i := 0; i < max; i++ {
+		params += `, $` + strconv.Itoa(i+1)
 	}
-	sql := `SELECT user_id, key, value FROM dm_user_properties WHERE user_id IN ( `+params+` )`
+	sql := `SELECT user_id, key, value FROM dm_user_properties WHERE user_id IN ( ` + params + ` )`
 
 	// Prepare Sql Query for properties
 	stmt, err := db.Prepare(sql)
