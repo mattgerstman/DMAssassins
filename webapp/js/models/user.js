@@ -31,6 +31,7 @@ var app = app || {
                 'name': 'Loading..',
                 'facebook': 'Loading..',
                 'secret': 'Loading..',
+                'team': 'Loading..',
                 'photo_thumb': SPY,
                 'photo': SPY
             }
@@ -65,6 +66,13 @@ var app = app || {
                     }
                 }
             });
+        },
+        setProperty: function(key, value) {
+            var properties = this.get('properties');
+            if (!properties)
+                properties = {};
+            properties[key] = value;
+            this.set('properties', properties);
         },
         getProperty: function(key){
             var properties = this.get('properties');

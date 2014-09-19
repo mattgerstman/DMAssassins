@@ -392,7 +392,7 @@
         <%
         _.each(teams, function(team){
         %>
-            <li data-team_id=<%= team.team_id %>> <%= team.team_name %> </li>
+            <li data-team_id=<%= team.team_id %> data-team_name=<%= team.team_name %>> <%= team.team_name %> </li>
         <%
         })
         %>
@@ -421,6 +421,9 @@
                             </div>
                             <div class="row">
                                 <label>Facebook:</label> <a href="<%= user.properties.facebook %>"><%= user.properties.facebook.replace('https://facebook','fb') %></a>
+                            </div>
+                            <div class="row">
+                                <label>Team:</label> <%= user.properties.team %>
                             </div>
                         </div>
                         <div class="row">

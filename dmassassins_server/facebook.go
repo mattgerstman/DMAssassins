@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	fb "github.com/huandu/facebook"
-	"github.com/polds/imgbase64"
 )
 
 // Returns an authenticated facebook session with app id/secret
@@ -65,15 +64,8 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	properties["facebook"] = "https://facebook.com/" + facebookId
 
 	picture := "https://graph.facebook.com/" + facebookId + "/picture"
-	photo := picture + "?width=1000"
-	imgbase64.SetDefaultImage(photo)
-	img := imgbase64.FromRemote(photo)
-	properties["photo"] = img
-
-	photo_thumb := picture + "?width=300&height=300"
-	imgbase64.SetDefaultImage(photo_thumb)
-	img_thumb := imgbase64.FromRemote(photo_thumb)
-	properties["photo_thumb"] = img_thumb
+	properties["photo"] = picture + "?width=1000"
+	properties["photo_thumb"] = picture + "?width=300&height=300"
 
 	properties["first_name"] = firstName
 	properties["last_name"] = lastName
