@@ -16,7 +16,7 @@
     <link href="assets/styles/sidebar.css" rel="stylesheet" type="text/css">
 
     <script id="nav-template" type="text/template">
-        <nav role="navigation" class="navbar navbar-default">
+        <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
           <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
@@ -392,7 +392,7 @@
         <%
         _.each(teams, function(team){
         %>
-            <li data-team_id=<%= team.team_id %> data-team_name=<%= team.team_name %>> <%= team.team_name %> </li>
+            <li data-team-id=<%= team.team_id %> data-team-name=<%= team.team_name %>> <%= team.team_name %> </li>
         <%
         })
         %>
@@ -410,20 +410,25 @@
             <%
             _.each(users, function(user) {
             %>
-                <div class="user col-xs-12 col-sm-6 col-md-4 col-lg-3" data-user_id=<%= user.user_id %>>
+                <div class="user col-xs-12 col-sm-6 col-md-4 col-lg-3" data-user-id=<%= user.user_id %>>
                      <div class="user-column text-center">
-                        <div class="user_data">
-                            <div class="row">
-                                <label>Name:</label> <%= user.properties.first_name + ' ' + user.properties.last_name %>
-                            </div>
-                            <div class="row">
-                                <label>Email:</label> <a href="mailto:"<%= user.email %>"><%= user.email %></a>
-                            </div>
-                            <div class="row">
-                                <label>Facebook:</label> <a href="<%= user.properties.facebook %>"><%= user.properties.facebook.replace('https://facebook','fb') %></a>
-                            </div>
-                            <div class="row">
-                                <label>Team:</label> <%= user.properties.team %>
+                        <div class="user-data-wrapper">
+                            <div class="user-data-text">
+                                <div class="row">
+                                    <label>Name:</label> <%= user.properties.first_name + ' ' + user.properties.last_name %>
+                                </div>
+                                <div class="row">
+                                    <label>Email:</label> <a href="mailto:"<%= user.email %>"><%= user.email %></a>
+                                </div>
+                                <div class="row">
+                                    <label>Facebook:</label> <a href="<%= user.properties.facebook %>"><%= user.properties.facebook.replace('https://facebook','fb') %></a>
+                                </div>
+                                <div class="row">
+                                    <label>Team:</label> <%= user.properties.team %>
+                                </div>
+                                <div class="row">
+                                    <label>Role:</label> <%= AuthUtils.getRolePrettyName(user.properties.user_role) %>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -431,12 +436,41 @@
                                <img src=<%= user.properties.photo_thumb %>>
                             </a>
                         </div>
+                        <div class ="row user-buttons">
+                            <button data-user-id ="<%=user.user_id %>" data-user-name ="<%=user.properties.first_name + ' ' + user.properties.last_name %>" class="btn btn-small btn-danger ban-user">Ban</button>
+                            <button data-user-id ="<%=user.user_id %>" data-user-name ="<%=user.properties.first_name + ' ' + user.properties.last_name %>" class="btn btn-small btn-danger kill-user">Kill</button>
+                            <button data-user-id ="<%=user.user_id %>" data-user-name ="<%=user.properties.first_name + ' ' + user.properties.last_name %>" class="btn btn-small btn-success revive-user hide">Revive</button>
+                            <button data-user-id ="<%=user.user_id %>" data-user-name ="<%=user.properties.first_name + ' ' + user.properties.last_name %>" class="btn btn-small btn-primary user-change-role">Change</button>
+                        </div>
                      </div>
                 </div>
             <%
             })
             %>
         </div>
+        
+        
+        <div id="ban_user_modal" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Ban User</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to ban <strong><span class="user-name"></span></strong>? They will be permanently removed from the game and leaderboard. <br />
+                    <strong>This action cannot be undone.</strong><br />
+                    If you just want to kill them close this window and click "Kill User."
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="ban_user_submit">Ban User</button>
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        
     </script>
     
     
