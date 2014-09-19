@@ -24,12 +24,15 @@ var app = app || {
 
         // default profile properties
         defaults: {
+            'user_id': '',
             'team_id': '',
             'team_name': ''
         },
         url: function(){            
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + 'game/' + game_id + '/team/' + this.get('team_id') + '/';           
+            var user_id = this.get('user_id');
+            var team_id = this.get('team_id');            
+            return config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/team/' + team_id + '/';           
         }
 
     })

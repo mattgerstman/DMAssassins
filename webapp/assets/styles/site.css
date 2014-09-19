@@ -23,6 +23,7 @@ a,a:focus {
 
 .thumbnail {
     max-width:300px;
+    max-height:300px;
     margin-left:auto;
     margin-right:auto;
     cursor: pointer;
@@ -41,5 +42,5 @@ a,a:focus {
 
 
 .drop-hover {
-    background: black!important;
+    background: red;
 }

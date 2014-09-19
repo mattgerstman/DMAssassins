@@ -40,8 +40,21 @@ var app = app || {
             this.listenTo(this.collection, 'add', this.render);
             this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
         },
+        addUserToTeam: function(user_id, team_id, team_name) {
+            var that = this;
+            var team = new app.Models.Team({user_id: user_id, team_id: team_id})
+            var user = app.Running.Users.get(user_id);
+            team.save(null, {
+                success: function(){
+                    that.collection.get(user_id).setProperty('team', team_name);
+                    that.render()
+                }
+            });     
+            
+            
+        },
         makeSortable: function() {
-            var originalDimesions;
+            var that = this;            
             var startFunc = function(e, ui) {
                 ui.helper.find('.user_data').hide();
                 ui.helper.animate({
@@ -64,10 +77,10 @@ var app = app || {
                 hoverClass: 'drop-hover',
                 tolerance: "pointer",
                 drop: function(event, ui) {
-                    console.log('user_id');
-                    console.log(ui.helper.data('user_id'))
-                    console.log('team_id');
-                    console.log($(this).data('team_id'));
+                    var user_id = ui.helper.data('user_id');
+                    var team_id = $(this).data('team_id');
+                    var team_name = $(this).data('team_name');
+                    that.addUserToTeam(user_id, team_id, team_name);
                 }
             });
 

@@ -107,6 +107,8 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
 		return nil, appErr
 	}
+
+	target.GetTeamByGameId(gameId)
 	response["target"] = target
 
 	// Get the Leaderboard for the game
