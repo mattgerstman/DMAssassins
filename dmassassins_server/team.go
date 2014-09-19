@@ -31,7 +31,38 @@ func (user *User) GetTeamByGameId(gameId uuid.UUID) (team *Team, appErr *Applica
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	teamId := uuid.Parse(teamIdBuffer)
+	user.Properties["team"] = teamName
 	return &Team{teamId, gameId, teamName}, nil
+}
+
+func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationError) {
+	// Query Db
+	rows, err := db.Query(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, game.GameId.String())
+	if err == sql.ErrNoRows {
+		return nil, NewApplicationError("No Teams", err, ErrCodeNoTeams)
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	teams = make(map[string]*Team)
+
+	// Loop through rows
+	for rows.Next() {
+		var teamIdBuffer sql.NullString
+		var teamName string
+
+		err = rows.Scan(&teamIdBuffer, &teamName)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
+		// Append team to teams array
+		teamId := uuid.Parse(teamIdBuffer.String)
+		team := &Team{teamId, game.GameId, teamName}
+		teams[teamId.String()] = team
+	}
+	return teams, nil
 }
 
 // Gets a list of temas for a game

@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// POST - Add a user to a team
-func postGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+// PUT - Add a user to a team
+func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -109,8 +109,10 @@ func GameUserTeamHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getGameUserTeam(r)
+		case "PUT":
+			obj, err = putGameUserTeam(r)
 		case "POST":
-			obj, err = postGameUserTeam(r)
+			obj, err = putGameUserTeam(r)
 		case "DELETE":
 			obj, err = deleteGameUserTeam(r)
 		default:

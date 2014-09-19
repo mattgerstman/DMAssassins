@@ -38,22 +38,7 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 	if appErr != nil {
 		return nil, appErr
 	}
-
-	gameMapping, appErr := GetGameMapping(userId, gameId)
-	if appErr != nil {
-		return nil, appErr
-	}
-	user.Properties["team"] = ""
-
-	if gameMapping.TeamId == nil {
-		return user, nil
-	}
-
-	team, appErr := GetTeamById(gameMapping.TeamId)
-	if appErr != nil {
-		return nil, appErr
-	}
-	user.Properties["team"] = team.TeamName
+	user.GetTeamByGameId(gameId)
 
 	return user, nil
 }
