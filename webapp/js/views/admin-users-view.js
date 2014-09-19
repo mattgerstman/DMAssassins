@@ -27,7 +27,7 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-
+            'click .ban-user': 'banUserModal'
         },
         // constructor
         initialize: function() {
@@ -39,6 +39,13 @@ var app = app || {
             this.listenTo(this.collection, 'sync', this.render);
             this.listenTo(this.collection, 'add', this.render);
             this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
+        },
+        banUserModal: function(event) {
+            var user_name = $(event.currentTarget).data('user-name');
+            var user_id = $(event.currentTarget).data('user-id');
+            $('#ban_user_submit').data('user-id', user_id);
+            $('#ban_user_modal .user-name').text(user_name)
+            $('#ban_user_modal').modal();  
         },
         addUserToTeam: function(user_id, team_id, team_name) {
             var that = this;
@@ -56,14 +63,15 @@ var app = app || {
         makeSortable: function() {
             var that = this;            
             var startFunc = function(e, ui) {
-                ui.helper.find('.user_data').hide();
+                ui.helper.find('.user-data-wrapper').hide();
+                ui.helper.find('.user-buttons').hide();
                 ui.helper.animate({
                     width: 50,
                     height: 50                    
                 }, 100);                
             };
             
-            this.$el.find('.sortable').sortable({
+            this.$el.find('.sortable .user').draggable({
                 handle: '.thumbnail',
                 connectWith: '#team_list li',
                 tolerance: "pointer",
@@ -77,16 +85,19 @@ var app = app || {
                 hoverClass: 'drop-hover',
                 tolerance: "pointer",
                 drop: function(event, ui) {
-                    var user_id = ui.helper.data('user_id');
-                    var team_id = $(this).data('team_id');
-                    var team_name = $(this).data('team_name');
+                    var user_id = ui.helper.data('user-id');
+                    var team_id = $(this).data('team-id');
+                    var team_name = $(this).data('team-name');
                     that.addUserToTeam(user_id, team_id, team_name);
                 }
             });
 
         },
         render: function() {
-            this.$el.html(this.template({users: this.collection.toJSON()} ));
+            var userSort = function(user) {
+                return user.properties.first_name;
+            }
+            this.$el.html(this.template({users: _.sortBy(this.collection.toJSON(), userSort)}));
             this.teams_view.setElement(this.$('#team_list')).render();
             this.makeSortable();
             return this;

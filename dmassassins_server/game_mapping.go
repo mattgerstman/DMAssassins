@@ -220,6 +220,8 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		userId := uuid.Parse(userIdBuffer)
 		teamId := uuid.Parse(teamIdBuffer.String)
 		properties := make(map[string]string)
+
+		properties["user_role"] = userRole
 		
 		if teams != nil {
 			if team, ok := teams[teamId.String()]; ok {

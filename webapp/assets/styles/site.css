@@ -8,7 +8,8 @@
 */
 
 body {
-    width:100%
+    width:100%;
+    padding-top:70px;
 }
 
 a,a:focus {
@@ -43,4 +44,24 @@ a,a:focus {
 
 .drop-hover {
     background: red;
+}
+
+.admin-users-body .user-data-wrapper {
+    position: relative;
+    height: 140px;
+}
+
+.admin-users-body .user-data-text {
+    position: absolute;
+    width:100%;
+    bottom: 0px;
+}
+
+.admin-users-body .thumbnail {
+    margin:10px 5px;
+}
+
+.admin-users-body .user-buttons {
+    margin-top:10px;
+    margin-bottom:20px;
 }
