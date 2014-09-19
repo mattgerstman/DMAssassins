@@ -28,6 +28,6 @@
     "datatables": "~1.10.2",
     "fontawesome": "~4.2.0",
     "underscore": "~1.7.0",
-    "jquery-ui": "~1.11.1"
+    "query-ui": "~1.11.1"
   }
 }
