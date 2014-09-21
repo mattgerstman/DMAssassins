@@ -53,8 +53,9 @@ a:focus {
   height: 25px;
 }
 .admin-users-body .user .user-data-text .row label {
-  width: 50px;
+  width: 75px;
   float: left;
+  font-size: 90%;
   text-align: left;
   margin-left: 20px;
 }
@@ -67,6 +68,14 @@ a:focus {
   float: right;
   text-align: right;
   margin-right: 20px;
+}
+.admin-users-body .user .user-data-text .row span.team-saved,
+.admin-users-body .user .user-data-text .row span.role-saved {
+  margin: 0;
+  margin-top: 4px;
+  font-size: 75%;
+  color: green;
+  display: none;
 }
 .admin-users-body .drag-img {
   max-width: 300px;

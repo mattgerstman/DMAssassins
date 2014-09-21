@@ -29,7 +29,7 @@
 /* Sidebar Styles */
 
 .sidebar-nav {
-    top: 0;
+    top: 50px;
     width: 250px;
     height:100%;
     margin: 0;
