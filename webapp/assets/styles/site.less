@@ -1,0 +1,129 @@
+/*
+// assets/styles/site.less
+// dmassassins.js
+//
+// Copyright (c) 2014 Matt Gerstman
+// MIT License.
+//
+*/
+
+body {
+    width:100%;
+    padding-top: 70px;
+}
+
+a,a:focus {
+    outline:none
+}
+
+.user-column {
+    max-width:300px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.thumbnail {
+    max-width:300px;
+    max-height:300px;
+    margin-left:auto;
+    margin-right:auto;
+    cursor: pointer;
+}
+
+.btn-half-block {
+    width:45%;
+    margin:5px 2%;
+}
+
+.kill-form{
+    
+    .form-control {
+        width:190px;
+        float:left;
+        margin-left:5px
+    }
+    button  {
+        margin-left:5px;
+        margin-right:5px
+    }
+}
+
+.admin-users-body {
+    .user {
+
+        h3 {
+            margin: 0;
+        }
+        a.subtext {
+            margin: 0;
+            font-size:80%;
+        }
+        .user-data-text {        
+            width:100%;
+            .row {
+                height:25px;
+                label {
+                    width:50px;
+                    float:left;
+                    text-align: left;
+                    margin-left:20px;
+                }
+                select {
+                    width:100px;
+                    direction: rtl;
+ 
+                }
+                select, span{
+                    float:right;
+                    text-align: right;
+                    margin-right:20px;                
+                }
+            }
+        }
+    }
+    
+    .drag-img {
+        max-width:300px;
+    }
+
+    .thumbnail {
+        margin:5px auto 10px auto;
+    }
+    .user-buttons {
+        margin-top:5px;
+        padding-bottom:15px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom:40px;
+    }
+}
+
+.drop-hover {
+    background: red;
+}
+
+
+
+
+@media(max-width:1550px) {
+
+    .admin-users-body {
+        .user-grid {
+            border-bottom: 1px solid #ddd;
+            margin-bottom:40px;
+        }
+        .user {
+            border:none;
+            margin-bottom:0;
+        }
+        .thumbnail {
+            max-width: 290px;
+            margin:5px 10px 10px 10px;
+        }
+        .user-buttons {
+            margin-top:5px;
+            margin-bottom:0;
+            border:none;
+        }
+        
+    }
+}

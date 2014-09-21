@@ -63,20 +63,22 @@ var app = app || {
         makeSortable: function() {
             var that = this;            
             var startFunc = function(e, ui) {
-                ui.helper.find('.user-data-wrapper').hide();
-                ui.helper.find('.user-buttons').hide();
-                ui.helper.animate({
+                ui.helper.find('.user').remove();
+                ui.helper.removeClass('user-grid');
+                ui.helper.find('.drag-img').removeClass('hide');
+                ui.helper.find('.drag-img').animate({
                     width: 50,
                     height: 50                    
-                }, 100);                
+                }, 100);
             };
             
-            this.$el.find('.sortable .user').draggable({
+            this.$el.find('.user-grid').draggable({
                 handle: '.thumbnail',
                 connectWith: '#team_list li',
                 tolerance: "pointer",
                 helper: 'clone',
                 forceHelperSize: true,
+                zIndex:5000,
                 start: startFunc,
                 cursorAt: {left:40, top:25}
             })

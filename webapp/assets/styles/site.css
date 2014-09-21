@@ -1,67 +1,106 @@
 /*
-// assets/styles/site.css
+// assets/styles/site.less
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
 // MIT License.
 //
 */
-
 body {
-    width:100%;
-    padding-top:70px;
+  width: 100%;
+  padding-top: 70px;
 }
-
-a,a:focus {
-    outline:none
+a,
+a:focus {
+  outline: none;
 }
-
 .user-column {
-    max-width:300px;
-    margin-left:auto;
-    margin-right:auto
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 .thumbnail {
-    max-width:300px;
-    max-height:300px;
-    margin-left:auto;
-    margin-right:auto;
-    cursor: pointer;
+  max-width: 300px;
+  max-height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
 }
-
+.btn-half-block {
+  width: 45%;
+  margin: 5px 2%;
+}
 .kill-form .form-control {
-    width:190px;
-    float:left;
-    margin-left:5px
+  width: 190px;
+  float: left;
+  margin-left: 5px;
 }
-
-.#kill-form button {
-    margin-left:5px;
-    margin-right:5px
+.kill-form button {
+  margin-left: 5px;
+  margin-right: 5px;
 }
-
-
-.drop-hover {
-    background: red;
+.admin-users-body .user h3 {
+  margin: 0;
 }
-
-.admin-users-body .user-data-wrapper {
-    position: relative;
-    height: 140px;
+.admin-users-body .user a.subtext {
+  margin: 0;
+  font-size: 80%;
 }
-
-.admin-users-body .user-data-text {
-    position: absolute;
-    width:100%;
-    bottom: 0px;
+.admin-users-body .user .user-data-text {
+  width: 100%;
 }
-
+.admin-users-body .user .user-data-text .row {
+  height: 25px;
+}
+.admin-users-body .user .user-data-text .row label {
+  width: 50px;
+  float: left;
+  text-align: left;
+  margin-left: 20px;
+}
+.admin-users-body .user .user-data-text .row select {
+  width: 100px;
+  direction: rtl;
+}
+.admin-users-body .user .user-data-text .row select,
+.admin-users-body .user .user-data-text .row span {
+  float: right;
+  text-align: right;
+  margin-right: 20px;
+}
+.admin-users-body .drag-img {
+  max-width: 300px;
+}
 .admin-users-body .thumbnail {
-    margin:10px 5px;
+  margin: 5px auto 10px auto;
+}
+.admin-users-body .user-buttons {
+  margin-top: 5px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 40px;
+}
+.drop-hover {
+  background: red;
+}
+@media (max-width: 1550px) {
+  .admin-users-body .user-grid {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 40px;
+  }
+  .admin-users-body .user {
+    border: none;
+    margin-bottom: 0;
+  }
+  .admin-users-body .thumbnail {
+    max-width: 290px;
+    margin: 5px 10px 10px 10px;
+  }
+  .admin-users-body .user-buttons {
+    margin-top: 5px;
+    margin-bottom: 0;
+    border: none;
+  }
 }
 
-.admin-users-body .user-buttons {
-    margin-top:10px;
-    margin-bottom:20px;
-}
+/* This beautiful CSS-File has been crafted with LESS (lesscss.org) and compiled by simpLESS (wearekiss.com/simpless) */
