@@ -32,6 +32,7 @@ var app = app || {
         // constructor
         initialize: function() {
             this.collection = app.Running.Users;
+            this.userViews = [];
             this.teams_view = new app.Views.AdminUsersTeamsView();
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(this.collection, 'change', this.render);
@@ -99,6 +100,14 @@ var app = app || {
             var userSort = function(user) {
                 return user.properties.first_name;
             }
+            var that = this;
+            this.userViews = [];
+            this.collection.each(function(user){
+                var userView = new app.Views.AdminUserView({
+                    model: user
+                });
+                that.userViews.push(userView);
+            })
             this.$el.html(this.template({users: _.sortBy(this.collection.toJSON(), userSort)}));
             this.teams_view.setElement(this.$('#team_list')).render();
             this.makeSortable();
