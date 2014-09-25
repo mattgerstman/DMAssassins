@@ -37,11 +37,9 @@
     list-style: none;
 }
 
-.sidebar-nav > li {
-    text-indent: 20px;
+.sidebar-nav > li {    
     line-height: 50px;
     border-bottom: 1px solid #e7e7e7;
-    cursor: pointer;
     width:250px;
 }
 
@@ -49,6 +47,25 @@
     border-top:none;
 }
 
+.sidebar-nav > li.active {
+    background: #e7e7e7;
+}
+
+.sidebar-nav > li input {
+    height:30px;
+    width:187.5px;
+    
+}
+
+.sidebar-nav > li a {
+    margin-left: 20px;
+    color:#777
+}
+
+.sidebar-nav > li a:hover {
+    color:#333;
+    text-decoration:none;
+}
 
 @media(min-width:768px) {
     .sidebar-wrapper {
