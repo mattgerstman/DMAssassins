@@ -48,9 +48,15 @@ a,a:focus {
     }
 }
 
-.admin-users-body {
-    .user {
+.user-grid {
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
 
+.admin-users-body {
+    .user {        
         h3 {
             margin: 0;
         }
@@ -63,13 +69,14 @@ a,a:focus {
             .row {
                 height:25px;
                 label {
-                    width:50px;
+                    width:75px;
                     float:left;
+                    font-size:90%;
                     text-align: left;
                     margin-left:20px;
                 }
                 select {
-                    width:100px;
+                    width:120px;
                     direction: rtl;
  
                 }
@@ -77,7 +84,15 @@ a,a:focus {
                     float:right;
                     text-align: right;
                     margin-right:20px;                
+                }                
+                span.team-saved, span.role-saved {
+                    margin:0;
+                    margin-top:4px;
+                    font-size:75%;
+                    color: green;
+                    display: none;
                 }
+
             }
         }
     }
@@ -97,8 +112,27 @@ a,a:focus {
     }
 }
 
+.new-team-form {
+    input {
+        margin-left: 18px;
+        margin-right:0;
+    }
+    .team-input-button {
+        margin-top:3px;
+        margin-left:3px;
+        display:inline;
+        cursor: pointer;
+    }
+    a.create-new-team:hover {
+        color:green;
+    }
+    a.cancel-new-team:hover {
+        color:red;
+    }
+}
+
 .drop-hover {
-    background: red;
+    background: #e7e7e7;
 }
 
 

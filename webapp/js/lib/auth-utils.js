@@ -11,6 +11,18 @@ var AuthUtils = {
         }
         return rolesMap;    
     },
+    getRolesMapFor: function(role) {
+        if (!role) {
+            return {};
+        }
+        var filteredMap = {};
+        var rolesMap = this.getRolesMap();
+        for (var key in rolesMap)  {
+            if (rolesMap[key]['value'] <= rolesMap[role]['value'])
+                filteredMap[key] = rolesMap[key];
+        }
+        return filteredMap;
+    },
     getRolePrettyName: function(role) {
         var rolesMap = this.getRolesMap();
         return rolesMap[role]['pretty_name'];

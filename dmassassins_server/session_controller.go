@@ -108,8 +108,8 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		return nil, appErr
 	}
 	//if target != nil {
-	//	target.GetTeamByGameId(gameId)	
-	//}	
+	//	target.GetTeamByGameId(gameId)
+	//}
 	response["target"] = target
 
 	// Get the Leaderboard for the game
