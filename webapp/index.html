@@ -74,7 +74,7 @@
                         </a>
                         <ul id="admin_dropdown" role="menu" class="dropdown-menu">
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Users</a></li>  
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#users">Edit Rules</a></li> 
+                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li> 
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_teams"><a href="#teams">Teams</a></li>  
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>    
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_twitter"><a href="#twitter">Twitter</a></li>    
@@ -376,8 +376,17 @@
         <% } %>
     </script>
     <script id="rules-template" type="text/template">
-    <%= rules %>
+        <%= rules %>
     </script>
+
+    <script id="admin-edit-rules-template" type="text/template">
+        <div id="epic_editor">
+            <textarea id="rules_text">
+                <%= rules %>
+            </textarea>
+        </div>
+    </script>
+
     
     <script id="admin-users-teams-template" type="text/template">
         <li>
@@ -491,6 +500,7 @@
     <script src="/bower_components/base64/base64.js" type="text/javascript"></script>
     <script src="/bower_components/datatables/media/js/jquery.dataTables.js" type="text/javascript" charset="utf8"></script>
     <script src="/bower_components/datatables-bootstrap3/BS3/assets/js/dataTables.js" type="text/javascript" charset="utf8"></script>
+    <script src="/bower_components/EpicEditor/epiceditor/js/epiceditor.js" type="text/javascript"></script>
 
     <script src="js/lib/facebook-sdk.js" type="text/javascript"></script>
     <script src="js/lib/auth-utils.js" type="text/javascript"></script>
@@ -516,6 +526,7 @@
     
     <script src="js/views/admin-users-view.js" type="text/javascript"></script>
     <script src="js/views/admin-users-teams-view.js" type="text/javascript"></script>
+    <script src="js/views/admin-edit-rules-view.js" type="text/javascript"></script>
     
     <script src="js/views/app-view.js" type="text/javascript"></script>
     <script src="js/views/nav-view.js" type="text/javascript"></script>
