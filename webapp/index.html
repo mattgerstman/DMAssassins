@@ -380,19 +380,28 @@
     </script>
     
     <script id="admin-users-teams-template" type="text/template">
-        <li class="team" id="SHOW_ALL">
-            Show All
+        <li class="team active" data-team-id="SHOW_ALL" id="nav_team_all">
+            <a href="#">Show All</a>
         </li>
-        <li class="team" id="NO_TEAM">
-            No Team
+        <li class="team" data-team-id="NO_TEAM" id="nav_team_none">
+            <a href="#">No Team</a>
         </li>
-        <li>
-            New Team
-        </li>         
+        <li class="new-team">
+            <a href="#" class="new-team-open">New Team</a>
+            <form class="new-team-form form-inline hide">
+                <input placeholder="Enter Team Name" type="text" class="new-team-name form-control" />                
+                <a href="#" class="team-input-button create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
+                <a href="#" class="team-input-button cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
+            </form>
+        </li>
         <%
         _.each(teams, function(team){
         %>
-            <li class="team" data-team-id="<%= team.team_id %>" data-team-name=<%= team.team_name %>> <%= team.team_name %> </li>
+            <li class="team team-droppable" data-team-id="<%= team.team_id %>"  id="nav_team_<%= team.team_id %>" data-team-name=<%= team.team_name %>>
+                <a href="#">
+                    <%= team.team_name %>
+                </a>
+            </li>
         <%
         })
         %>
@@ -411,7 +420,7 @@
     
     <script id="admin-user-template" type="text/template">
     
-        <div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" data-user-id=<%= user_id %>>
+        <div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" id="user_<%= user_id %>" data-user-id="<%= user_id %>">
              <img class="drag-img hide" src=<%= properties.photo_thumb %>>
              <div class="user">
                  <div class="user-column text-center">
