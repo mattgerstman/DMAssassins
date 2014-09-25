@@ -35,6 +35,7 @@ var app = app || {
             'join_game': 'join_game',
             'rules': 'rules',
             'users': 'users',
+            'edit_rules': 'edit_rules',
             'switch_game': 'switch_game'
 
         },
@@ -204,6 +205,13 @@ var app = app || {
             app.Running.currentView.collection.fetch();
             app.Running.Teams.fetch();
             this.render(); 
+        },
+        edit_rules: function() {
+            var view = new app.Views.AdminEditRulesView();
+            app.Running.AppView.setCurrentView(view);
+            app.Running.currentView.model.fetch();
+            this.render(); 
+//            app.Running.currentView.loadEditor();
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {
