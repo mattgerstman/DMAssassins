@@ -17,6 +17,7 @@ const (
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameUsersPath       = "/game/{game_id}/users/"
 	gameUserPath        = "/game/{game_id}/user/{user_id}/"
+	gameUserRolePath    = "/game/{game_id}/user/{user_id}/role/"
 	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTeamPath    = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 	gameTeamPath        = "/game/{game_id}/team/"
@@ -122,6 +123,7 @@ func StartServer() {
 	r.HandleFunc(gameUsersPath, GameUsersHandler()).Methods("GET", "DELETE", "PUT")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
+	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")

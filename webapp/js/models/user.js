@@ -73,6 +73,8 @@ var app = app || {
                 properties = {};
             properties[key] = value;
             this.set('properties', properties);
+            this.trigger('change');
+            return this.get('properties');
         },
         getProperty: function(key){
             var properties = this.get('properties');

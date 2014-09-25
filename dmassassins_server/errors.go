@@ -45,7 +45,7 @@ const (
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420
-	ErrCodeNoTeams = 40421
+	ErrCodeNoTeams        = 40421
 
 	// 500 - Internal Server Error
 	ErrCodeInternalServerWTF      = 50000
