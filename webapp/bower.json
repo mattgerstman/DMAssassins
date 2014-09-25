@@ -10,6 +10,7 @@
     "DMAssassins"
   ],
   "license": "MIT",
+  "private": true,
   "ignore": [
     "**/.*",
     "node_modules",
@@ -26,7 +27,7 @@
     "datatables-bootstrap3": "*",
     "datatables": "~1.10.2",
     "fontawesome": "~4.2.0",
-    "jquery-ui": "~1.11.1"    
+    "jquery-ui": "~1.11.1",
     "marked": "~0.3.2",
     "underscore": "~1.7.0"
   }
