@@ -33,16 +33,11 @@ var app = app || {
             this.listenTo(this.model, 'set', this.render)
         },
         loadEditor: function(){
-            var opts = {
-                container: this.$el.find('#epic_editor'),
-                basePath: '/bower_components/EpicEditor/epiceditor',
-                textarea: 'rules_text'
-            }
-            this.editor = new EpicEditor(opts)
+            this.$el.find("#rules-editor").markdown()
         },
         render: function() {
-            this.$el.html(this.template(this.model.attributes));       
-            this.loadEditor();     
+            this.$el.html(this.template(this.model.attributes));         
+            this.loadEditor();
             return this;
         }
 

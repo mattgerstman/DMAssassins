@@ -114,6 +114,30 @@ a:focus {
 .drop-hover {
   background: #e7e7e7;
 }
+.edit-rules textarea,
+.edit-rules #editor div {
+  display: inline-block;
+  width: 49%;
+  height: 100%;
+  vertical-align: top;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+.edit-rules textarea {
+  border: none;
+  border-right: 1px solid #ccc;
+  resize: none;
+  outline: none;
+  background-color: #f6f6f6;
+  font-size: 14px;
+  font-family: 'Monaco', courier, monospace;
+  padding: 20px;
+}
+.edit-rules code {
+  color: #f66;
+}
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {
     border-bottom: 1px solid #ddd;
