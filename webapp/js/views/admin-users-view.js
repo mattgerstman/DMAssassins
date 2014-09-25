@@ -99,7 +99,7 @@ var app = app || {
                 ui.helper.find('.drag-img').removeClass('hide');
                 ui.helper.find('.drag-img').animate({
                     width: 50,
-                    height: 50                    
+                    height: 50             
                 }, 100);
             };
             
