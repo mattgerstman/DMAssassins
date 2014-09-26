@@ -1,46 +1,159 @@
 /*
-// assets/styles/site.css
+// assets/styles/site.less
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
 // MIT License.
 //
 */
-
 body {
-    width:100%
+  width: 100%;
+  padding-top: 70px;
 }
-
-a,a:focus {
-    outline:none
+a,
+a:focus {
+  outline: none;
 }
-
 .user-column {
-    max-width:300px;
-    margin-left:auto;
-    margin-right:auto
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 .thumbnail {
-    max-width:300px;
-    max-height:300px;
-    margin-left:auto;
-    margin-right:auto;
-    cursor: pointer;
+  max-width: 300px;
+  max-height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
 }
-
+.btn-half-block {
+  width: 45%;
+  margin: 5px 2%;
+}
 .kill-form .form-control {
-    width:190px;
-    float:left;
-    margin-left:5px
+  width: 190px;
+  float: left;
+  margin-left: 5px;
 }
-
-.#kill-form button {
-    margin-left:5px;
-    margin-right:5px
+.kill-form button {
+  margin-left: 5px;
+  margin-right: 5px;
 }
-
-
+.user-grid {
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+.admin-users-body .user h3 {
+  margin: 0;
+}
+.admin-users-body .user a.subtext {
+  margin: 0;
+  font-size: 80%;
+}
+.admin-users-body .user .user-data-text {
+  width: 100%;
+}
+.admin-users-body .user .user-data-text .row {
+  height: 25px;
+}
+.admin-users-body .user .user-data-text .row label {
+  width: 75px;
+  float: left;
+  font-size: 90%;
+  text-align: left;
+  margin-left: 20px;
+}
+.admin-users-body .user .user-data-text .row select {
+  width: 120px;
+  direction: rtl;
+}
+.admin-users-body .user .user-data-text .row select,
+.admin-users-body .user .user-data-text .row span {
+  float: right;
+  text-align: right;
+  margin-right: 20px;
+}
+.admin-users-body .user .user-data-text .row span.team-saved,
+.admin-users-body .user .user-data-text .row span.role-saved {
+  margin: 0;
+  margin-top: 4px;
+  font-size: 75%;
+  color: green;
+  display: none;
+}
+.admin-users-body .drag-img {
+  max-width: 300px;
+}
+.admin-users-body .thumbnail {
+  margin: 5px auto 10px auto;
+}
+.admin-users-body .user-buttons {
+  margin-top: 5px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 40px;
+}
+.new-team-form input {
+  margin-left: 18px;
+  margin-right: 0;
+}
+.new-team-form .team-input-button {
+  margin-top: 3px;
+  margin-left: 3px;
+  display: inline;
+  cursor: pointer;
+}
+.new-team-form a.create-new-team:hover {
+  color: green;
+}
+.new-team-form a.cancel-new-team:hover {
+  color: red;
+}
 .drop-hover {
-    background: red;
+  background: #e7e7e7;
+}
+.edit-rules textarea,
+.edit-rules #editor div {
+  display: inline-block;
+  width: 49%;
+  height: 100%;
+  vertical-align: top;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+.edit-rules textarea {
+  border: none;
+  border-right: 1px solid #ccc;
+  resize: none;
+  outline: none;
+  background-color: #f6f6f6;
+  font-size: 14px;
+  font-family: 'Monaco', courier, monospace;
+  padding: 20px;
+}
+.edit-rules code {
+  color: #f66;
+}
+@media (max-width: 1550px) {
+  .admin-users-body .user-grid {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 40px;
+  }
+  .admin-users-body .user {
+    border: none;
+    margin-bottom: 0;
+  }
+  .admin-users-body .thumbnail {
+    max-width: 290px;
+    margin: 5px 10px 10px 10px;
+  }
+  .admin-users-body .user-buttons {
+    margin-top: 5px;
+    margin-bottom: 0;
+    border: none;
+  }
 }
