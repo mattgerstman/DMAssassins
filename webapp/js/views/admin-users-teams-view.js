@@ -33,7 +33,10 @@ var app = app || {
             this.listenTo(this.collection, 'remove', this.render)
         },
         render: function() {
-            this.$el.html(this.template({ teams: this.collection.toJSON() }));
+            var teamSort = function(team){
+                return team.team_name;
+            }
+            this.$el.html(this.template({ teams: _.sortBy(this.collection.toJSON(), teamSort) }));
             return this;
 
         },

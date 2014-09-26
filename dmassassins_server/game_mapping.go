@@ -74,6 +74,7 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	if NoRowsAffectedAppErr != nil {
 		return NoRowsAffectedAppErr
 	}
+	gameMapping.UserRole = role
 	return nil
 }
 
@@ -191,7 +192,7 @@ func (user *User) GetNewGamesForUser() (games []*Game, appErr *ApplicationError)
 // Get all users for a game
 func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *ApplicationError) {
 	teams, appErr := game.GetTeamsMap()
-	if appErr != nil && appErr.Code != ErrCodeNoTeams{
+	if appErr != nil && appErr.Code != ErrCodeNoTeams {
 		return nil, appErr
 	}
 
@@ -220,14 +221,16 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		userId := uuid.Parse(userIdBuffer)
 		teamId := uuid.Parse(teamIdBuffer.String)
 		properties := make(map[string]string)
-		
+
+		properties["user_role"] = userRole
+
 		if teams != nil {
 			if team, ok := teams[teamId.String()]; ok {
 				properties["team"] = team.TeamName
 			} else {
 				properties["team"] = "No Team"
 			}
-			
+
 		}
 
 		// Create the user struct and add it
