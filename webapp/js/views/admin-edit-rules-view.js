@@ -33,7 +33,7 @@ var app = app || {
             this.listenTo(this.model, 'set', this.render)
         },
         loadEditor: function(){
-            this.$el.find("#rules-editor").markdown()
+            this.$el.find("#rules-editor").markdown({savable:true})
         },
         render: function() {
             this.$el.html(this.template(this.model.attributes));         

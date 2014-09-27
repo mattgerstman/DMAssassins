@@ -199,12 +199,13 @@ var app = app || {
             app.Running.AppView.setCurrentView(view);
             this.render();
         },
-        users: function() {
+        users: function() {            
             var view = new app.Views.AdminUsersView();
-            app.Running.AppView.setCurrentView(view);
+            app.Running.AppView.setCurrentView(view);            
+            app.Running.currentView.collection.reset();
             app.Running.currentView.collection.fetch();
-            app.Running.Teams.fetch();
-            this.render(); 
+            app.Running.Teams.fetch();             
+            this.render();
         },
         edit_rules: function() {
             var view = new app.Views.AdminEditRulesView();

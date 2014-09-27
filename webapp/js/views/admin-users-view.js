@@ -45,10 +45,10 @@ var app = app || {
             this.userViews = [];
             this.teams_view = new app.Views.AdminUsersTeamsView();
             this.listenTo(this.collection, 'fetch', this.render);
-            this.listenTo(this.collection, 'reset', this.render);
             this.listenTo(this.collection, 'sync', this.render);
-            this.listenTo(this.collection, 'change', this.makeDraggable)
-            this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
+            this.listenTo(this.collection, 'change', this.render)
+//            this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
+//            this.listenTo(app.Running.Games, 'game-change', this.teams_view.collection.fetch);
         },
         banUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
@@ -188,6 +188,7 @@ var app = app || {
                 console.log(team);
                 app.Running.Teams.add(team);
                 that.teams_view.render();
+                that.makeDroppable();
             });
 
         },
@@ -196,11 +197,12 @@ var app = app || {
                  this.hideNewTeam();                 
              }
              if (event.keyCode == 13) {
-                 this.createNewTeam();                 
+                 this.createNewTeam(event); 
              }
              
         },
         render: function() {
+            console.log('render');
             this.$el.html(this.template());
             this.teams_view.setElement(this.$('#team_list')).render();
                     
@@ -234,7 +236,7 @@ var app = app || {
                 teams: app.Running.Teams.toJSON(),
                 roles: AuthUtils.getRolesMapFor(myRole)
             };    
-                    
+                         
             _.each(data, function(user){
                 that.addUser(user, extras);
             })
