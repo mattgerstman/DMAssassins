@@ -24,7 +24,7 @@ const (
 	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTeamPath    = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 	gameTeamPath        = "/game/{game_id}/team/"
-	gameTeamIdPath      = "/game/{game_id}/team/{team_id}"
+	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
 	gameRulesPath       = "/game/{game_id}/rules/"
 
 	userGamePath = "/user/{user_id}/game/"
@@ -91,6 +91,7 @@ func connect() (db *sql.DB, err error) {
 // Handles CORS, eventually I'll strip it down to exactly the headers/origins I need
 func corsHandler(h http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// log.Println(r)
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -134,7 +135,7 @@ func StartServer() {
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
-	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE", "PUT")
 
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")

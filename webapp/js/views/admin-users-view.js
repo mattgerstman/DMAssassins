@@ -35,12 +35,17 @@ var app = app || {
             'click .revive-user-submit': 'reviveUser',
             'change select.user-team': 'selectChangeTeam',
             'change select.user-role': 'selectChangeRole',
-            'click li.team a': 'sortByTeam',
+            'click  a.team-name ': 'sortByTeam',
             'click .new-team-open': 'showNewTeam',
             'click .create-new-team': 'createNewTeam',
             'click .cancel-new-team': 'cancelNewTeam',
             'keyup .new-team-name': 'newTeamKeypress',
-            'blur .new-team-form input': 'blurTeamForm'
+            'blur .new-team-form input': 'blurTeamForm',
+            'click .edit-team': 'showEditTeamForm',
+            'click .cancel-edit-team': 'cancelEditTeam',
+            'click .save-edit-team': 'saveEditTeam',
+            'click .delete-team': 'deleteTeamModal',
+            'click .delete-team-submit': 'deleteTeam'
         },
         team: undefined,
         // constructor
@@ -53,8 +58,6 @@ var app = app || {
             this.listenTo(this.collection, 'sync', this.render);
             this.listenTo(this.collection, 'change', this.render)
 			this.listenTo(this.collection, 'remove', this.render)
-//            this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
-//            this.listenTo(app.Running.Games, 'game-change', this.teams_view.collection.fetch);
         },
         banUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
@@ -192,13 +195,12 @@ var app = app || {
             this.render();            
         },
         showNewTeam: function(event) {            
-//            this.teams_view.render();
             event.preventDefault();
             this.$el.find('.new-team-open').addClass('hide');
             this.$el.find('.new-team-form').removeClass('hide');
             this.$el.find('.new-team-form input').focus();
         },
-        hideNewTeam: function() {
+        hideNewTeam: function() {             
             this.$el.find('.new-team-open').removeClass('hide');
             this.$el.find('.new-team-form').addClass('hide');
         },
@@ -226,9 +228,9 @@ var app = app || {
             var url = config.WEB_ROOT + 'game/' + game_id + '/team/';
             var that = this;
             $.post(url, {team_name:team_name}, function(team){
-                console.log(team);
                 app.Running.Teams.add(team);
                 that.teams_view.render();
+                that.selectActiveTeam();
                 that.makeDroppable();
             });
 
@@ -242,8 +244,75 @@ var app = app || {
              }
              
         },
+        showEditTeamForm: function(event) {
+            event.preventDefault();
+            var team_id = $(event.currentTarget).data('team-id');
+            $('#nav_team_'+team_id).find('.edit-team-form').removeClass('hide');
+            $('#nav_team_'+team_id).find('.team-display').addClass('hide');
+
+        },
+        hideEditTeam: function(event) {
+            var team_id = $(event.currentTarget).data('team-id');
+            $('#nav_team_'+team_id).find('.team-display').removeClass('hide');
+            $('#nav_team_'+team_id).find('.edit-team-form').addClass('hide');
+        },
+        cancelEditTeam: function(event) {
+            if (event)           
+                event.preventDefault();
+            this.hideEditTeam(event);
+        },
+        saveEditTeam: function(event) {
+            event.preventDefault();
+            var team_id = $(event.currentTarget).data('team-id');
+            var team = app.Running.Teams.get(team_id);
+            var name = $('#nav_team_'+team_id).find('.edit-team-name').val()
+            if (name == team.get('team_name'))
+            {
+                this.hideEditTeam(event);
+                return;
+            }
+                
+            var that = this;
+            team.set('team_name', name);
+            team.save();
+        },
+        deleteTeamModal: function(event) {
+            event.preventDefault();
+            var team_name = $(event.currentTarget).data('team-name');
+            var team_id = $(event.currentTarget).data('team-id');
+            $('.delete-team-submit').data('team-name', team_name);
+            $('.delete-team-submit').data('team-id', team_id);
+            $('#delete_team_modal .team-name').text(team_name)
+            $('#delete_team_modal').modal();
+
+        },
+        deleteTeam: function(event) {
+            var team_id = $(event.currentTarget).data('team-id');
+            var team_name = $(event.currentTarget).data('team-name');
+	      	var team = app.Running.Teams.get(team_id);
+	      	var that = this;
+	      	team.destroy({success:function(){
+	      	    if (that.team == team_name) {
+    	      	    that.team = 'null'
+    	      	    that.team_id = 'null'
+	      	    }
+    	      	app.Running.Users.each(function(user){
+        	      	if (user.getProperty('team') == team_name)
+        	      	{
+            	      	user.setProperty('team', 'null'), true;
+   
+        	      	}
+    	      	})
+    	      	that.render();    	      	
+            }});           
+            $('#delete_team_modal').modal('hide');
+        },
+        selectActiveTeam: function() {
+            this.$el.find('.active').removeClass('active');
+            this.$el.find('#nav_team_'+this.team_id).addClass('active');
+
+        },
         render: function() {
-            console.log('render');
 			$('.modal-backdrop').remove();
             this.$el.html(this.template());
             this.teams_view.setElement(this.$('#team_list')).render();
@@ -257,14 +326,12 @@ var app = app || {
             var data = this.collection.models;
             if (this.team !== undefined)
             {
-                var that = this;
-                this.$el.find('.active').removeClass('active');
+                var that = this;                
                 data = _.filter(data, function(user){
                     return user.getProperty('team') == that.team;
-                });
-                
-                this.$el.find('#nav_team_'+this.team_id).addClass('active');
+                });                            
             }
+            this.selectActiveTeam();
 
             var userSort = function(user) {
                 return user.getProperty('first_name');

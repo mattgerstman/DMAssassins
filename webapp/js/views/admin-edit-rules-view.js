@@ -33,10 +33,27 @@ var app = app || {
             this.listenTo(this.model, 'set', this.render)
         },
         loadEditor: function(){
-            this.$el.find("#rules-editor").markdown({savable:true})
+            var that = this;
+            this.$el.find("#rules-editor").markdown({
+                savable:true,
+                saveButtonClass: 'btn btn-md btn-primary',
+                footer: '<div class="saved hide">Saving...</div>',
+                onSave: function(event) {
+                        var rules = event.getContent();
+                        that.model.set('rules', rules);
+                        $('.saved').removeClass('hide')
+                        that.model.save(null, {success: function(){
+                            $('.saved').text('Saved.').fadeOut(2000, function(){
+                                $(this).text('Saving...');    
+                            });
+                            
+                        }});
+                    },
+                })
         },
         render: function() {
-            this.$el.html(this.template(this.model.attributes));         
+            var data = this.model.attributes;
+            this.$el.html(this.template(data));         
             this.loadEditor();
             return this;
         }

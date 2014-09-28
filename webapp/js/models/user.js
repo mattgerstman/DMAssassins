@@ -67,13 +67,16 @@ var app = app || {
                 }
             });
         },
-        setProperty: function(key, value) {
+        setProperty: function(key, value, silent) {
             var properties = this.get('properties');
             if (!properties)
                 properties = {};
             properties[key] = value;
             this.set('properties', properties);
-            this.trigger('change');
+            if ((silent === undefined) || (silent === false))
+            {
+                this.trigger('change');
+            }            
             return this.get('properties');
         },
         getProperty: function(key){
