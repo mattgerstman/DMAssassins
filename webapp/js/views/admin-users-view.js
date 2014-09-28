@@ -28,9 +28,14 @@ var app = app || {
         // The DOM events specific to an item.
         events: {
             'click .ban-user': 'banUserModal',
+            'click .kill-user': 'killUserModal',
+            'click .revive-user': 'reviveUserModal',
+            'click .ban-user-submit': 'banUser',
+            'click .kill-user-submit': 'killUser',
+            'click .revive-user-submit': 'reviveUser',
             'change select.user-team': 'selectChangeTeam',
             'change select.user-role': 'selectChangeRole',
-            'click li.team': 'sortByTeam',
+            'click li.team a': 'sortByTeam',
             'click .new-team-open': 'showNewTeam',
             'click .create-new-team': 'createNewTeam',
             'click .cancel-new-team': 'cancelNewTeam',
@@ -47,16 +52,52 @@ var app = app || {
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(this.collection, 'sync', this.render);
             this.listenTo(this.collection, 'change', this.render)
+			this.listenTo(this.collection, 'remove', this.render)
 //            this.listenTo(app.Running.Games, 'game-change', this.collection.fetch);
 //            this.listenTo(app.Running.Games, 'game-change', this.teams_view.collection.fetch);
         },
         banUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
             var user_id = $(event.currentTarget).data('user-id');
-            $('#ban_user_submit').data('user-id', user_id);
+            $('.ban-user-submit').data('user-id', user_id);
             $('#ban_user_modal .user-name').text(user_name)
-            $('#ban_user_modal').modal();  
+            $('#ban_user_modal').modal();
         },
+        killUserModal: function(event) {
+            var user_name = $(event.currentTarget).data('user-name');
+            var user_id = $(event.currentTarget).data('user-id');
+            $('.kill-user-submit').data('user-id', user_id);
+            $('#kill_user_modal .user-name').text(user_name)
+            $('#kill_user_modal').modal();  
+        },
+        reviveUserModal: function(event) {
+            var user_name = $(event.currentTarget).data('user-name');
+            var user_id = $(event.currentTarget).data('user-id');
+            $('.revive-user-submit').data('user-id', user_id);
+            $('#revive_user_modal .user-name').text(user_name)
+            $('#revive_user_modal').modal();  
+        },
+               
+        banUser: function(event) {
+        	var user_id = $(event.currentTarget).data('user-id');
+	      	var user = this.collection.get(user_id);
+	      	user.ban()
+		  	$('#ban_user_modal').modal('hide')
+        },
+        killUser: function(event) {
+        	var user_id = $(event.currentTarget).data('user-id');
+	      	var user = this.collection.get(user_id);
+	      	user.kill()
+	      	$('#kill_user_modal').modal('hide')
+        },
+
+        reviveUser: function(event) {
+        	var user_id = $(event.currentTarget).data('user-id');
+	      	var user = this.collection.get(user_id);
+	      	user.revive()
+	      	$('#revive_user_modal').modal('hide')
+        },
+
         selectChangeTeam: function(event){
             var user_id = $(event.currentTarget).data('user-id');
             var team_id = $(event.currentTarget).find('option:selected').val()
@@ -143,8 +184,8 @@ var app = app || {
                 
                 
             if (this.team_id == 'NO_TEAM') {
-                this.team = null;
-                this.team_id = 'none'
+                this.team = "null";
+                this.team_id = 'null'
             }
                 
             
@@ -203,6 +244,7 @@ var app = app || {
         },
         render: function() {
             console.log('render');
+			$('.modal-backdrop').remove();
             this.$el.html(this.template());
             this.teams_view.setElement(this.$('#team_list')).render();
                     

@@ -84,6 +84,26 @@ var app = app || {
                 return null;
             return properties[key];
         },
+        ban: function(){
+        	var that = this;
+	      	this.destroy({
+		      	url: that.url() + 'ban/'
+	      	})  
+        },
+        kill: function(){
+        	var that = this;
+        	var url = this.url() + 'kill/';
+	      	$.post(url, function(response){
+	      		that.setProperty('alive', 'false');
+	      	});
+        },
+        revive: function(){
+        	var that = this;
+        	var url = this.url() + 'revive/';
+	      	$.post(url, function(response){
+	      		that.setProperty('alive', 'true');
+	      	});
+        },
         quit: function(secret) {
             var that = this;
             this.destroy({
