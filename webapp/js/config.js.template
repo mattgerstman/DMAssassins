@@ -1,0 +1,5 @@
+var config = {
+	LOCAL_ROOT : '/Users/Matthew/Dropbox/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/',
+	WEB_ROOT : 'http://localhost:8000/',
+	APP_ID : null	
+}

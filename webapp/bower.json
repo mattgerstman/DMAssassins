@@ -1,0 +1,34 @@
+{
+  "name": "DMAssassins",
+  "version": "0.7.0",
+  "homepage": "https://github.com/mattgerstman/DMAssassins",
+  "authors": [
+    "Matt Gerstman <mattgerstman@gmail.com>"
+  ],
+  "description": "DMAssassins Web Libraries",
+  "keywords": [
+    "DMAssassins"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "~1.1.2",
+    "base64": "~0.3.0",
+    "bootstrap-markdown": "~2.7.0",
+    "bootstrap-social-buttons": "https://github.com/noizwaves/bootstrap-social-buttons.git#~1.0.0",    
+    "bootstrap": "~3.2.0",
+    "datatables-bootstrap3": "*",
+    "datatables": "~1.10.2",
+    "fontawesome": "~4.2.0",
+    "jquery-ui": "~1.11.1",
+    "marked": "~0.3.2",
+    "underscore": "~1.7.0"
+  }
+}

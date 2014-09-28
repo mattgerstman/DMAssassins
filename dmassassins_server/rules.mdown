@@ -1,0 +1,32 @@
+##Killing
+
+To assassinate your target perform the following steps:
+
+1. Shoot them with silly string. 
+2. Ask the user for their secret
+3. Enter their secret on the website.
+4. Receive your new target.
+
+If your assassins shoots you, you are eliminated from the game and you must give up your secret.
+You are only allowed to kill the person who is your current target on the website.
+
+##Defense
+To defend your self from assassination, you may shoot your assassin with silly string. This will grant you 30 minutes of immunity.
+
+##Safe Zones
+The third-floor corridor is forbidden to all users who do not wish to die a most painful death.
+
+##Winners
+The winners will be the last player standing and the player with the most kills.
+In the event of a draw or multiple winners, the distribution of prizes will be determined by the admin.
+
+##Pauses
+The game may be paused at the admin's discretion. You will be notified of this by email.
+
+##Plot Twists
+
+There will be several plot twists that will change the game dynamic. You will be notified of these by email.
+
+##Cheating
+If a player is caught cheating they will be completely removed from the game.
+If someone refuses to give up their secret, you can contact the admin at [%ADMINEMAIL%](mailto:%ADMINEMAIL%).
