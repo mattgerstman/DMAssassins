@@ -388,11 +388,11 @@
 
     
     <script id="admin-users-teams-template" type="text/template">
-        <li class="team active" data-team-id="SHOW_ALL" id="nav_team_all">
-            <a href="#">Show All</a>
+        <li class="team active" id="nav_team_all">
+            <a href="#" data-team-id="SHOW_ALL" >Show All</a>
         </li>
-        <li class="team" data-team-id="NO_TEAM" id="nav_team_none">
-            <a href="#">No Team</a>
+        <li class="team" id="nav_team_none">
+            <a href="#"  data-team-id="NO_TEAM">No Team</a>
         </li>
         <li class="new-team">
             <a href="#" class="new-team-open">New Team</a>
@@ -405,10 +405,14 @@
         <%
         _.each(teams, function(team){
         %>
-            <li class="team team-droppable" data-team-id="<%= team.team_id %>"  id="nav_team_<%= team.team_id %>" data-team-name=<%= team.team_name %>>
-                <a href="#">
+            <li class="team team-droppable" id="nav_team_<%= team.team_id %>" >
+                <a href="#" data-team-id="<%= team.team_id %>"   data-team-name=<%= team.team_name %>>
                     <%= team.team_name %>
                 </a>
+				<div class="team-buttons">
+	                <a href="#" class="rename-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
+					<a href="#" class="delete-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
+                </div>
             </li>
         <%
         })
@@ -418,7 +422,7 @@
             <%
             _.each(teams, function(team){
             %>
-                <option value="<%= team.team_id %>"> <%= team.team_name %> </option>
+                <option value="<%= team.team_id %>"> <%= team.team_name %> </option>			
             <%
             })
             %>        
@@ -433,21 +437,33 @@
              <div class="user">
                  <div class="user-column text-center">
                     <div class="row">
-                        <h3><%= properties.first_name + ' ' + properties.last_name %></h3>
+                        <h3>
+                        	<% if (properties.alive !="true") { %> 
+                        		<s>
+							<%} %>
+		                        	<%= properties.first_name + ' ' + properties.last_name %>
+							<% if (properties.alive !="true") { %> 
+                        		</s>
+							<%} %>		                        	
+		                        	
+                        </h3>
                         <a href="mailto:<%= email %>" class="subtext"><%= email %></a><br />
                         <a href="<%= properties.facebook %>" class="subtext">View Facebook</a>
                     </div>
 
                     <div class="row">
                         <a class="thumbnail">
-                           <img src=<%= properties.photo_thumb %>>
+                           <img class="<% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
                         </a>
                     </div>
                     <div class="user-data-text">
                         <div class="row">
                             <label>Team:<span class="team-saved" id="team_saved_<%= user_id %>" >Saved</span></label>
                             <select class="user-team" data-user-id ="<%=user_id %>">
-                                <% _.each(teams, function(team) { %>
+                                
+                                <% if (properties.team == 'null') { %>
+	                                <option value ="">Select a Team</option>								
+                                <% } _.each(teams, function(team) { %>
                                     <option value="<%=team.team_id%>" <%= team.team_name === properties.team ? 'selected' : ''%>><%= team.team_name %></option>
                                 <% }) %>
                             </select>
@@ -461,22 +477,25 @@
                             </select>
                         </div>
                     </div>
-                    <div class ="user-buttons btn-group btn-group-justified kill-user-wrapper">
-                        <div class="btn-group">
-                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
-                        </div>
-                        <div class="btn-group">                            
-                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
-                        </div>
-                    </div>
-                    <div class ="user-buttons btn-group btn-group-justified revive-user-wrapper hide">
-                        <div class="btn-group">
-                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
-                        </div>
-                        <div class="btn-group">                            
-                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
-                        </div>
-                    </div>
+                    <% if (properties.alive =="true") { %> 
+	                    <div class ="user-buttons btn-group btn-group-justified kill-user-wrapper">
+	                        <div class="btn-group">
+	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+	                        </div>
+	                        <div class="btn-group">                            
+	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
+	                        </div>
+	                    </div>
+	                <% } else { %>
+	                    <div class ="user-buttons btn-group btn-group-justified revive-user-wrapper">
+	                        <div class="btn-group">
+	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+	                        </div>
+	                        <div class="btn-group">                            
+	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
+	                        </div>
+	                    </div>
+					<% } %>
                  </div>
             </div>
         </div>
@@ -495,7 +514,57 @@
 
 
         </div>
+
+        <div id="revive_user_modal" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Revive User</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to revive <strong><span class="user-name"></span></strong>? This will revive them and randomly place them in the middle of another assassin/target pair.
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary hidden-xs revive-user-submit">Revive User</button>
+
+                <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-block btn-primary visible-xs revive-user-submit">Revive User</button>
+
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
         
+        
+
+        <div id="kill_user_modal" class="modal fade">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Kill User</h4>
+              </div>
+              <div class="modal-body">
+                <p>Are you sure you want to kill <strong><span class="user-name"></span></strong>? This will kill them as though their assassin has killed them.<br />
+                    <strong>If you want to ban the user completely close this window and click "Ban User."</strong>
+                </p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger hidden-xs kill-user-submit">Kill User</button>
+
+                <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs kill-user-submit">Kill User</button>
+
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+        
+
         
         <div id="ban_user_modal" class="modal fade">
           <div class="modal-dialog">
@@ -511,8 +580,12 @@
                 </p>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="ban_user_submit">Ban User</button>
+                <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger hidden-xs ban-user-submit">Ban User</button>
+
+                <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs ban-user-submit">Ban User</button>
+
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
