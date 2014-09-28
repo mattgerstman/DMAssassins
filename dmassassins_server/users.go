@@ -256,7 +256,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	if incrementKillCount {
+	if !incrementKillCount {
 		tx.Commit()
 		return newTargetId, nil
 	}
