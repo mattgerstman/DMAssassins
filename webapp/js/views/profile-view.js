@@ -65,7 +65,19 @@ var app = app || {
             $('.modal-backdrop').remove();
         },
         render: function() {
-            this.$el.html(this.template(this.model.attributes));
+            var data = this.model.attributes;
+            data.teams_enabled = false;
+            var game = app.Running.Games.getActiveGame();
+            if (game) {
+                data.teams_enabled = game.areTeamsEnabled();    
+            }
+            
+            
+            var role = app.Running.User.getProperty('user_role');  
+            var allow_quit = !AuthUtils.requiresCaptain(role);
+            data.allow_quit = allow_quit;
+
+            this.$el.html(this.template(data));
             return this;
         }
     })

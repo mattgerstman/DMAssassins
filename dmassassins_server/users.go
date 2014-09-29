@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -100,6 +101,7 @@ func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
 
 	user.Properties["secret"] = gameMapping.Secret
 	user.Properties["user_role"] = gameMapping.UserRole
+	user.Properties["alive"] = strconv.FormatBool(gameMapping.Alive)
 	user.Properties["team"] = ""
 
 	if gameMapping.TeamId == nil {
@@ -194,6 +196,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 	var targetSecret string
 	var oldTargetIdBuffer, newTargetIdBuffer sql.NullString
 	// Grab the target's secret and user_id for comparison/use below
+
 	err := db.QueryRow(`SELECT map.secret, users.user_id FROM dm_users as users, dm_user_game_mapping as map WHERE users.user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2) AND map.user_id = users.user_id AND map.game_id = $3 `, user.UserId.String(), gameId.String(), gameId.String()).Scan(&targetSecret, &oldTargetIdBuffer)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -253,7 +256,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	if incrementKillCount {
+	if !incrementKillCount {
 		tx.Commit()
 		return newTargetId, nil
 	}

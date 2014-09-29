@@ -59,7 +59,7 @@ var app = app || {
         },
         // cancels the game creation/selection
         goBack: function() {
-            if (app.Session.get('has_game') == "true") {
+            if (!!app.Running.Games.getActiveGameId()) {
                 history.back();
                 return;
             }

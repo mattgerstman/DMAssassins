@@ -104,6 +104,13 @@ a,a:focus {
     .thumbnail {
         margin:5px auto 10px auto;
     }
+    .dead {
+		-webkit-filter: grayscale(100%);
+	       -moz-filter: grayscale(100%);
+	         -o-filter: grayscale(100%);
+	        -ms-filter: grayscale(100%);
+	            filter: grayscale(100%); 
+    }
     .user-buttons {
         margin-top:5px;
         padding-bottom:15px;
@@ -112,23 +119,52 @@ a,a:focus {
     }
 }
 
-.new-team-form {
-    input {
-        margin-left: 18px;
-        margin-right:0;
-    }
-    .team-input-button {
-        margin-top:3px;
-        margin-left:3px;
-        display:inline;
-        cursor: pointer;
-    }
-    a.create-new-team:hover {
-        color:green;
-    }
-    a.cancel-new-team:hover {
-        color:red;
-    }
+.sidebar-nav {
+	> li.team {
+		a {
+			width:157px;
+			display: inline-block;
+		}
+		.team-buttons {
+			width:65px;
+			display:inline;
+			a {
+				width:0px;
+			}
+			span {
+		        margin-top:3px;
+		        margin-left:2px;
+		        display:inline;
+		        cursor: pointer;
+			}
+			a.edit-team:hover {
+		        color:blue;
+		    }
+		    a.delete-team:hover {
+		        color:red;
+		    }
+		}	
+	}
+		cursor: default;
+		.new-team-form, .edit-team-form {
+		    input {
+		        margin-left: 18px;
+		        margin-right:0;
+		    }
+		    .team-input-button {
+		        margin-top:3px;
+		        margin-left:3px;
+		        display:inline;
+		        cursor: pointer;
+		    }
+		    a.create-new-team:hover, a.save-edit-team:hover {
+		        color:green;
+		    }
+		    a.cancel-new-team:hover, a.cancel-edit-team:hover {
+		        color:red;
+		    }
+		}
+
 }
 
 .drop-hover {
@@ -161,6 +197,16 @@ a,a:focus {
     code {
         color: #f66;
     }
+}
+
+.saved {
+    margin-left:5px;
+    display: inline;
+    
+}
+
+.default_cursor {
+    cursor: default!important;
 }
 
 

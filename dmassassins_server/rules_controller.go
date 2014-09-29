@@ -2,10 +2,15 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type RulesPost struct {
+	Rules string `json:"rules"`
+}
 
 // POST - Update rules for a game
 func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
@@ -27,7 +32,14 @@ func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
 		return "", appErr
 	}
 
-	rules := r.FormValue("rules")
+	decoder := json.NewDecoder(r.Body)
+	var rulesPost RulesPost
+	err := decoder.Decode(&rulesPost)
+	if err != nil {
+		return "", NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
+
+	rules := rulesPost.Rules
 	if rules == "" {
 		msg := "Missing Parameter: rules"
 		err := errors.New(msg)

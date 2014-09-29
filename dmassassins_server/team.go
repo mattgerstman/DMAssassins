@@ -150,6 +150,8 @@ func DeleteTeam(teamId uuid.UUID) (appErr *ApplicationError) {
 	if appErr != nil {
 		return appErr
 	}
+
+	tx.Commit()
 	return nil
 }
 

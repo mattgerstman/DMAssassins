@@ -67,13 +67,16 @@ var app = app || {
                 }
             });
         },
-        setProperty: function(key, value) {
+        setProperty: function(key, value, silent) {
             var properties = this.get('properties');
             if (!properties)
                 properties = {};
             properties[key] = value;
             this.set('properties', properties);
-            this.trigger('change');
+            if ((silent === undefined) || (silent === false))
+            {
+                this.trigger('change');
+            }            
             return this.get('properties');
         },
         getProperty: function(key){
@@ -83,6 +86,26 @@ var app = app || {
             if (properties[key] === undefined)
                 return null;
             return properties[key];
+        },
+        ban: function(){
+        	var that = this;
+	      	this.destroy({
+		      	url: that.url() + 'ban/'
+	      	})  
+        },
+        kill: function(){
+        	var that = this;
+        	var url = this.url() + 'kill/';
+	      	$.post(url, function(response){
+	      		that.setProperty('alive', 'false');
+	      	});
+        },
+        revive: function(){
+        	var that = this;
+        	var url = this.url() + 'revive/';
+	      	$.post(url, function(response){
+	      		that.setProperty('alive', 'true');
+	      	});
         },
         quit: function(secret) {
             var that = this;
