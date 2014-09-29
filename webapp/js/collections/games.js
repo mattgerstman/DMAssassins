@@ -66,6 +66,7 @@ var app = app || {
             if (!game) {
                 return null;
             }
+            game.fetchProperties();
             this.active_game = game;
             app.Session.set('game_id', game_id);
             app.Session.set('has_game', true);

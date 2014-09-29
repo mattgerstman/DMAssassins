@@ -34,7 +34,10 @@ var app = app || {
         // renderer
         render: function() {
             this.$el.html(this.template(this.model.attributes));
-            var numCols = this.model.get('teams_enabled') + 2;
+            var numCols = 2;
+            if (this.model.get('teams_enabled') == 'true')
+                numCols = 3;
+                
             var options = {
                 paging: false,
                 searching: false,

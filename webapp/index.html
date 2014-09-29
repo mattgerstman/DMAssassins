@@ -76,9 +76,7 @@
                         <ul id="admin_dropdown" role="menu" class="dropdown-menu">
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Users</a></li>  
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li> 
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_teams"><a href="#teams">Teams</a></li>  
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>    
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_twitter"><a href="#twitter">Twitter</a></li>    
                             <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>      
                         </ul>
                     </li>   
@@ -118,7 +116,7 @@
                         <label>Facebook:</label> <a href="<%= properties.facebook %>"><%= properties.facebook.replace('https://facebook','fb') %></a>
                     </div>
                 </div>
-                <% if (properties.team) { %>                
+                <% if (teams_enabled && properties.team) { %>                
                         <div class="row">
                             <label>Team:</label> <%= properties.team %>
                         </div>
@@ -157,7 +155,7 @@
                     <div class="row">
                         <label>Facebook:</label> <a href="<%= properties.facebook %>"><%= properties.facebook.replace('https://facebook','fb') %></a>
                     </div>
-                    <% if (properties.team) { %>                
+                    <% if (teams_enabled && properties.team) { %>                
                         <div class="row">
                             <label>Team:</label> <%= properties.team %>
                         </div>
@@ -325,7 +323,7 @@
         <table class="stripe compact" id="user_leaderboard_table">
             <thead>
                 <th style="width:<%=user_col_width%>%">Name</th>
-                <% if (teams_enabled) { %>
+                <% if (teams_enabled == 'true') { %>
                     <th style="width:<%=user_col_width%>%">Team</th>
                 <% } %>
                 <th style="width:<%=user_col_width%>%">Alive</th>
@@ -337,7 +335,7 @@
                     %>
                     <tr>
                         <td><%=user.name%></td>
-                        <% if (teams_enabled) { %>
+                        <% if (teams_enabled =='true') { %>
                             <td><%= user.team_name %></td>
                         <% } %>
                         <td><%=user.alive ? 'Yes' : 'No'%></td>
@@ -348,7 +346,7 @@
                     %>
             </tbody>
         </table>
-        <% if (teams_enabled) { %>
+        <% if (teams_enabled == 'true') { %>
             <h3>Team Rankings</h3>
             <table class="stripe compact" id="team_leaderboard_table">
                 <thead>
@@ -468,22 +466,24 @@
                     </div>
 
                     <div class="row">
-                        <a class="thumbnail">
+                        <a class="thumbnail <% if (!teams_enabled) { %> default_cursor <%} %>">
                            <img class="<% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
                         </a>
                     </div>
                     <div class="user-data-text">
-                        <div class="row">
-                            <label>Team:<span class="team-saved" id="team_saved_<%= user_id %>" >Saved</span></label>
-                            <select class="user-team" data-user-id ="<%=user_id %>">
-                                
-                                <% if (properties.team == 'null') { %>
-	                                <option value ="">Select a Team</option>								
-                                <% } _.each(teams, function(team) { %>
-                                    <option value="<%=team.team_id%>" <%= team.team_name === properties.team ? 'selected' : ''%>><%= team.team_name %></option>
-                                <% }) %>
-                            </select>
-                        </div>                        
+                        <% if (teams_enabled) { %>
+                            <div class="row">
+                                <label>Team:<span class="team-saved" id="team_saved_<%= user_id %>" >Saved</span></label>
+                                <select class="user-team" data-user-id ="<%=user_id %>">
+                                    
+                                    <% if (properties.team == 'null') { %>
+    	                                <option value ="">Select a Team</option>								
+                                    <% } _.each(teams, function(team) { %>
+                                        <option value="<%=team.team_id%>" <%= team.team_name === properties.team ? 'selected' : ''%>><%= team.team_name %></option>
+                                    <% }) %>
+                                </select>
+                            </div>                        
+                        <% } %>                            
                         <div class="row">
                             <label>Role:<span class="role-saved" id="role_saved_<%= user_id %>" >Saved</span></label>
                             <select class="user-role" data-user-id ="<%=user_id %>">
@@ -519,14 +519,16 @@
     </script>
     
     <script id="admin-users-template" type="text/template">
-        <div class="teams hidden-xs">
-            <div class="sidebar-wrapper">
-                <ul id="team_list" class="sidebar-nav">
-
-                </ul>
-            </div>  
-        </div>
-        <div class="admin-users-body">
+        <% if (teams_enabled) { %>
+            <div class="teams hidden-xs">
+                <div class="sidebar-wrapper">
+                    <ul id="team_list" class="sidebar-nav">
+    
+                    </ul>
+                </div>  
+            </div>
+        <% } %>
+        <div class="admin-users-body <% if (teams_enabled) { %>adjust-sidebar <% } %>">
 
 
         </div>

@@ -314,7 +314,18 @@ var app = app || {
         },
         render: function() {
 			$('.modal-backdrop').remove();
-            this.$el.html(this.template());
+			
+			var data = {};
+			var game = app.Running.Games.getActiveGame();
+			var teams_enabled = false
+			if (game)
+			{
+    			teams_enabled = game.areTeamsEnabled();
+			}
+            data.teams_enabled = teams_enabled;
+			
+            this.$el.html(this.template(data));
+            
             this.teams_view.setElement(this.$('#team_list')).render();
                     
             while (this.userViews.length)
@@ -343,15 +354,19 @@ var app = app || {
             var that = this;
             var extras = {
                 teams: app.Running.Teams.toJSON(),
-                roles: AuthUtils.getRolesMapFor(myRole)
+                roles: AuthUtils.getRolesMapFor(myRole),
+                teams_enabled: teams_enabled
             };    
                          
             _.each(data, function(user){
                 that.addUser(user, extras);
             })
 
-            this.makeDraggable();
-            this.makeDroppable();
+            if (teams_enabled)
+            {
+                this.makeDraggable();
+                this.makeDroppable();                
+            }
             this.trigger('render');
             return this;
         }
