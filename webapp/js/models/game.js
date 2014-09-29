@@ -31,6 +31,21 @@ var app = app || {
 
         idAttribute: 'game_id',
         urlRoot: config.WEB_ROOT + 'user/',
+        areTeamsEnabled: function() {
+            return this.getProperty('teams_enabled') == 'true';
+        },
+        getProperty: function(key) {
+            var properties = this.get('game_properties');
+            if (!properties)
+                return null;
+            if (properties[key] === undefined)
+                return null;
+            return properties[key]  
+        },
+        fetchProperties: function() {
+            var url = config.WEB_ROOT + 'game/' + this.get('game_id') + '/';
+            return this.fetch({url: url});
+        },
         url: function() {
             var url = this.urlRoot;
             url += app.Session.get('user_id') + '/game/';            

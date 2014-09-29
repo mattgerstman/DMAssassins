@@ -183,6 +183,9 @@ a:focus {
   margin-left: 5px;
   display: inline;
 }
+.default_cursor {
+  cursor: default!important;
+}
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {
     border-bottom: 1px solid #ddd;
