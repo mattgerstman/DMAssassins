@@ -62,7 +62,6 @@ var app = app || {
         // select an item on the nav bar
         select: function(event) {
             var target = event.currentTarget;
-            console.log(target);
             if ($(target).hasClass('disabled') || $(target).hasClass('dropdown-toggle')) {
                 event.preventDefault();
                 return;
