@@ -24,7 +24,6 @@ var app = app || {
         history: [],
         // All the routes
         routes: {
-            '': 'target',
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
@@ -85,7 +84,7 @@ var app = app || {
             var hasGame = app.Session.get('has_game') == "true";
 
             // is the game started
-            var hasTarget = !!app.Running.TargetModel.get('user_id');
+            var hasTarget = !!app.Running.TargetModel.get('user_id') && app.Running.Games.getActiveGame().get('game_started');
 
             /*
 			Variables I use when shit's not routing properly /**/

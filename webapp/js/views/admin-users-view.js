@@ -172,6 +172,10 @@ var app = app || {
             });
         },
         addUser: function(user, extras){
+            extras.logged_in = false;
+            if (user.get('user_id') == app.Session.get('user_id')) {
+                extras.logged_in = true;
+            }
             var userView = new app.Views.AdminUserView(user);
             this.userViews.push(userView);
             this.$el.find('.admin-users-body').append(userView.render(extras).el);
@@ -354,7 +358,8 @@ var app = app || {
             var that = this;
             var extras = {
                 teams: app.Running.Teams.toJSON(),
-                roles: AuthUtils.getRolesMapFor(myRole),
+                roles: AuthUtils.getRolesMapFor(myRole, teams_enabled),
+                is_admin: AuthUtils.requiresAdmin(myRole),
                 teams_enabled: teams_enabled
             };    
                          
