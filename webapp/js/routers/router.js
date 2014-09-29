@@ -24,6 +24,7 @@ var app = app || {
         history: [],
         // All the routes
         routes: {
+            '': 'target',
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
@@ -35,7 +36,8 @@ var app = app || {
             'rules': 'rules',
             'users': 'users',
             'edit_rules': 'edit_rules',
-            'switch_game': 'switch_game'
+            'switch_game': 'switch_game',
+            'game_settings': 'game_settings',
 
         },
         // routes that require we have a game that has been started
@@ -211,7 +213,11 @@ var app = app || {
             app.Running.AppView.setCurrentView(view);
             app.Running.currentView.model.fetch();
             this.render(); 
-//            app.Running.currentView.loadEditor();
+        },
+        game_settings: function() {
+            var view = new app.Views.AdminGameSettingsView();
+            app.Running.AppView.setCurrentView(view);
+            this.render();             
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {

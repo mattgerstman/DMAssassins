@@ -19,21 +19,18 @@ var app = app || {
 
 (function($) {
     'use strict';
-    app.Views.AdminUserView = Backbone.View.extend({
+    app.Views.AdminGameSettingsView = Backbone.View.extend({
 
-        template: _.template($('#admin-user-template').html()),
+        template: _.template($('#admin-game-settings-template').html()),
         tagName:'div',
-        initialize: function(model){
-            this.model = model;
+        initialize: function(){
+            this.model = app.Running.Games.getActiveGame();
             this.listenTo(this.model, 'change', this.render)
             this.listenTo(this.model, 'fetch', this.render)
             this.listenTo(this.model, 'save', this.render)
         },
-        render: function(extras){
+        render: function(){
             var data = this.model.attributes;
-            for (var key in extras) {
-                data[key] = extras[key]
-            }
             this.$el.html(this.template(data))
             return this;
         }    

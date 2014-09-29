@@ -133,12 +133,18 @@ func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
 // Checks if a given plaintext password is right for a game
 // Returns an error if the password doesn't match
 func CheckPassword(gameId uuid.UUID, testPassword string) (appErr *ApplicationError) {
-	var hashedPassword []byte
-	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&hashedPassword)
+	var storedPassword string
+	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&storedPassword)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return CheckPasswordHash(hashedPassword, testPassword)
+	if strings.EqualFold(testPassword, storedPassword) {
+		return nil
+	}
+	//CheckPasswordHash(hashedPassword, testPassword)
+	msg := "Invalid Game Password: " + testPassword
+	err = errors.New(msg)
+	return NewApplicationError(msg, err, ErrCodeInvalidGamePassword)
 }
 
 // Compares a hashed password to a plaintext password
@@ -180,11 +186,13 @@ func Crypt(plainPw string) (hashedPassword []byte, appErr *ApplicationError) {
 
 // Creates a new game and saves it in the database
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game, appErr *ApplicationError) {
-	// Encrypt the game's password
-	encryptedPassword, appErr := Crypt(gamePassword)
-	if appErr != nil {
-		return nil, appErr
-	}
+	// I'll probably remove this altogether later but for now I'll leave it
+	// in case I ever want to encrypt game passwords again
+	// // Encrypt the game's password
+	// encryptedPassword, appErr := Crypt(gamePassword)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
 
 	// Start a transaction, god knows we can't break anything
 	tx, err := db.Begin()
@@ -201,7 +209,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 	// Generate a UUID and execute the statement to insert the game into the db
 	gameId := uuid.NewRandom()
-	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, encryptedPassword)
+	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, gamePassword)
 	// Check to make sure the insert happened
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
@@ -237,7 +245,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 		return nil, NoRowsAffectedAppErr
 	}
 	tx.Commit()
-	hasPassword := encryptedPassword != nil
+	hasPassword := gamePassword != ""
 
 	game = &Game{gameId, gameName, false, hasPassword, nil}
 	_, appErr = game.GetGameProperties()
