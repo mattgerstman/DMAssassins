@@ -36,16 +36,20 @@ var app = app || {
             this.NavGameView = app.Running.NavGameView;
             this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget)
             this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
-            this.listenTo(app.Running.User, 'fetch', this.handleAdmin)
-            this.listenTo(app.Running.User, 'change', this.handleAdmin)
-            this.listenTo(app.Running.Games, 'game-change', this.handleAdmin)
+            this.listenTo(app.Running.User, 'fetch', this.render)
+            this.listenTo(app.Running.User, 'change', this.render)
+            this.listenTo(app.Running.Games, 'game-change', this.render)
         },
 
         // if we don't have a target hide that view
         render: function() {
-            this.$el.html(this.template());
+            var role = app.Running.User.getProperty('user_role');  
+            var data = {};
+            data.is_captain = AuthUtils.requiresCaptain(role);
+            data.is_admin = AuthUtils.requiresAdmin(role);
+            
+            this.$el.html(this.template(data));
             this.handleTarget();
-            this.handleAdmin();
             
             var selectedElem = this.$el.find('#nav_' + Backbone.history.fragment);
             this.highlight(selectedElem);
@@ -58,6 +62,7 @@ var app = app || {
         // select an item on the nav bar
         select: function(event) {
             var target = event.currentTarget;
+            console.log(target);
             if ($(target).hasClass('disabled') || $(target).hasClass('dropdown-toggle')) {
                 event.preventDefault();
                 return;
@@ -118,11 +123,13 @@ var app = app || {
         // hides the target nav item
         enableTarget: function() {
             this.$el.find('#nav_target').removeClass('disabled');
+            this.$el.find('#nav_target a').removeClass('disabled');
         },
 
         // shows the target nav item
         disableTarget: function() {
             this.$el.find('#nav_target').addClass('disabled');
+            this.$el.find('#nav_target a').addClass('disabled');
         }
 
     })

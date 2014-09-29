@@ -11,13 +11,17 @@ var AuthUtils = {
         }
         return rolesMap;    
     },
-    getRolesMapFor: function(role) {
+    getRolesMapFor: function(role, teams_enabled) {
         if (!role) {
             return {};
         }
         var filteredMap = {};
         var rolesMap = this.getRolesMap();
         for (var key in rolesMap)  {
+            if (teams_enabled === false) {
+                if (rolesMap[key]['value'] == 1)
+                    continue;
+            }
             if (rolesMap[key]['value'] <= rolesMap[role]['value'])
                 filteredMap[key] = rolesMap[key];
         }

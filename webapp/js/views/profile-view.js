@@ -66,7 +66,17 @@ var app = app || {
         },
         render: function() {
             var data = this.model.attributes;
-            data.teams_enabled = app.Running.Games.getActiveGame().areTeamsEnabled();
+            data.teams_enabled = false;
+            var game = app.Running.Games.getActiveGame();
+            if (game) {
+                data.teams_enabled = game.areTeamsEnabled();    
+            }
+            
+            
+            var role = app.Running.User.getProperty('user_role');  
+            var allow_quit = !AuthUtils.requiresCaptain(role);
+            data.allow_quit = allow_quit;
+
             this.$el.html(this.template(data));
             return this;
         }

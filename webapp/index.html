@@ -58,33 +58,33 @@
                         <ul class="dropdown-menu" role="menu" id="games_dropdown">
                         </ul>
                     </li>
-                    <li id="admin_parent" class="nav_item dropdown_parent hide">
-                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
-                            <div class="hidden-sm">
-                                <span id="admin_header">
-                                    Admin
-                                </span>
-                                <span class="caret"></span>                                     
-                            </div>
-                            <div class="visible-sm">
-                                <span id="admin_header_short">
-                                    Admin
-                                </span>
-                                <span class="caret"></span>
-                            </div>
-                        </a>
-                        <ul id="admin_dropdown" role="menu" class="dropdown-menu">
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Users</a></li>  
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li> 
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>    
-                            <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>      
-                        </ul>
-                    </li>   
-                    <li class="nav_item" id="nav_logout">
-                        <a href="#logout">
-                            Logout
-                        </a>
-                    </li>
+                    <% if (is_admin) { %>
+                        <li id="admin_parent" class="nav_item dropdown_parent">
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <div class="hidden-sm">
+                                    <span id="admin_header">
+                                        Admin
+                                    </span>
+                                    <span class="caret"></span>                                     
+                                </div>
+                                <div class="visible-sm">
+                                    <span id="admin_header_short">
+                                        Admin
+                                    </span>
+                                    <span class="caret"></span>
+                                </div>
+                            </a>
+                            <ul id="admin_dropdown" role="menu" class="dropdown-menu">
+                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Manage Users</a></li>  
+                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li> 
+                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>    
+                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>      
+                            </ul>
+                        </li>   
+                    <% } else if (is_captain) { %>
+                        <li class="nav_item" id="nav_users"><a href="#users">Manage Users</a></li>                          
+                    <% } %>
+                    <li class="nav_item" id="nav_logout"><a href="#logout">Logout</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->            
       </div><!-- /.container-fluid -->
@@ -172,9 +172,11 @@
                        <img src=<%= properties.photo_thumb %>>
                     </a>
                 </div>
-                <div class="row user-column">
-                    <button class="btn btn-block btn-danger" id="quit">Quit Game</button>
-                </div>
+                <% if (allow_quit) { %>
+                    <div class="row user-column">
+                        <button class="btn btn-block btn-danger" id="quit">Quit Game</button>
+                    </div>
+                <% } %>
              </div>
         </div>
         <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
@@ -400,15 +402,17 @@
         <li class="team" id="nav_team_null">
             <a href="#" class="team-name" data-team-id="NO_TEAM">No Team</a>
         </li>
-        <li class="new-team">
-            <a href="#" class="new-team-open">New Team</a>
-            <form class="new-team-form form-inline hide">
-                <input placeholder="Enter Team Name" type="text" class="new-team-name form-control" />                
-                <a href="#" class="team-input-button create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
-                <a href="#" class="team-input-button cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
-            </form>
-        </li>
+        <% if (is_admin) { %>
+            <li class="new-team">
+                <a href="#" class="new-team-open">New Team</a>
+                <form class="new-team-form form-inline hide">
+                    <input placeholder="Enter Team Name" type="text" class="new-team-name form-control" />                
+                    <a href="#" class="team-input-button create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
+                    <a href="#" class="team-input-button cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
+                </form>
+            </li>
         <%
+            }
         _.each(teams, function(team){
         %>
             <li class="team team-droppable" id="nav_team_<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
@@ -416,16 +420,20 @@
                     <a href="#" class="team-name" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
                         <%= team.team_name %>
                     </a>
+                <% if (is_admin) { %>
     				<div class="team-buttons">
     	                <a href="#" class="edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
     					<a href="#" class="delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
                     </div>
+                <% } %>
                 </div>
-                <form class="edit-team-form form-inline hide">
-                    <input type="text" class="edit-team-name form-control" value="<%= team.team_name %>"/>
-                    <a href="#" class="team-input-button save-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok"></span></a>
-                    <a href="#" class="team-input-button cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
-                </form>
+                <% if (is_admin) { %>
+                    <form class="edit-team-form form-inline hide">
+                        <input type="text" class="edit-team-name form-control" value="<%= team.team_name %>"/>
+                        <a href="#" class="team-input-button save-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok"></span></a>
+                        <a href="#" class="team-input-button cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
+                    </form>
+                <% } %>
                 
             </li>
         <%
@@ -483,36 +491,43 @@
                                     <% }) %>
                                 </select>
                             </div>                        
-                        <% } %>                            
-                        <div class="row">
-                            <label>Role:<span class="role-saved" id="role_saved_<%= user_id %>" >Saved</span></label>
-                            <select class="user-role" data-user-id ="<%=user_id %>">
-                                <% _.each(roles, function(role, role_id) { %>                                
-                                    <option value="<%=role_id%>" <%= role_id === properties.user_role ? 'selected' : ''%>><%= role.pretty_name %></option>
-                                <% }) %>
-                            </select>
-                        </div>
+                        <% } %>  
+                        <% if (is_admin) { %>
+                            <div class="row">
+                                <label>Role:<span class="role-saved" id="role_saved_<%= user_id %>" >Saved</span></label>
+                                <select class="user-role" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
+    
+                                    <% _.each(roles, function(role, role_id) { %>                      
+                                        <option value="<%=role_id%>" <%= role_id === properties.user_role ? 'selected' : ''%>><%= role.pretty_name %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                        <% } %>
                     </div>
-                    <% if (properties.alive =="true") { %> 
-	                    <div class ="user-buttons btn-group btn-group-justified kill-user-wrapper">
-	                        <div class="btn-group">
-	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
-	                        </div>
-	                        <div class="btn-group">                            
-	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
-	                        </div>
-	                    </div>
-	                <% } else { %>
-	                    <div class ="user-buttons btn-group btn-group-justified revive-user-wrapper">
-	                        <div class="btn-group">
-	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
-	                        </div>
-	                        <div class="btn-group">                            
-	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
-	                        </div>
-	                    </div>
-					<% } %>
-                 </div>
+                    <% if (is_admin) { %>
+                        <% if (properties.alive =="true") { %> 
+    	                    <div class ="user-buttons btn-group btn-group-justified kill-user-wrapper">
+    	                        <div class="btn-group">
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+    	                        </div>
+    	                        <div class="btn-group">                            
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
+    	                        </div>
+    	                    </div>
+    	                <% } else { %>
+    	                    <div class ="user-buttons btn-group btn-group-justified revive-user-wrapper">
+    	                        <div class="btn-group">
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+    	                        </div>
+    	                        <div class="btn-group">                            
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
+    	                        </div>
+    	                    </div>
+    					<% } %>
+                     </div>
+                    <% } else { %>
+                         <div class ="user-buttons"></div>
+                    <% } %>
             </div>
         </div>
     
