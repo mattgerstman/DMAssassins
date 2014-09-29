@@ -55,7 +55,9 @@ var app = app || {
             })
         },
         render: function() {
-            this.$el.html(this.template(this.model.attributes));
+            var data = this.model.attributes;
+            data.teams_enabled = app.Running.Games.getActiveGame().areTeamsEnabled();
+            this.$el.html(this.template(data));
             return this;
         }
     })

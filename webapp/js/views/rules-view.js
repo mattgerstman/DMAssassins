@@ -34,7 +34,9 @@ var app = app || {
         },
 
         render: function() {
-            this.$el.html(this.template(this.model.attributes));
+            var data = this.model.attributes;
+            data.rules = marked(data.rules);
+            this.$el.html(this.template(data));
             return this;
         }
 

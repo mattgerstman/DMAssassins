@@ -2,10 +2,17 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type TeamPost struct {
+	TeamId   string `json:"team_id"`
+	TeamName string `json:"team_name"`
+	GameId   string `json:"game_id"`
+}
 
 // POST - rename a team
 func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
@@ -27,7 +34,14 @@ func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
-	teamName := r.FormValue("team_name")
+	decoder := json.NewDecoder(r.Body)
+	var teamInfo TeamPost
+	err := decoder.Decode(&teamInfo)
+	if err != nil {
+		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
+
+	teamName := teamInfo.TeamName
 	if teamName == "" {
 		msg := "Missing Parameter: team_name"
 		err := errors.New(msg)
@@ -85,6 +99,8 @@ func GameTeamIdHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getGameTeamId(r)
+		case "PUT":
+			obj, err = postGameTeamId(r)
 		case "POST":
 			obj, err = postGameTeamId(r)
 		case "DELETE":

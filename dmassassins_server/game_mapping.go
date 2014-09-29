@@ -196,7 +196,7 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		return nil, appErr
 	}
 
-	rows, err := db.Query(`SELECT users.user_id, users.email, users.facebook_id, map.team_id, map.user_role FROM dm_users AS users, dm_user_game_mapping AS map WHERE users.user_id = map.user_id AND map.game_id = $1`, game.GameId.String())
+	rows, err := db.Query(`SELECT users.user_id, users.email, users.facebook_id, map.team_id, map.user_role, map.alive FROM dm_users AS users, dm_user_game_mapping AS map WHERE users.user_id = map.user_id AND map.game_id = $1`, game.GameId.String())
 	if err == sql.ErrNoRows {
 		return nil, NewApplicationError("No Users For Game", err, ErrCodeNoGameMappings)
 	}
@@ -210,9 +210,10 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	for rows.Next() {
 		var userIdBuffer, email, facebookId, userRole string
 		var teamIdBuffer sql.NullString
+		var alive bool
 
 		// Scan in variables
-		err := rows.Scan(&userIdBuffer, &email, &facebookId, &teamIdBuffer, &userRole)
+		err := rows.Scan(&userIdBuffer, &email, &facebookId, &teamIdBuffer, &userRole, &alive)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -223,12 +224,13 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		properties := make(map[string]string)
 
 		properties["user_role"] = userRole
+		properties["alive"] = strconv.FormatBool(alive)
 
 		if teams != nil {
 			if team, ok := teams[teamId.String()]; ok {
 				properties["team"] = team.TeamName
 			} else {
-				properties["team"] = "No Team"
+				properties["team"] = "null"
 			}
 
 		}
@@ -267,6 +269,73 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	}
 
 	return users, nil
+}
+
+func (gameMapping *GameMapping) Revive() (appErr *ApplicationError) {
+
+	// Get a random assassin/target pair
+	var assassinIdBuffer, targetIdBuffer string
+	err := db.QueryRow(`SELECT user_id, target_id FROM dm_user_targets where game_id = $1 ORDER BY RANDOM() LIMIT 1`, gameMapping.GameId.String()).Scan(&assassinIdBuffer, &targetIdBuffer)
+	if err == sql.ErrNoRows {
+		return NewApplicationError("No Users left", err, ErrCodeNoUsers)
+	}
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Prepare the statement to kill the old target
+	setAssassin, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2 AND game_id = $3`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute the statement to kill the old target
+	_, err = tx.Stmt(setAssassin).Exec(gameMapping.UserId.String(), assassinIdBuffer, gameMapping.GameId.String())
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Prepare the statement to kill the old target
+	setTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute the statement to kill the old target
+	_, err = tx.Stmt(setTarget).Exec(gameMapping.UserId.String(), targetIdBuffer, gameMapping.GameId.String())
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Prepare the statement to kill the old target
+	setAlive, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = true WHERE user_id = $1 AND game_id = $2`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute the statement to kill the old target
+	_, err = tx.Stmt(setAlive).Exec(gameMapping.UserId.String(), gameMapping.GameId.String())
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	gameMapping.Alive = true
+	tx.Commit()
+
+	return nil
+
 }
 
 // Gets an arbitrary game for a user to start off with

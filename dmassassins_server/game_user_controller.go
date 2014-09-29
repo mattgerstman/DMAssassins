@@ -71,7 +71,7 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 
 // DELETE - Lets a user quit the game
 func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
-	//appErr = RequiresUser(r)
+	appErr = RequiresUser(r)
 	if appErr != nil {
 		return appErr
 	}

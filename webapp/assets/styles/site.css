@@ -89,26 +89,67 @@ a:focus {
 .admin-users-body .thumbnail {
   margin: 5px auto 10px auto;
 }
+.admin-users-body .dead {
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
 .admin-users-body .user-buttons {
   margin-top: 5px;
   padding-bottom: 15px;
   border-bottom: 1px solid #ddd;
   margin-bottom: 40px;
 }
-.new-team-form input {
+.sidebar-nav {
+  cursor: default;
+}
+.sidebar-nav > li.team a {
+  width: 157px;
+  display: inline-block;
+}
+.sidebar-nav > li.team .team-buttons {
+  width: 65px;
+  display: inline;
+}
+.sidebar-nav > li.team .team-buttons a {
+  width: 0px;
+}
+.sidebar-nav > li.team .team-buttons span {
+  margin-top: 3px;
+  margin-left: 2px;
+  display: inline;
+  cursor: pointer;
+}
+.sidebar-nav > li.team .team-buttons a.edit-team:hover {
+  color: blue;
+}
+.sidebar-nav > li.team .team-buttons a.delete-team:hover {
+  color: red;
+}
+.sidebar-nav .new-team-form input,
+.sidebar-nav .edit-team-form input {
   margin-left: 18px;
   margin-right: 0;
 }
-.new-team-form .team-input-button {
+.sidebar-nav .new-team-form .team-input-button,
+.sidebar-nav .edit-team-form .team-input-button {
   margin-top: 3px;
   margin-left: 3px;
   display: inline;
   cursor: pointer;
 }
-.new-team-form a.create-new-team:hover {
+.sidebar-nav .new-team-form a.create-new-team:hover,
+.sidebar-nav .edit-team-form a.create-new-team:hover,
+.sidebar-nav .new-team-form a.save-edit-team:hover,
+.sidebar-nav .edit-team-form a.save-edit-team:hover {
   color: green;
 }
-.new-team-form a.cancel-new-team:hover {
+.sidebar-nav .new-team-form a.cancel-new-team:hover,
+.sidebar-nav .edit-team-form a.cancel-new-team:hover,
+.sidebar-nav .new-team-form a.cancel-edit-team:hover,
+.sidebar-nav .edit-team-form a.cancel-edit-team:hover {
   color: red;
 }
 .drop-hover {
@@ -137,6 +178,13 @@ a:focus {
 }
 .edit-rules code {
   color: #f66;
+}
+.saved {
+  margin-left: 5px;
+  display: inline;
+}
+.default_cursor {
+  cursor: default!important;
 }
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {

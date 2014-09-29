@@ -9,7 +9,7 @@ import (
 
 // POST - Creates a team for a game
 func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
-	//appErr = RequiresAdmin(r)
+	appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -46,7 +46,7 @@ func putUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	return NewGame(gameName, userId, gamePassword)
 }
 
-// GET - gets a list of games a user is in
+// GET - gets a list of games for a user
 func getUserGame(r *http.Request) (response map[string][]*Game, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
