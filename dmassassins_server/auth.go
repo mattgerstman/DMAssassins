@@ -92,7 +92,7 @@ func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 }
 
 // Compare two user roles by their int values
-func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
+func CompareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 	var roles = map[string]int{
 		"dm_super_admin": RoleSuperAdmin,
 		"dm_admin":       RoleAdmin,
@@ -103,10 +103,10 @@ func compareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
 }
 
 // Requires the same user, captain for that team, or admin for that game
-func RequiresUser(r *http.Request) (appErr *ApplicationError) {
+func RequiresUser(r *http.Request) (role string, appErr *ApplicationError) {
 	role, teamId, userId, appErr := getRoleFromRequest(r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
 
 	vars := mux.Vars(r)
@@ -114,15 +114,15 @@ func RequiresUser(r *http.Request) (appErr *ApplicationError) {
 
 	// If the userId's are equal or we're not requesting a user return no error
 	if (uuid.Equal(userId, reqUserId)) || (reqUserId == nil) {
-		return nil
+		return role, nil
 	}
 
 	// Check if the auth token is for a team captain for theuse given
 	appErr = isTeamCaptain(role, teamId, r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
-	return nil
+	return role, nil
 }
 
 // Standard permission denied application error
@@ -135,16 +135,20 @@ func GetPermissionDeniedAppErr() (appErr *ApplicationError) {
 // Check if a role/teamId match to be the team captain for the user_id/game_id in the request
 func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (appErr *ApplicationError) {
 
-	if compareRole(role, RoleAdmin) {
+	if CompareRole(role, RoleAdmin) {
 		return nil
 	}
 
-	if !compareRole(role, RoleCaptain) {
+	if !CompareRole(role, RoleCaptain) {
 		return GetPermissionDeniedAppErr()
 	}
 
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
+	if userId == nil {
+		return nil
+	}
+
 	gameId := uuid.Parse(vars["game_id"])
 
 	// Get the game mapping for the necessary user
@@ -163,44 +167,44 @@ func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (appErr *Appl
 }
 
 // Requires the user is a team captain
-func RequiresCaptain(r *http.Request) (appErr *ApplicationError) {
+func RequiresCaptain(r *http.Request) (role string, appErr *ApplicationError) {
 	role, teamId, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
 
 	appErr = isTeamCaptain(role, teamId, r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
 
-	return nil
+	return role, nil
 }
 
 // Requires the user is a game admin
-func RequiresAdmin(r *http.Request) (appErr *ApplicationError) {
-	role, _, _, appErr := getRoleFromRequest(r)
+func RequiresAdmin(r *http.Request) (role string, appErr *ApplicationError) {
+	role, _, _, appErr = getRoleFromRequest(r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
-	if !compareRole(role, RoleAdmin) {
-		return GetPermissionDeniedAppErr()
+	if !CompareRole(role, RoleAdmin) {
+		return role, GetPermissionDeniedAppErr()
 	}
 
-	return nil
+	return role, nil
 
 }
 
 // Requires the user is Matt Gerstman
-func RequiresSuperAdmin(r *http.Request) (appErr *ApplicationError) {
-	role, _, _, appErr := getRoleFromRequest(r)
+func RequiresSuperAdmin(r *http.Request) (role string, appErr *ApplicationError) {
+	role, _, _, appErr = getRoleFromRequest(r)
 	if appErr != nil {
-		return appErr
+		return role, appErr
 	}
-	if !compareRole(role, RoleSuperAdmin) {
-		return GetPermissionDeniedAppErr()
+	if !CompareRole(role, RoleSuperAdmin) {
+		return role, GetPermissionDeniedAppErr()
 	}
-	return nil
+	return role, nil
 }
 
 // Validates a db token/facebook id against the given token

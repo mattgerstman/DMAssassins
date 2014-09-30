@@ -9,7 +9,7 @@ import (
 
 // DELETE - Bans a user from a game
 func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
 	}

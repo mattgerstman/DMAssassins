@@ -59,7 +59,7 @@ var app = app || {
         },
         removeActiveGame: function(){
             this.remove(this.active_game);
-            return this.setArbitraryActiveGame();                
+            return this.setArbitraryActiveGame();
         },
         setActiveGame: function(game_id, silent) {
             var game = this.get(game_id);

@@ -316,9 +316,7 @@ var app = app || {
             this.$el.find('#nav_team_'+this.team_id).addClass('active');
 
         },
-        render: function() {
-			$('.modal-backdrop').remove();
-			
+        render: function() {			
 			var data = {};
 			var game = app.Running.Games.getActiveGame();
 			var teams_enabled = false

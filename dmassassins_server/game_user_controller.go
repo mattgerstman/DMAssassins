@@ -42,7 +42,7 @@ func putGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Application
 
 // GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
 func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
-	appErr = RequiresUser(r)
+	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -71,7 +71,7 @@ func getGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 
 // DELETE - Lets a user quit the game
 func deleteGameUser(r *http.Request) (appErr *ApplicationError) {
-	appErr = RequiresUser(r)
+	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return appErr
 	}

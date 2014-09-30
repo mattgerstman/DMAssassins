@@ -40,6 +40,9 @@ $(function() {
     app.Running.LeaderboardModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
     app.Running.RulesModel.listenTo(app.Running.Games, 'game-change', app.Running.RulesModel.fetch);
 
+    app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.checkAccess);
+    app.Running.User.listenTo(app.Running.User, 'change', app.Running.User.checkAccess);
+
     app.Running.Router = new app.Routers.Router();
     Backbone.history.start();
 

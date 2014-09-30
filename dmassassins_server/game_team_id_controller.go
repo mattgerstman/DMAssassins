@@ -16,7 +16,7 @@ type TeamPost struct {
 
 // POST - rename a team
 func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -57,7 +57,7 @@ func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 
 // GET - get a team by its id
 func getGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
-	appErr = RequiresCaptain(r)
+	_, appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -74,7 +74,7 @@ func getGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 
 // DELETE - deletes a team
 func deleteGameTeamId(r *http.Request) (appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
 	}
