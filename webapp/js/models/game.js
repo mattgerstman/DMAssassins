@@ -43,8 +43,12 @@ var app = app || {
             return properties[key]  
         },
         fetchProperties: function() {
-            var url = config.WEB_ROOT + 'game/' + this.get('game_id') + '/';
+            var url = this.gameUrl();
             return this.fetch({url: url});
+        },
+        gameUrl: function() {
+            var url = config.WEB_ROOT + 'game/' + this.get('game_id') + '/';
+            return url;
         },
         url: function() {
             var url = this.urlRoot;

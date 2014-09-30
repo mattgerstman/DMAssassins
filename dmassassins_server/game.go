@@ -16,6 +16,43 @@ type Game struct {
 	Properties  map[string]string `json:"game_properties"`
 }
 
+// Rename a game
+func (game *Game) Rename(newName string) (appErr *ApplicationError) {
+	res, err := db.Exec(`UPDATE dm_games SET game_name = $1 WHERE game_id = $2`, newName, game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Make sure at least one game was affected
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
+	}
+
+	game.GameName = newName
+	return nil
+
+}
+
+// Rename a game
+func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) {
+	res, err := db.Exec(`UPDATE dm_games SET game_password = $1 WHERE game_id = $2`, newPassword, game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Make sure at least one game was affected
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
+	}
+
+	game.HasPassword = newPassword == ""
+	game.Properties["game_password"] = newPassword
+	return nil
+
+}
+
 // Get all games
 func GetGameList() (games []*Game, appErr *ApplicationError) {
 	// Query db for all games
@@ -47,8 +84,10 @@ func GetGameById(gameId uuid.UUID) (game *Game, appErr *ApplicationError) {
 		hasPassword = true
 	}
 
+	properties := make(map[string]string)
+
 	// Return the game
-	game = &Game{gameId, gameName, gameStarted, hasPassword, nil}
+	game = &Game{gameId, gameName, gameStarted, hasPassword, properties}
 	_, appErr = game.GetGameProperties()
 	if appErr != nil {
 		return nil, appErr
@@ -75,8 +114,24 @@ func (game *Game) End() (appErr *ApplicationError) {
 	return nil
 }
 
+func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
+
+	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1", game.GameId.String()).Scan(&count)
+	if err != nil {
+		return 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return count, nil
+}
+
 // Start a game
 func (game *Game) Start() (appErr *ApplicationError) {
+
+	count, appErr := game.GetNumPlayers()
+	if count < 4 {
+		err := errors.New("Not Enough Players")
+		return NewApplicationError("You must have at least 4 players to start a game", err, ErrCodeNeedMorePlayers)
+	}
+
 	// First assign targets for the game
 	_, appErr = game.AssignTargets()
 	if appErr != nil {
@@ -124,21 +179,32 @@ func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
 
 		// Create the game struct and apparend it to the list
 		gameId = uuid.Parse(gameIdBuffer)
-		game := &Game{gameId, gameName, gameStarted, hasPassword, nil}
+		properties := make(map[string]string)
+		game := &Game{gameId, gameName, gameStarted, hasPassword, properties}
 		games = append(games, game)
 	}
 	return games, nil
 }
 
+// Gets a game's password or returns an empty string if there is none
+func (game *Game) GetPassword() (gamePassword string, appErr *ApplicationError) {
+	var storedPassword sql.NullString
+	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, game.GameId.String()).Scan(&storedPassword)
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return storedPassword.String, nil
+}
+
 // Checks if a given plaintext password is right for a game
 // Returns an error if the password doesn't match
 func CheckPassword(gameId uuid.UUID, testPassword string) (appErr *ApplicationError) {
-	var storedPassword string
+	var storedPassword sql.NullString
 	err := db.QueryRow(`SELECT game_password FROM dm_games WHERE game_id = $1`, gameId.String()).Scan(&storedPassword)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	if strings.EqualFold(testPassword, storedPassword) {
+	if strings.EqualFold(testPassword, storedPassword.String) {
 		return nil
 	}
 	//CheckPasswordHash(hashedPassword, testPassword)
@@ -247,7 +313,9 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	tx.Commit()
 	hasPassword := gamePassword != ""
 
-	game = &Game{gameId, gameName, false, hasPassword, nil}
+	properties := make(map[string]string)
+
+	game = &Game{gameId, gameName, false, hasPassword, properties}
 	_, appErr = game.GetGameProperties()
 	if appErr != nil {
 		return nil, appErr

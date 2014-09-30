@@ -9,7 +9,7 @@ import (
 
 // GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
 func getGameUsers(r *http.Request) (users map[string]*User, appErr *ApplicationError) {
-	//appErr = RequiresAdmin(r)
+	_, appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}
