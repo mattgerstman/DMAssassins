@@ -9,7 +9,7 @@ import (
 
 // PUT - Add a user to a team
 func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -39,7 +39,7 @@ func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 
 // GET - gets a team for a user by game_id
 func getGameUserTeam(r *http.Request) (*Team, *ApplicationError) {
-	appErr := RequiresCaptain(r)
+	_, appErr := RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -70,7 +70,7 @@ func getGameUserTeam(r *http.Request) (*Team, *ApplicationError) {
 
 // DELETE - removes a user from a team
 func deleteGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

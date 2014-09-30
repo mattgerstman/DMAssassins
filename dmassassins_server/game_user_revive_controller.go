@@ -9,7 +9,7 @@ import (
 
 // POST - Revives a user and places them in between an assassin target apir
 func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
 	}

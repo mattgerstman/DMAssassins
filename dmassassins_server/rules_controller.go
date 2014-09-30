@@ -14,7 +14,7 @@ type RulesPost struct {
 
 // POST - Update rules for a game
 func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return "", appErr
 	}
