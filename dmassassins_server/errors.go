@@ -17,6 +17,7 @@ const (
 	ErrCodeMissingHeader    = 40004
 	ErrCodeInvalidUUID      = 40005
 	ErrCodeInvalidJSON      = 40006
+	ErrCodeNeedMorePlayers  = 40007
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100

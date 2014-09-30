@@ -114,8 +114,24 @@ func (game *Game) End() (appErr *ApplicationError) {
 	return nil
 }
 
+func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
+
+	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1", game.GameId.String()).Scan(&count)
+	if err != nil {
+		return 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return count, nil
+}
+
 // Start a game
 func (game *Game) Start() (appErr *ApplicationError) {
+
+	count, appErr := game.GetNumPlayers()
+	if count < 4 {
+		err := errors.New("Not Enough Players")
+		return NewApplicationError("You must have at least 4 players to start a game", err, ErrCodeNeedMorePlayers)
+	}
+
 	// First assign targets for the game
 	_, appErr = game.AssignTargets()
 	if appErr != nil {

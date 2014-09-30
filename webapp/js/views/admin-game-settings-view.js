@@ -74,6 +74,8 @@ var app = app || {
             var url = this.model.gameUrl();
             $.post(url, function(){
                 that.model.set('game_started', true);
+            }).error(function(response){
+                alert(response.responseText);
             });
         },
         endGameModal: function(event) {
