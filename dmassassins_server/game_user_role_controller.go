@@ -9,7 +9,7 @@ import (
 
 // POST - Wrapper for GameMapping:ChangeRole
 func postGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -42,7 +42,7 @@ func postGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *Applic
 	}
 
 	if role == "dm_super_admin" {
-		appErr = RequiresSuperAdmin(r)
+		_, appErr = RequiresSuperAdmin(r)
 		if appErr != nil {
 			return nil, appErr
 		}

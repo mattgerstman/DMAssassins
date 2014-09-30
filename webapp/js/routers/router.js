@@ -24,7 +24,7 @@ var app = app || {
         history: [],
         // All the routes
         routes: {
-            '': 'target',
+            '': 'my_profile',
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
@@ -41,13 +41,19 @@ var app = app || {
 
         },
         // routes that require we have a game that has been started
-        requiresTarget: ['#target', '#', ''],
+        requiresTarget: ['#target'],
 
         // routes that require just authentication
         requiresJustAuth: ['#multigame', ''],
 
         // routes that require we have a game and we're authenticated
         requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules'],
+
+        // routes that require the user is at least a team captain
+        requiresCaptain: ['#users'],
+        
+        // routes that require is at least a game admin
+        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists'],        
 
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
@@ -88,16 +94,38 @@ var app = app || {
             // is the game started
             var hasTarget = !!app.Running.TargetModel.get('user_id') && app.Running.Games.getActiveGame().get('game_started');
 
+            // do we need to be a captain
+            var needCaptain = _.contains(this.requiresCaptain, path);
+
+            // do we need to be an admin
+            var needAdmin = _.contains(this.requiresAdmin, path);
+            
+            // The active user's role in the current game
+            var userRole = app.Running.User.getProperty('user_role');
+            
+            // is the user a captain
+            var isCaptain = AuthUtils.requiresCaptain(userRole);
+
+            // is the user an admin
+            var isAdmin = AuthUtils.requiresAdmin(userRole);
+
+
+
             /*
-			Variables I use when shit's not routing properly /**/
+			Variables I use when shit's not routing properly */
             /*/
 			console.log('path:', path);
 			console.log('needGameAndAuth: ', needGameAndAuth);
-			console.log('isGame: ', isGame);
-			console.log('isStarted: ', isStarted);
+			console.log('hasGame: ', hasGame);
+			console.log('hasTarget: ', hasTarget);
 			console.log('needAuth: ', needAuth);
 			console.log('isAuth: ', isAuth);
 			console.log('cancelAccess: ', cancelAccess);
+            console.log('needCaptain: ', needCaptain);
+            console.log('isCaptain: ', isCaptain);
+            console.log('needAdmin: ', needAdmin);
+            console.log('isAdmin: ', isAdmin);
+
 /**/
 
             // Do we need authentication
@@ -124,7 +152,19 @@ var app = app || {
                 Backbone.history.navigate('', {
                     trigger: true
                 });
-                // nothing is wrong! let them pass.	
+            }
+            // do they need to be a captain and are they?
+            else if (needCaptain && !isCaptain) {
+                Backbone.history.navigate('', {
+                    trigger: true
+                });
+            }
+            // do they need to be an admin and are they?
+            else if (needAdmin && !isAdmin) {
+                Backbone.history.navigate('', {
+                    trigger: true
+                });
+            // nothing is wrong! let them pass.	
             } else {
                 //No problem handle the route
                 return next();
@@ -136,8 +176,13 @@ var app = app || {
         },
         // go to the previous
         back: function() {
-            this.history.pop();
-            history.back();
+            console.log('back');
+            console.log(this.history.pop());
+            var path = this.history.pop();
+            console.log(path);
+            Backbone.history.navigate(path, {
+                    trigger: true
+                });
         },
         // login route
         login: function() {

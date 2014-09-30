@@ -9,7 +9,7 @@ import (
 
 // POST - Kills a user for their assassin
 func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return appErr
 	}

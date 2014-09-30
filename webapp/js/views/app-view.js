@@ -26,6 +26,8 @@ var app = app || {
         },
         // renders a page within the body of the app
         renderPage: function(page) {
+            // Removes modal backdrop if we rapidly change pages
+            $('.modal-backdrop').remove();
             this.$body.html(page.render().el);
         },
         setCurrentView: function(view) {

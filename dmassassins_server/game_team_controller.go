@@ -9,7 +9,7 @@ import (
 
 // POST - Creates a team for a game
 func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
-	appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -32,7 +32,7 @@ func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
 
 // GET - Gets the list of temas for a game
 func getGameTeam(r *http.Request) (teams []*Team, appErr *ApplicationError) {
-	//appErr = RequiresAdmin(r)
+	_, appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}

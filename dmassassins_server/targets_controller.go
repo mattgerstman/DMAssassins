@@ -11,7 +11,7 @@ import (
 // GET function for /user/{user_id}/target returns a user's information
 // Need to add permissions to this on a per user basis
 func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
-	//appErr = RequiresUser(r)
+	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -45,7 +45,7 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 
 // DELETE - Kill a target, delete User may eventually be used by an admin
 func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError) {
-	appErr = RequiresUser(r)
+	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}

@@ -118,7 +118,7 @@ func StartServer() {
 	r := mux.NewRouter().StrictSlash(true)
 
 	// Just Game
-	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "GET", "DELETE")
+	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "PUT", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 
