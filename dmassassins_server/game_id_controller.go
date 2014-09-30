@@ -49,7 +49,7 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 
 	// Change password
 	game.ChangePassword(gameSettingsPut.GamePassword)
-	
+
 	//Set teams enabled
 	game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
 
