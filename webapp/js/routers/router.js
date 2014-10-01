@@ -176,10 +176,7 @@ var app = app || {
         },
         // go to the previous
         back: function() {
-            console.log('back');
-            console.log(this.history.pop());
             var path = this.history.pop();
-            console.log(path);
             Backbone.history.navigate(path, {
                     trigger: true
                 });
@@ -204,7 +201,6 @@ var app = app || {
         },
         // target route
         target: function() {
-            //console.log('target');
             var view = new app.Views.TargetView();
             app.Running.AppView.setCurrentView(view);
             this.render();
@@ -225,14 +221,12 @@ var app = app || {
         },
         // profile route
         my_profile: function() {
-            //console.log('profile');			
             var view = new app.Views.ProfileView();
             app.Running.AppView.setCurrentView(view);
             this.render();
         },
         // leaderboard route
         leaderboard: function() {
-            //console.log('leaderboard');			
             var view = new app.Views.LeaderboardView();
             app.Running.AppView.setCurrentView(view);
             app.Running.currentView.model.fetch();
@@ -240,7 +234,6 @@ var app = app || {
         },
         // rules route
         rules: function() {
-            //console.log('rules');			
             var view = new app.Views.RulesView();
             app.Running.AppView.setCurrentView(view);
             this.render();
@@ -296,7 +289,6 @@ var app = app || {
             }
             // if we have a nav and highlight the nav item
             if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
-                //console.log(fragment);
                 if (fragment === '')
                     fragment = 'target';
 

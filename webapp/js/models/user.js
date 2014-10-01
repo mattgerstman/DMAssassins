@@ -124,7 +124,6 @@ var app = app || {
             })
         },
         checkAccess: function(){
-            console.log('checkaccess');
             app.Running.Router.before({}, function(){});
         }
     })
