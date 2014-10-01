@@ -69,7 +69,8 @@ var app = app || {
             $('.logo').removeClass('hide');
         },
         // show the create game s ubview
-        createGame: function() {
+        createGame: function(event) {
+            event.preventDefault();
             var name = $('#create_game_name').val();
             var password = null;
             if ($('#create_game_need_password').is(':checked')) {
