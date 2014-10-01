@@ -5,3 +5,5 @@ webapp/bower_components
 dump.sql
 
 fixer.sh
+
+webapp/bower.json

@@ -33,9 +33,11 @@ var app = app || {
         },
         // renderer
         render: function() {
-            this.$el.html(this.template(this.model.attributes));
+            var data = this.model.attributes;
+            this.$el.html(this.template(data));
             var numCols = 2;
-            if (this.model.get('teams_enabled') == 'true')
+            var teams_enabled = data.teams_enabled;
+            if (teams_enabled)
                 numCols = 3;
                 
             var options = {
@@ -50,7 +52,7 @@ var app = app || {
 
             this.$el.find('#user_leaderboard_table').dataTable(options);
 
-            if (this.model.get('teams_enabled')) {
+            if (teams_enabled) {
                 options.order = [
                     [4, 'desc']
                 ]
