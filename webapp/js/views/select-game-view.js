@@ -31,7 +31,8 @@ var app = app || {
             'click .join-game-submit': 'joinGame',
             'click .create-or-join-back': 'goBack',
             'click #create_game_need_password': 'togglePassword',
-            'change #games': 'checkPassword'
+            'change #games': 'checkPassword',
+            'blur #games': 'checkPassword'
 
         },
         // previous page, may depricate
@@ -60,7 +61,7 @@ var app = app || {
         // cancels the game creation/selection
         goBack: function() {
             if (!!app.Running.Games.getActiveGameId()) {
-                history.back();
+                app.Running.Router.back()
                 return;
             }
             $('.select-game-active').addClass('hide').removeClass('select-game-active');
@@ -68,7 +69,8 @@ var app = app || {
             $('.logo').removeClass('hide');
         },
         // show the create game s ubview
-        createGame: function() {
+        createGame: function(event) {
+            event.preventDefault();
             var name = $('#create_game_name').val();
             var password = null;
             if ($('#create_game_need_password').is(':checked')) {
@@ -98,7 +100,8 @@ var app = app || {
 
         },
         // posts to the join game model
-        joinGame: function() {
+        joinGame: function(event) {
+            event.preventDefault();
             var game_id = $('#games option:selected').val();
             var password = $('#join_game_password').val();
             app.Running.Games.joinGame(game_id, password);
@@ -119,9 +122,9 @@ var app = app || {
             $('#create_game_password').attr('disabled', !e.target.checked);
         },
         // toggles the password entry field on join game
-        checkPassword: function(e) {
-            var need_password = $('#games option:selected').attr('game_has_password') == 'true';
-            $('#join_game_password').attr('disabled', !need_password);
+        checkPassword: function() {
+            var need_password = this.$el.find('#games option:selected').attr('game_has_password') == 'true';
+            this.$el.find('#join_game_password').attr('disabled', !need_password);
 
         },
         render: function() {
@@ -130,6 +133,7 @@ var app = app || {
                     member: false
                 })
             }));
+            this.checkPassword();
             return this;
         }
 
