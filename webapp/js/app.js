@@ -22,7 +22,7 @@ $(function() {
 
     Raven.config(config.SENTRY_DSN, {
     }).install();
-Raven.captureMessage('hello world!')
+
     app.Running.AppView = new app.Views.AppView();
     app.Running.AppView.render();
 
