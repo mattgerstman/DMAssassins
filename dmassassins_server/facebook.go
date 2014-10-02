@@ -69,6 +69,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	properties["first_name"] = firstName
 	properties["last_name"] = lastName
+	properties["allow_email"] = "true"
 
 	// Create user
 	user, appErr = NewUser(username, email, facebookId, properties)

@@ -1,7 +1,14 @@
 {
+	"APIDomain": "",
 	"FBAppId": "",
 	"FBAppSecret" :"",
 	"FBAccessToken" : "",
 	"DatabaseURL": "postgres://localhost?dbname=dmassassins&sslmode=disable",
-	"SentryDSN" : ""
+	"SentryDSN" : "",
+	"SupportEmail": "",
+	"MailGunPublicKey": "",
+	"MailGunPrivateKey": "",
+	"MailGunDomain": "",
+	"MailGunSender": "",
+	"MailGunReplyTo": ""
 }

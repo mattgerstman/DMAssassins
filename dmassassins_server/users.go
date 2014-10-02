@@ -189,6 +189,24 @@ func (user *User) GetToken() (fbToken string, appErr *ApplicationError) {
 
 }
 
+// Change a user's email
+func (user *User) ChangeEmail(email string) (appErr *ApplicationError) {
+	if email == user.Email {
+		return nil
+	}
+	res, err := db.Exec(`UPDATE dm_users SET email = $1 WHERE user_id = $2`, email, user.UserId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	// Make sure update worked
+	NoRowsAffectedAppErr := WereRowsAffected(res)
+	if NoRowsAffectedAppErr != nil {
+		return NoRowsAffectedAppErr
+	}
+	user.Email = email
+	return nil
+}
+
 //Kills an Assassin's target, user must be logged in
 func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount bool) (target_id uuid.UUID, appErr *ApplicationError) {
 
