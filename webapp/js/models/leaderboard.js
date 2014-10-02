@@ -24,17 +24,16 @@ var app = app || {
             user_col_width: 20,
             team_col_width: 20,
             users: [{
-                name: "Matt",
-                kills: 75,
-                team_name: "Tech"
+                name: "Loading...",
+                kills: "Loading...",
+                team_name: "Loading..."
             }, {
-                name: "Jimmy",
-                kills: 5,
-                team_name: "Morale"
+                name: "Loading...",
+                kills: "Loading...",
+                team_name: "Loading..."
             }],
             teams: [{
-                Tech: 4,
-                Morale: 1
+                "Loading...": "Loading..."
             }]
         },
         parse: function(data) {

@@ -20,6 +20,7 @@ const (
 	gameUserKillPath    = "/game/{game_id}/user/{user_id}/kill/"
 	gameUserRevivePath  = "/game/{game_id}/user/{user_id}/revive/"
 	gameUserPath        = "/game/{game_id}/user/{user_id}/"
+	gameUserEmailPath   = "/game/{game_id}/user/{user_id}/email/"
 	gameUserRolePath    = "/game/{game_id}/user/{user_id}/role/"
 	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTeamPath    = "/game/{game_id}/user/{user_id}/team/{team_id}/"
@@ -27,9 +28,10 @@ const (
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
 	gameRulesPath       = "/game/{game_id}/rules/"
 
-	userGamePath = "/user/{user_id}/game/"
-	sessionPath  = "/session/"
-	homePath     = "/"
+	userGamePath             = "/user/{user_id}/game/"
+	unsubscribePath = "/unsubscribe/{user_id}"
+	sessionPath              = "/session/"
+	homePath                 = "/"
 
 	HttpReponseCodeOk        = 200
 	HttpResponseCodeCreated  = 201
@@ -40,6 +42,29 @@ const (
 func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
 	httpCode := code / 100
 	http.Error(w, msg, httpCode)
+}
+
+// If we just want to return a string do it through this function
+func WriteStringToPayload(w http.ResponseWriter, r *http.Request, msg string, appErr *ApplicationError) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Content-Type", "application/json")
+	if appErr != nil {
+		HttpErrorLogger(w, appErr.Msg, appErr.Code)
+		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
+		return
+	}
+	httpCode := HttpReponseCodeOk
+	w.WriteHeader(httpCode)
+	byteMsg := []byte(msg)
+	_, err := w.Write(byteMsg)
+	if err != nil {
+		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
+		LogWithSentry(appErr, nil, raven.ERROR, raven.NewHttp(r))
+		HttpErrorLogger(w, appErr.Msg, appErr.Code)
+		return
+	}
+
 }
 
 // All HTTP requests should end up here, this function prints either an object or an error depending on the situation
@@ -129,9 +154,14 @@ func StartServer() {
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
 	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
 
+	// User actions
 	r.HandleFunc(gameUserBanPath, GameUserBanHandler()).Methods("DELETE")
 	r.HandleFunc(gameUserKillPath, GameUserKillHandler()).Methods("POST")
 	r.HandleFunc(gameUserRevivePath, GameUserReviveHandler()).Methods("POST")
+
+	// User Email Actions
+	r.HandleFunc(gameUserEmailPath, GameUserEmailHandler()).Methods("POST")
+	r.HandleFunc(unsubscribePath, UnsubscribeHandler()).Methods("GET")
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")

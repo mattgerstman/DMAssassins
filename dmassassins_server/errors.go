@@ -54,6 +54,7 @@ const (
 	ErrCodeDatabase               = 50001
 	ErrCodeDatabaseNoRowsAffected = 50002
 	ErrCodeFile                   = 50003
+	ErrCodeEmail                  = 50004
 	ErrCodeSession                = 50010 // Malformed Session
 )
 
