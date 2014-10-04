@@ -1,0 +1,9 @@
+Hey %recipient.first_name%,
+
+The moment is here, {{.GameName}} DMAssassins has begun. Login at http://dmassassins.com to check out your very first target. Be aware however, while you are hunting, someone else is hunting you. When you kill your target, and we're sure you will, go to the target page and enter that user's secret. If by some unfortunate circumstance you're killed you'll have to give up your secret.
+
+Good Luck!
+The DMAssassins Team
+
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

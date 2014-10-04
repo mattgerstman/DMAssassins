@@ -28,10 +28,10 @@ const (
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
 	gameRulesPath       = "/game/{game_id}/rules/"
 
-	userGamePath             = "/user/{user_id}/game/"
+	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
-	sessionPath              = "/session/"
-	homePath                 = "/"
+	sessionPath     = "/session/"
+	homePath        = "/"
 
 	HttpReponseCodeOk        = 200
 	HttpResponseCodeCreated  = 201

@@ -1,0 +1,10 @@
+Hey %recipient.first_name%,
+
+Welcome to Death Match Assassins where the motto is kill all your friends and have fun doing it. Get ready for a game of stalking, paranoia, and deception. Your admin will start the game soon, until then we recommend you login and read the rules carefully to make sure you don't run afoul of them.
+
+We'll be sure to let you know as soon as you can start hunting your first target!
+
+Sincerely,
+The DMAssassins Team
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
