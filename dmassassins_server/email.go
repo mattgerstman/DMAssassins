@@ -2,16 +2,9 @@ package main
 
 import (
 	"bytes"
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/mailgun/mailgun-go"
 	"text/template"
-	"fmt"
 )
-
-type EmailData struct {
-	GameName  string
-	APIDomain string
-}
 
 func parseEmailableUsers(users map[string]*User, onlyAlive bool) (userList []*User) {
 	for _, user := range users {
@@ -42,37 +35,134 @@ func (game *Game) getEmailableUsersForGame(onlyAlive bool) (userList []*User, ap
 	return userList, nil
 }
 
-func (game *Game) sendStartGameEmail() (id string, appErr *ApplicationError) {
-	// users, appErr := game.getEmailableUsersForGame(false)
-	// if appErr != nil {
-	// 	return appErr
-	// }
+func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *ApplicationError) {
 
-	// Temporary code to only email me. I don't want to waste emails with MailGun on testing
-	user, appErr := GetUserById(uuid.Parse("5759a74a-2f1b-11e4-9241-685b35b45205"))
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/banhammer.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/banhammer.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `Welcome to DMAssassins!`
+	tag := `WelcomeUser`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+func (user *User) SendAdminWelcomeEmail() (id string, appErr *ApplicationError) {
+
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/welcome-admin.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/welcome-admin.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `Welcome to DMAssassins!`
+	tag := `WelcomeUser`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+func (user *User) SendUserWelcomeEmail() (id string, appErr *ApplicationError) {
+
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/welcome-user.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/welcome-user.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `Welcome to DMAssassins!`
+	tag := `WelcomeUser`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+func (game *Game) sendStartGameEmail() (id string, appErr *ApplicationError) {
+	users, appErr := game.getEmailableUsersForGame(false)
 	if appErr != nil {
 		return "", appErr
 	}
-	users := []*User{user}
 
 	var bodyBuffer bytes.Buffer
-	emailData := &EmailData{game.GameName, Config.APIDomain}
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
 	t, err := template.ParseFiles("templates/game-started.txt")
 	if err != nil {
-		// TODO be less lazy
-		fmt.Println(err)
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
 	}
 	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/game-started.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
 
 	subject := game.GameName + ` DMAssassins Has Begun!`
 	tag := `StartGame`
 	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
 
-	return sendEmail(subject, body, tag, users)
+	return sendEmail(subject, body, htmlBody, tag, users)
 
 }
 
-func sendEmail(subject, body, tag string, users []*User) (id string, appErr *ApplicationError) {
+func sendEmail(subject, body, htmlBody, tag string, users []*User) (id string, appErr *ApplicationError) {
 
 	mg := mailgun.NewMailgun(Config.MailGunDomain, Config.MailGunPrivateKey, Config.MailGunPublicKey)
 
@@ -83,6 +173,7 @@ func sendEmail(subject, body, tag string, users []*User) (id string, appErr *App
 	)
 	m.AddTag(tag)
 	m.SetTracking(true)
+	m.SetHtml(htmlBody)
 
 	for _, user := range users {
 		err := m.AddRecipientAndVariables(user.Email, map[string]interface{}{

@@ -1,6 +1,6 @@
 Hey %recipient.first_name%,
 
-Welcome to Death Match Assassins where the motto is kill all your friends and have fun doing it. Get ready for a game of stalking, paranoia, and deception. Your admin will start the game soon, until then we recommend you login and read the rules carefully to make sure you don't run afoul of them.
+Welcome to Death Match Assassins where the motto is kill all your friends and have fun doing it. Get ready for a game of stalking, paranoia, and deception. Your admin will start the game soon. Until then, we recommend you log in and read the rules carefully to make sure you don't run afoul of them.
 
 We'll be sure to let you know as soon as you can start hunting your first target!
 

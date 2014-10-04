@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/getsentry/raven-go"
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"github.com/gorilla/mux"
@@ -34,8 +35,29 @@ func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
 	}
 
 	secret := gameMapping.Secret
+	appErr = gameMapping.LeaveGame(secret)
+	if appErr != nil {
+		return appErr
+	}
 
-	return gameMapping.LeaveGame(secret)
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING)
+		return nil
+
+	}
+	game, appErr := GetGameById(userId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+	_, appErr = user.SendBanhammerEmail(game.GameName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+
+	return nil
 }
 
 // Handler for /game path

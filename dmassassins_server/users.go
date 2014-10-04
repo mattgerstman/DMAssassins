@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"strconv"
 	"strings"
 )
@@ -39,6 +40,11 @@ func NewUser(username, email, facebookId string, properties map[string]string) (
 	// Set properties
 	for key, value := range properties {
 		user.SetUserProperty(key, value)
+	}
+
+	_, appErr = user.SendUserWelcomeEmail()
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 	}
 
 	// Return user
