@@ -50,6 +50,37 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },      
     },
+    env : {
+      options : {
+          /* Shared Options Hash */
+          //globalOption : 'foo'
+      },
+      dev: {
+          NODE_ENV : 'DEVELOPMENT'
+      },
+      prod : {
+          NODE_ENV : 'PRODUCTION'
+      }
+
+    },
+    preprocess: {
+      dev : {
+          src : 'index.html.template',
+          dest : 'index.html'
+      },
+      prod : {
+          src : 'index.html.template',
+          dest : 'index.html',
+          options : {
+              context : {
+                  name : '<%= pkg.name %>',
+                  version : '<%= pkg.version %>',
+                  now : '<%= now %>',
+                  ver : '<%= ver %>'
+              }
+          }
+      }
+    },
     watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
@@ -66,9 +97,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-preprocess');
+  grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // Default task.
-  grunt.registerTask('default', ['concat', 'uglify', 'jshint']);
+  grunt.registerTask('dev', ['concat', 'uglify', 'jshint', 'env:dev', 'preprocess:dev']);
+  grunt.registerTask('prod', ['concat', 'uglify', 'jshint', 'env:prod', 'preprocess:prod']);
 
 };
