@@ -12,6 +12,7 @@
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.2.1/bootstrap-social.min.css" rel="stylesheet" type="text/css">
+    <link href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="//cdn.datatables.net/plug-ins/a5734b29083/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet" type="text/css">
     <link href="dist/<!-- @echo VERSION -->/DMAssassins.min.css" rel="stylesheet" type="text/css">
     <!-- @endif -->
@@ -19,6 +20,7 @@
     <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/fontawesome/css/font-awesome.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/bootstrap-social-buttons/social-buttons.css" rel="stylesheet" type="text/css">
+    <link href="/bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/site.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/sidebar.css" rel="stylesheet" type="text/css">
