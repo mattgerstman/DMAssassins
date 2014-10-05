@@ -5,7 +5,6 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
-	"github.com/getsentry/raven-go"
 	"strings"
 )
 
@@ -312,15 +311,6 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	_, appErr = game.GetGameProperties()
 	if appErr != nil {
 		return nil, appErr
-	}
-
-	user, appErr := GetUserById(userId)
-	if appErr != nil {
-		return game, nil
-	}
-	_, appErr = user.SendAdminWelcomeEmail()
-	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 	}
 
 	return game, nil

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/getsentry/raven-go"
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )

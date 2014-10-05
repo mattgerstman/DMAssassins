@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"net/http"
@@ -71,7 +72,27 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 		return nil, err
 	}
 	gameId := uuid.Parse(vars["game_id"])
-	return user.KillTarget(gameId, secret, true)
+	targetId, oldTargetId, appErr := user.KillTarget(gameId, secret, true)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	oldTarget, appErr := GetUserById(oldTargetId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return targetId, nil
+	}
+	game, appErr := GetGameById(gameId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return targetId, nil
+	}
+	_, appErr = oldTarget.SendDeadEmail(game.GameName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+	}
+
+	return targetId, nil
 }
 
 // Handler for /user/{user_id}/target

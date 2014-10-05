@@ -1,6 +1,6 @@
 Hey %recipient.first_name%,
 
-Unfortunately you're dead. Better luck next time. We hope you enjoyed playing!
+Unfortunately you have died in {{.GameName}} DMAssassins. Better luck next time. We hope you enjoyed playing!
 
 Sincerely,
 The DMAssassins Team
