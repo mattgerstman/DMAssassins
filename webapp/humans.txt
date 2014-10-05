@@ -17,7 +17,7 @@
 Lead Developer: Matt Gerstman                            
 Code Snob:      Taylor Trimble
 Designer:       Sydney Spratt
-                            
+
                                           
 /* SITE */
 Components: Gorilla, Backbone.js, LESS, MailGun, jQuery, DataTables

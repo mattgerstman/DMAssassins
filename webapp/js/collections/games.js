@@ -47,7 +47,6 @@ var app = app || {
         },
         joinGame: function(game_id, password, team_id) {
             app.Running.User.joinGame(game_id, password, team_id);  
-            this.trigger('game-change');          
         },
         setArbitraryActiveGame: function(silent) {
             var newGame = this.findWhere({game_started: true});
