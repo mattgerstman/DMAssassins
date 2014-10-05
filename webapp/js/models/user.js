@@ -42,13 +42,14 @@ var app = app || {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';           
         },       
-        joinGame: function(game_id, game_password) {
+        joinGame: function(game_id, game_password, team_id) {
             var that = this;            
             var last_game_id = app.Running.Games.getActiveGameId();
             app.Running.Games.setActiveGame(game_id).set('member', true);
             this.save(null, {
                 headers: {
-                    'X-DMAssassins-Game-Password': game_password
+                    'X-DMAssassins-Game-Password': game_password,
+                    'X-DMAssassins-Team-Id': team_id
                 },
                 success: function() {
                     that.trigger('join-game');

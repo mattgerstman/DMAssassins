@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"errors"
+	"fmt"
 )
 
 type Team struct {
@@ -38,9 +39,6 @@ func (user *User) GetTeamByGameId(gameId uuid.UUID) (team *Team, appErr *Applica
 func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationError) {
 	// Query Db
 	rows, err := db.Query(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, game.GameId.String())
-	if err == sql.ErrNoRows {
-		return nil, NewApplicationError("No Teams", err, ErrCodeNoTeams)
-	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -69,6 +67,10 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 	// Query Db
 	rows, err := db.Query(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, game.GameId.String())
+	if err == sql.ErrNoRows {
+		fmt.Println("No teams")
+		return nil, NewApplicationError("No Team", err, ErrCodeNoTeams)
+	}
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

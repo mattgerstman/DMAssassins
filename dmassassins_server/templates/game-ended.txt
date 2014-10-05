@@ -1,8 +1,8 @@
 Hey %recipient.first_name%,
 
-"The time has come," the walrus said, "to talk of many things: Of hunting friends, avoiding capture, and ending deadly games."
+"The time has come," the walrus said, "to talk of many things: of hunting friends, avoiding capture, and ending deadly games."
 
-With that, {{.GameName}} DMAssassins has come to an end. We hope you've enjoyed playing, winner(s) will be announced by your game admin seperately. Login to check out the leaderboard.
+With that, {{.GameName}} DMAssassins has come to an end. We hope you've enjoyed playing. The winner(s) will be announced by your game admin seperately. Log in to check out the leaderboard.
 
 Sincerely,
 The DMAssassins Team
