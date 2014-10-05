@@ -21,5 +21,5 @@ var app = app || {
             return config.WEB_ROOT + 'game/' + game_id + '/team/';
         }
         
-    })
+    });
 })();

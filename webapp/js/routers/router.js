@@ -189,8 +189,8 @@ var app = app || {
         },
         // logout route
         logout: function() {
-            app.Session.clear()
-            this.navigate('login', true)
+            app.Session.clear();
+            this.navigate('login', true);
         },
         // game selection route
         multigame: function() {
@@ -292,14 +292,14 @@ var app = app || {
                 if (fragment === '')
                     fragment = 'my_profile';
 
-                app.Running.NavView.highlight('#nav_' + fragment)
+                app.Running.NavView.highlight('#nav_' + fragment);
                 app.Running.NavView.handleTarget();
                 app.Running.NavGameView.updateText();
             }
 
             // render our page within the app
-            app.Running.AppView.renderPage(app.Running.currentView)
+            app.Running.AppView.renderPage(app.Running.currentView);
         }
-    })
+    });
 
-})()
+})();

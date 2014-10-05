@@ -36,12 +36,12 @@ var app = app || {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + "game/" + game_id + '/user/' + this.get('assassin_id') + '/target/';
         },
+        idAttribute: 'assassin_id',
         // consstructor
         initialize: function() {
             if (!this.get('assassin_id')) {
                 this.assassin_id = app.Session.get('user_id');
             }
-            this.idAttribute = 'assassin_id'
         }
-    })
+    });
 })();

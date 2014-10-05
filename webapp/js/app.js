@@ -30,8 +30,8 @@ $(function() {
     app.Session.setAuthHeader();
 
     app.Running.Games = new app.Collections.Games();
-    app.Running.User = new app.Models.User()
-    app.Running.TargetModel = new app.Models.Target()
+    app.Running.User = new app.Models.User();
+    app.Running.TargetModel = new app.Models.Target();
     app.Running.LeaderboardModel = new app.Models.Leaderboard();
     app.Running.RulesModel = new app.Models.Rules();
 

@@ -31,16 +31,16 @@ var app = app || {
         // constructor, loads a user id so we can get their games from the model
         initialize: function() {
             this.collection = app.Running.Games;
-            this.listenTo(this.collection, 'fetch', this.render)
-            this.listenTo(this.collection, 'change', this.render)
-            this.listenTo(this.collection, 'reset', this.render)
-            this.listenTo(this.collection, 'add', this.render)
-            this.listenTo(this.collection, 'remove', this.render)
+            this.listenTo(this.collection, 'fetch', this.render);
+            this.listenTo(this.collection, 'change', this.render);
+            this.listenTo(this.collection, 'reset', this.render);
+            this.listenTo(this.collection, 'add', this.render);
+            this.listenTo(this.collection, 'remove', this.render);
             this.listenTo(this.collection, 'game-change', this.render);
 
         },
         handleJoin: function () {
-            var availableGame = _.findWhere(this.collection.toJSON(), {member: false})
+            var availableGame = _.findWhere(this.collection.toJSON(), {member: false});
             if (availableGame === undefined)
             {
                 this.hideJoin();
@@ -75,7 +75,7 @@ var app = app || {
                 return this;
             }
 
-            var game = this.collection.getActiveGame()
+            var game = this.collection.getActiveGame();
             if (!game)
             {
                 return this;
@@ -106,9 +106,9 @@ var app = app || {
         // select a game from the dropdown
         select: function(event) {
             var game_id = $(event.target).attr('game_id');
-            app.Running.Games.setActiveGame(game_id)
+            app.Running.Games.setActiveGame(game_id);
 
         }
-    })
+    });
 
 })(jQuery);

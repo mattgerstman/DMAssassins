@@ -34,11 +34,11 @@ var app = app || {
         // constructor
         initialize: function() {
             this.NavGameView = app.Running.NavGameView;
-            this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget)
-            this.listenTo(app.Running.TargetModel, 'change', this.handleTarget)
-            this.listenTo(app.Running.User, 'fetch', this.render)
-            this.listenTo(app.Running.User, 'change', this.render)
-            this.listenTo(app.Running.Games, 'game-change', this.render)
+            this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget);
+            this.listenTo(app.Running.TargetModel, 'change', this.handleTarget);
+            this.listenTo(app.Running.User, 'fetch', this.render);
+            this.listenTo(app.Running.User, 'change', this.render);
+            this.listenTo(app.Running.Games, 'game-change', this.render);
         },
 
         // if we don't have a target hide that view
@@ -67,7 +67,7 @@ var app = app || {
                 return;
             }
             $('.navbar-collapse.in').collapse('hide');
-            this.highlight(target)
+            this.highlight(target);
 
         },
 
@@ -131,6 +131,6 @@ var app = app || {
             this.$el.find('#nav_target a').addClass('disabled');
         }
 
-    })
+    });
 
 })(jQuery);

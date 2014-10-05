@@ -43,7 +43,7 @@ var app = app || {
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + 'game/' + game_id + '/leaderboard/'
+            return config.WEB_ROOT + 'game/' + game_id + '/leaderboard/';
         }
-    })
+    });
 })();
