@@ -232,14 +232,14 @@ func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, use
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 
-	var facebookId, facebookToken string
-	var teamIdBuffer sql.NullString
+	var facebookId string
+	var teamIdBuffer, facebookToken sql.NullString
 	err := db.QueryRow(`SELECT dm_users.facebook_id, dm_users.facebook_token, game.user_role, game.team_id FROM dm_users, dm_user_game_mapping AS game WHERE dm_users.user_id = game.user_id AND game.user_id = $1 AND (game.game_id = $2 OR game.user_role = 'dm_super_admin')`, userId.String(), gameId.String()).Scan(&facebookId, &facebookToken, &userRole, &teamIdBuffer)
 	if err != nil {
 		return "", nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	teamId = uuid.Parse(teamIdBuffer.String)
-	appErr = validateFacebookToken(facebookToken, token, facebookId)
+	appErr = validateFacebookToken(facebookToken.String, token, facebookId)
 	if appErr != nil {
 		return "", nil, nil, appErr
 	}
