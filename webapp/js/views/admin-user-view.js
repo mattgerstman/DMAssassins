@@ -25,18 +25,18 @@ var app = app || {
         tagName:'div',
         initialize: function(model){
             this.model = model;
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'fetch', this.render)
-            this.listenTo(this.model, 'save', this.render)
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'save', this.render);
         },
         render: function(extras){
             var data = this.model.attributes;
             for (var key in extras) {
-                data[key] = extras[key]
+                data[key] = extras[key];
             }
-            this.$el.html(this.template(data))
+            this.$el.html(this.template(data));
             return this;
         }    
-    })
+    });
 })(jQuery);
     

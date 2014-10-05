@@ -28,9 +28,9 @@ var app = app || {
         initialize: function(params) {
             this.model = app.Running.RulesModel;
 
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'fetch', this.render)
-            this.listenTo(this.model, 'set', this.render)
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'set', this.render);
         },
 
         render: function() {
@@ -40,6 +40,6 @@ var app = app || {
             return this;
         }
 
-    })
+    });
 
 })(jQuery);

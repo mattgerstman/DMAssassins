@@ -95,7 +95,7 @@ var app = app || {
                         // scope are the facebook permissions we're requesting 
                     }, {
                         scope: 'public_profile,email,user_friends,user_photos'
-                    })
+                    });
 
                 } else {
 
@@ -105,12 +105,12 @@ var app = app || {
                         // scope are the facebook permissions we're requesting
                     }, {
                         scope: 'public_profile,email,user_friends,user_photos'
-                    })
+                    });
 
                     // The person is not logged into Facebook, so we're not sure if
                     // they are logged into this app or not.
                 }
-            })
+            });
 
         },
 
@@ -123,7 +123,7 @@ var app = app || {
                 'facebook_id': response.authResponse.userID,
                 'facebook_token': response.authResponse.accessToken,
                 'game_id': game_id
-            }
+            };
 
             var that = this;
 
@@ -160,7 +160,7 @@ var app = app || {
                 app.Running.Games.reset(games);
                 
                 // store the basic auth token in the session in case we need to reload it on app launch
-                that.storeSession(response)
+                that.storeSession(response);
                 app.Running.Games.setActiveGame(game.game_id, true);
                 app.Running.Games.getActiveGame().set(game);
 
@@ -209,10 +209,10 @@ var app = app || {
         // stores all the basic auth variables in the session
         storeBasicAuth: function(data) {
             var user_id = data.user.user_id;
-            this.set('user_id', user_id)
+            this.set('user_id', user_id);
 
-            var token = data.token
-            var plainKey = user_id + ":" + token
+            var token = data.token;
+            var plainKey = user_id + ":" + token;
             var base64Key = window.btoa(plainKey);
             this.set('authKey', base64Key);
             this.setAuthHeader();
@@ -229,4 +229,4 @@ var app = app || {
 
         }
     });
-})()
+})();

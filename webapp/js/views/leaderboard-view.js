@@ -27,9 +27,9 @@ var app = app || {
         // constructor
         initialize: function(params) {
             this.model = app.Running.LeaderboardModel;
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'reset', this.render)
-            this.listenTo(this.model, 'fetch', this.render)
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'reset', this.render);
+            this.listenTo(this.model, 'fetch', this.render);
         },
         // renderer
         render: function() {
@@ -55,12 +55,12 @@ var app = app || {
             if (teams_enabled) {
                 options.order = [
                     [4, 'desc']
-                ]
+                ];
                 this.$el.find('#team_leaderboard_table').dataTable(options);
             }
             return this;
         }
 
-    })
+    });
 
 })(jQuery);

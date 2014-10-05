@@ -27,5 +27,5 @@ var app = app || {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/rules/';
         }
-    })
+    });
 })();

@@ -28,15 +28,18 @@ var app = app || {
 		  	Backbone.history.route(route, function(fragment) {
 		   		var args = router._extractParameters(route, fragment);
 		   		var next = function(){
-			    	callback && callback.apply(router, args);
+			    	if(callback)
+			    	{
+        			    callback.apply(router, args);	
+			    	}			    	    
 				    router.trigger.apply(router, ['route:' + name].concat(args));
 				    router.trigger('route', name, args);
 				    Backbone.history.trigger('route', router, name, args);
 				    router.after.apply(router, args);		
-		   		}
+		   		};
 		   		router.before.apply(router, [args, next]);
 		  	});
 			return this;
 		}
 	});
-})()
+})();

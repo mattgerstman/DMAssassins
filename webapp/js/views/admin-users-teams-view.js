@@ -25,16 +25,16 @@ var app = app || {
         tagName: 'ul',
         initialize: function() {
             this.collection = app.Running.Teams;
-            this.listenTo(this.collection, 'fetch', this.render)
-            this.listenTo(this.collection, 'change', this.render)
-            this.listenTo(this.collection, 'reset', this.render)
-            this.listenTo(this.collection, 'add', this.render)
-            this.listenTo(this.collection, 'remove', this.render)
+            this.listenTo(this.collection, 'fetch', this.render);
+            this.listenTo(this.collection, 'change', this.render);
+            this.listenTo(this.collection, 'reset', this.render);
+            this.listenTo(this.collection, 'add', this.render);
+            this.listenTo(this.collection, 'remove', this.render);
         },
         render: function() {
             var teamSort = function(team){
                 return team.team_name;
-            }
+            };
             
             var data = { teams: _.sortBy(this.collection.toJSON(), teamSort) };
                         
@@ -45,6 +45,6 @@ var app = app || {
 
         },
 
-    })
+    });
 
 })(jQuery);
