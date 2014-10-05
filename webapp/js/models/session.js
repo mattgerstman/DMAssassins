@@ -152,11 +152,6 @@ var app = app || {
 
                 target.assassin_id = response.user.user_id;
 
-                if (config.ENV == 'PROD')
-                {
-                    ga(‘set’, ‘&uid’, {{response.user.user_id}}); // Set the user ID using signed-in user_id.
-                }
-
                 // reload the data for all models
                 app.Running.User.set(user);
                 app.Running.TargetModel.set(target);               
