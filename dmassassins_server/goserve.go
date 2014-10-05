@@ -120,7 +120,7 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, X-DMAssassins-Game-Password, Authorization")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, X-DMAssassins-Game-Password, X-DMAssassins-Team-Id, Authorization")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		} else {
 			h.ServeHTTP(w, r)

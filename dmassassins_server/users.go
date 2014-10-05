@@ -67,6 +67,29 @@ func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 	return user, nil
 }
 
+// Get a user From the DB by their email
+func GetUserByEmail(email string) (user *User, appErr *ApplicationError) {
+	var userId uuid.UUID
+	var username, facebookId, userIdBuffer string
+	err := db.QueryRow(`SELECT user_id, username, facebook_id FROM dm_users WHERE email = $1`, email).Scan(&userIdBuffer, &username, &facebookId)
+	switch {
+	case err == sql.ErrNoRows:
+		msg := "Invalid user: " + username
+		return nil, NewApplicationError(msg, err, ErrCodeNotFoundEmail)
+	case err != nil:
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	userId = uuid.Parse(userIdBuffer)
+
+	user = &User{userId, username, email, facebookId, nil}
+	_, appErr = user.GetUserProperties()
+	if appErr != nil {
+		return nil, appErr
+	}
+	return user, nil
+}
+
 // Select a user from the db by user_id (uuid) and return it as a user object
 func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	var username, email, facebookId string

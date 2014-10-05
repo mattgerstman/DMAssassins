@@ -256,100 +256,120 @@
         </div><!-- /.modal -->    
 
     </script>
+    
+    <script id="select-game-team-option" type="text/template">
+        <option value="" id="team_placeholder">Select a Team</option>
+        <%
+        _.each(teams, function(team){
+        %>
+            <option value="<%= team.team_id %>"><%= team.team_name %></option>
+        <%
+        })
+        %>    
+    </script>
+    
     <script id="select-game-template" type="text/template">
-    <div class="container-fluid">
-            <img src="/assets/img/logo.png" class="center-block img-responsive logo" /> 
-            <div id="create-or-join" class="">
-                <div class="container col-md-offset-2 col-md-8 text-center">
-                    <div class="hidden-xs">
-                        <button class="btn btn-facebook btn-lg show-create-game">Create A Game</button>
-                        <button class="btn btn-facebook btn-lg show-join-game">Join A Game</button>             
-                    </div>
-                    <div class="visible-xs-block">
-                        <button class="btn btn-facebook btn-block show-create-game">Create A Game</button>
-                        <button class="btn btn-facebook btn-block show-join-game">Join A Game</button>              
-                    </div>
-
-                </div>              
-            </div>
-            <div id="create-game" class="container hide">
-                <form class="form-horizontal text-left" role="form">            
-                    <div class="form-group">
-                        <h1 class="text-center col-sm-12 col-xs-12">Create a Game</h1>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-5 col-xs-5 control-label" for="create_game_name">Game Name:</label>
-                        <div class="col-sm-3 col-xs-7">
-                            <input id="create_game_name" class="form-control"></input>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-5 col-xs-5 control-label" for="create_game_need_password">Password protect?:</label>
-                        <div class="col-sm-3 col-xs-7">
-                            <input id="create_game_need_password" type="checkbox"</input>
-                        </div>
-                    </div>
-                    <div id="create_password_block" class="form-group">
-                        <label class="col-sm-5 col-xs-5 control-label" for="create_game_password">Password:</label>
-                        <div class="col-sm-3 col-xs-7">
-                            <input id="create_game_password" class="form-control" disabled></input>
-                        </div>
-                    </div>
-                    <div class="form-group">
+        <div class="container-fluid">
+                <img src="/assets/img/logo.png" class="center-block img-responsive logo" /> 
+                <div id="create-or-join" class="">
+                    <div class="container col-md-offset-2 col-md-8 text-center">
                         <div class="hidden-xs">
-                            <div class="col-sm-offset-5 col-sm-2">
-                                <button class="btn btn-default btn-block create-game-submit">Create</button>                            
-                            </div>
-                            <div class="col-sm-1">
-                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>
-                            </div>
+                            <button class="btn btn-facebook btn-lg show-create-game">Create A Game</button>
+                            <button class="btn btn-facebook btn-lg show-join-game">Join A Game</button>             
                         </div>
                         <div class="visible-xs-block">
-                            <button class="btn btn-default btn-block create-game-submit">Create</button>
-                            <button class="btn btn-danger btn-block create-or-join-back">Back</button>                          
+                            <button class="btn btn-facebook btn-block show-create-game">Create A Game</button>
+                            <button class="btn btn-facebook btn-block show-join-game">Join A Game</button>              
                         </div>
-                    </div>
-                        
-                </form>
-            </div>
-            <div id="join-game" class="container hide">
-                <form class="form-horizontal text-left" role="form">
-                    <div class="form-group">
-                        <h1 class="text-center col-sm-12 col-xs-12">Select a Game</h1>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-5 col-xs-5 control-label" for="games">Game:</label>
-                        <div class="col-sm-3 col-xs-7">
-                            <select id="games" class="form-control">
-                                <% _.each(games, function(game){ %>     
-                                    <option value=<%= game.game_id %> game_has_password=<%= game.game_has_password %>><%= game.game_name %> </option>               
-                                <% }) %>
-                            </select>
+    
+                    </div>              
+                </div>
+                <div id="create-game" class="container hide">
+                    <form class="form-horizontal text-left" role="form">            
+                        <div class="form-group">
+                            <h1 class="text-center col-sm-12 col-xs-12">Create a Game</h1>
                         </div>
-                    </div>
-                    <div id="join_password_block" class="form-group">
-                        <label class="col-sm-5 col-xs-5 control-label" for="join_game_password">Password:</label>
-                        <div class="col-sm-3 col-xs-7">
-                            <input id="join_game_password" class="form-control" disabled></input>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="hidden-xs">
-                            <div class="col-sm-offset-5 col-sm-2">
-                                <button class="btn btn-default btn-block join-game-submit">Join</button>                            
-                            </div>
-                            <div class="col-sm-1">
-                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                        <div class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="create_game_name">Game Name:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="create_game_name" class="form-control"></input>
                             </div>
                         </div>
-                        <div class="visible-xs-block">
-                            <button class="btn btn-default btn-block join-game-submit">Join</button>
-                            <button class="btn btn-danger btn-block create-or-join-back">Back</button>                          
+                        <div class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="create_game_need_password">Password protect?:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="create_game_need_password" type="checkbox"</input>
+                            </div>
                         </div>
-                    </div>
-                </form>
+                        <div id="create_password_block" class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="create_game_password">Password:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="create_game_password" class="form-control" disabled></input>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="hidden-xs">
+                                <div class="col-sm-offset-5 col-sm-2">
+                                    <button class="btn btn-default btn-block create-game-submit">Create</button>                            
+                                </div>
+                                <div class="col-sm-1">
+                                    <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                                </div>
+                            </div>
+                            <div class="visible-xs-block">
+                                <button class="btn btn-default btn-block create-game-submit">Create</button>
+                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>                          
+                            </div>
+                        </div>
+                            
+                    </form>
+                </div>
+                <div id="join-game" class="container hide">
+                    <form class="form-horizontal text-left" role="form">
+                        <div class="form-group">
+                            <h1 class="text-center col-sm-12 col-xs-12">Select a Game</h1>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="games">Game:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <select id="games" class="form-control">
+                                    <% _.each(games, function(game){ %>     
+                                        <option value="<%= game.game_id %>" game_has_password="<%= game.game_has_password %>"><%= game.game_name %> </option>               
+                                    <% }) %>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="join_password_block" class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="join_game_password">Password:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="join_game_password" class="form-control" disabled></input>
+                            </div>
+                        </div>
+                        <div id="join_team_block" class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="join_game_team">Team:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <select id="join_game_team" class="form-control" disabled>                                    
+                                    <option value="" id="team_placeholder">This Game Doesn't Have Teams</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="hidden-xs">
+                                <div class="col-sm-offset-5 col-sm-2">
+                                    <button class="btn btn-default btn-block join-game-submit">Join</button>                            
+                                </div>
+                                <div class="col-sm-1">
+                                    <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                                </div>
+                            </div>
+                            <div class="visible-xs-block">
+                                <button class="btn btn-default btn-block join-game-submit">Join</button>
+                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>                          
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
     </script>
     <script id="login-template" type="text/template">
     <div class="col-md-2"></div>
