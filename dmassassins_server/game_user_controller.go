@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -35,7 +36,27 @@ func putGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Application
 		return nil, appErr
 	}
 
-	return user.JoinGame(gameId, gamePassword)
+	gameMapping, appErr = user.JoinGame(gameId, gamePassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	teamIdHeader := r.Header.Get("X-DMAssassins-Team-Id")
+	teamId := uuid.Parse(teamIdHeader)
+	if teamId == nil {
+		return gameMapping, nil
+	}
+	user, appErr = GetUserById(userId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING)
+		return gameMapping, nil
+	}
+	gameMapping, appErr = user.JoinTeam(teamId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING)
+	}
+
+	return gameMapping, nil
 }
 
 // GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status

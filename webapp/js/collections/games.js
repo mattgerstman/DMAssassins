@@ -45,8 +45,8 @@ var app = app || {
                 that.setActiveGame(game.get('game_id'));
             }})
         },
-        joinGame: function(game_id, password) {
-            app.Running.User.joinGame(game_id, password);  
+        joinGame: function(game_id, password, team_id) {
+            app.Running.User.joinGame(game_id, password, team_id);  
             this.trigger('game-change');          
         },
         setArbitraryActiveGame: function(silent) {

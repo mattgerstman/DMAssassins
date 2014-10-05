@@ -55,6 +55,12 @@ a,a:focus {
     transition: all 0.5s ease;
 }
 
+
+.email-setting {
+    margin-left:3px;
+    cursor:pointer;
+}
+
 .admin-users-body {
     .user {        
         h3 {
@@ -119,18 +125,6 @@ a,a:focus {
     }
 }
 
-.email-setting {
-    margin-left:3px;
-    cursor:pointer;
-}
-.glyphicon-pencil {
-    color:orange;
-}
-.glyphicon-ban-circle {
-    color:red;
-}
-
-
 .sidebar-nav {
 	> li.team {
 		a {
@@ -149,33 +143,37 @@ a,a:focus {
 		        display:inline;
 		        cursor: pointer;
 			}
+			
+            a.edit-team, a.delete-team{
+                color:#777;
+            }
 			a.edit-team:hover {
-		        color:blue;
+		        color:orange;
 		    }
 		    a.delete-team:hover {
 		        color:red;
 		    }
 		}	
 	}
-		cursor: default;
-		.new-team-form, .edit-team-form {
-		    input {
-		        margin-left: 18px;
-		        margin-right:0;
-		    }
-		    .team-input-button {
-		        margin-top:3px;
-		        margin-left:3px;
-		        display:inline;
-		        cursor: pointer;
-		    }
-		    a.create-new-team:hover, a.save-edit-team:hover {
-		        color:green;
-		    }
-		    a.cancel-new-team:hover, a.cancel-edit-team:hover {
-		        color:red;
-		    }
-		}
+	cursor: default;
+	.new-team-form, .edit-team-form {
+	    input {
+	        margin-left: 18px;
+	        margin-right:0;
+	    }
+	    .team-input-button {
+	        margin-top:3px;
+	        margin-left:3px;
+	        display:inline;
+	        cursor: pointer;
+	    }
+	    a.create-new-team:hover, a.save-edit-team:hover {
+	        color:green;
+	    }
+	    a.cancel-new-team:hover, a.cancel-edit-team:hover {
+	        color:red;
+	    }
+	}
 
 }
 
