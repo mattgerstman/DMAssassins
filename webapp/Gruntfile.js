@@ -38,14 +38,7 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      files: [
-          'js/lib/*.js',
-          'js/models/*.js',
-          'js/collections/*.js',
-          'js/views/*.js',
-          'js/routers/*.js',
-          'js/*.js'
-          ],
+      files: '<%= concat.dist.src %>',
       gruntfile: {
         src: 'Gruntfile.js'
       },      
@@ -89,16 +82,6 @@ module.exports = function(grunt) {
             'dist/<%= pkg.version %>/DMAssassins.min.css': ['assets/styles/*.css']
         }
       }
-    },
-    watch: {
-      gruntfile: {
-        files: '<%= jshint.gruntfile.src %>',
-        tasks: ['jshint:gruntfile']
-      },
-      lib_test: {
-        files: '<%= jshint.lib_test.src %>',
-        tasks: ['jshint:lib_test', 'qunit']
-      }
     }
   });
 
@@ -108,11 +91,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-preprocess');
   grunt.loadNpmTasks('grunt-env');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   // Default task.
-  grunt.registerTask('dev', ['concat', 'uglify', 'jshint', 'env:dev', 'preprocess:dev']);
-  grunt.registerTask('prod', ['concat', 'uglify', 'jshint', 'cssmin', 'env:prod', 'preprocess:prod']);
+  grunt.registerTask('dev', ['jshint', 'env:dev', 'preprocess:dev']);
+  grunt.registerTask('prod', ['concat', 'uglify', 'cssmin', 'env:prod', 'preprocess:prod']);
 
 };

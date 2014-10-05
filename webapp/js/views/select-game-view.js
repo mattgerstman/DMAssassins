@@ -96,7 +96,6 @@ var app = app || {
                     that.showJoinGame();
                 }
             });
-
         },
         // posts to the join game model
         joinGame: function(event) {
