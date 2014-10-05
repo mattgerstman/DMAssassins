@@ -34,7 +34,7 @@ module.exports = function(grunt) {
       },
       dist: {
         src: '<%= concat.dist.dest %>',
-        dest: 'dist/<%= pkg.name %>.min.js'
+        dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.min.js'
       }
     },
     jshint: {
@@ -52,14 +52,13 @@ module.exports = function(grunt) {
     },
     env : {
       options : {
-          /* Shared Options Hash */
-          //globalOption : 'foo'
+          VERSION: '<%= pkg.version %>'
       },
       dev: {
-          NODE_ENV : 'DEVELOPMENT'
+          NODE_ENV: 'DEVELOPMENT'
       },
       prod : {
-          NODE_ENV : 'PRODUCTION'
+          NODE_ENV: 'PRODUCTION'
       }
 
     },
@@ -81,6 +80,16 @@ module.exports = function(grunt) {
           }
       }
     },
+    cssmin: {
+      add_banner: {
+        options: {
+          banner: '<%= banner %>'
+        },
+        files: {
+            'dist/<%= pkg.version %>/DMAssassins.min.css': ['assets/styles/*.css']
+        }
+      }
+    },
     watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
@@ -100,9 +109,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-preprocess');
   grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   // Default task.
   grunt.registerTask('dev', ['concat', 'uglify', 'jshint', 'env:dev', 'preprocess:dev']);
-  grunt.registerTask('prod', ['concat', 'uglify', 'jshint', 'env:prod', 'preprocess:prod']);
+  grunt.registerTask('prod', ['concat', 'uglify', 'jshint', 'cssmin', 'env:prod', 'preprocess:prod']);
 
 };
