@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"github.com/getsentry/raven-go"
 	fb "github.com/huandu/facebook"
 )
 
@@ -75,6 +76,11 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	user, appErr = NewUser(username, email, facebookId, properties)
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	_, appErr = user.SendUserWelcomeEmail()
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 	}
 
 	return user, nil

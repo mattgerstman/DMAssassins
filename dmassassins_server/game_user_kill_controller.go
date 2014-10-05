@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -40,9 +41,27 @@ func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
 
 	secret := gameMapping.Secret
 
-	_, appErr = assassin.KillTarget(gameMapping.GameId, secret, true)
+	_, oldTargetId, appErr := assassin.KillTarget(gameMapping.GameId, secret, true)
+	if appErr != nil {
+		return appErr
+	}
 
-	return appErr
+	oldTarget, appErr := GetUserById(oldTargetId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+	game, appErr := GetGameById(gameId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+	_, appErr = oldTarget.SendDeadEmail(game.GameName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING)
+	}
+
+	return nil
 }
 
 // Handler for /game path

@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -33,7 +34,39 @@ func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
-	return gameMapping.Revive()
+	assassinId, _, appErr := gameMapping.Revive()
+	if appErr != nil {
+		return appErr
+	}
+
+	assassin, appErr := GetUserById(assassinId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING)
+		return nil
+	}
+
+	game, appErr := GetGameById(gameId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+	_, appErr = assassin.SendNewTargetEmail(game.GameName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING)
+	}
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING)
+		return nil
+	}
+
+	_, appErr = user.SendReviveEmail(game.GameName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING)
+	}
+
+	return nil
 }
 
 // Handler for /game path

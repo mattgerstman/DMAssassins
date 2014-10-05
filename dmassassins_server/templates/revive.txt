@@ -1,6 +1,6 @@
 Hey %recipient.first_name%,
 
-We have decided to awaken you from the dead. Login at http://dmassassins.com to see your newest target.
+We have decided to awaken you from the dead in {{.GameName}} DMAssassins. Login at http://dmassassins.com to see your newest target.
 
 Good Luck!
 The DMAssassins Team

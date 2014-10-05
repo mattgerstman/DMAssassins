@@ -1,6 +1,6 @@
 Hey %recipient.first_name%,
 
-Due to unforseen circumstances our hand has been forced and you have been given a new target. Login at http://dmassassins.com to discover who they are.
+Due to unforseen circumstances our hand has been forced and you have been given a new target in {{.GameName}} DMAssassins. Login at http://dmassassins.com to discover who they are.
 
 Good Luck!
 The DMAssassins Team

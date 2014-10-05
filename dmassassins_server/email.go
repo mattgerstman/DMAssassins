@@ -35,6 +35,99 @@ func (game *Game) getEmailableUsersForGame(onlyAlive bool) (userList []*User, ap
 	return userList, nil
 }
 
+func (user *User) SendDeadEmail(GameName string) (id string, appErr *ApplicationError) {
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/you-died.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/you-died.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `You Have Been Killed In ` + GameName + ` DMAssassins`
+	tag := `Revived`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+func (user *User) SendReviveEmail(GameName string) (id string, appErr *ApplicationError) {
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/revive.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/revive.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `You Have Been Revived In ` + GameName + ` DMAssassins`
+	tag := `Revived`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+func (user *User) SendNewTargetEmail(GameName string) (id string, appErr *ApplicationError) {
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	t, err := template.ParseFiles("templates/new-target.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/new-target.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	subject := `You Have A New Target In ` + GameName + ` DMAssassins`
+	tag := `NewTarget`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	users := []*User{user}
+
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
 func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *ApplicationError) {
 
 	var bodyBuffer bytes.Buffer
@@ -56,7 +149,7 @@ func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *Applic
 	}
 	htmlT.Execute(&htmlBodyBuffer, emailData)
 
-	subject := `Welcome to DMAssassins!`
+	subject := `You Have Been Banned From ` + GameName + ` DMAssassins`
 	tag := `WelcomeUser`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
@@ -88,7 +181,7 @@ func (user *User) SendAdminWelcomeEmail() (id string, appErr *ApplicationError) 
 	htmlT.Execute(&htmlBodyBuffer, emailData)
 
 	subject := `Welcome to DMAssassins!`
-	tag := `WelcomeUser`
+	tag := `WelcomeAdmin`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
 

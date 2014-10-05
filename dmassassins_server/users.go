@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/getsentry/raven-go"
 	"strconv"
 	"strings"
 )
@@ -41,12 +40,6 @@ func NewUser(username, email, facebookId string, properties map[string]string) (
 	for key, value := range properties {
 		user.SetUserProperty(key, value)
 	}
-
-	_, appErr = user.SendUserWelcomeEmail()
-	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
-	}
-
 	// Return user
 	return user, nil
 }
@@ -214,16 +207,15 @@ func (user *User) ChangeEmail(email string) (appErr *ApplicationError) {
 }
 
 //Kills an Assassin's target, user must be logged in
-func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount bool) (target_id uuid.UUID, appErr *ApplicationError) {
+func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount bool) (newTargetId, oldTargetId uuid.UUID, appErr *ApplicationError) {
 
-	var oldTargetId, newTargetId uuid.UUID
 	var targetSecret string
 	var oldTargetIdBuffer, newTargetIdBuffer sql.NullString
 	// Grab the target's secret and user_id for comparison/use below
 
 	err := db.QueryRow(`SELECT map.secret, users.user_id FROM dm_users as users, dm_user_game_mapping as map WHERE users.user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2) AND map.user_id = users.user_id AND map.game_id = $3 `, user.UserId.String(), gameId.String(), gameId.String()).Scan(&targetSecret, &oldTargetIdBuffer)
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	oldTargetId = uuid.Parse(oldTargetIdBuffer.String)
@@ -231,7 +223,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 	// Start a transaction so we can rollback if something blows up
 	tx, err := db.Begin()
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Confirm the user entered the right secret
@@ -239,28 +231,28 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 		// If secret is invalid throw an error
 		msg := fmt.Sprintf("Invalid secret: %s", secret)
 		err := errors.New("Invalid Secret")
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidSecret)
+		return nil, nil, NewApplicationError(msg, err, ErrCodeInvalidSecret)
 
 	}
 	// Prepare the statement to kill the old target
 	setDead, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to kill the old target
 	_, err = tx.Stmt(setDead).Exec(oldTargetId.String(), gameId.String())
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get the old target's target to assign to the Assassin
 	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1 AND game_id = $2`, oldTargetId.String(), gameId.String()).Scan(&newTargetIdBuffer)
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	newTargetId = uuid.Parse(newTargetIdBuffer.String)
 
@@ -269,7 +261,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 	_, err = tx.Stmt(removeOldTarget).Exec(oldTargetId.String(), gameId.String())
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Set up the Assassin's new target
@@ -277,12 +269,12 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 	_, err = tx.Stmt(setNewTarget).Exec(newTargetId.String(), user.UserId.String(), gameId.String())
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	if !incrementKillCount {
 		tx.Commit()
-		return newTargetId, nil
+		return newTargetId, oldTargetId, nil
 	}
 
 	// Update kill count
@@ -290,10 +282,10 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, incrementKillCount
 	_, err = tx.Stmt(updateKills).Exec(user.UserId.String(), gameId.String())
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	tx.Commit()
 
-	return newTargetId, nil
+	return newTargetId, oldTargetId, nil
 }
