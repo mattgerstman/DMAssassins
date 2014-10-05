@@ -7,11 +7,18 @@ import (
 )
 
 type Configuration struct {
-	FBAppId       string
-	FBAppSecret   string
-	FBAccessToken string
-	DatabaseURL   string
-	SentryDSN     string
+	APIDomain         string
+	FBAppId           string
+	FBAppSecret       string
+	FBAccessToken     string
+	DatabaseURL       string
+	SentryDSN         string
+	SupportEmail      string
+	MailGunPublicKey  string
+	MailGunPrivateKey string
+	MailGunDomain     string
+	MailGunSender     string
+	MailGunReplyTo    string
 }
 
 var Config *Configuration

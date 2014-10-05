@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -43,7 +44,21 @@ func putUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 
 	gamePassword := newGame.GamePassword
-	return NewGame(gameName, userId, gamePassword)
+	game, appErr = NewGame(gameName, userId, gamePassword)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+		return game, nil
+	}
+	_, appErr = user.SendAdminWelcomeEmail()
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+	}
+	return game, nil
 }
 
 // GET - gets a list of games for a user

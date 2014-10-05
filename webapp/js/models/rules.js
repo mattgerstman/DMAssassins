@@ -21,7 +21,7 @@ var app = app || {
 
     app.Models.Rules = Backbone.Model.extend({
         defaults: {
-            rules: 'yo'
+            rules: 'Loading...'
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();

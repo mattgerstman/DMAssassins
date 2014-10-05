@@ -81,6 +81,11 @@ func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
+	_, appErr = game.sendStartGameEmail()
+	if appErr != nil {
+		return nil, appErr
+	}
+
 	return game, nil
 }
 

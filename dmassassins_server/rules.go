@@ -9,7 +9,7 @@ import (
 // Pulls the default rules from rules.mdown and
 func loadDefaultRules(adminEmail string) (rules string, appErr *ApplicationError) {
 
-	fileByte, _ := ioutil.ReadFile("rules.mdown")
+	fileByte, _ := ioutil.ReadFile("templates/rules.mdown")
 	outputString := string(fileByte)
 	outputString = strings.Replace(outputString, `%ADMINEMAIL%`, adminEmail, -1)
 	return outputString, nil

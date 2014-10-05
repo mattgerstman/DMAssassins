@@ -24,11 +24,10 @@ var app = app || {
             'assassin_id': '',
             'username': '',
             'user_id': '',
-            'email': '',
             'properties': {
-                'name': '',
-                'facebook': '',
-                'team':'No Team',
+                'name': 'Loading...',
+                'facebook': 'Loading...',
+                'team':'Loading...',
                 'photo_thumb': SPY,
                 'photo': SPY
             }

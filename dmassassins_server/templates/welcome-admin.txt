@@ -1,0 +1,8 @@
+Hey %recipient.first_name%,
+
+Welcome to Death Match Assassins where the motto is kill all your friends and have fun doing it. Thanks for creating a game. Before you start sending out signups we recommend that you familiarize yourself with the admin panel. Make sure to tweak the game rules to best fit your game. You can start the game by clicking "start game" in the "game settings" panel.
+
+Sincerely,
+The DMAssassins Team
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

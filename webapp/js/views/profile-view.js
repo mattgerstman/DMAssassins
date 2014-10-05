@@ -30,6 +30,9 @@ var app = app || {
             'click .thumbnail': 'showFullImage',
             'click #quit': 'showQuitModal',
             'click #quit_game_confirm': 'quitGame',
+            'click #email_settings': 'showEmailModal',
+            'click #email_settings_save': 'saveEmailSettings',
+            'keyup #email': 'emailEnter' 
         },
 
         // load profile picture in modal window
@@ -51,6 +54,20 @@ var app = app || {
             this.model.quit(secret);
 
         },
+        showEmailModal: function(){
+            $('#email_modal').modal();
+        },
+        emailEnter: function(event) {
+            if (event.which == 13) {
+              this.saveEmailSettings();
+            }  
+        },
+        saveEmailSettings: function(){
+            var email = $('#email').val();
+            var allow_email = $('#allow_email').is(':checked') ? 'true' : 'false';
+            this.model.saveEmailSettings(email, allow_email);
+            $('#email_modal').modal('hide')
+        },
         // constructor
         initialize: function(params) {
             this.model = app.Running.User;
@@ -61,17 +78,17 @@ var app = app || {
 
         },
         destroyCallback: function() {
-            $('#quit_modal').modal('hide')
-            $('.modal-backdrop').remove();
+            $('#quit_modal').modal('hide')            
         },
         render: function() {
+            $('.modal-backdrop').remove();
             var data = this.model.attributes;
             data.teams_enabled = false;
             var game = app.Running.Games.getActiveGame();
             if (game) {
                 data.teams_enabled = game.areTeamsEnabled();    
             }
-            
+            data.allow_email = data.properties.allow_email == 'true';
             
             var role = app.Running.User.getProperty('user_role');  
             var allow_quit = !AuthUtils.requiresCaptain(role);
