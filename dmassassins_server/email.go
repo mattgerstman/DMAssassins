@@ -36,6 +36,14 @@ func (game *Game) getEmailableUsersForGame(onlyAlive bool) (userList []*User, ap
 }
 
 func (user *User) SendDeadEmail(GameName string) (id string, appErr *ApplicationError) {
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
 		"GameName":  GameName,
@@ -67,6 +75,14 @@ func (user *User) SendDeadEmail(GameName string) (id string, appErr *Application
 }
 
 func (user *User) SendReviveEmail(GameName string) (id string, appErr *ApplicationError) {
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
 		"GameName":  GameName,
@@ -98,6 +114,14 @@ func (user *User) SendReviveEmail(GameName string) (id string, appErr *Applicati
 }
 
 func (user *User) SendNewTargetEmail(GameName string) (id string, appErr *ApplicationError) {
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
 		"GameName":  GameName,
@@ -129,6 +153,13 @@ func (user *User) SendNewTargetEmail(GameName string) (id string, appErr *Applic
 }
 
 func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *ApplicationError) {
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
 
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
@@ -161,6 +192,13 @@ func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *Applic
 }
 
 func (user *User) SendAdminWelcomeEmail() (id string, appErr *ApplicationError) {
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
 
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
@@ -192,7 +230,13 @@ func (user *User) SendAdminWelcomeEmail() (id string, appErr *ApplicationError) 
 }
 
 func (user *User) SendUserWelcomeEmail() (id string, appErr *ApplicationError) {
-
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
 		"APIDomain": Config.APIDomain,
@@ -223,6 +267,7 @@ func (user *User) SendUserWelcomeEmail() (id string, appErr *ApplicationError) {
 }
 
 func (game *Game) sendStartGameEmail() (id string, appErr *ApplicationError) {
+
 	users, appErr := game.getEmailableUsersForGame(false)
 	if appErr != nil {
 		return "", appErr
