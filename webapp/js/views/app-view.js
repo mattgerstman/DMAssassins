@@ -36,5 +36,5 @@ var app = app || {
             app.Running.currentView = view;
 
         }
-    })
+    });
 })(jQuery);

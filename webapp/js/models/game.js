@@ -40,7 +40,7 @@ var app = app || {
                 return null;
             if (properties[key] === undefined)
                 return null;
-            return properties[key]  
+            return properties[key];
         },
         fetchProperties: function() {
             var url = this.gameUrl();
@@ -60,5 +60,5 @@ var app = app || {
             }            
             return url + game_id + '/';
         }
-    })
+    });
 })();

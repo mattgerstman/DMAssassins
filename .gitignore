@@ -3,7 +3,8 @@ dmassassins_server/config.json
 webapp/js/config.js
 webapp/bower_components
 dump.sql
-
 fixer.sh
-
 webapp/bower.json
+webapp/dist
+
+webapp/dist/DMAssassins.min.js

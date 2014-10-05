@@ -28,9 +28,9 @@ var app = app || {
         initialize: function(params) {
             this.model = app.Running.RulesModel;
 
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'fetch', this.render)
-            this.listenTo(this.model, 'set', this.render)
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'set', this.render);
         },
         loadEditor: function(){
             var that = this;
@@ -41,7 +41,7 @@ var app = app || {
                 onSave: function(event) {
                         var rules = event.getContent();
                         that.model.set('rules', rules);
-                        $('.saved').removeClass('hide')
+                        $('.saved').removeClass('hide');
                         that.model.save(null, {success: function(){
                             $('.saved').text('Saved.').fadeOut(2000, function(){
                                 $(this).text('Saving...');    
@@ -49,7 +49,7 @@ var app = app || {
                             
                         }});
                     },
-                })
+                });
         },
         render: function() {
             var data = this.model.attributes;
@@ -58,6 +58,6 @@ var app = app || {
             return this;
         }
 
-    })
+    });
 
 })(jQuery);

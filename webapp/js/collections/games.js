@@ -22,11 +22,11 @@ var app = app || {
             _.each(response.available, function(item){
                 item.member = false;
                 list.push(item);
-            })
+            });
             _.each(response.member, function(item){
                 item.member = true;
                 list.push(item);
-            })
+            });
             return list;
         },
         comparator: 'game_name',
@@ -43,17 +43,17 @@ var app = app || {
             game.fetch({success: function(){
                 that.add(game);
                 that.setActiveGame(game.get('game_id'));
-            }})
+            }});
         },
         joinGame: function(game_id, password, team_id) {
             app.Running.User.joinGame(game_id, password, team_id);  
             this.trigger('game-change');          
         },
         setArbitraryActiveGame: function(silent) {
-            var newGame = this.findWhere({game_started: true})
+            var newGame = this.findWhere({game_started: true});
             if (!newGame)
             {
-                newGame = this.findWhere({game_started: false})
+                newGame = this.findWhere({game_started: false});
             }
             this.setActiveGame(newGame, silent);
             return newGame;
@@ -98,5 +98,5 @@ var app = app || {
 
         
         
-    })
+    });
 })();

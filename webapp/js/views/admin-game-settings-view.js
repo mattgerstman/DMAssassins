@@ -33,9 +33,9 @@ var app = app || {
         },
         initialize: function(){
             this.model = app.Running.Games.getActiveGame();
-            this.listenTo(this.model, 'fetch', this.render)
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'save', this.render)
+            this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'save', this.render);
         },
         saveGame: function(event){
         
@@ -61,7 +61,7 @@ var app = app || {
                     $(".save-game").text('Saved');        
                     setTimeout(function(){
                         $(".save-game").text('Save');    
-                    }, 1000)
+                    }, 1000);
                 }                
             });
         },
@@ -103,9 +103,9 @@ var app = app || {
             $('.modal-backdrop').remove();            
             var data = this.model.attributes;
             data.teams_enabled = data.game_properties.teams_enabled == 'true';
-            this.$el.html(this.template(data))
+            this.$el.html(this.template(data));
             return this;
         }    
-    })
+    });
 })(jQuery);
     
