@@ -8,7 +8,7 @@ var AuthUtils = {
             dm_captain:     {value: 1, pretty_name: "Captain"},
             dm_admin:       {value: 2, pretty_name: "Admin"},
             dm_super_admin: {value: 3, pretty_name: "Super Admin"},
-        }
+        };
         return rolesMap;    
     },
     getRolesMapFor: function(role, teams_enabled) {
@@ -19,24 +19,24 @@ var AuthUtils = {
         var rolesMap = this.getRolesMap();
         for (var key in rolesMap)  {
             if (teams_enabled === false) {
-                if (rolesMap[key]['value'] == 1)
+                if (rolesMap[key].value == 1)
                     continue;
             }
-            if (rolesMap[key]['value'] <= rolesMap[role]['value'])
+            if (rolesMap[key].value <= rolesMap[role].value)
                 filteredMap[key] = rolesMap[key];
         }
         return filteredMap;
     },
     getRolePrettyName: function(role) {
         var rolesMap = this.getRolesMap();
-        return rolesMap[role]['pretty_name'];
+        return rolesMap[role].pretty_name;
     },
     isRoleAllowed: function(userRole, minRoleForAccess) {
         var rolesMap = this.getRolesMap();
         if ((userRole === undefined) || (rolesMap[userRole] === undefined))
-            return undefined
+            return undefined;
         
-        return rolesMap[userRole]['value'] >= rolesMap[minRoleForAccess]['value'];        
+        return rolesMap[userRole].value >= rolesMap[minRoleForAccess].value;        
     },
     requiresUser: function(userRole) {
         return this.isRoleAllowed(userRole, 'dm_user');
@@ -50,5 +50,5 @@ var AuthUtils = {
     requiresSuperAdmin: function(userRole) {
         return this.isRoleAllowed(userRole, 'dm_super_admin');
     }
-}
+};
 

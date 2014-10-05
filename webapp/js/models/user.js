@@ -92,7 +92,7 @@ var app = app || {
         	var that = this;
 	      	this.destroy({
 		      	url: that.url() + 'ban/'
-	      	})  
+	      	});  
         },
         kill: function(){
         	var that = this;
@@ -112,12 +112,12 @@ var app = app || {
             var data = {
                 email: email,
                 allow_email: allow_email
-            }
+            };
             var that = this;
             var url = this.url() + 'email/';
             $.post(url, data, function(response){
                 that.set('email', email);
-            })
+            });
         },
         quit: function(secret) {
             var that = this;
@@ -133,10 +133,10 @@ var app = app || {
                         return;
                     }
                 }
-            })
+            });
         },
         checkAccess: function(){
             app.Running.Router.before({}, function(){});
         }
-    })
+    });
 })();

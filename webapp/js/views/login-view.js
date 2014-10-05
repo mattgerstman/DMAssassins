@@ -33,13 +33,13 @@ var app = app || {
         // call the model login function
         login: function() {
 
-            this.model.login()
+            this.model.login();
         },
         // render the login page
         render: function() {
             this.$el.html(this.template(this.model.attributes));
             return this;
         },
-    })
+    });
 
 })(jQuery);

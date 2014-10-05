@@ -39,9 +39,9 @@ var app = app || {
         // constructor
         initialize: function() {
             this.collection = app.Running.Games;
-            this.listenTo(this.collection, 'reset', this.render)
-            this.listenTo(this.collection, 'fetch', this.render)
-            this.listenTo(app.Running.User, 'join-error-password', this.badPassword)
+            this.listenTo(this.collection, 'reset', this.render);
+            this.listenTo(this.collection, 'fetch', this.render);
+            this.listenTo(app.Running.User, 'join-error-password', this.badPassword);
         },
         // shows the create game subview
         showCreateGame: function() {
@@ -60,7 +60,7 @@ var app = app || {
         // cancels the game creation/selection
         goBack: function() {
             if (!!app.Running.Games.getActiveGameId()) {
-                app.Running.Router.back()
+                app.Running.Router.back();
                 return;
             }
             $('.select-game-active').addClass('hide').removeClass('select-game-active');
@@ -178,7 +178,7 @@ var app = app || {
                     }
                 },
                 error:function(){
-                   that.noTeams()
+                   that.noTeams();
                 }
             });
             
@@ -193,6 +193,6 @@ var app = app || {
             return this;
         }
 
-    })
+    });
 
 })(jQuery);

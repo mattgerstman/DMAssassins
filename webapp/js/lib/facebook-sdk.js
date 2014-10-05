@@ -37,7 +37,7 @@ var app = app || {
     } else {
 		//console.log('else');
 
-		app.Running.Router.navigate('login')
+		app.Running.Router.navigate('login');
     }
     
   }

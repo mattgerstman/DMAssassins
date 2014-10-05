@@ -32,14 +32,14 @@ var app = app || {
         },
         // loads picture in a modal window
         showFullImage: function() {
-            $('#photoModal').modal()
+            $('#photoModal').modal();
         },
         // constructor
         initialize: function() {
             this.model = app.Running.TargetModel;
-            this.listenTo(this.model, 'change', this.render)
-            this.listenTo(this.model, 'fetch', this.render)
-            this.listenTo(this.model, 'set', this.render)
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'set', this.render);
         },
         // kills your target
         kill: function() {
@@ -52,7 +52,7 @@ var app = app || {
                 success: function() {
                     view.model.fetch();
                 }
-            })
+            });
         },
         render: function() {
             var data = this.model.attributes;
@@ -60,6 +60,6 @@ var app = app || {
             this.$el.html(this.template(data));
             return this;
         }
-    })
+    });
 
 })(jQuery);
