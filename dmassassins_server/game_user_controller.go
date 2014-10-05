@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"github.com/gorilla/mux"
-	"log"
 	"net/http"
 )
 
@@ -30,7 +29,6 @@ func putGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Application
 	}
 
 	gamePassword := r.Header.Get("X-DMAssassins-Game-Password")
-	log.Println(gamePassword)
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {

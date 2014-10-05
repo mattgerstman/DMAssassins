@@ -290,7 +290,7 @@ var app = app || {
             // if we have a nav and highlight the nav item
             if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
                 if (fragment === '')
-                    fragment = 'target';
+                    fragment = 'my_profile';
 
                 app.Running.NavView.highlight('#nav_' + fragment)
                 app.Running.NavView.handleTarget();

@@ -1,0 +1,12 @@
+Hey %recipient.first_name%,
+
+"The time has come," the walrus said, "to talk of many things: Of hunting friends, avoiding capture, and ending deadly games."
+
+With that, {{.GameName}} DMAssassins has come to an end. We hope you've enjoyed playing, winner(s) will be announced by your game admin seperately. Login to check out the leaderboard.
+
+Sincerely,
+The DMAssassins Team
+
+P.S. We're running a limited beta right now. If you're interested in starting your own game email matt@dmassassins.com for beta pricing!
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

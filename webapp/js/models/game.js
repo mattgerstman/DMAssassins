@@ -23,7 +23,7 @@ var app = app || {
         // default properties with a fake game
         defaults: {
             game_id: '',
-            game_name: '',
+            game_name: 'Loading...',
             game_started: false,
             game_has_password: false,
             member: true

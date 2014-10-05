@@ -252,14 +252,6 @@ func Crypt(plainPw string) (hashedPassword []byte, appErr *ApplicationError) {
 
 // Creates a new game and saves it in the database
 func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game, appErr *ApplicationError) {
-	// I'll probably remove this altogether later but for now I'll leave it
-	// in case I ever want to encrypt game passwords again
-	// // Encrypt the game's password
-	// encryptedPassword, appErr := Crypt(gamePassword)
-	// if appErr != nil {
-	// 	return nil, appErr
-	// }
-
 	// Start a transaction, god knows we can't break anything
 	tx, err := db.Begin()
 	if err != nil {
