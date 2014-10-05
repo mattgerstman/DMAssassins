@@ -45,6 +45,10 @@ a:focus {
   -o-transition: all 0.5s ease;
   transition: all 0.5s ease;
 }
+.email-setting {
+  margin-left: 3px;
+  cursor: pointer;
+}
 .admin-users-body .user h3 {
   margin: 0;
 }
@@ -102,16 +106,6 @@ a:focus {
   border-bottom: 1px solid #ddd;
   margin-bottom: 40px;
 }
-.email-setting {
-  margin-left: 3px;
-  cursor: pointer;
-}
-.glyphicon-pencil {
-  color: orange;
-}
-.glyphicon-ban-circle {
-  color: red;
-}
 .sidebar-nav {
   cursor: default;
 }
@@ -132,8 +126,12 @@ a:focus {
   display: inline;
   cursor: pointer;
 }
+.sidebar-nav > li.team .team-buttons a.edit-team,
+.sidebar-nav > li.team .team-buttons a.delete-team {
+  color: #777;
+}
 .sidebar-nav > li.team .team-buttons a.edit-team:hover {
-  color: blue;
+  color: orange;
 }
 .sidebar-nav > li.team .team-buttons a.delete-team:hover {
   color: red;

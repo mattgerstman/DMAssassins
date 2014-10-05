@@ -162,6 +162,7 @@ var app = app || {
                 // store the basic auth token in the session in case we need to reload it on app launch
                 that.storeSession(response)
                 app.Running.Games.setActiveGame(game.game_id, true);
+                app.Running.Games.getActiveGame().set(game);
 
                 var targetURLs = app.Running.Router.requiresTarget;
                 var path = Backbone.history.fragment;

@@ -30,9 +30,9 @@ func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
 	return game.NewTeam(teamName)
 }
 
-// GET - Gets the list of temas for a game
+// GET - Gets the list of teams for a game
 func getGameTeam(r *http.Request) (teams []*Team, appErr *ApplicationError) {
-	_, appErr = RequiresCaptain(r)
+	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
