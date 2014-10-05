@@ -8,3 +8,5 @@ webapp/bower.json
 webapp/dist
 
 webapp/dist/DMAssassins.min.js
+
+webapp/index.html
