@@ -7,7 +7,6 @@
 //
 // shows the login screen
 
-
 var app = app || {
     Collections: {},
     Models: {},
@@ -32,7 +31,10 @@ var app = app || {
         },
         // call the model login function
         login: function() {
-
+            var button = this.$el.find('.btn-facebook');
+            var width = button.width();
+            button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
+            button.attr('disabled', true);
             this.model.login();
         },
         // render the login page
