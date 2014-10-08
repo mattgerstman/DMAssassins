@@ -43,6 +43,13 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 
 // Get a single Game Property from the db
 func (game *Game) GetGameProperty(key string) (property string, appErr *ApplicationError) {
+
+	// If we have the property readily available just return it
+	if property, ok := game.Properties[key]; ok {
+		return property, nil
+	}
+
+	// Otherwise query the DB
 	err := db.QueryRow(`SELECT value FROM dm_game_properties WHERE game_id = $1 AND key ILIKE $2`, game.GameId.String(), key).Scan(&property)
 	if err == sql.ErrNoRows {
 		return "", nil

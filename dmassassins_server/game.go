@@ -317,6 +317,29 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 }
 
+func (game *Game) AssignTargetsByTeams() (targets map[string]uuid.UUID, appErr *ApplicationError) {
+		// Begin Transaction
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Get new target list
+	rows, err := db.Query(`SELECT user_id, team_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY random()`, game.GameId.String())
+	if err != nil {
+		tx.Rollback()
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	teamsList := make([]uuid.UUID)
+
+	_ = teamsList
+	_ = rows
+
+	return nil, nil
+
+}
+
 // Assign all targets
 func (game *Game) AssignTargets() (targets map[string]uuid.UUID, appErr *ApplicationError) {
 
