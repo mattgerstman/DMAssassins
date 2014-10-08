@@ -7,13 +7,15 @@ import (
 	"strings"
 )
 
-// Sets a single user property for a user
-func (user *User) SetUserProperty(key string, value string) (appErr *ApplicationError) {
+// Sets a single user property for a user, takes a transaction to go into another function
+func (user *User) SetUserPropertyTransactional(tx *sql.Tx, key string, value string) (appErr *ApplicationError) {
 	// First attempt to update it if the property currently exists
-	res, err := db.Exec(`UPDATE dm_user_properties SET value = $1 WHERE user_id = $2 AND key ILIKE $3`, value, user.UserId.String(), key)
+	tryUpdate, err := db.Prepare(`UPDATE dm_user_properties SET value = $1 WHERE user_id = $2 AND key ILIKE $3`)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	res, err := tx.Stmt(tryUpdate).Exec(value, user.UserId.String(), key)
 	// Check how many rows were affected by the update
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
@@ -22,10 +24,16 @@ func (user *User) SetUserProperty(key string, value string) (appErr *Application
 
 	// If no rows were affected insert the property
 	if rowsAffected == 0 {
-		res, err := db.Exec(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`, user.UserId.String(), key, value)
+		tryInsert, err := db.Prepare(`INSERT INTO dm_user_properties (user_id, key, value) VALUES ($1,$2,$3)`)
 		if err != nil {
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
+		res, err = tx.Stmt(tryInsert).Exec(user.UserId.String(), key, value)
+		if err != nil {
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -40,9 +48,38 @@ func (user *User) SetUserProperty(key string, value string) (appErr *Application
 	return nil
 }
 
+// Sets a single user property for a user, wraps it in a transaction to make sure it doesn't blow up
+func (user *User) SetUserProperty(key string, value string) (appErr *ApplicationError) {
+
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = user.SetUserPropertyTransactional(tx, key, value)
+	if appErr != nil {
+		tx.Rollback()
+		return
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
 // Get a single User Property from the db
 func (user *User) GetUserProperty(key string) (property string, appErr *ApplicationError) {
+
+	// If we have the property in the user struct just return it
+	if property, ok := user.Properties[key]; ok {
+		return property, nil
+	}
+
 	err := db.QueryRow(`SELECT value FROM dm_user_properties WHERE user_id = $1 AND key ILIKE $2`, user.UserId.String(), key).Scan(&property)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -75,8 +112,7 @@ func (user *User) GetUserProperties() (properties map[string]string, appErr *App
 			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
 			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 		}
-	}
-	// DROIDS Set name to concatenation of first and last name (could make this a frontend problem)
+	}	
 	properties["name"] = properties["first_name"] + " " + properties["last_name"]
 	user.Properties = properties
 	return properties, nil

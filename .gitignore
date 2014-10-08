@@ -10,3 +10,5 @@ webapp/dist
 webapp/dist/DMAssassins.min.js
 
 webapp/index.html
+
+db_dump.sql

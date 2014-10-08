@@ -38,6 +38,7 @@ var app = app || {
             'edit_rules': 'edit_rules',
             'switch_game': 'switch_game',
             'game_settings': 'game_settings',
+            'plot_twists': 'plot_twists',
 
         },
         // routes that require we have a game that has been started
@@ -256,6 +257,11 @@ var app = app || {
             var view = new app.Views.AdminGameSettingsView();
             app.Running.AppView.setCurrentView(view);
             this.render();             
+        },
+        plot_twists: function() {
+            var view = new app.Views.AdminPlotTwistsView();
+            app.Running.AppView.setCurrentView(view);
+            this.render();                         
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {
