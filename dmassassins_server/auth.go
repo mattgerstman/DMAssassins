@@ -54,12 +54,14 @@ func GetBasicAuth(r *http.Request) (userId uuid.UUID, token string, appErr *Appl
 		return nil, "", NewApplicationError(msg, err, ErrCodeInvalidHeader)
 	}
 
+	// Check that the userId is valid
 	userId = uuid.Parse(userTokenComponents[0])
 	if userId == nil {
 		msg := "Invalid Header: Authorization"
 		err := errors.New("UserId was not valid UUID")
 		return nil, "", NewApplicationError(msg, err, ErrCodeInvalidHeader)
 	}
+	// Grab the token
 	token = userTokenComponents[1]
 
 	return userId, token, nil
@@ -67,21 +69,24 @@ func GetBasicAuth(r *http.Request) (userId uuid.UUID, token string, appErr *Appl
 
 // Requires that a user is logged in
 func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
+	// Decode the userId and token from the Header
 	userId, token, appErr := GetBasicAuth(r)
 	if appErr != nil {
 		return appErr
 	}
-
+	// Get the user
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return appErr
 	}
 
+	// Get the user's db token
 	dbToken, appErr := user.GetToken()
 	if appErr != nil {
 		return appErr
 	}
 
+	// Validate the user's facebook id with the dbToken and the given token
 	appErr = validateFacebookToken(dbToken, token, user.FacebookId)
 
 	if appErr != nil {
@@ -135,10 +140,12 @@ func GetPermissionDeniedAppErr() (appErr *ApplicationError) {
 // Check if a role/teamId match to be the team captain for the user_id/game_id in the request
 func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (appErr *ApplicationError) {
 
+	// If the user is an admin let them pass
 	if CompareRole(role, RoleAdmin) {
 		return nil
 	}
 
+	// If the user is not a captain auto block
 	if !CompareRole(role, RoleCaptain) {
 		return GetPermissionDeniedAppErr()
 	}
@@ -168,11 +175,14 @@ func isTeamCaptain(role string, teamId uuid.UUID, r *http.Request) (appErr *Appl
 
 // Requires the user is a team captain
 func RequiresCaptain(r *http.Request) (role string, appErr *ApplicationError) {
+
+	// Decode role and teamId from request info
 	role, teamId, _, appErr := getRoleFromRequest(r)
 	if appErr != nil {
 		return role, appErr
 	}
 
+	// Check that the user is captain for the requested team data
 	appErr = isTeamCaptain(role, teamId, r)
 	if appErr != nil {
 		return role, appErr
@@ -183,10 +193,14 @@ func RequiresCaptain(r *http.Request) (role string, appErr *ApplicationError) {
 
 // Requires the user is a game admin
 func RequiresAdmin(r *http.Request) (role string, appErr *ApplicationError) {
+
+	// Decode role and teamId from request info
 	role, _, _, appErr = getRoleFromRequest(r)
 	if appErr != nil {
 		return role, appErr
 	}
+
+	// check if the user is an admin if not return a permission denied error
 	if !CompareRole(role, RoleAdmin) {
 		return role, GetPermissionDeniedAppErr()
 	}
@@ -197,10 +211,13 @@ func RequiresAdmin(r *http.Request) (role string, appErr *ApplicationError) {
 
 // Requires the user is Matt Gerstman
 func RequiresSuperAdmin(r *http.Request) (role string, appErr *ApplicationError) {
+
+	// Decode role and teamId from request info
 	role, _, _, appErr = getRoleFromRequest(r)
 	if appErr != nil {
 		return role, appErr
 	}
+	// check if the user is a super admin if not return a permission denied error
 	if !CompareRole(role, RoleSuperAdmin) {
 		return role, GetPermissionDeniedAppErr()
 	}
@@ -209,13 +226,18 @@ func RequiresSuperAdmin(r *http.Request) (role string, appErr *ApplicationError)
 
 // Validates a db token/facebook id against the given token
 func validateFacebookToken(facebookToken, token, facebookId string) *ApplicationError {
+	// If the given token is equal juist return nil
 	if facebookToken == token {
 		return nil
 	}
+
+	// Grab facebook Id from token
 	apiFacebookId, appErr := GetFacebookIdFromToken(token)
 	if appErr != nil {
 		return appErr
 	}
+
+	// If the tokens arent equal permission denied
 	if apiFacebookId != facebookId {
 		msg := "Invalid Token"
 		err := errors.New(msg)
@@ -224,6 +246,7 @@ func validateFacebookToken(facebookToken, token, facebookId string) *Application
 	return nil
 }
 
+// Gets the userRole, teamId, and userId from the request to be validated upstream
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {
 	userId, token, appErr := GetBasicAuth(r)
 	if appErr != nil {

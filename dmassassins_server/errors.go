@@ -10,14 +10,15 @@ import (
 // Error codes are multiples of http codes for easy mapping
 const (
 	// 400 - Bad Request
-	ErrCodeBadRequestWTF    = 40000
-	ErrCodeInvalidParameter = 40001
-	ErrCodeMissingParameter = 40002
-	ErrCodeInvalidHeader    = 40003
-	ErrCodeMissingHeader    = 40004
-	ErrCodeInvalidUUID      = 40005
-	ErrCodeInvalidJSON      = 40006
-	ErrCodeNeedMorePlayers  = 40007
+	ErrCodeBadRequestWTF     = 40000
+	ErrCodeInvalidParameter  = 40001
+	ErrCodeMissingParameter  = 40002
+	ErrCodeInvalidHeader     = 40003
+	ErrCodeMissingHeader     = 40004
+	ErrCodeInvalidUUID       = 40005
+	ErrCodeInvalidJSON       = 40006
+	ErrCodeNeedMorePlayers   = 40007
+	ErrCodePlayerMissingTeam = 40008
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100
@@ -56,7 +57,7 @@ const (
 	ErrCodeFile                   = 50003
 	ErrCodeEmail                  = 50004
 	ErrCodeBadTemplate            = 50005
-	ErrCodeInvalidPlotTwist	= 50006
+	ErrCodeInvalidPlotTwist       = 50006
 	ErrCodeSession                = 50010 // Malformed Session
 )
 

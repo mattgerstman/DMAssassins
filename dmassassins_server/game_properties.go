@@ -37,6 +37,7 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 		}
 	}
 
+	// Set the property in the struct
 	game.Properties[key] = value
 	return nil
 }
@@ -73,6 +74,7 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
 	// Loop through rows and add properties
 	for rows.Next() {
 		var key string
@@ -88,8 +90,8 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
 		}
 	}
-	// DROIDS Set name to concatenation of first and last name (could make this a frontend problem)
-	properties["name"] = properties["first_name"] + " " + properties["last_name"]
+
+	// Add the properties to the struct
 	game.Properties = properties
 	return properties, nil
 }

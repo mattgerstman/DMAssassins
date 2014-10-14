@@ -44,11 +44,13 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (gameMapping *
 	var kills int
 	var alive bool
 
+	// Confirm the user has the right password
 	appErr = CheckPassword(gameId, gamePassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// Assign the user a secret
 	secret, appErr := NewSecret()
 	if appErr != nil {
 		return nil, appErr
@@ -65,15 +67,17 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (gameMapping *
 
 // Changes a user's role within a game
 func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationError) {
-
+	// Update the user role
 	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	// Validate it affected at least one row
 	NoRowsAffectedAppErr := WereRowsAffected(res)
 	if NoRowsAffectedAppErr != nil {
 		return NoRowsAffectedAppErr
 	}
+	// Change the role on the user struct
 	gameMapping.UserRole = role
 	return nil
 }
@@ -105,7 +109,7 @@ func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 	var userIdBuffer string
 
 	// Query the database
-	err := db.QueryRow(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_admin' AND game_id = $1`, game.GameId.String()).Scan(&userIdBuffer)
+	err := db.QueryRow(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_admin' AND game_id = $1 LIMIT 1`, game.GameId.String()).Scan(&userIdBuffer)
 	if err == sql.ErrNoRows {
 		return nil, NewApplicationError("No Admin", err, ErrCodeNotFoundGameMapping)
 	}
@@ -121,7 +125,7 @@ func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 	return GetUserById(userId)
 }
 
-// delete sthe actual game mapping from the db
+// deletes the actual game mapping from the db
 func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
 	res, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
@@ -145,6 +149,7 @@ func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationErr
 		return appErr
 	}
 
+	// Kill the assassins target (silently)
 	if appErr == nil {
 		_, _, appErr = assassin.KillTarget(gameMapping.GameId, secret, false)
 		if appErr != nil {
@@ -152,6 +157,7 @@ func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationErr
 		}
 	}
 
+	// Delete the game mapping from the db
 	appErr = gameMapping.delete()
 	if appErr != nil {
 		return appErr
@@ -271,6 +277,7 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	return users, nil
 }
 
+// Revive a previously killed user
 func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr *ApplicationError) {
 
 	// Get a random assassin/target pair
