@@ -12,3 +12,5 @@ webapp/dist/DMAssassins.min.js
 webapp/index.html
 
 db_dump.sql
+
+dmassassins_server/npm-debug.log

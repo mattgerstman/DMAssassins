@@ -14,6 +14,7 @@ type GameSettingsPut struct {
 	EnableTeams  string `json:"game_teams_enabled"`
 }
 
+// PUT - Changes game settings
 func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
 	if appErr != nil {

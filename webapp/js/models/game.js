@@ -20,7 +20,7 @@ var app = app || {
     'use strict';
     app.Models.Game = Backbone.Model.extend({
 
-        // default properties with a fake game
+        // default properties for a game to appear "Loading..."
         defaults: {
             game_id: '',
             game_name: 'Loading...',
@@ -29,8 +29,11 @@ var app = app || {
             member: true
         },
 
+		// sets game_id as the id attribute
         idAttribute: 'game_id',
+        // Sets the url root
         urlRoot: config.WEB_ROOT + 'user/',
+        // Determine if teams are enabled for this game
         areTeamsEnabled: function() {
             return this.getProperty('teams_enabled') == 'true';
         },
@@ -52,12 +55,12 @@ var app = app || {
         },
         url: function() {
             var url = this.urlRoot;
-            url += app.Session.get('user_id') + '/game/';            
+            url += app.Session.get('user_id') + '/game/';
             var game_id = this.get('game_id');
             if (!game_id)
             {
                 return url;
-            }            
+            }
             return url + game_id + '/';
         }
     });

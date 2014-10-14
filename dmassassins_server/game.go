@@ -5,7 +5,9 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 type Game struct {
@@ -29,12 +31,13 @@ func (game *Game) Rename(newName string) (appErr *ApplicationError) {
 		return NoRowsAffectedAppErr
 	}
 
+	// Set the name in the struct if we use it later
 	game.GameName = newName
 	return nil
 
 }
 
-// Rename a game
+// Change a game's password
 func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) {
 	res, err := db.Exec(`UPDATE dm_games SET game_password = $1 WHERE game_id = $2`, newPassword, game.GameId.String())
 	if err != nil {
@@ -47,6 +50,7 @@ func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) 
 		return NoRowsAffectedAppErr
 	}
 
+	// Set the password in the struct if we use it later
 	game.HasPassword = newPassword == ""
 	game.Properties["game_password"] = newPassword
 	return nil
@@ -57,7 +61,6 @@ func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) 
 func GetGameList() (games []*Game, appErr *ApplicationError) {
 	// Query db for all games
 	rows, err := db.Query(`SELECT game_id, game_name, game_started, game_password FROM dm_games ORDER BY game_name`)
-
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -114,6 +117,20 @@ func (game *Game) End() (appErr *ApplicationError) {
 	return nil
 }
 
+// Determine if any players need a team before starting
+func (game *Game) doAnyPlayersNeedTeams() (appErr *ApplicationError) {
+	var count int
+	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1 AND team_id IS NULL", game.GameId.String()).Scan(&count)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	if count != 0 {
+		return NewApplicationError("Every player must be assigned a team to start", err, ErrCodePlayerMissingTeam)
+	}
+	return nil
+}
+
+// Get the number of players for a game
 func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
 
 	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1", game.GameId.String()).Scan(&count)
@@ -126,10 +143,23 @@ func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
 // Start a game
 func (game *Game) Start() (appErr *ApplicationError) {
 
+	// Make sure we have enough players to start the game
 	count, appErr := game.GetNumPlayers()
 	if count < 4 {
 		err := errors.New("Not Enough Players")
 		return NewApplicationError("You must have at least 4 players to start a game", err, ErrCodeNeedMorePlayers)
+	}
+
+	// If teams are enabled make sure all users have a team to start
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if appErr != nil {
+		return appErr
+	}
+	if teamsEnabled == `true` {
+		anyPlayersNeedTeams := game.doAnyPlayersNeedTeams()
+		if anyPlayersNeedTeams != nil {
+			return anyPlayersNeedTeams
+		}
 	}
 
 	// First assign targets for the game
@@ -317,30 +347,188 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 }
 
-func (game *Game) AssignTargetsByTeams() (targets map[string]uuid.UUID, appErr *ApplicationError) {
-		// Begin Transaction
+// Assigns targets using a methodology
+func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationError) {
+	// DROIDS FILL THIS IN
+	return nil
+}
+
+type targetPair struct {
+	AssassinId     uuid.UUID `json:assassin_id`
+	AssassinTeamId uuid.UUID `json:assassin_team_id`
+	TargetId       uuid.UUID `json:target_id`
+	TargetTeamId   uuid.UUID `json:target_team_id`
+}
+
+// Assign targets and space them out by team
+func (game *Game) AssignTargetsByTeams() (appErr *ApplicationError) {
+	// Begin Transaction
 	tx, err := db.Begin()
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id, team_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY random()`, game.GameId.String())
+	rows, err := db.Query(`SELECT user_id, team_id, user_role FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	teamsList := make([]uuid.UUID)
+	// Get the list of team ids
+	teamsList, appErr := game.GetActiveTeamIds()
+	if appErr != nil {
+		return appErr
+	}
 
-	_ = teamsList
-	_ = rows
+	// Create userList, captainList, and buffer variables
+	var userIdBuffer, teamIdBuffer, userRole string
+	userList := make(map[string][]uuid.UUID)
+	captainList := make(map[string]uuid.UUID)
 
-	return nil, nil
+	// Fill in userList and captainList with valid slices
+	for _, team := range teamsList {
+		userList[team.String()] = []uuid.UUID{}
+	}
+
+	// parse out users into teams and captain
+	numUsers := 0
+	for rows.Next() {
+		// Get the user_id from the row
+		err = rows.Scan(&userIdBuffer, &teamIdBuffer, &userRole)
+		if err != nil {
+			tx.Rollback()
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
+		// If user is a captain put them in the captains list
+		userId := uuid.Parse(userIdBuffer)
+		if CompareRole(userRole, RoleCaptain) {
+			captainList[teamIdBuffer] = userId
+			continue
+		}
+		// If they aren't a captain add them to the userList
+		userList[teamIdBuffer] = append(userList[teamIdBuffer], userId)
+		numUsers++
+	}
+
+	numTeams := len(teamsList)
+	originalNumTeams := numTeams
+	rand.Seed(time.Now().UTC().UnixNano())
+
+	assigned := 1
+	var targetList []*targetPair
+	randTeam := teamsList[rand.Intn(numTeams)]
+
+	var firstUser, firstUserTeam, currentUser, currentUserTeam, lastUser, lastUserTeam uuid.UUID
+
+	firstUser, userList[randTeam.String()] = userList[randTeam.String()][0], userList[randTeam.String()][1:]
+
+	firstUserTeam = randTeam
+	lastUserTeam = firstUserTeam
+	lastUser = firstUser
+
+	// While we still have users to assign
+	for assigned < numUsers {
+		// Get a random team
+		randTeamIndex := rand.Intn(numTeams)
+		currentUserTeam = teamsList[randTeamIndex]
+
+		// If the random team is the same as the last one just go to the next team
+		if uuid.Equal(currentUserTeam, lastUserTeam) {
+			randTeamIndex++
+			if randTeamIndex > numTeams {
+				randTeamIndex = 0
+			}
+			currentUserTeam = teamsList[randTeamIndex]
+		}
+
+		// If our current team has no members delete it and go to the next one
+		for len(userList[currentUserTeam.String()]) == 0 {
+			// delete the current team from the userlist
+			delete(userList, currentUserTeam.String())
+
+			// delete the currentTeam from the teamsList
+			teamsList = append(teamsList[:randTeamIndex], teamsList[(randTeamIndex+1):]...)
+
+			// change numTeams to reflect the current number of teams
+			numTeams = len(teamsList)
+			// If our index is greater than the number of teams set it to 0
+			if randTeamIndex >= numTeams {
+				randTeamIndex = 0
+			}
+
+			// set the current user team
+			currentUserTeam = teamsList[randTeamIndex]			
+		}
+
+		// pop out currentUser from userList[currentUserTeam]
+		currentUser, userList[currentUserTeam.String()] = userList[currentUserTeam.String()][0], userList[currentUserTeam.String()][1:]
+
+		// append lastUser currentUser to the targetsList
+		userTargetPair := &targetPair{lastUser, lastUserTeam, currentUser, currentUserTeam}
+		targetList = append(targetList, userTargetPair)
+
+		lastUser = currentUser
+		lastUserTeam = currentUserTeam
+
+		assigned++
+	}
+
+	userTargetPair := &targetPair{lastUser, lastUserTeam, firstUser, firstUserTeam}
+	targetList = append(targetList, userTargetPair)
+
+
+	// Space out captains by 5 unless we don't have enough users
+	captainSpace := 5
+	numTeams = originalNumTeams
+	userTeamRatio := (numUsers / numTeams)
+	if userTeamRatio < captainSpace {
+		captainSpace = userTeamRatio
+	}
+
+	i := 0
+	// Loop through captains
+	for captainTeam, captain := range captainList {
+		captainTeamId := uuid.Parse(captainTeam)
+		// we have to use a marker to determine if we've found an appropriate pair to insert the captain in
+		foundPair := false
+		for !foundPair {
+			if i >= numUsers {
+				i = 0
+			}
+			// Check if the assassin and target both have different teams than the captain
+			assassinTeamId, targetTeamId := targetList[i].AssassinTeamId, targetList[i].TargetTeamId
+			if uuid.Equal(captainTeamId, assassinTeamId) {
+				i++
+				continue
+			}	
+			if uuid.Equal(captainTeamId, targetTeamId) {
+				i++
+				continue
+			}
+			// If neither has the same team, we've found a match
+			foundPair = true
+		}
+		// Get all the assassin/target information
+		assassinId, assassinTeamId, targetId, targetTeamId := targetList[i].AssassinId, targetList[i].AssassinTeamId, targetList[i].TargetId, targetList[i].TargetTeamId
+		// Insert the captain after the assassin
+		targetList[i] = &targetPair{assassinId, assassinTeamId, captainId, captainTeamId}
+		// Add a pair for the target
+		captainPair := &targetPair{captainId, captainTeamId, targetId, targetTeamId}		
+		targetList = append(targetList[i])
+
+		
+	}
+
+	_ = targetList
+
+	return nil
 
 }
 
-// Assign all targets
+// Assign all targets plainly
+// DROIDS rewrite this to not do a million inserts
 func (game *Game) AssignTargets() (targets map[string]uuid.UUID, appErr *ApplicationError) {
 
 	// Begin Transaction

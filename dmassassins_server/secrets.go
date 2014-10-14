@@ -14,6 +14,7 @@ func NewSecret() (secret string, appErr *ApplicationError) {
 		return "", NewApplicationError("Internal Error", err, ErrCodeFile)
 	}
 
+	// Read in words list
 	var words []string
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&words)

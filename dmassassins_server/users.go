@@ -49,6 +49,7 @@ func NewUser(username, email, facebookId string, properties map[string]string) (
 func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 	var userId uuid.UUID
 	var email, facebookId, userIdBuffer string
+	// Get the user info from the db
 	err := db.QueryRow(`SELECT user_id, email, facebook_id FROM dm_users WHERE username = $1`, username).Scan(&userIdBuffer, &email, &facebookId)
 	switch {
 	case err == sql.ErrNoRows:
@@ -58,13 +59,19 @@ func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Parse the user_id into a uuid
 	userId = uuid.Parse(userIdBuffer)
 
+	// Build the user struct
 	user = &User{userId, username, email, facebookId, nil}
+
+	// Get the user's properties
 	_, appErr = user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// Return the user
 	return user, nil
 }
 
@@ -72,6 +79,7 @@ func GetUserByUsername(username string) (user *User, appErr *ApplicationError) {
 func GetUserByEmail(email string) (user *User, appErr *ApplicationError) {
 	var userId uuid.UUID
 	var username, facebookId, userIdBuffer string
+	// Get the user info from the db
 	err := db.QueryRow(`SELECT user_id, username, facebook_id FROM dm_users WHERE email = $1`, email).Scan(&userIdBuffer, &username, &facebookId)
 	switch {
 	case err == sql.ErrNoRows:
@@ -81,19 +89,23 @@ func GetUserByEmail(email string) (user *User, appErr *ApplicationError) {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Parse the user_id into a uuid
 	userId = uuid.Parse(userIdBuffer)
 
+	// Build the user struct
 	user = &User{userId, username, email, facebookId, nil}
 	_, appErr = user.GetUserProperties()
 	if appErr != nil {
 		return nil, appErr
 	}
+	// Return the user
 	return user, nil
 }
 
 // Select a user from the db by user_id (uuid) and return it as a user object
 func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 	var username, email, facebookId string
+	// Get the user info from the db
 	err := db.QueryRow(`SELECT username, email, facebook_id FROM dm_users WHERE user_id = $1`, userId.String()).Scan(&username, &email, &facebookId)
 	switch {
 	case err == sql.ErrNoRows:
@@ -117,11 +129,13 @@ func GetUserById(userId uuid.UUID) (user *User, appErr *ApplicationError) {
 // Gets game related properties for a user and loads them into the user.Properties map
 func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
 
+	// Get the game mapping
 	gameMapping, appErr := GetGameMapping(user.UserId, gameId)
 	if appErr != nil {
 		return appErr
 	}
 
+	// Convert al lthe game mapping columns to userProperties
 	user.Properties["secret"] = gameMapping.Secret
 	user.Properties["user_role"] = gameMapping.UserRole
 	user.Properties["alive"] = strconv.FormatBool(gameMapping.Alive)
@@ -131,6 +145,7 @@ func (user *User) GetUserGameProperties(gameId uuid.UUID) *ApplicationError {
 		return nil
 	}
 
+	// Gets the user's team
 	team, appErr := GetTeamById(gameMapping.TeamId)
 	if appErr != nil {
 		return nil
@@ -234,14 +249,15 @@ func (user *User) ChangeEmail(email string) (appErr *ApplicationError) {
 func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (newTargetId, oldTargetId uuid.UUID, appErr *ApplicationError) {
 
 	var targetSecret string
-	var oldTargetIdBuffer, newTargetIdBuffer sql.NullString
+	var oldTargetIdBuffer, newTargetIdBuffer, oldTargetTeamIdBuffer sql.NullString
 	// Grab the target's secret and user_id for comparison/use below
 
-	err := db.QueryRow(`SELECT map.secret, users.user_id FROM dm_users as users, dm_user_game_mapping as map WHERE users.user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2) AND map.user_id = users.user_id AND map.game_id = $3 `, user.UserId.String(), gameId.String(), gameId.String()).Scan(&targetSecret, &oldTargetIdBuffer)
+	err := db.QueryRow(`SELECT map.secret, users.user_id, map.team_id FROM dm_users as users, dm_user_game_mapping as map WHERE users.user_id = (SELECT target_id FROM dm_user_targets where user_id = $1 AND game_id = $2) AND map.user_id = users.user_id AND map.game_id = $3 `, user.UserId.String(), gameId.String(), gameId.String()).Scan(&targetSecret, &oldTargetIdBuffer, &oldTargetTeamIdBuffer)
 	if err != nil {
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	oldTargetTeamId := uuid.Parse(oldTargetTeamIdBuffer.String)
 	oldTargetId = uuid.Parse(oldTargetIdBuffer.String)
 
 	// Start a transaction so we can rollback if something blows up
@@ -308,7 +324,7 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 	}
 
 	// Do anything necessary for a plot twist here
-	appErr = user.HandlePlotTwistOnKill(tx, gameId)
+	appErr = user.HandlePlotTwistOnKill(tx, oldTargetId, gameId, oldTargetTeamId)
 	if appErr != nil {
 		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
