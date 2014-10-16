@@ -816,6 +816,7 @@
             <a href="#" class="list-group-item" id="targets_randomize">Randomize Targets</a>
             <a href="#" class="list-group-item" id="targets_reverse">Reverse Targets</a>
             <a href="#" class="list-group-item" id="targets_strong_weak">Strong Target The Weak</a>
+            <a href="#" class="list-group-item" id="targets_strong_closed_loop">Put Strong In A Closed Loop</a>
         </div>
         <div class="list-group col-sm-3 col-sm-offset-1	">
             <h1 class="text-center">Kill Mode</h1>

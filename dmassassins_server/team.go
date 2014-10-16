@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+const (
+	MinUsersPerTeam = 5
+)
+
 type Team struct {
 	TeamId   uuid.UUID `json:"team_id"`
 	GameId   uuid.UUID `json:"game_id"`
@@ -66,7 +70,7 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 
 // Get a list of team ids with players currently in the game
 func (game *Game) GetActiveTeamIds() (teamsList []uuid.UUID, appErr *ApplicationError) {
-	rows, err := db.Query(`SELECT distinct(team_id) FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY team_name`, game.GameId.String())
+	rows, err := db.Query(`SELECT distinct(team_id) FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true`, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -259,4 +263,40 @@ func (team *Team) Rename(newName string) (appErr *ApplicationError) {
 
 	team.TeamName = newName
 	return nil
+}
+
+func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
+	var numUsers, numCaptains int
+
+	rows, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		err = rows.Scan(&numUsers)
+		if err != nil {
+			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		if numUsers < MinUsersPerTeam {
+			return false, nil
+		}
+	}
+
+	rows, err = db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&numCaptains)
+		if err != nil {
+			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		if numCaptains != 1 {
+			return false, nil
+		}
+	}
+
+	return true, nil
+
 }

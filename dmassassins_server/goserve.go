@@ -139,6 +139,9 @@ func StartServer() {
 		log.Fatal("Could not connect to database")
 	}
 
+	// startGame()
+	// generateTestUsers()
+
 	defer db.Close()
 
 	r := mux.NewRouter().StrictSlash(true)

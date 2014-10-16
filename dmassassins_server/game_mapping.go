@@ -51,7 +51,7 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (gameMapping *
 	}
 
 	// Assign the user a secret
-	secret, appErr := NewSecret()
+	secret, appErr := NewSecret(3)
 	if appErr != nil {
 		return nil, appErr
 	}
