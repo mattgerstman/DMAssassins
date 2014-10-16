@@ -8,7 +8,7 @@ import (
 )
 
 // Creates a new secret from the json file
-func NewSecret() (secret string, appErr *ApplicationError) {
+func NewSecret(length int) (secret string, appErr *ApplicationError) {
 	file, err := os.Open("secrets.json")
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeFile)
@@ -26,7 +26,7 @@ func NewSecret() (secret string, appErr *ApplicationError) {
 	// I'm using a permutation of the array because it's the simplest way i found to get three unique words from it
 	rand.Seed(time.Now().UTC().UnixNano())
 	for i, j := range rand.Perm(len(words)) {
-		if i >= 3 {
+		if i >= length {
 			break
 		}
 		secret += words[j]

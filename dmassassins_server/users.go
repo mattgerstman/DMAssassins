@@ -23,15 +23,10 @@ func NewUser(username, email, facebookId string, properties map[string]string) (
 	// Generate the UUID and insert it
 	userId := uuid.NewRandom()
 
-	res, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, facebook_id) VALUES ($1,$2,$3,$4)`, userId.String(), username, email, facebookId)
+	_, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, facebook_id) VALUES ($1,$2,$3,$4)`, userId.String(), username, email, facebookId)
 	if err != nil {
+		fmt.Println(err)
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Makes sure insert worked
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return nil, NoRowsAffectedAppErr
 	}
 
 	// Create user
