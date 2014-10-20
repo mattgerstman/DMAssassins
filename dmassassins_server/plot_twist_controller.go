@@ -9,12 +9,12 @@ import (
 )
 
 type PlotTwistPut struct {
-	PlotTwistType string `json:"plot_twist_type"`
-	PlotTwistName string `json:"plot_twist_name"`
+	PlotTwistName  string `json:"plot_twist_name"`
+	PlotTwistValue string `json:"plot_twist_value"`
 }
 
 func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
-	_, appErr = RequiresAdmin(r)
+	//_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -41,19 +41,18 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 	if err != nil {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
-
-	// Validate type
-	plotTwistType := plotTwistPut.PlotTwistType
-	if plotTwistType == "" {
-		return nil, NewApplicationError("Missing Parameter: plot_twist_type", err, ErrCodeMissingParameter)
-	}
 	// Validate Name
 	plotTwistName := plotTwistPut.PlotTwistName
 	if plotTwistName == "" {
 		return nil, NewApplicationError("Missing Parameter: plot_twist_name", err, ErrCodeMissingParameter)
 	}
+	plotTwistValue := plotTwistPut.PlotTwistValue
+	if plotTwistValue == "" {
+		return nil, NewApplicationError("Missing Parameter: plot_twist_value", err, ErrCodeMissingParameter)
+	}
+
 	// Activate plot twist
-	appErr = game.ActivatePlotTwist(plotTwistType, plotTwistName)
+	appErr = game.ActivatePlotTwist(plotTwistName, plotTwistValue)
 	if appErr != nil {
 		return nil, appErr
 	}

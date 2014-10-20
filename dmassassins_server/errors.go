@@ -19,6 +19,7 @@ const (
 	ErrCodeInvalidJSON       = 40006
 	ErrCodeNeedMorePlayers   = 40007
 	ErrCodePlayerMissingTeam = 40008
+	ErrCodeInvalidPlotTwist  = 40009
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100
@@ -57,7 +58,6 @@ const (
 	ErrCodeFile                   = 50003
 	ErrCodeEmail                  = 50004
 	ErrCodeBadTemplate            = 50005
-	ErrCodeInvalidPlotTwist       = 50006
 	ErrCodeSession                = 50010 // Malformed Session
 )
 

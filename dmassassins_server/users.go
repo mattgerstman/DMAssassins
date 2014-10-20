@@ -18,6 +18,13 @@ type User struct {
 	Properties map[string]string `json:"properties"`
 }
 
+// Returns a dumb user object with just a userId to avoid DB Queries of setting up a full struct
+// This should be used extremely cautiously and only for items like batch setting user properties
+func GetDumbUser(userId uuid.UUID) (user *User) {
+	properties := make(map[string]string)
+	return &User{userId, "", "", "", properties}
+}
+
 // Add a user to the DB and return it as a user object
 func NewUser(username, email, facebookId string, properties map[string]string) (user *User, appErr *ApplicationError) {
 	// Generate the UUID and insert it
