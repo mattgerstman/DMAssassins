@@ -3,7 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-//	"fmt"
+	//	"fmt"
 	"strconv"
 )
 
@@ -22,13 +22,17 @@ func GetParamsForSlice(startingNum int, slice []interface{}) (params string) {
 func ConvertUserIdRowsToSlice(rows *sql.Rows) (users []uuid.UUID, appErr *ApplicationError) {
 	var userIdBuffer string
 	for rows.Next() {
+		// load the uuid into a buffer string
 		err := rows.Scan(&userIdBuffer)
 		if err != nil {
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+		// Parse the uuid
 		userId := uuid.Parse(userIdBuffer)
+		// append the uuid
 		users = append(users, userId)
 	}
+	// Return the users list
 	return users, nil
 }
 

@@ -123,57 +123,6 @@ func (game *Game) AssignClosedStrongLoop() (appErr *ApplicationError) {
 	return game.AssignTargets(users, true)
 }
 
-// Get a slice of the strongest player for each team, ties are broken arbitrarily
-func (game *Game) getStrongPlayers() (strong []uuid.UUID, appErr *ApplicationError) {
-	// segregate strong users
-	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills desc`, game.GameId.String())
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// parse strong users into slice
-	for rows.Next() {
-		var strongUserIdBuffer string
-		err = rows.Scan(&strongUserIdBuffer)
-		if err != nil {
-			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-		// Add strong userId to strong slice
-		strongUserId := uuid.Parse(strongUserIdBuffer)
-		strong = append(strong, strongUserId)
-	}
-	return strong, nil
-}
-
-// Get a slice of the weakest player for each team, ties are broken arbitrarily
-func (game *Game) getWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) {
-	// segregate weak users
-	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills asc`, game.GameId.String())
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// We need to offset strong and weak to ensure that strong players aren't targetting their own weakest palyer
-	var firstWeakUserIdBuffer string
-	rows.Next()
-	rows.Scan(&firstWeakUserIdBuffer)
-	firstWeakUserId := uuid.Parse(firstWeakUserIdBuffer)
-
-	// parse weak users into slice
-	for rows.Next() {
-		var weakUserIdBuffer string
-		err = rows.Scan(&weakUserIdBuffer)
-		if err != nil {
-			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-		// Add weak userId to weak slice
-		weakUserId := uuid.Parse(weakUserIdBuffer)
-		weak = append(weak, weakUserId)
-	}
-	weak = append(weak, firstWeakUserId)
-	return weak, nil
-}
-
 // Gets a list of rows for players not in the given uuid slice
 func (game *Game) getPlayersNotInSlice(userSlice []interface{}) (rows *sql.Rows, appErr *ApplicationError) {
 

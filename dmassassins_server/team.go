@@ -180,6 +180,39 @@ func DeleteTeam(teamId uuid.UUID) (appErr *ApplicationError) {
 	return nil
 }
 
+// Gets a uuid slice of team captains who are alive
+func (game *Game) GetAllTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
+// Gets a uuid slice of team captains who are alive
+func (game *Game) GetAliveTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND alive = true AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
+// Gets a uuid slice of team captains who are dead
+func (game *Game) GetDeadTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND alive = false AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
 // Gets the team for a user and gameId
 func (user *User) GetTeam(gameId uuid.UUID) (team *Team, appErr *ApplicationError) {
 	gameMapping, appErr := GetGameMapping(user.UserId, gameId)

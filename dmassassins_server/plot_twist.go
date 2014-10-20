@@ -10,51 +10,182 @@ import (
 )
 
 const (
+	SecInHour        = 3600
 	TwentyFourHours  = 86400
 	FourtyEightHours = 172800
 )
 
-// Handles a Plot Twist that has an immediate action
-func (game *Game) handleActionTwist(twistType, twistName string) (appErr *ApplicationError) {
-	if twistType == `assign_targets` {
-		return game.AssignTargetsBy(twistName)
+// Revives a list of users, assumes they're all already dead
+func (game *Game) ReviveUsers(toBeRevived []uuid.UUID) (appErr *ApplicationError) {
+
+	// Create a interface slice to store the users to be killed and the
+	toBeRevivedInterface := ConvertUUIDSliceToInterface(toBeRevived)
+
+	var toBeRevivedUpdate []interface{}
+	toBeRevivedUpdate = append(toBeRevivedUpdate, game.GameId.String())
+	toBeRevivedUpdate = append(toBeRevivedUpdate, toBeRevivedInterface...)
+
+	// Get the params string for the update
+	params := GetParamsForSlice(1, toBeRevivedUpdate)
+
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	if twistType == `kill_users` {
-		// DROIDS write kill_users function
-		return nil
+
+	// Prepare statement to revive captains
+	reviveStmt, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = true WHERE game_id = $1 AND user_id IN (` + params + `)`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	return nil
+
+	// Execute statement to revive captains
+	_, err = tx.Stmt(reviveStmt).Exec(toBeRevivedUpdate...)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Mark users as revived
+	for _, userId := range toBeRevived {
+		user := GetDumbUser(userId)
+		appErr = user.SetUserPropertyTransactional(tx, `revived`, `true`)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	// Assign targets
+	return game.AssignTargetsBy(`normal`)
+}
+
+// Revives all of the captains who are dead
+func (game *Game) ReviveCaptains() (appErr *ApplicationError) {
+	// Get all the dead team captains
+	toBeRevived, appErr := game.GetDeadTeamCaptains()
+	if appErr != nil {
+		return appErr
+	}
+	// Revive them
+	return game.ReviveUsers(toBeRevived)
+
+}
+
+// Revives all of the strongest players who are dead
+func (game *Game) ReviveStrongestPlayers() (appErr *ApplicationError) {
+	// Get all the strongest players
+	toBeRevived, appErr := game.getStrongPlayersWithState(false)
+	if appErr != nil {
+		return appErr
+	}
+	// Revive them
+	return game.ReviveUsers(toBeRevived)
+}
+
+// Kill all the players who havent killed in the past x hours and randomize targets
+func (game *Game) KillPlayersWithNoRecentKills(hours float64) (appErr *ApplicationError) {
+
+	// Get last_killed value for all users
+	rows, err := db.Query(`SELECT DISTINCT ON (m.user_id) m.user_id, p.value FROM dm_user_game_mapping AS m LEFT OUTER JOIN dm_user_properties AS p ON m.user_id = p.user_id AND p.key='last_killed' WHERE m.game_id = $1 AND m.alive = true AND (m.user_role = 'dm_captain' OR m.user_role='dm_user')`, game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Get current time in seconds
+	now := time.Now()
+
+	var toBeKilled []uuid.UUID
+	minKillTime := float64(now.Unix()) - (hours * float64(SecInHour))
+
+	for rows.Next() {
+		var userIdBuffer string
+		var lastKilledBuffer sql.NullString
+
+		// Scan userId and lastKilled
+		err = rows.Scan(&userIdBuffer, &lastKilledBuffer)
+		if err != nil {
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
+		// Set up lastKilled in advance
+		var lastKilled float64
+		lastKilled = 0
+
+		// If the selected lastKilled is valid parse it to a float
+		if lastKilledBuffer.Valid {
+			lastKilled, err = strconv.ParseFloat(lastKilledBuffer.String, 64)
+			if err != nil {
+				return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+			}
+		}
+
+		// If lastKilled is at least the minimum kill time continue
+		if lastKilled >= minKillTime {
+			continue
+		}
+
+		// append the userId to the kill list
+		userId := uuid.Parse(userIdBuffer)
+		toBeKilled = append(toBeKilled, userId)
+	}
+
+	// Create a interface slice to store the users to be killed and the gameId
+	toBeKilledInterface := ConvertUUIDSliceToInterface(toBeKilled)
+	var toBeKilledUpdate []interface{}
+	toBeKilledUpdate = append(toBeKilledUpdate, game.GameId.String())
+	toBeKilledUpdate = append(toBeKilledUpdate, toBeKilledInterface...)
+
+	// Get the params string for the update
+	params := GetParamsForSlice(1, toBeKilledUpdate)
+
+	// Kill the users
+	_, err = db.Exec(`UPDATE dm_user_game_mapping SET alive = false WHERE game_id = $1 AND user_id IN (`+params+`)`, toBeKilledUpdate...)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return game.AssignTargetsBy(`normal`)
+}
+
+// Kill all the players with 0 kills and randomize targets
+func (game *Game) KillPlayersWithNoKills() (appErr *ApplicationError) {
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET alive = false WHERE kills = 0 AND game_id = $1 `, game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return game.AssignTargetsBy(`normal`)
 }
 
 // Activates a plot twist
-func (game *Game) ActivatePlotTwist(twistType, twistName string) (appErr *ApplicationError) {
+func (game *Game) ActivatePlotTwist(twistName, twistValue string) (appErr *ApplicationError) {
 
-	// Determine what type of plot twist we're working with
-	typeMap := map[string]string{`kill_mode`: `property`, `kill_users`: `action`, `assign_targets`: `action`}
-	if _, ok := typeMap[twistType]; !ok {
-		msg := "Invalid Plot Twist Type"
-		err := errors.New(msg)
-		return NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
-	}
-
-	// set the game property for a property based twist
-	handler := typeMap[twistType]
-	if handler == `property` {
-		appErr = game.SetGameProperty(twistType, twistName)
-		if appErr != nil {
-			return appErr
+	switch twistName {
+	case `assign_targets`:
+		return game.AssignTargetsBy(twistValue)
+	case `kill_mode`:
+		return game.SetGameProperty(twistName, twistValue)
+	case `kill_innocent`:
+		return game.KillPlayersWithNoKills()
+	case `kill_inactive`:
+		numHours, err := strconv.ParseFloat(twistValue, 64)
+		if err != nil {
+			return NewApplicationError(`Invalid Number of Hours`, err, ErrCodeInvalidParameter)
 		}
+		return game.KillPlayersWithNoRecentKills(numHours)
+	case `revive_strongest`:
+		return game.ReviveStrongestPlayers()
+	case `revive_captains`:
+		return game.ReviveCaptains()
 	}
 
-	// execute the action for an action based twist
-	if handler == `action` {
-		appErr = game.handleActionTwist(twistType, twistName)
-		if appErr != nil {
-			return appErr
-		}
-	}
-
-	return nil
+	msg := `Invalid Plot Twist: ` + twistName
+	err := errors.New(msg)
+	return NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
 }
 
 // Determine if the user has made another kill in the past 24 hours and if so gives them an extra point
@@ -145,6 +276,7 @@ func killWeakestPlayerForTeam(gameId, teamId uuid.UUID) (appErr *ApplicationErro
 // Check if the user killed is the weakest player for their team, if so kill the weakest player for that team
 func (user *User) handleDefendWeak(tx *sql.Tx, oldTargetId, gameId, teamId uuid.UUID) (appErr *ApplicationError) {
 
+	// DROIDS HANDLE TIE FOR WEAKEST PLAYER
 	// Get the weakest player's id
 	var weakUserIdBuffer string
 	err := db.QueryRow(`SELECT user_id from dm_user_game_mapping WHERE game_id = $1 AND team_id = $2 AND (alive = true OR user_id = $3) ORDER BY kills ASC LIMIT 1`, gameId.String(), teamId.String(), oldTargetId.String()).Scan(&weakUserIdBuffer)
