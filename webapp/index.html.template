@@ -829,9 +829,9 @@
             <a href="#" class="list-group-item">Kill Players With No Kills</a>
             <a href="#" class="list-group-item">Kill Players With No Kills In The Past X Hours</a>
         </div>
-        <div class="list-group col-sm-3 col-sm-offset-1	">
+        <div class="list-group col-sm-3">
             <h1 class="text-center">Revive Players</h1>
-            <a href="#" class="list-group-item">Revive Captains</a>
+            <a href="#" class="list-group-item">Revive Team Captains</a>
             <a href="#" class="list-group-item">Revive Strongest Players</a>
         </div>
     </script>

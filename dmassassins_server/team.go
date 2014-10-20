@@ -267,13 +267,14 @@ func (team *Team) Rename(newName string) (appErr *ApplicationError) {
 
 func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
 	var numUsers, numCaptains int
+	var teamIdBuffer string
 
 	rows, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	for rows.Next() {
-		err = rows.Scan(&numUsers)
+		err = rows.Scan(&numUsers, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -288,7 +289,7 @@ func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) 
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&numCaptains)
+		err = rows.Scan(&numCaptains, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}

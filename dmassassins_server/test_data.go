@@ -3,31 +3,34 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"fmt"
-	//"github.com/getsentry/raven-go"
+	"github.com/getsentry/raven-go"
 	"strconv"
 )
 
-func startGame() {
-	// gameId := uuid.Parse("9202fcd2-ccbd-42d4-8c54-99968a38e5e6")
-	// game, appErr := GetGameById(gameId)
-	// if appErr != nil {
-	// 	return
-	// }
-	// rows, appErr := game.GetAllActivePlayers()
-	// if appErr != nil {
-	// 	return
-	// }
+func startGameInner() (appErr *ApplicationError) {
+	gameId := uuid.Parse("9202fcd2-ccbd-42d4-8c54-99968a38e5e6")
+	game, appErr := GetGameById(gameId)
+	if appErr != nil {
+		return appErr
+	}
+	appErr = game.AssignTargetsBy(`normal`)
+	if appErr != nil {
+		return appErr
+	}
+	if appErr != nil {
+		return appErr
+	}
+	return nil
+}
 
-	// appErr = game.AssignTargetsByTeams(rows)
-	// if appErr != nil {
-	// 	return
-	// }
-	// if appErr != nil {
-	// 	LogWithSentry(appErr, nil, raven.ERROR)
-	// 	fmt.Println(appErr.Msg)
-	// 	fmt.Println(appErr.Err)
-	// 	fmt.Println(appErr.Code)
-	// }
+func startGame() {
+	appErr := startGameInner()
+	if appErr != nil {
+		LogWithSentry(appErr, nil, raven.ERROR)
+		fmt.Println(appErr.Msg)
+		fmt.Println(appErr.Err)
+		fmt.Println(appErr.Code)
+	}
 }
 
 func generateTestUsers() {
