@@ -11,6 +11,7 @@ import (
 type PlotTwistPut struct {
 	PlotTwistName  string `json:"plot_twist_name"`
 	PlotTwistValue string `json:"plot_twist_value"`
+	SendEmail      bool   `json:"send_email"`
 }
 
 func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
@@ -51,9 +52,10 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 	plotTwistValue := plotTwistPut.PlotTwistValue
+	sendEmail := plotTwistPut.SendEmail
 
 	// Activate plot twist
-	appErr = game.ActivatePlotTwist(plotTwistName, plotTwistValue)
+	appErr = game.ActivatePlotTwist(plotTwistName, plotTwistValue, sendEmail)
 	if appErr != nil {
 		return nil, appErr
 	}

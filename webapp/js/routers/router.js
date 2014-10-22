@@ -39,6 +39,7 @@ var app = app || {
             'switch_game': 'switch_game',
             'game_settings': 'game_settings',
             'plot_twists': 'plot_twists',
+            'email_users': 'email_users'
 
         },
         // routes that require we have a game that has been started
@@ -54,7 +55,7 @@ var app = app || {
         requiresCaptain: ['#users'],
         
         // routes that require is at least a game admin
-        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists'],        
+        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],        
 
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
@@ -262,6 +263,12 @@ var app = app || {
             var view = new app.Views.AdminPlotTwistsView();
             app.Running.AppView.setCurrentView(view);
             this.render();                         
+        },
+        email_users: function() {
+            var view = new app.Views.AdminEmailUsersView();
+            app.Running.UserEmails.fetch();
+            app.Running.AppView.setCurrentView(view);
+            this.render();                                     
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {

@@ -43,6 +43,21 @@ func (game *Game) getEmailableUsersForGame(onlyAlive bool) (userList []*User, ap
 	return userList, nil
 }
 
+// Gets a list of emailable users for a game
+func (game *Game) GetEmailsForGame(onlyAlive bool) (emails []string, appErr *ApplicationError) {
+
+	userList, appErr := game.getEmailableUsersForGame(onlyAlive)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	for _, user := range userList {
+		emails = append(emails, user.Email)
+	}
+
+	return emails, nil
+}
+
 // Inform a user they've deid
 func (user *User) SendDeadEmail(GameName string) (id string, appErr *ApplicationError) {
 	// Make sure we're allowed to email the user

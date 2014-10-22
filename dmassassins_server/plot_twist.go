@@ -162,7 +162,7 @@ func (game *Game) KillPlayersWithNoKills() (appErr *ApplicationError) {
 }
 
 // Activates a plot twist
-func (game *Game) ActivatePlotTwist(twistName, twistValue string) (appErr *ApplicationError) {
+func (game *Game) ActivatePlotTwist(twistName, twistValue string, sendEmail bool) (appErr *ApplicationError) {
 
 	switch twistName {
 	case `assign_targets`:
