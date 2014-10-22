@@ -141,7 +141,7 @@ var app = app || {
         noTeams: function(){
             var teamField = this.$el.find('#join_game_team');
             teamField.attr('disabled', true);            
-            teamField.find('#team_placeholder').text('This Game Doesn\'t Have Teams');
+            teamField.find('#team_placeholder').text('No Teams');
         },
         // toggles the password entry field and team entry fieldon join game
         checkFields: function() {
@@ -150,7 +150,7 @@ var app = app || {
             var selected = this.$el.find('#games option:selected');
             var need_password = selected.attr('game_has_password') == 'true';
             var passwordField = this.$el.find('#join_game_password');
-            var passwordPlaceholder = need_password ? '' : 'This Game Has No Password';
+            var passwordPlaceholder = need_password ? '' : 'No Password';
             passwordField.attr('disabled', !need_password);
             passwordField.val(passwordPlaceholder);
             
