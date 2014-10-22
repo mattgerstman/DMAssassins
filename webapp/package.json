@@ -9,6 +9,7 @@
   "engines": {
     "node": ">= 0.10.0"
   },
+  "beta":"TRUE",
   "private": true,
   "devDependencies": {
     "grunt": "~0.4.5",

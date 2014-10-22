@@ -45,15 +45,16 @@ module.exports = function(grunt) {
     },
     env : {
       options : {
-          VERSION: '<%= pkg.version %>'
+          VERSION: '<%= pkg.version %>',          
       },
       dev: {
-          NODE_ENV: 'DEVELOPMENT'
+          NODE_ENV: 'DEVELOPMENT',
+          BETA: '<%= pkg.beta %>'
       },
       prod : {
-          NODE_ENV: 'PRODUCTION'
+          NODE_ENV: 'PRODUCTION',
+          BETA: '<%= pkg.beta %>',
       }
-
     },
     preprocess: {
       dev : {
@@ -66,7 +67,7 @@ module.exports = function(grunt) {
           options : {
               context : {
                   name : '<%= pkg.name %>',
-                  version : '<%= pkg.version %>',
+                  version : '<%= pkg.version %>',                  
                   now : '<%= now %>',
                   ver : '<%= ver %>'
               }

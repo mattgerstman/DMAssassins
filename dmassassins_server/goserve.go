@@ -150,6 +150,7 @@ func StartServer() {
 	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "PUT", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
+	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
 
 	// Game then User
 	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT")
@@ -170,7 +171,7 @@ func StartServer() {
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
 	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE", "PUT")
-	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT")
+
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")
 
