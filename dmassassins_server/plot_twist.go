@@ -173,7 +173,7 @@ func (game *Game) ActivatePlotTwist(twistName, twistValue string) (appErr *Appli
 		return game.KillPlayersWithNoKills()
 	case `kill_inactive`:
 		numHours, err := strconv.ParseFloat(twistValue, 64)
-		if err != nil {
+		if err != nil || numHours == 0 {
 			return NewApplicationError(`Invalid Number of Hours`, err, ErrCodeInvalidParameter)
 		}
 		return game.KillPlayersWithNoRecentKills(numHours)

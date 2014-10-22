@@ -486,6 +486,12 @@ func (game *Game) insertTargetsWithDelete(targetList []*targetPair) (appErr *App
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// if we have no targets just clear the db
+	if len(targetList) == 0 {
+		tx.Commit()
+		return
+	}
+
 	appErr = game.insertTargets(tx, targetList)
 	if appErr != nil {
 		return appErr
@@ -494,6 +500,7 @@ func (game *Game) insertTargetsWithDelete(targetList []*targetPair) (appErr *App
 	return nil
 }
 
+// Gets all active players for a game as a slice of uuids
 func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *ApplicationError) {
 	// Get new target list
 	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
@@ -519,11 +526,39 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 	return users, nil
 }
 
+// Deletes all targets for a game
+func (game *Game) deleteTargets() (appErr *ApplicationError) {
+
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Prepare statement to delete targets
+	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute statement to delete targets
+	_, err = tx.Stmt(deleteTargets).Exec(game.GameId.String())
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	tx.Commit()
+	return nil
+}
+
 // Assign all targets plainly
 func (game *Game) AssignTargets(users []uuid.UUID, skipDelete bool) (appErr *ApplicationError) {
 
 	if len(users) == 0 {
-		return nil
+		if !skipDelete {
+			return game.deleteTargets()
+		}
+		return
 	}
 
 	var targets []*targetPair

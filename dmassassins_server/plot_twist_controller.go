@@ -14,7 +14,7 @@ type PlotTwistPut struct {
 }
 
 func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
-	//_, appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -39,17 +39,18 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 	var plotTwistPut PlotTwistPut
 	err := decoder.Decode(&plotTwistPut)
 	if err != nil {
-		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+		msg := "Invalid JSON"
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeInvalidJSON)
 	}
 	// Validate Name
 	plotTwistName := plotTwistPut.PlotTwistName
 	if plotTwistName == "" {
-		return nil, NewApplicationError("Missing Parameter: plot_twist_name", err, ErrCodeMissingParameter)
+		msg := "Missing Parameter: plot_twist_name"
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 	plotTwistValue := plotTwistPut.PlotTwistValue
-	if plotTwistValue == "" {
-		return nil, NewApplicationError("Missing Parameter: plot_twist_value", err, ErrCodeMissingParameter)
-	}
 
 	// Activate plot twist
 	appErr = game.ActivatePlotTwist(plotTwistName, plotTwistValue)
@@ -63,11 +64,12 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 // Handler for /game path
 func GamePlotTwistHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		var obj interface{}
 		var err *ApplicationError
 
 		switch r.Method {
+		case "POST":
+			fallthrough
 		case "PUT":
 			obj, err = putPlotTwist(r)
 		default:
