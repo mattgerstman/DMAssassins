@@ -87,7 +87,6 @@ var app = app || {
             {
                 this.trigger('game-change');
             }
-
             return this.active_game;
         },
 

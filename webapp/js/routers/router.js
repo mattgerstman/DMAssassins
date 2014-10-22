@@ -49,7 +49,7 @@ var app = app || {
         requiresJustAuth: ['#multigame', ''],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules'],
+        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules', '#', ''],
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['#users'],
