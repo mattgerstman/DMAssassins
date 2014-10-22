@@ -37,12 +37,20 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 		}
 	}
 
+	// Set the property in the struct
 	game.Properties[key] = value
 	return nil
 }
 
 // Get a single Game Property from the db
 func (game *Game) GetGameProperty(key string) (property string, appErr *ApplicationError) {
+
+	// If we have the property readily available just return it
+	if property, ok := game.Properties[key]; ok {
+		return property, nil
+	}
+
+	// Otherwise query the DB
 	err := db.QueryRow(`SELECT value FROM dm_game_properties WHERE game_id = $1 AND key ILIKE $2`, game.GameId.String(), key).Scan(&property)
 	if err == sql.ErrNoRows {
 		return "", nil
@@ -66,6 +74,7 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 	case err != nil:
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
 	// Loop through rows and add properties
 	for rows.Next() {
 		var key string
@@ -81,8 +90,8 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
 		}
 	}
-	// DROIDS Set name to concatenation of first and last name (could make this a frontend problem)
-	properties["name"] = properties["first_name"] + " " + properties["last_name"]
+
+	// Add the properties to the struct
 	game.Properties = properties
 	return properties, nil
 }
