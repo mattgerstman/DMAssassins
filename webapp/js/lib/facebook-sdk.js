@@ -16,30 +16,25 @@ var app = app || {
     // app know the current login status of the person.
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
-    
+
     if (!app.Session.get('authenticated'))
     {
-    	//console.log('no facebook response');
+    	// If we're already authenticated don't bother creating a session
 	    return;
     }
-    	
-    
-    if (response.status === 'connected') {
-      // Logged into your app and Facebook.
 
-		  //console.log('connected');
-		  app.Session.createSession(response, function(){
-//	  		  app.Running.Router.reload();
-				
-		  });
+
+	if (response.status === 'connected') {
+		// User is logged into DMAssassins and Facebook.
+		app.Session.createSession(response, function(){
+	});
 
 
     } else {
-		//console.log('else');
-
+		// User needss to log in
 		app.Running.Router.navigate('login');
     }
-    
+
   }
 
 
@@ -48,16 +43,16 @@ var app = app || {
   window.fbAsyncInit = function() {
   FB.init({
     appId      : config.APP_ID,
-    cookie     : true,  // enable cookies to allow the server to access 
+    cookie     : true,  // enable cookies to allow the server to access
                         // the session
     xfbml      : true,  // parse social plugins on this page
     version    : 'v2.0', // use version 2.0
     status	   : true
   });
-  
+
   app.Running.FB = FB;
 
-  // Now that we've initialized the JavaScript SDK, we call 
+  // Now that we've initialized the JavaScript SDK, we call
   // FB.getLoginStatus().  This function gets the state of the
   // person visiting this page and can return one of three states to
   // the callback you provide.  They can be:

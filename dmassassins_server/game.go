@@ -29,12 +29,13 @@ func (game *Game) Rename(newName string) (appErr *ApplicationError) {
 		return NoRowsAffectedAppErr
 	}
 
+	// Set the name in the struct if we use it later
 	game.GameName = newName
 	return nil
 
 }
 
-// Rename a game
+// Change a game's password
 func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) {
 	res, err := db.Exec(`UPDATE dm_games SET game_password = $1 WHERE game_id = $2`, newPassword, game.GameId.String())
 	if err != nil {
@@ -47,6 +48,7 @@ func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) 
 		return NoRowsAffectedAppErr
 	}
 
+	// Set the password in the struct if we use it later
 	game.HasPassword = newPassword == ""
 	game.Properties["game_password"] = newPassword
 	return nil
@@ -57,7 +59,6 @@ func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) 
 func GetGameList() (games []*Game, appErr *ApplicationError) {
 	// Query db for all games
 	rows, err := db.Query(`SELECT game_id, game_name, game_started, game_password FROM dm_games ORDER BY game_name`)
-
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -114,9 +115,23 @@ func (game *Game) End() (appErr *ApplicationError) {
 	return nil
 }
 
-func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
+// Determine if any players need a team before starting
+func (game *Game) doAnyPlayersNeedTeams() (appErr *ApplicationError) {
+	var count int
+	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1 AND team_id IS NULL", game.GameId.String()).Scan(&count)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	if count != 0 {
+		return NewApplicationError("Every player must be assigned a team to start", err, ErrCodePlayerMissingTeam)
+	}
+	return nil
+}
 
-	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE game_id = $1", game.GameId.String()).Scan(&count)
+// Get the number of players for a game
+func (game *Game) GetNumActivePlayers() (count int, appErr *ApplicationError) {
+
+	err := db.QueryRow("SELECT count(user_id) FROM dm_user_game_mapping WHERE (user_role = 'dm_user' OR user_role = 'dm_captain') AND alive = true AND game_id = $1", game.GameId.String()).Scan(&count)
 	if err != nil {
 		return 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -126,14 +141,27 @@ func (game *Game) GetNumPlayers() (count int, appErr *ApplicationError) {
 // Start a game
 func (game *Game) Start() (appErr *ApplicationError) {
 
-	count, appErr := game.GetNumPlayers()
+	// Make sure we have enough players to start the game
+	count, appErr := game.GetNumActivePlayers()
 	if count < 4 {
 		err := errors.New("Not Enough Players")
 		return NewApplicationError("You must have at least 4 players to start a game", err, ErrCodeNeedMorePlayers)
 	}
 
+	// If teams are enabled make sure all users have a team to start
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if appErr != nil {
+		return appErr
+	}
+	if teamsEnabled == `true` {
+		anyPlayersNeedTeams := game.doAnyPlayersNeedTeams()
+		if anyPlayersNeedTeams != nil {
+			return anyPlayersNeedTeams
+		}
+	}
+
 	// First assign targets for the game
-	_, appErr = game.AssignTargets()
+	appErr = game.AssignTargetsBy(`normal`)
 	if appErr != nil {
 		return appErr
 	}
@@ -276,7 +304,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	}
 
 	// Create a user secret for the game
-	secret, appErr := NewSecret()
+	secret, appErr := NewSecret(3)
 	if appErr != nil {
 		tx.Rollback()
 		return nil, appErr
@@ -315,99 +343,4 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 	return game, nil
 
-}
-
-// Assign all targets
-func (game *Game) AssignTargets() (targets map[string]uuid.UUID, appErr *ApplicationError) {
-
-	// Begin Transaction
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Prepare statement to delete previous targets
-	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
-	if err != nil {
-		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Execute statement to delete previous targets
-	_, err = tx.Stmt(deleteTargets).Exec(game.GameId.String())
-	if err != nil {
-		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true ORDER BY random()`, game.GameId.String())
-	if err != nil {
-		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	var userIdBuffer, firstIdBuffer sql.NullString
-	var userId, prevUserId, firstUserId uuid.UUID
-
-	targets = make(map[string]uuid.UUID) // Map to return targets
-
-	rows.Next()
-
-	err = rows.Scan(&firstIdBuffer)
-	if err != nil {
-		tx.Rollback()
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	firstUserId = uuid.Parse(firstIdBuffer.String)
-	prevUserId = firstUserId
-
-	// Loop through rows
-	for rows.Next() {
-
-		// Get the user_id from the row
-		err = rows.Scan(&userIdBuffer)
-		userId = uuid.Parse(userIdBuffer.String)
-		if err != nil {
-			tx.Rollback()
-			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-
-		// Prepare the statement to insert the target row
-		insertTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
-		if err != nil {
-			tx.Rollback()
-			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-
-		// Execute the statement to insert the target row
-		_, err = tx.Stmt(insertTarget).Exec(prevUserId.String(), userId.String(), game.GameId.String())
-		if err != nil {
-			tx.Rollback()
-			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-		}
-
-		// Store the mapping to return
-		targets[prevUserId.String()] = userId
-		// Increment to the next user
-		prevUserId = userId
-	}
-
-	// Prepare the statement to have the last user target the first
-	lastTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Execute the statement to have the last user target the first
-	_, err = tx.Stmt(lastTarget).Exec(userId.String(), firstUserId.String(), game.GameId.String())
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	targets[userId.String()] = firstUserId
-
-	tx.Commit()
-	return targets, nil
 }
