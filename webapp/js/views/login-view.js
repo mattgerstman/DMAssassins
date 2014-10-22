@@ -30,8 +30,8 @@ var app = app || {
             this.model = app.Session;
         },
         // call the model login function
-        login: function() {
-            var button = this.$el.find('.btn-facebook');
+        login: function(e) {
+            var button = $(e.currentTarget);
             var width = button.width();
             button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
             button.attr('disabled', true);
