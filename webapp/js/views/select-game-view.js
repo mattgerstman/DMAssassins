@@ -42,6 +42,8 @@ var app = app || {
             this.listenTo(this.collection, 'reset', this.render);
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(app.Running.User, 'join-error-password', this.badPassword);
+            this.listenTo(app.Running.User, 'join-game', this.finishJoin);
+            this.listenTo(app.Running.Games, 'game-change', this.finishJoin);
         },
         // shows the create game subview
         showCreateGame: function() {
@@ -133,6 +135,11 @@ var app = app || {
             Backbone.history.navigate('my_profile', {
                 trigger: true
             });
+        },
+        finishJoin: function(){
+            Backbone.history.navigate('my_profile', {
+                trigger: true
+            });            
         },
         // toggles the password entry field on create game
         togglePassword: function(e) {

@@ -75,6 +75,9 @@ var app = app || {
             this.listenTo(this.model, 'fetch', this.render);
             this.listenTo(this.model, 'destroy', this.destroyCallback);
             this.listenTo(this.model, 'set', this.render);
+            this.listenTo(app.Running.Games, 'game-change', this.render);
+            this.listenTo(app.Running.Games, 'change', this.render);
+            this.listenTo(app.Running.Games, 'join-game', this.render);
 
         },
         destroyCallback: function() {
@@ -93,7 +96,6 @@ var app = app || {
             var role = app.Running.User.getProperty('user_role');  
             var allow_quit = !AuthUtils.requiresCaptain(role);
             data.allow_quit = allow_quit;
-
             this.$el.html(this.template(data));
             return this;
         }
