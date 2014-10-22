@@ -54,7 +54,7 @@ var app = app || {
             return this;
         },
 
-        // unsets a session 
+        // unsets a session
         unset: function(key) {
             if (this.supportStorage) {
                 sessionStorage.removeItem(key);
@@ -92,7 +92,7 @@ var app = app || {
                     FB.login(function(response) {
                         parent.createSession(response);
 
-                        // scope are the facebook permissions we're requesting 
+                        // scope are the facebook permissions we're requesting
                     }, {
                         scope: 'public_profile,email,user_friends,user_photos'
                     });
@@ -137,13 +137,13 @@ var app = app || {
             // after the ajax request run this function
             login.done(function(response) {
 
-                // store all reponse data in the new session immediately 
-                var parsedGames    = app.Running.Games.parse(response.games);    
+                // store all reponse data in the new session immediately
+                var parsedGames    = app.Running.Games.parse(response.games);
                 var games 		   = parsedGames           || {};
                 var game 		   = response.game         || { game_id: null };
                 var user 		   = response.user         || { user_id: null };
-                var target 		   = response.target       || { assassin_id: user.user_id };                
-                var leaderboard    = response.leaderboard  || {};        
+                var target 		   = response.target       || { assassin_id: user.user_id };
+                var leaderboard    = response.leaderboard  || {};
                 var rules          = null;
                 if (game.game_properties)
                 {
@@ -154,17 +154,17 @@ var app = app || {
 
                 // reload the data for all models
                 app.Running.User.set(user);
-                app.Running.TargetModel.set(target);               
+                app.Running.TargetModel.set(target);
                 app.Running.LeaderboardModel.set(leaderboard);
                 app.Running.RulesModel.set(rules);
                 app.Running.Games.reset(games);
-                
+
                 // store the basic auth token in the session in case we need to reload it on app launch
                 that.storeSession(response);
                 console.log(game);
                 if (game.game_id) {
                     app.Running.Games.setActiveGame(game.game_id, true);
-                    app.Running.Games.getActiveGame().set(game);                    
+                    app.Running.Games.getActiveGame().set(game);
                 }
 
                 var targetURLs = app.Running.Router.requiresTarget;
@@ -178,14 +178,14 @@ var app = app || {
                 if (path == 'login' && app.Running.TargetModel.get('user_id')) {
                     Backbone.history.navigate('#', {
                         trigger: true
-                    });       
+                    });
                     return;
                 }
 
                 Backbone.history.navigate('#my_profile', {
                     trigger: true
-                });                
-                
+                });
+
 
 
             });
@@ -205,7 +205,7 @@ var app = app || {
         },
         storeSession: function(data) {
             // store a boolean to determine if we're authenticated
-            this.set('authenticated', true); 
+            this.set('authenticated', true);
             this.set('has_game', data.game !== null);
             this.storeBasicAuth(data);
         },

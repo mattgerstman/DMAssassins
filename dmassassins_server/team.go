@@ -7,6 +7,10 @@ import (
 	"fmt"
 )
 
+const (
+	MinUsersPerTeam = 5
+)
+
 type Team struct {
 	TeamId   uuid.UUID `json:"team_id"`
 	GameId   uuid.UUID `json:"game_id"`
@@ -36,6 +40,7 @@ func (user *User) GetTeamByGameId(gameId uuid.UUID) (team *Team, appErr *Applica
 	return &Team{teamId, gameId, teamName}, nil
 }
 
+// Get a mapping of TeamId to Team
 func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationError) {
 	// Query Db
 	rows, err := db.Query(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, game.GameId.String())
@@ -63,7 +68,25 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 	return teams, nil
 }
 
-// Gets a list of temas for a game
+// Get a list of team ids with players currently in the game
+func (game *Game) GetActiveTeamIds() (teamsList []uuid.UUID, appErr *ApplicationError) {
+	rows, err := db.Query(`SELECT distinct(team_id) FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		var teamIdBuffer string
+		err = rows.Scan(&teamIdBuffer)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		teamId := uuid.Parse(teamIdBuffer)
+		teamsList = append(teamsList, teamId)
+	}
+	return teamsList, nil
+}
+
+// Gets a list of teams for a game
 func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 	// Query Db
 	rows, err := db.Query(`SELECT team_id, team_name FROM dm_teams WHERE game_id = $1 ORDER BY team_name`, game.GameId.String())
@@ -157,6 +180,39 @@ func DeleteTeam(teamId uuid.UUID) (appErr *ApplicationError) {
 	return nil
 }
 
+// Gets a uuid slice of team captains who are alive
+func (game *Game) GetAllTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
+// Gets a uuid slice of team captains who are alive
+func (game *Game) GetAliveTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND alive = true AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
+// Gets a uuid slice of team captains who are dead
+func (game *Game) GetDeadTeamCaptains() (captains []uuid.UUID, appErr *ApplicationError) {
+	// Get list of Dead Captain Ids
+	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE user_role = 'dm_captain' AND alive = false AND game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return ConvertUserIdRowsToSlice(rows)
+}
+
 // Gets the team for a user and gameId
 func (user *User) GetTeam(gameId uuid.UUID) (team *Team, appErr *ApplicationError) {
 	gameMapping, appErr := GetGameMapping(user.UserId, gameId)
@@ -240,4 +296,41 @@ func (team *Team) Rename(newName string) (appErr *ApplicationError) {
 
 	team.TeamName = newName
 	return nil
+}
+
+func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
+	var numUsers, numCaptains int
+	var teamIdBuffer string
+
+	rows, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		err = rows.Scan(&numUsers, &teamIdBuffer)
+		if err != nil {
+			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		if numUsers < MinUsersPerTeam {
+			return false, nil
+		}
+	}
+
+	rows, err = db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&numCaptains, &teamIdBuffer)
+		if err != nil {
+			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		if numCaptains != 1 {
+			return false, nil
+		}
+	}
+
+	return true, nil
+
 }

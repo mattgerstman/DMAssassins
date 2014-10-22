@@ -45,18 +45,20 @@ func (game *Game) GetRules() (rules string, appErr *ApplicationError) {
 
 }
 
+// Convert the markdown rules to HTML
 func (game *Game) GetHTMLRules() (rules string, appErr *ApplicationError) {
 
-	var ok bool
-	if rules, ok = game.Properties["rules"]; !ok {
-		rules, appErr = game.GetRules()
-		if appErr != nil {
-			return "", appErr
-		}
+	// Get the rules
+	rules, appErr = game.GetRules()
+	if appErr != nil {
+		return "", appErr
 	}
 
+	// Convert the rules to HTML
 	rulesByte := blackfriday.MarkdownBasic([]byte(rules))
 	rules = string(rulesByte)
+
+	// Update thae struct with HTML rules
 	game.Properties["rules"] = rules
 	return rules, nil
 }

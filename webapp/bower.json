@@ -30,5 +30,8 @@
     "jquery-ui": "~1.11.1",
     "marked": "~0.3.2",
     "underscore": "~1.7.0"
+  },
+  "resolutions": {
+    "datatables": "~1.10.2"
   }
 }
