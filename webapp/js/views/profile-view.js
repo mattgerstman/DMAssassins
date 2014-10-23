@@ -31,7 +31,7 @@ var app = app || {
             'click #quit': 'showQuitModal',
             'click #quit_game_confirm': 'quitGame',
             'click #email_settings': 'showEmailModal',
-            'click #email_settings_save': 'saveEmailSettings',
+            'click .js-email-settings-save': 'saveEmailSettings',
             'keyup #email': 'emailEnter' 
         },
 
