@@ -178,7 +178,9 @@ var app = app || {
         },
         // go to the previous
         back: function() {
+            this.history.pop();
             var path = this.history.pop();
+            console.log(path);
             Backbone.history.navigate(path, {
                     trigger: true
                 });
