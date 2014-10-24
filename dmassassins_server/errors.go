@@ -20,6 +20,7 @@ const (
 	ErrCodeNeedMorePlayers   = 40007
 	ErrCodePlayerMissingTeam = 40008
 	ErrCodeInvalidPlotTwist  = 40009
+	ErrCodeCaptainExists     = 40010
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100

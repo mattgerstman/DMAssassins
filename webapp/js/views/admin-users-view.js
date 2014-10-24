@@ -45,7 +45,9 @@ var app = app || {
             'click .cancel-edit-team': 'cancelEditTeam',
             'click .save-edit-team': 'saveEditTeam',
             'click .delete-team': 'deleteTeamModal',
-            'click .delete-team-submit': 'deleteTeam'
+            'click .delete-team-submit': 'deleteTeam',
+            'mouseover .teams': 'sidebarMouseover',
+            'mouseout .teams': 'sidebarMouseout'
         },
         team: undefined,
         // constructor
@@ -55,9 +57,7 @@ var app = app || {
             this.userViews = [];
             this.teams_view = new app.Views.AdminUsersTeamsView();
             this.listenTo(this.collection, 'fetch', this.render);
-            this.listenTo(this.collection, 'sync', this.render);
-            this.listenTo(this.collection, 'change', this.render);
-			this.listenTo(this.collection, 'remove', this.render);
+            this.listenTo(this.collection, 'reset', this.render);
         },
         banUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
@@ -84,8 +84,18 @@ var app = app || {
         banUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
-	      	user.ban();
-		  	$('#ban_user_modal').modal('hide');
+	      	user.destroy({
+		      	url: user.url() + 'ban/',
+		      	success: function(){
+    		        var user_id = user.get('user_id')
+    		        $('#user_'+user_id).remove();
+    		        $('#ban_user_modal').modal('hide');      	
+		      	},
+		      	error: function(response){
+                    alert(response.responseText);
+		      	}
+	      	}); 
+		  	
         },
         killUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
@@ -111,15 +121,25 @@ var app = app || {
         selectChangeRole: function(event){
             var user_id = $(event.currentTarget).data('user-id');
             var role_id = $(event.currentTarget).find('option:selected').val();
-            return this.changeUserRole(user_id, role_id);
+            return this.changeUserRole(event, user_id, role_id);
         },
-        changeUserRole: function(user_id, role_id){
+        changeUserRole: function(event, user_id, role_id){
             // Sorry Taylor, a model for this one is overkill
             var game_id = app.Running.Games.getActiveGameId();
-            var url = config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/role/';
-            $.post(url, {role: role_id} ,function(){
-                $('#role_saved_'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });
-            });
+            var url = config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/role/';            
+            $.ajax({
+                type:"POST",
+                url: url,
+                data: {role: role_id},
+                success: function(){
+                    $('#role_saved_'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });    
+                },
+                error: function(response){
+                    var originalRole = app.Running.Users.get(user_id).getProperty('user_role');
+                    $(event.currentTarget).val(originalRole);
+                    alert(response.responseText);
+                }
+            })
         },
         addUserToTeam: function(user_id, team_id, team_name, callback) {
             var that = this;
@@ -241,10 +261,12 @@ var app = app || {
         },
         newTeamKeypress: function(event) {
              if (event.keyCode == 27) {
-                 this.hideNewTeam();                 
+                event.preventDefault();
+                this.hideNewTeam();                 
              }
              if (event.keyCode == 13) {
-                 this.createNewTeam(event); 
+                event.preventDefault();
+                this.createNewTeam(event); 
              }
              
         },
@@ -315,6 +337,12 @@ var app = app || {
             this.$el.find('.active').removeClass('active');
             this.$el.find('#nav_team_'+this.team_id).addClass('active');
 
+        },
+        sidebarMouseover: function(){
+            document.body.style.overflow='hidden';
+        },
+        sidebarMouseout: function(){
+            document.body.style.overflow='auto';
         },
         render: function() {
             var that = this;    			

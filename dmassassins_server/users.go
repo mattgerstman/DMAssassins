@@ -32,7 +32,6 @@ func NewUser(username, email, facebookId string, properties map[string]string) (
 
 	_, err := db.Exec(`INSERT INTO dm_users (user_id, username, email, facebook_id) VALUES ($1,$2,$3,$4)`, userId.String(), username, email, facebookId)
 	if err != nil {
-		fmt.Println(err)
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
@@ -247,8 +246,24 @@ func (user *User) ChangeEmail(email string) (appErr *ApplicationError) {
 	return nil
 }
 
-//Kills an Assassin's target, user must be logged in
 func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (newTargetId, oldTargetId uuid.UUID, appErr *ApplicationError) {
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	newTargetId, oldTargetId, appErr = user.KillTargetTransactional(tx, gameId, secret, trueKill)
+	if appErr != nil {
+		tx.Rollback()
+		return nil, nil, appErr
+	}
+	tx.Commit()
+	return newTargetId, oldTargetId, nil
+}
+
+//Kills an Assassin's target, user must be logged in
+func (user *User) KillTargetTransactional(tx *sql.Tx, gameId uuid.UUID, secret string, trueKill bool) (newTargetId, oldTargetId uuid.UUID, appErr *ApplicationError) {
 
 	var targetSecret string
 	var oldTargetIdBuffer, newTargetIdBuffer, oldTargetTeamIdBuffer sql.NullString
@@ -262,12 +277,6 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 	oldTargetTeamId := uuid.Parse(oldTargetTeamIdBuffer.String)
 	oldTargetId = uuid.Parse(oldTargetIdBuffer.String)
 
-	// Start a transaction so we can rollback if something blows up
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
 	// Confirm the user entered the right secret
 	if !strings.EqualFold(secret, targetSecret) {
 		// If secret is invalid throw an error
@@ -276,24 +285,23 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 		return nil, nil, NewApplicationError(msg, err, ErrCodeInvalidSecret)
 
 	}
+
 	// Prepare the statement to kill the old target
 	setDead, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to kill the old target
 	_, err = tx.Stmt(setDead).Exec(oldTargetId.String(), gameId.String())
 	if err != nil {
-		tx.Rollback()
+		fmt.Println(err)
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Get the old target's target to assign to the Assassin
 	err = db.QueryRow(`SELECT target_id FROM dm_user_targets WHERE user_id = $1 AND game_id = $2`, oldTargetId.String(), gameId.String()).Scan(&newTargetIdBuffer)
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	newTargetId = uuid.Parse(newTargetIdBuffer.String)
@@ -301,14 +309,12 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 	// Prepare the statement to delete the row for the dead user's target
 	removeOldTarget, err := db.Prepare(`DELETE FROM dm_user_targets WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to delete the row for the dead user's target
 	_, err = tx.Stmt(removeOldTarget).Exec(oldTargetId.String(), gameId.String())
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
@@ -316,32 +322,26 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 	setNewTarget, err := db.Prepare(`UPDATE dm_user_targets SET target_id = $1 WHERE user_id = $2 AND game_id = $3`)
 	_, err = tx.Stmt(setNewTarget).Exec(newTargetId.String(), user.UserId.String(), gameId.String())
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
 	if !trueKill {
-		tx.Commit()
 		return newTargetId, oldTargetId, nil
 	}
 
 	// Do anything necessary for a plot twist here
 	appErr = user.HandlePlotTwistOnKill(tx, oldTargetId, gameId, oldTargetTeamId)
 	if appErr != nil {
-		tx.Rollback()
-		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, nil, appErr
 	}
 
 	// Update kill count
 	updateKills, err := db.Prepare(`UPDATE dm_user_game_mapping SET kills = kills + 1 WHERE user_id = $1 AND game_id = $2`)
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	_, err = tx.Stmt(updateKills).Exec(user.UserId.String(), gameId.String())
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
@@ -351,11 +351,8 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 	lastKill := strconv.FormatInt(now, 10)
 	appErr = user.SetUserPropertyTransactional(tx, `last_killed`, lastKill)
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
-	tx.Commit()
 
 	return newTargetId, oldTargetId, nil
 }

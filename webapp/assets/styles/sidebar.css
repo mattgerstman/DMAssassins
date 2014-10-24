@@ -12,6 +12,7 @@
     top:50px;
     width: 0;
     height: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
     background: #f8f8f8;
     border-top: none;
@@ -29,12 +30,11 @@
 /* Sidebar Styles */
 
 .sidebar-nav {
-    top: 50px;
     width: 250px;
-    height:100%;
     margin: 0;
     padding: 0;
     list-style: none;
+    margin-bottom:49px;
 }
 
 .sidebar-nav > li {    
@@ -54,7 +54,7 @@
 .sidebar-nav > li input {
     height:30px;
     width:187.5px;
-    
+       
 }
 
 .sidebar-nav > li a {
@@ -75,7 +75,8 @@
     }
 
     .sidebar-nav {
-        position: fixed;
+        overflow-x: hidden;
+        overflow-y: scroll;
     }
 
     .adjust-sidebar {
