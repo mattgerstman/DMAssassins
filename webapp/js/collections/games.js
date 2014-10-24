@@ -56,11 +56,13 @@ var app = app || {
         },
         // Set the active game to an arbitrary one
         setArbitraryActiveGame: function(silent) {
-            var newGame = this.findWhere({game_started: true});
+            var newGame = this.findWhere({game_started: true, member:true});
+            console.log(newGame);
             if (!newGame)
             {
-                newGame = this.findWhere({game_started: false});
+                newGame = this.findWhere({game_started: false, member:true});
             }
+            console.log(newGame);
             this.setActiveGame(newGame, silent);
             return newGame;
         },
