@@ -243,8 +243,7 @@ var app = app || {
         users: function() {            
             var view = new app.Views.AdminUsersView();
             app.Running.AppView.setCurrentView(view);            
-            app.Running.currentView.collection.reset();
-            app.Running.currentView.collection.fetch();
+            app.Running.currentView.collection.fetch({reset: true});
             app.Running.Teams.fetch();             
             this.render();
         },

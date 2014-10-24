@@ -99,17 +99,29 @@ func GetGameById(gameId uuid.UUID) (game *Game, appErr *ApplicationError) {
 // End a game
 func (game *Game) End() (appErr *ApplicationError) {
 
-	// Set game_started to false
-	res, err := db.Exec("UPDATE dm_games SET game_started = false WHERE game_id = $1", game.GameId.String())
+	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Make sure at least one game was affected
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
+	// prepare the statement to set game_started to false
+	endGame, err := db.Prepare("UPDATE dm_games SET game_started = false WHERE game_id = $1")
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	// Execute the statement to set game_started to false
+	_, err = tx.Stmt(endGame).Exec(game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = game.DeleteTargetsTransactional(tx)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+	tx.Commit()
 
 	game.Started = false
 	return nil

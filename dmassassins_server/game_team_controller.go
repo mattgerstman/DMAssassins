@@ -50,6 +50,15 @@ func getGameTeam(r *http.Request) (teams []*Team, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if teamsEnabled != `true` {
+		return nil, nil
+	}
+
 	return game.GetTeams()
 }
 
