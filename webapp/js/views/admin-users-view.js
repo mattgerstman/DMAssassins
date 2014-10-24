@@ -87,7 +87,7 @@ var app = app || {
 	      	user.destroy({
 		      	url: user.url() + 'ban/',
 		      	success: function(){
-    		        var user_id = user.get('user_id')
+    		        var user_id = user.get('user_id');
     		        $('#user_'+user_id).remove();
     		        $('#ban_user_modal').modal('hide');      	
 		      	},
@@ -139,7 +139,7 @@ var app = app || {
                     $(event.currentTarget).val(originalRole);
                     alert(response.responseText);
                 }
-            })
+            });
         },
         addUserToTeam: function(user_id, team_id, team_name, callback) {
             var that = this;
