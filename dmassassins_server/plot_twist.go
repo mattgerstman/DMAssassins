@@ -232,10 +232,10 @@ func (user *User) handleSuccessiveKills(tx *sql.Tx, gameId uuid.UUID) (appErr *A
 }
 
 // Kills the weakest player on a team
-func killWeakestPlayerForTeam(gameId, teamId uuid.UUID) (appErr *ApplicationError) {
+func killWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId uuid.UUID) (appErr *ApplicationError) {
 	// Get the id for the weakest player's assasin
 	var assassingIdBuffer, secret string
-	err := db.QueryRow(`SELECT targets.user_id, map.secret FROM dm_user_targets as targets, dm_user_game_mapping as map WHERE targets.target_id = map.user_id AND map.game_id = $1 AND map.team_id = $2 AND alive = true ORDER BY map.kills ASC LIMIT 1;=`, gameId.String(), teamId.String()).Scan(&assassingIdBuffer, &secret)
+	err := db.QueryRow(`SELECT targets.user_id, map.secret FROM dm_user_targets as targets, dm_user_game_mapping as map WHERE targets.target_id = map.user_id AND map.game_id = $1 AND map.team_id = $2 AND alive = true ORDER BY map.kills ASC LIMIT 1`, gameId.String(), teamId.String()).Scan(&assassingIdBuffer, &secret)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -248,7 +248,7 @@ func killWeakestPlayerForTeam(gameId, teamId uuid.UUID) (appErr *ApplicationErro
 	}
 
 	// kill the assassins target (silently)
-	_, _, appErr = assassin.KillTarget(gameId, secret, false)
+	_, _, appErr = assassin.KillTargetTransactional(tx, gameId, secret, false)
 	if appErr != nil {
 		return appErr
 	}
@@ -267,6 +267,7 @@ func killWeakestPlayerForTeam(gameId, teamId uuid.UUID) (appErr *ApplicationErro
 	_, appErr = assassin.SendNewTargetEmail(gameName)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING)
+
 	}
 
 	return nil
@@ -287,7 +288,7 @@ func (user *User) handleDefendWeak(tx *sql.Tx, oldTargetId, gameId, teamId uuid.
 	// Compare the weakeste player and the given last target, if they match kill the next weakest player
 	weakUserId := uuid.Parse(weakUserIdBuffer)
 	if uuid.Equal(oldTargetId, weakUserId) {
-		return killWeakestPlayerForTeam(gameId, teamId)
+		return killWeakestPlayerForTeam(tx, gameId, teamId)
 	}
 
 	return nil
@@ -301,6 +302,14 @@ func (user *User) HandlePlotTwistOnKill(tx *sql.Tx, oldTargetId, gameId, teamId 
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		return appErr
+	}
+
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if appErr != nil {
+		return appErr
+	}
+	if teamsEnabled != `true` {
+		return nil
 	}
 
 	// Check for successive kills plot twist

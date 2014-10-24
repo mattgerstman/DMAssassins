@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -140,16 +141,24 @@ func deleteGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
+	// get the game
 	game, appErr = GetGameById(gameId)
-
 	if appErr != nil {
 		return nil, appErr
 	}
 
+	// end the game
 	appErr = game.End()
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	// Inform users the game has ended
+	_, appErr = game.sendGameOverEmail()
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING)
+	}
+
 	return game, nil
 
 }

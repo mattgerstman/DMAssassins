@@ -472,18 +472,11 @@ func (game *Game) insertTargetsWithDelete(targetList []*targetPair) (appErr *App
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Prepare statement to delete previous targets
-	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
-	if err != nil {
+	// Delete targets
+	appErr = game.DeleteTargetsTransactional(tx)
+	if appErr != nil {
 		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Execute statement to delete previous targets
-	_, err = tx.Stmt(deleteTargets).Exec(game.GameId.String())
-	if err != nil {
-		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return appErr
 	}
 
 	// if we have no targets just clear the db
@@ -527,26 +520,36 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 }
 
 // Deletes all targets for a game
-func (game *Game) deleteTargets() (appErr *ApplicationError) {
-
-	tx, err := db.Begin()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
+func (game *Game) DeleteTargetsTransactional(tx *sql.Tx) (appErr *ApplicationError) {
 
 	// Prepare statement to delete targets
 	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
 	if err != nil {
-		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute statement to delete targets
 	_, err = tx.Stmt(deleteTargets).Exec(game.GameId.String())
 	if err != nil {
-		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	return nil
+}
+
+// Deletes all targets for a game
+func (game *Game) DeleteTargets() (appErr *ApplicationError) {
+
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = game.DeleteTargetsTransactional(tx)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
 	tx.Commit()
 	return nil
 }
@@ -556,7 +559,7 @@ func (game *Game) AssignTargets(users []uuid.UUID, skipDelete bool) (appErr *App
 
 	if len(users) == 0 {
 		if !skipDelete {
-			return game.deleteTargets()
+			return game.DeleteTargets()
 		}
 		return
 	}

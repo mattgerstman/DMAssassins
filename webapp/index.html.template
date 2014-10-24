@@ -232,8 +232,14 @@
 
                   </div>
                   <div class="modal-footer">
-                    <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary btn-medium" id="email_settings_save">Save</button>
+                    <div class="hidden-xs">
+                        <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary btn-medium js-email-settings-save">Save</button>
+                    </div>
+                    <div class="visible-xs-block">
+                        <button class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary btn-block js-email-settings-save">Save</button>
+                    </div>
                   </div>
               </form>
             </div><!-- /.modal-content -->
@@ -536,7 +542,6 @@
         <%
         })
         %>
-
         <select id="team-select-placeholder" class="hide">
             <%
             _.each(teams, function(team){

@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"errors"
 	"strconv"
 )
 
@@ -65,8 +66,47 @@ func (user *User) JoinGame(gameId uuid.UUID, gamePassword string) (gameMapping *
 	return &GameMapping{user.UserId, gameId, teamId, userRole, secret, kills, alive}, nil
 }
 
+// Can a user become a captain
+func (gameMapping *GameMapping) CanBecomeCaptain() (appErr *ApplicationError) {
+	// Get the team
+	team, appErr := GetTeamById(gameMapping.TeamId)
+	if appErr != nil {
+		return appErr
+	}
+
+	// Get the team captain
+	captainId, appErr := team.GetTeamCaptainId()
+	if appErr != nil {
+		return appErr
+	}
+
+	// If we don't have a team captain demote them
+	if captainId == nil {
+		return nil
+	}
+
+	demoteString := ``
+	user, appErr := GetUserById(captainId)
+	if appErr == nil {
+		demoteString = "\nDemote " + user.Properties[`first_name`] + ` ` + user.Properties[`last_name`] + ` to promote another user.`
+	}
+
+	// Return an error if we have a captain
+	msg := `A team cannot have two captains!` + demoteString
+	err := errors.New(msg)
+	return NewApplicationError(msg, err, ErrCodeCaptainExists)
+}
+
 // Changes a user's role within a game
 func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationError) {
+
+	if role == `dm_captain` {
+		appErr = gameMapping.CanBecomeCaptain()
+		if appErr != nil {
+			return appErr
+		}
+	}
+
 	// Update the user role
 	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {

@@ -298,6 +298,22 @@ func (team *Team) Rename(newName string) (appErr *ApplicationError) {
 	return nil
 }
 
+// Gets the user id for the team captain
+func (team *Team) GetTeamCaptainId() (captainId uuid.UUID, appErr *ApplicationError) {
+	var captainIdBuffer string
+
+	// Get captain id from db
+	err := db.QueryRow(`SELECT user_id FROM dm_user_game_mapping WHERE team_id = $1 and user_role = 'dm_captain'`, team.TeamId.String()).Scan(&captainIdBuffer)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return uuid.Parse(captainIdBuffer), nil
+}
+
+// is it safe to assign targets by teams
 func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
 	var numUsers, numCaptains int
 	var teamIdBuffer string
