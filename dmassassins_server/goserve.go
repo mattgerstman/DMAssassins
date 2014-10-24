@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
+	"time"
 )
 
 var db *sql.DB
@@ -180,6 +181,6 @@ func StartServer() {
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
-	http.Handle("/", corsHandler(r))
+	http.Handle("/", corsHandler(http.TimeoutHandler(r, time.Second*20, `Timeout Occurred!`)))
 	http.ListenAndServe(":8000", nil)
 }

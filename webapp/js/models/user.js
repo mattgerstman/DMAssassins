@@ -52,11 +52,8 @@ var app = app || {
                     'X-DMAssassins-Team-Id': team_id
                 },
                 success: function() {
-                    that.trigger('join-game');
                     app.Running.Games.setActiveGame(game_id).set('member', true);                    
-                    Backbone.history.navigate('my_profile', {
-                        trigger: true
-                    });
+                    that.trigger('join-game');
                 },
                 error: function(that, response, options) {
                     if (response.status == 401) {
@@ -86,12 +83,6 @@ var app = app || {
             if (properties[key] === undefined)
                 return null;
             return properties[key];
-        },
-        ban: function(){
-        	var that = this;
-	      	this.destroy({
-		      	url: that.url() + 'ban/'
-	      	});  
         },
         kill: function(){
         	var that = this;

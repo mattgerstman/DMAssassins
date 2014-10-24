@@ -38,7 +38,7 @@ var app = app || {
             this.listenTo(this.model, 'save', this.render);
         },
         saveGame: function(event){
-        
+            event.preventDefault();
             // Get values from form
             var game_name = $('#game_name').val();
             var game_password = $('#game_password').val();
@@ -89,12 +89,16 @@ var app = app || {
             this.model.destroy({
                 url: url,
                 success: function() {
+                    alert("The game has successfully ended!\n Thanks for being an admin!");
                     if (!app.Running.Games.setArbitraryActiveGame()) {
                         Backbone.history.navigate('#logout', {
                             trigger: true
                         });
                         return;
                     }
+                    Backbone.history.navigate('#my_profile', {
+                            trigger: true
+                        });
                 }
             });
         },

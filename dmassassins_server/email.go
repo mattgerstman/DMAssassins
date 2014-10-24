@@ -58,7 +58,7 @@ func (game *Game) GetEmailsForGame(onlyAlive bool) (emails []string, appErr *App
 	return emails, nil
 }
 
-// Inform a user they've deid
+// Inform a user they've died
 func (user *User) SendDeadEmail(GameName string) (id string, appErr *ApplicationError) {
 	// Make sure we're allowed to email the user
 	allowEmail, appErr := user.GetUserProperty("allow_email")
@@ -92,7 +92,7 @@ func (user *User) SendDeadEmail(GameName string) (id string, appErr *Application
 
 	// Set up the subject and contents of the email
 	subject := `You Have Been Killed In ` + GameName + ` DMAssassins`
-	tag := `Revived`
+	tag := `Killed`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
 
@@ -363,6 +363,47 @@ func (game *Game) sendStartGameEmail() (id string, appErr *ApplicationError) {
 
 	// Set up the subject and contents of the email
 	subject := game.GameName + ` DMAssassins Has Begun!`
+	tag := `StartGame`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+// Inform users the game has ended
+func (game *Game) sendGameOverEmail() (id string, appErr *ApplicationError) {
+
+	// Get all users for the game that we're allowed to email
+	users, appErr := game.getEmailableUsersForGame(false)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/game-ended.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/game-ended.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := game.GameName + ` DMAssassins Is Over!`
 	tag := `StartGame`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
