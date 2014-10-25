@@ -24,7 +24,7 @@ type Configuration struct {
 var Config *Configuration
 
 // Loads config variables from file into global Config struct
-func LoadConfig() *ApplicationError {
+func LoadConfig() (appErr *ApplicationError) {
 	file, err := os.Open("config.json")
 	if err != nil {
 		log.Fatal("Failed to load config with message:", err)
@@ -34,6 +34,31 @@ func LoadConfig() *ApplicationError {
 	if err != nil {
 		log.Fatal("Failed to load config with message:", err)
 	}
-	return nil
+	return LoadPlotTwists()
+}
 
+type PlotTwist struct {
+	KillMode      string `json:"kill_mode"`
+	KillTimer     int    `json:"kill_timer"`
+	AssignTargets string `json:"assign_targets"`
+	Revive        string `json:"revive"`
+	SendEmail     string `json:"send_email"`
+}
+
+type PlotTwistMap map[string]*PlotTwist
+
+var PlotTwistConfig PlotTwistMap
+
+// Loads plot twists from config file
+func LoadPlotTwists() (appErr *ApplicationError) {
+	file, err := os.Open("plot_twists.json")
+	if err != nil {
+		log.Fatal("Failed to load plot twist config with message:", err)
+	}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&PlotTwistConfig)
+	if err != nil {
+		log.Fatal("Failed to load plot twist config with message:", err)
+	}
+	return nil
 }

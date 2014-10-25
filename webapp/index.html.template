@@ -184,7 +184,7 @@
                     </a>
                 </div>
                 <% if (allow_quit) { %>
-                    <div class="user-column btn-group btn-group-justified">
+                    <div class="user-column btn-group btn-group-justified profile-buttons">
                         <div class="btn-group">
                             <button type="button" class="btn btn-primary" id="email_settings">Email Settings</button>
                         </div>
@@ -193,7 +193,7 @@
                         </div>
                     </div>
                 <% } else { %>
-                    <div class="row user-column">
+                    <div class="row user-column profile-buttons">
                         <button class="btn btn-block btn-primary" id="email_settings">Email Settings</button>
                     </div>
                 <% } %>

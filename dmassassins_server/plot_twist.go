@@ -15,8 +15,21 @@ const (
 	FourtyEightHours = 172800
 )
 
+// Gets plot twist from the plot twist config
+func GetPlotTwist(twistName string) (twist *PlotTwist, appErr *ApplicationError) {
+
+	if twist, ok := PlotTwistConfig[twistName]; ok {
+		return twist, nil
+	}
+
+	msg := `Invalid Plot Twist: ` + twistName
+	err := errors.New(msg)
+	return nil, NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
+
+}
+
 // Revives a list of users, assumes they're all already dead
-func (game *Game) ReviveUsers(toBeRevived []uuid.UUID) (appErr *ApplicationError) {
+func (game *Game) ReviveUsers(tx *sql.Tx, toBeRevived []uuid.UUID) (appErr *ApplicationError) {
 
 	// Create a interface slice to store the users to be killed and the
 	toBeRevivedInterface := ConvertUUIDSliceToInterface(toBeRevived)
@@ -28,23 +41,15 @@ func (game *Game) ReviveUsers(toBeRevived []uuid.UUID) (appErr *ApplicationError
 	// Get the params string for the update
 	params := GetParamsForSlice(1, toBeRevivedUpdate)
 
-	// Start a transaction so we can rollback if something blows up
-	tx, err := db.Begin()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
 	// Prepare statement to revive captains
 	reviveStmt, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = true WHERE game_id = $1 AND user_id IN (` + params + `)`)
 	if err != nil {
-		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute statement to revive captains
 	_, err = tx.Stmt(reviveStmt).Exec(toBeRevivedUpdate...)
 	if err != nil {
-		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
@@ -53,39 +58,34 @@ func (game *Game) ReviveUsers(toBeRevived []uuid.UUID) (appErr *ApplicationError
 		user := GetDumbUser(userId)
 		appErr = user.SetUserPropertyTransactional(tx, `revived`, `true`)
 		if appErr != nil {
-			tx.Rollback()
 			return appErr
 		}
 	}
 
-	// Commit the transaction
-	tx.Commit()
-
-	// Assign targets
-	return game.AssignTargetsBy(`normal`)
+	return nil
 }
 
 // Revives all of the captains who are dead
-func (game *Game) ReviveCaptains() (appErr *ApplicationError) {
+func (game *Game) ReviveCaptains(tx *sql.Tx) (appErr *ApplicationError) {
 	// Get all the dead team captains
 	toBeRevived, appErr := game.GetDeadTeamCaptains()
 	if appErr != nil {
 		return appErr
 	}
 	// Revive them
-	return game.ReviveUsers(toBeRevived)
+	return game.ReviveUsers(tx, toBeRevived)
 
 }
 
 // Revives all of the strongest players who are dead
-func (game *Game) ReviveStrongestPlayers() (appErr *ApplicationError) {
+func (game *Game) ReviveStrongestPlayers(tx *sql.Tx) (appErr *ApplicationError) {
 	// Get all the strongest players
 	toBeRevived, appErr := game.getStrongPlayersWithState(false)
 	if appErr != nil {
 		return appErr
 	}
 	// Revive them
-	return game.ReviveUsers(toBeRevived)
+	return game.ReviveUsers(tx, toBeRevived)
 }
 
 // Kill all the players who havent killed in the past x hours and randomize targets
@@ -162,13 +162,13 @@ func (game *Game) KillPlayersWithNoKills() (appErr *ApplicationError) {
 }
 
 // Activates a plot twist
-func (game *Game) ActivatePlotTwist(twistName, twistValue string, sendEmail bool) (appErr *ApplicationError) {
+func (game *Game) ActivatePlotTwistPart(tx *sql.Tx, twistName, twistValue string) (appErr *ApplicationError) {
 
 	switch twistName {
 	case `assign_targets`:
-		return game.AssignTargetsBy(twistValue)
+		return
 	case `kill_mode`:
-		return game.SetGameProperty(twistName, twistValue)
+		return
 	case `kill_innocent`:
 		return game.KillPlayersWithNoKills()
 	case `kill_inactive`:
@@ -177,15 +177,79 @@ func (game *Game) ActivatePlotTwist(twistName, twistValue string, sendEmail bool
 			return NewApplicationError(`Invalid Number of Hours`, err, ErrCodeInvalidParameter)
 		}
 		return game.KillPlayersWithNoRecentKills(numHours)
-	case `revive_strongest`:
-		return game.ReviveStrongestPlayers()
-	case `revive_captains`:
-		return game.ReviveCaptains()
 	}
 
 	msg := `Invalid Plot Twist: ` + twistName
 	err := errors.New(msg)
 	return NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
+}
+
+// Revive a group of players
+func (game *Game) RevivePlayers(tx *sql.Tx, revive string) (appErr *ApplicationError) {
+	switch revive {
+	case `revive_strongest`:
+		return game.ReviveStrongestPlayers(tx)
+	case `revive_captains`:
+		return game.ReviveCaptains(tx)
+	}
+	return nil
+}
+
+// Activates a plot twist
+func (game *Game) ActivatePlotTwist(twistName string) (appErr *ApplicationError) {
+	twist, appErr := GetPlotTwist(twistName)
+	if appErr != nil {
+		return appErr
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Revive anyone we need to revive
+	revive := twist.Revive
+	if revive != `` {
+		appErr = game.RevivePlayers(tx, revive)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	// Assign targets
+	assignMode := twist.AssignTargets
+	if assignMode != `` {
+		appErr = game.AssignTargetsByTransactional(tx, assignMode)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	// Set kill mode
+	appErr = game.SetGamePropertyTransactional(tx, `kill_mode`, twist.KillMode)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
+	// Set kill tiemr
+	killTimer := twist.KillTimer
+	if killTimer != 0 {
+		appErr = game.SetKillTimer(tx, killTimer)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return nil
 }
 
 // Determine if the user has made another kill in the past 24 hours and if so gives them an extra point

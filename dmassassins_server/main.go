@@ -10,4 +10,5 @@ func main() {
 	LoadConfig()
 	fmt.Println("Server")
 	StartServer()
+
 }

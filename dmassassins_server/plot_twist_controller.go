@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -51,13 +52,20 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
-	plotTwistValue := plotTwistPut.PlotTwistValue
-	sendEmail := plotTwistPut.SendEmail
 
 	// Activate plot twist
-	appErr = game.ActivatePlotTwist(plotTwistName, plotTwistValue, sendEmail)
+	appErr = game.ActivatePlotTwist(plotTwistName)
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	if !plotTwistPut.SendEmail {
+		return game, nil
+	}
+
+	_, appErr = game.SendPlotTwistEmail(plotTwistName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"plot_twist_name": plotTwistName, "game_id": gameId.String()}, raven.WARNING)
 	}
 
 	return game, nil

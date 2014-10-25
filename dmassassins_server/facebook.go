@@ -3,17 +3,22 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	fb "github.com/huandu/facebook"
 )
 
-// Returns an authenticated facebook session with app id/secret
-// Need to move app id/secret to config file
-func getFacebookSession(token string) (fbSession *fb.Session) {
-
+func getFbApp() *fb.App {
 	fb.Version = "v2.0"
 	var app = fb.New(Config.FBAppId, Config.FBAppSecret)
 	app.RedirectUri = "http://dmassassins.com"
+	return app
+}
+
+// Returns an authenticated facebook session with app id/secret
+func getFacebookSession(token string) (fbSession *fb.Session) {
+
+	app := getFbApp()
 
 	session := app.Session(token)
 	return session
@@ -168,4 +173,33 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 	}
 	return facebookId, nil
 
+}
+
+func PostKillTweet() (appErr *ApplicationError) {
+
+	//token := `CAAJJWeRefcEBAEqXaly1QCWEYCPo4g0wQwAUeATgKwZAwHUP0wuYXW0JgZCntYas2N7pG2lGdGZA8jVjwpGc5gp9wlK6hAwcby7qz6K27wYZCDcZAG2LRRxyR9g5GIlT9bDAd7mMarCOMpD7ZB6DGBLtcnwoKoIQyZABCFn03ExyKocxDoANZB9aOh1FhvJO9huyQiJdCD5GHqKocgWe4G6O10SCYhgT9a8ZD`
+
+	//pageId := `1697108740514966`
+	res, err := fb.Get("/10152622020481913", fb.Params{"fields": "access_token", "access_token": Config.FBAccessToken})
+	fmt.Println(res)
+	if err != nil {
+		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+	}
+
+	var accessToken string
+	err = res.DecodeField("access_token", &accessToken)
+	if err != nil {
+		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+	}
+
+	// //session = getFacebookSession(accessToken)
+	// res, err = session.Post(`/1697108740514966/feed`, fb.Params{"message": `tswift`, "access_token": accessToken})
+	// fmt.Println(res)
+	// fmt.Println(err)
+	// if err != nil {
+	// 	return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+	// }
+	// fmt.Println(res)
+
+	return nil
 }

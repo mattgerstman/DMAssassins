@@ -194,6 +194,12 @@ a:focus {
 .default_cursor {
   cursor: default!important;
 }
+.user_view .thumbnail {
+  margin-bottom: 10px;
+}
+.user_view .profile-buttons {
+  margin-bottom: 10px;
+}
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {
     border-bottom: 1px solid #ddd;

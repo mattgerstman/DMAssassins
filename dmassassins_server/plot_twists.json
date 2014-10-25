@@ -1,0 +1,44 @@
+{
+    "normal": {
+        "assign_targets": "normal",
+        "kill_mode": "normal",
+        "kill_timer": 0,
+        "revive": ""
+    },
+    "reverse_targets": {
+        "assign_targets": "reverse",
+        "kill_mode": "normal",
+        "kill_timer": 0,
+        "revive": ""
+    },
+    "successive_kills": {
+        "assign_targets": "normal",
+        "kill_mode": "successive_kills",
+        "kill_timer": 0,
+        "revive": ""
+    },
+    "strong_weak": {
+        "assign_targets": "strong_weak",
+        "kill_mode": "defend_weak",
+        "kill_timer": 0,
+        "revive": ""
+    },
+    "strong_closed": {
+        "assign_targets": "strong_closed",
+        "kill_mode": "defend_weak",
+        "kill_timer": 0,
+        "revive": "strong"
+    },
+    "timer_24": {
+        "assign_targets": "normal",
+        "kill_mode": "normal",        
+        "kill_timer": 24,
+        "revive": ""
+    },
+    "timer_48": {
+        "assign_targets": "normal",
+        "kill_mode": "normal",        
+        "kill_timer": 48,
+        "revive": ""
+    }
+}
