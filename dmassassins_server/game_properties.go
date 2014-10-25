@@ -7,14 +7,36 @@ import (
 	"strings"
 )
 
-// Sets a single game property for a game
+// Wrapper for SetGamePropertyTransactional that opens up and commits a transaction
 func (game *Game) SetGameProperty(key string, value string) (appErr *ApplicationError) {
 
-	// First attempt to update it if the property currently exists
-	res, err := db.Exec(`UPDATE dm_game_properties SET value = $1 WHERE game_id = $2 AND key ILIKE $3`, value, game.GameId.String(), key)
+	// Start transaction
+	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	// Set game property
+	appErr = game.SetGamePropertyTransactional(tx, key, value)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
+	// Commit transaction
+	tx.Commit()
+	return nil
+}
+
+// Sets a single game property for a game
+func (game *Game) SetGamePropertyTransactional(tx *sql.Tx, key string, value string) (appErr *ApplicationError) {
+	// First attempt to update it if the property currently exists
+	tryUpdate, err := db.Prepare(`UPDATE dm_game_properties SET value = $1 WHERE game_id = $2 AND key ILIKE $3`)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	res, err := tx.Stmt(tryUpdate).Exec(value, game.GameId.String(), key)
 	// Check how many rows were affected by the update
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
@@ -23,21 +45,26 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 
 	// If no rows were affected insert the property
 	if rowsAffected == 0 {
-		res, err := db.Exec(`INSERT INTO dm_game_properties (game_id, key, value) VALUES ($1,$2,$3)`, game.GameId.String(), key, value)
+		tryInsert, err := db.Prepare(`INSERT INTO dm_game_properties (game_id, key, value) VALUES ($1, $2, $3)`)
 		if err != nil {
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
+		res, err = tx.Stmt(tryInsert).Exec(game.GameId.String(), key, value)
+		if err != nil {
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 		if rowsAffected == 0 {
-			err = errors.New("Failed insert for " + key + " : " + string(value))
+			err = errors.New("Failed insert for " + key + " : " + value)
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 	}
 
-	// Set the property in the struct
 	game.Properties[key] = value
 	return nil
 }

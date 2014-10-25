@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -131,6 +132,12 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 	}
 }
 
+func startPolling() {
+	for _ = range time.Tick(2 * time.Second) {
+		fmt.Println("yo")
+	}
+}
+
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
 	var err error
@@ -139,6 +146,13 @@ func StartServer() {
 		appErr := NewApplicationError("Could not connect to database", err, ErrCodeDatabase)
 		LogWithSentry(appErr, nil, raven.ERROR)
 		log.Fatal("Could not connect to database")
+	}
+	//go startPolling()
+
+	appErr := PostKillTweet()
+	if appErr != nil {
+		fmt.Println(appErr)
+		LogWithSentry(appErr, nil, raven.ERROR)
 	}
 
 	// startGame()

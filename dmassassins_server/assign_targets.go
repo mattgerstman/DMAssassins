@@ -9,23 +9,40 @@ import (
 	//	"strconv"
 )
 
-// Assigns targets using a methodology
+// Assigns targets using a methodology, wrapps the inner function in a transaction
 func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationError) {
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = game.AssignTargetsByTransactional(tx, assignmentType)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
+	tx.Commit()
+	return nil
+}
+
+// Assigns targets using a methodology using a transaction
+func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string) (appErr *ApplicationError) {
 
 	// Reverse targets
 	if assignmentType == `reverse` {
 		fmt.Println(`reverse`)
-		return game.ReverseTargets()
+		return game.reverseTargets(tx)
 	}
 
 	if assignmentType == `strong_weak` {
 		fmt.Println(`strong_weak`)
-		return game.AssignStrongTargetWeak()
+		return game.assignStrongTargetWeak(tx)
 	}
 
 	if assignmentType == `closed_strong` {
 		fmt.Println(`closed_strong`)
-		return game.AssignClosedStrongLoop()
+		return game.assignClosedStrongLoop(tx)
 	}
 
 	// If they don't have a special method check if teams are enabled
@@ -48,7 +65,7 @@ func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationErr
 				return appErr
 			}
 			fmt.Println(`teams`)
-			return game.AssignTargetsByTeams(rows)
+			return game.assignTargetsByTeams(tx, rows)
 		}
 	}
 	fmt.Println(`regular`)
@@ -59,7 +76,7 @@ func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationErr
 	}
 
 	// Fallback to plain random assignment
-	return game.AssignTargets(users, false)
+	return game.assignTargets(tx, users, false)
 }
 
 type targetPair struct {
@@ -72,7 +89,7 @@ type targetPair struct {
 }
 
 // Reverses targets for a game
-func (game *Game) ReverseTargets() (appErr *ApplicationError) {
+func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 	var userIdBuffer, targetIdBuffer string
 	var targets []*targetPair
 	rows, err := db.Query(`SELECT user_id, target_id FROM dm_user_targets WHERE game_id = $1`, game.GameId.String())
@@ -88,11 +105,11 @@ func (game *Game) ReverseTargets() (appErr *ApplicationError) {
 		targets = append(targets, pair)
 	}
 
-	return game.insertTargetsWithDelete(targets)
+	return game.insertTargetsWithDelete(tx, targets)
 }
 
 // Put strong users in a closed loop and other users in a regular loop
-func (game *Game) AssignClosedStrongLoop() (appErr *ApplicationError) {
+func (game *Game) assignClosedStrongLoop(tx *sql.Tx) (appErr *ApplicationError) {
 	// Gets the strongest players
 	strong, appErr := game.getStrongPlayers()
 	if appErr != nil {
@@ -100,7 +117,7 @@ func (game *Game) AssignClosedStrongLoop() (appErr *ApplicationError) {
 	}
 
 	// Assigns the strong players as targets
-	appErr = game.AssignTargets(strong, false)
+	appErr = game.assignTargets(tx, strong, false)
 	if appErr != nil {
 		return appErr
 	}
@@ -120,7 +137,7 @@ func (game *Game) AssignClosedStrongLoop() (appErr *ApplicationError) {
 		return appErr
 	}
 
-	return game.AssignTargets(users, true)
+	return game.assignTargets(tx, users, true)
 }
 
 // Gets a list of rows for players not in the given uuid slice
@@ -139,7 +156,7 @@ func (game *Game) getPlayersNotInSlice(userSlice []interface{}) (rows *sql.Rows,
 }
 
 // have the strongest players target the weakest ones, don't be concerned about teams/captains
-func (game *Game) AssignStrongTargetWeak() (appErr *ApplicationError) {
+func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) {
 	// Get strong players
 	strong, appErr := game.getStrongPlayers()
 	if appErr != nil {
@@ -237,7 +254,7 @@ func (game *Game) AssignStrongTargetWeak() (appErr *ApplicationError) {
 	// have last user target first strong user
 	lastTarget := &targetPair{lastUserId, nil, "", firstStrong, nil, ""}
 	targets = append(targets, lastTarget)
-	return game.insertTargetsWithDelete(targets)
+	return game.insertTargetsWithDelete(tx, targets)
 }
 
 func (game *Game) GetAllActivePlayersAsRows() (rows *sql.Rows, appErr *ApplicationError) {
@@ -250,7 +267,7 @@ func (game *Game) GetAllActivePlayersAsRows() (rows *sql.Rows, appErr *Applicati
 }
 
 // Assign targets and space them out by team
-func (game *Game) AssignTargetsByTeams(rows *sql.Rows) (appErr *ApplicationError) {
+func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *ApplicationError) {
 	// Get the list of team ids
 	teamsList, appErr := game.GetActiveTeamIds()
 	if appErr != nil {
@@ -421,7 +438,7 @@ func (game *Game) AssignTargetsByTeams(rows *sql.Rows) (appErr *ApplicationError
 		targetList = append(targetList, captainPair)
 	}
 
-	return game.insertTargetsWithDelete(targetList)
+	return game.insertTargetsWithDelete(tx, targetList)
 
 }
 
@@ -448,40 +465,17 @@ func (game *Game) insertTargets(tx *sql.Tx, targetList []*targetPair) (appErr *A
 	return nil
 }
 
-// Wraps insert targets in a transaction and doesn't delete
-func (game *Game) insertTargetsWithoutDelete(targetList []*targetPair) (appErr *ApplicationError) {
-	tx, err := db.Begin()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	appErr = game.insertTargets(tx, targetList)
-	if appErr != nil {
-		return appErr
-	}
-	tx.Commit()
-	return nil
-
-}
-
 // inserts a slice of targetPairs into the database and deletes the current pairs in the db
-func (game *Game) insertTargetsWithDelete(targetList []*targetPair) (appErr *ApplicationError) {
-
-	tx, err := db.Begin()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
+func (game *Game) insertTargetsWithDelete(tx *sql.Tx, targetList []*targetPair) (appErr *ApplicationError) {
 
 	// Delete targets
 	appErr = game.DeleteTargetsTransactional(tx)
 	if appErr != nil {
-		tx.Rollback()
 		return appErr
 	}
 
 	// if we have no targets just clear the db
 	if len(targetList) == 0 {
-		tx.Commit()
 		return
 	}
 
@@ -489,7 +483,6 @@ func (game *Game) insertTargetsWithDelete(targetList []*targetPair) (appErr *App
 	if appErr != nil {
 		return appErr
 	}
-	tx.Commit()
 	return nil
 }
 
@@ -555,7 +548,7 @@ func (game *Game) DeleteTargets() (appErr *ApplicationError) {
 }
 
 // Assign all targets plainly
-func (game *Game) AssignTargets(users []uuid.UUID, skipDelete bool) (appErr *ApplicationError) {
+func (game *Game) assignTargets(tx *sql.Tx, users []uuid.UUID, skipDelete bool) (appErr *ApplicationError) {
 
 	if len(users) == 0 {
 		if !skipDelete {
@@ -586,8 +579,8 @@ func (game *Game) AssignTargets(users []uuid.UUID, skipDelete bool) (appErr *App
 
 	// Execute the actual insert code
 	if skipDelete {
-		return game.insertTargetsWithoutDelete(targets)
+		return game.insertTargets(tx, targets)
 	}
-	return game.insertTargetsWithDelete(targets)
+	return game.insertTargetsWithDelete(tx, targets)
 
 }

@@ -413,6 +413,47 @@ func (game *Game) sendGameOverEmail() (id string, appErr *ApplicationError) {
 
 }
 
+// Inform users of a plot tiwst
+func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *ApplicationError) {
+
+	// Get all users for the game that we're allowed to email
+	users, appErr := game.getEmailableUsersForGame(true)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/" + twistName + ".txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/" + twistName + ".html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := game.GameName + `DMAssassins - Plot Twist!`
+	tag := `PlotTwist`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
 // Send an email through mailgun
 func sendEmail(subject, body, htmlBody, tag string, users []*User) (id string, appErr *ApplicationError) {
 	// Instantiate the mailgun object
