@@ -37,14 +37,6 @@ func LoadConfig() (appErr *ApplicationError) {
 	return LoadPlotTwists()
 }
 
-type PlotTwist struct {
-	KillMode      string `json:"kill_mode"`
-	KillTimer     int    `json:"kill_timer"`
-	AssignTargets string `json:"assign_targets"`
-	Revive        string `json:"revive"`
-	SendEmail     string `json:"send_email"`
-}
-
 type PlotTwistMap map[string]*PlotTwist
 
 var PlotTwistConfig PlotTwistMap

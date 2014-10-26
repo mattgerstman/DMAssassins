@@ -26,6 +26,9 @@ a:focus {
   margin-right: auto;
   cursor: pointer;
 }
+.logo {
+  margin-bottom: 30px;
+}
 .btn-half-block {
   width: 45%;
   margin: 5px 2%;

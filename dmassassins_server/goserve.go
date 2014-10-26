@@ -149,11 +149,11 @@ func StartServer() {
 	}
 	//go startPolling()
 
-	appErr := PostKillTweet()
-	if appErr != nil {
-		fmt.Println(appErr)
-		LogWithSentry(appErr, nil, raven.ERROR)
-	}
+	// appErr := PostKillTweet()
+	// if appErr != nil {
+	// 	fmt.Println(appErr)
+	// 	LogWithSentry(appErr, nil, raven.ERROR)
+	// }
 
 	// startGame()
 	// generateTestUsers()
