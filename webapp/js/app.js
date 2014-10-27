@@ -37,7 +37,6 @@ $(function() {
 
     app.Running.Users = new app.Collections.Users();
     app.Running.Teams = new app.Collections.Teams();
-    app.Running.UserEmails = new app.Models.UserEmails();
 
     app.Running.User.listenTo(app.Running.Games, 'game-change', app.Running.User.fetch);
     app.Running.TargetModel.listenTo(app.Running.Games, 'game-change', app.Running.TargetModel.fetch);

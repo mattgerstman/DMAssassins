@@ -37,9 +37,7 @@ var app = app || {
             'users': 'users',
             'edit_rules': 'edit_rules',
             'switch_game': 'switch_game',
-            'game_settings': 'game_settings',
-            'plot_twists': 'plot_twists',
-            'email_users': 'email_users'
+            'game_settings': 'game_settings'
 
         },
         // routes that require we have a game that has been started
@@ -260,11 +258,6 @@ var app = app || {
             var view = new app.Views.AdminGameSettingsView();
             app.Running.AppView.setCurrentView(view);
             this.render();             
-        },
-        plot_twists: function() {
-            var view = new app.Views.AdminPlotTwistsView();
-            app.Running.AppView.setCurrentView(view);
-            this.render();                         
         },
         email_users: function() {
             var view = new app.Views.AdminEmailUsersView();
