@@ -28,6 +28,16 @@ var app = app || {
             if (Storage && sessionStorage) {
                 this.supportStorage = true;
             }
+            if (!this.supportStorage) {
+                return;
+            }
+            try {
+                sessionStorage.setItem('test', 0);
+            }
+            catch (err) {
+                console.log(err);
+                this.supportStorage = false;
+            }
         },
 
         // returns data stored in the session
@@ -51,6 +61,7 @@ var app = app || {
             } else {
                 Backbone.Model.prototype.set.call(this, key, value);
             }
+            console.log(this);
             return this;
         },
 

@@ -91,7 +91,8 @@ var app = app || {
             var needTarget = _.contains(this.requiresTarget, path);
 
             // is there a game
-            var hasGame = app.Session.get('has_game') == "true";
+            var sessionHasGame = app.Session.get('has_game');
+            var hasGame = (sessionHasGame == "true") || (sessionHasGame === true);
 
             // is the game started
             var hasTarget = !!app.Running.TargetModel.get('user_id') && app.Running.Games.getActiveGame().get('game_started');
@@ -115,7 +116,7 @@ var app = app || {
 
             /*
 			Variables I use when shit's not routing properly */
-            /*/
+            //
 			console.log('path:', path);
 			console.log('needGameAndAuth: ', needGameAndAuth);
 			console.log('hasGame: ', hasGame);
