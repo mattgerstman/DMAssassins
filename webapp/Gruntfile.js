@@ -62,7 +62,8 @@ module.exports = function(grunt) {
       },
       dev: {
           NODE_ENV: 'DEVELOPMENT',
-          BETA: '<%= pkg.beta %>'
+          BETA: '<%= pkg.beta %>',
+          BANNER: '<%= banner %>',
       },
       prod : {
           NODE_ENV: 'PRODUCTION',
