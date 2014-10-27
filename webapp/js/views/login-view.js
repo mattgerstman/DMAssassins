@@ -35,6 +35,14 @@ var app = app || {
             var width = button.width();
             button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
             button.attr('disabled', true);
+            
+            if( navigator.userAgent.match('CriOS') )
+            {
+                window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ document.location.href +'&scope=email,user_friends,public_profile', '', null);
+                return;
+            }
+                
+
             this.model.login();
         },
         // render the login page
