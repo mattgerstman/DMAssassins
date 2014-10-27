@@ -751,38 +751,49 @@
     </script>
 
     <script id="admin-game-settings-template" type="text/template">
-        <div class="user-column">
-            <form class="game-settings" role="form">
-                <div class="form-group">
-                    <label for="game_name" class="control-label">Game Name:</label>
-                    <input id="game_name" class="form-control" value="<%=game_name%>" />
-                </div>
-                <div class="form-group">
-                    <label for="game_password" class="control-label">Game Password:</label>
-                    <input id="game_password" class="form-control" placeholder="Leave Blank For No Password" value="<%= game_properties.game_password %>"/>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox">
-                        <label for="teams_enabled">
-                            <input id="teams_enabled" type="checkbox" <% if (teams_enabled) { %> checked <% } %>/> Enable Teams
-                        </label>
+        <div class="container">
+            <div class="col-sm-4 col-sm-offset-1">
+                <h1 class="text-center">Settings</h1>
+                <form class="game-settings" role="form">
+                    <div class="form-group">
+                        <label for="game_name" class="control-label">Game Name:</label>
+                        <input id="game_name" class="form-control" value="<%=game_name%>" />
                     </div>
-                    <button class="btn btn-block btn-primary save-game">Save</button>
-                </div>
-
-            </form>
-            <div class="user-column">
+                    <div class="form-group">
+                        <label for="game_password" class="control-label">Game Password:</label>
+                        <input id="game_password" class="form-control" placeholder="Leave Blank For No Password" value="<%= game_properties.game_password %>"/>
+                    </div>
+    
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label for="teams_enabled">
+                                <input id="teams_enabled" type="checkbox" <% if (teams_enabled) { %> checked <% } %>/> Enable Teams
+                            </label>
+                        </div>
+                        <button class="btn btn-block btn-primary save-game">Save</button>
+                    </div>
+    
+                </form>
                 <% if (!game_started) { %>
                     <button class="btn btn-block btn-success start-game">Start Game</button>
                 <% } else { %>
                     <button class="btn btn-block btn-danger end-game">End Game</button>
                 <% } %>
-            </div>
-            </form>
-       </div>
 
-          <div id="start_game_modal" class="modal fade">
+            </div>
+            <div class="list-group col-sm-4 col-sm-offset-2">
+                <h1 class="text-center">Plot Twists</h1>
+                <a href="#" class="list-group-item" id="randomize_targets">Randomize Targets</a>
+                <a href="#" class="list-group-item" id="reverse_targets">Reverse Targets</a>
+                <a href="#" class="list-group-item" id="successive_kills">Successive Kills Count Double</a>
+                <% if (teams_enabled) { %>
+                    <a href="#" class="list-group-item" id="strong_weak">Strong Target The Weak</a>
+                    <a href="#" class="list-group-item" id="strong_closed">Put Strongest In A Closed Loop</a>
+                <% } %>
+                <a href="#" class="list-group-item" id="timer_24">24 Hours To Kill</a>
+            </div>
+        </div>
+        <div id="start_game_modal" class="modal fade">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -830,41 +841,6 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-
-    </script>
-
-
-    <script id="admin-plot-twists-template" type="text/template">
-        <div class="container">
-            <div class="row">
-                <div class="list-group col-sm-4 col-sm-offset-1">
-                    <h1 class="text-center">Reassign Targets</h1>
-                    <a href="#" class="list-group-item" id="targets_randomize">Randomize Targets</a>
-                    <a href="#" class="list-group-item" id="targets_reverse">Reverse Targets</a>
-                    <a href="#" class="list-group-item" id="targets_strong_weak">Strong Target The Weak</a>
-                    <a href="#" class="list-group-item" id="targets_strong_closed">Put Strong In A Closed Loop</a>
-                </div>
-                <div class="list-group col-sm-4 col-sm-offset-2">
-                    <h1 class="text-center">Kill Mode</h1>
-                    <a href="#" class="list-group-item" id="kill_mode_normal">Normal Kill Mode</a>
-                    <a href="#" class="list-group-item" id="kill_mode_successive">Successive Kills Count Double</a>
-                    <a href="#" class="list-group-item" id="kill_mode_defend_weak">Defend The Weak</a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="list-group col-sm-4 col-sm-offset-1">
-                    <h1 class="text-center">Revive Players</h1>
-                    <a href="#" class="list-group-item" id="revive_captains">Revive Team Captains</a>
-                    <a href="#" class="list-group-item" id="revive_strongest">Revive Strongest Players</a>
-                </div>
-    
-                <div class="list-group col-sm-4 col-sm-offset-2">
-                    <h1 class="text-center">Kill Players</h1>
-                    <a href="#" class="list-group-item" id="kill_innocent">Kill Players With No Kills</a>
-                    <a href="#" class="list-group-item" id="kill_inactive">Kill Players With No Kills In The Past X Hours</a>
-                </div>
-            </div>
-        </div>
         <div id="plot-twist-modal-container"></div>
     </script>
 
@@ -890,10 +866,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn hidden-xs twist-submit <%=submit_class%>" data-twist-name="<%= twist_name %>" data-twist-value="<%= twist_value %>"><%= submit_text %></button>
+                    <button type="submit" class="btn hidden-xs twist-submit <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
                     
                     <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-block visible-xs twist-submit  <%=submit_class%>" data-twist-name="<%= twist_name %>" data-twist-value="<%= twist_value %>"><%= submit_text %></button>                
+                    <button type="submit" class="btn btn-block visible-xs twist-submit  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>                
                 </div>
               </form>
             </div><!-- /.modal-content -->
@@ -901,110 +877,70 @@
         </div><!-- /.modal -->
     </script>   
     
-    <script id="plot-twist-body-targets-randomize-template" type="text/template">
+    <script id="plot-twist-body-randomize-targets-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
             <li>All users will have a new target</li>
             <% if (teams_enabled) { %>
                 <li>We will attempt to give all users a target from a different team.</li>
-                <li>We will attempt to prevent team captains from targeting each other.</li>                
+                <li>We will attempt to prevent team captains from targeting each other.</li>        
+                <li>Users will be emailed informing them of the plot twist</li>        
             <% } %>
         </ol>                
     </script>
 
-    <script id="plot-twist-body-targets-reverse-template" type="text/template">
+    <script id="plot-twist-body-reverse-targets-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
             <li>All users will target their current assassin.</li>
             <li>All users will be targeted by their current target.</li>
+            <li>Users will be emailed informing them of the plot twist</li>
         </ol>                
     </script>
 
-    <script id="plot-twist-body-targets-strong-weak-template" type="text/template">
+    <script id="plot-twist-body-successive-kills-template" type="text/template">
+        The following will happen if you implement this plot twist:<br />
+        <ol>            
+            <li>All users will have a new target</li>
+            <li>If a player makes a kill and has already killed in the last 24 hours they will get two points.</li>
+            <li>A player will get no more than 2 points per kill.</li>
+            <li>If a player is on a kill spree, they can potentially rack up a series of 2 point kills.</li>
+            <li>Users will be emailed informing them of the plot twist</li>
+        </ol>
+    </script>
+
+    <script id="plot-twist-body-strong-weak-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
             <li>The player with the most kills from each team will be targeting the player with the least kills from a different team.</li>
-            <li>Ties for "strongest" and "weakest" for each team will be broken arbitrarily.</li>
+            <li>For target assignment, ties for "strongest" and "weakest" for each team will be broken arbitrarily.</li>
             <li>All other players will be assigned a random target.</li>
+            <li>If the player with the lowest number of kills for a team dies, the next lowest team member will also die.</li>
+            <li>If players are tied for "weakest" they both count.</li>
+            <li>Users will be emailed informing them of the plot twist</li>
         </ol>
-        <i>Note: This plot twist pairs really well with the "Defend The Weak" Kill Mode.</i>
     </script>
 
-    <script id="plot-twist-body-targets-strong-closed-template" type="text/template">
+    <script id="plot-twist-body-strong-closed-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
+            <li>If the player with the most kills for their team is dead, they will be revived.</li>    
             <li>The player with the most kills from each team will be assigned another "strong" player from another team.</li>
             <li>Strong players will be in their own mini game and will not be able to target regular users until targets are reassigned.</li>
             <li>Ties for "strongest" for each team will be broken arbitrarily</li>
             <li>All other players will be assigned a random target</li>
+            <li>All players have 48 hours to kill their new target</li>
+            <li>Users will be emailed informing them of the plot twist</li>
         </ol>
     </script>
 
-    <script id="plot-twist-body-kill-mode-normal-template" type="text/template">
+    <script id="plot-twist-body-timer-24-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
-            <li>All kills will count as one.</li>
+            <li>All players get a new target</li>
+            <li>Players who do not kill their target within 24 hours will be eliminated</li>
+            <li>Users will be emailed informing them of the plot twist</li>
         </ol>
-    </script>
-
-    <script id="plot-twist-body-kill-mode-successive-kills-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>If a player makes a kill and has already killed in the last 24 hours they will get two points.</li>
-            <li>A player will get no more than 2 points per kill.</li>
-            <li>If a player is on a kill spree, they can potentially rack up a series of 2 point kills.</li>
-        </ol>
-        <i>Note: This plot twist works well with "Put Strong In A Close Loop" target assignment.</i>
-    </script>
-
-    <script id="plot-twist-body-kill-mode-defend-weak-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>If the player with the lowest number of kills for a team dies, the next lowest team member will also die.</li>
-            <li>If players are tied for "weakest" they both count.</li>
-        </ol>
-        <i>Note: This plot twist works well with "Strong Target The Weak" target assignment.</i><br />
-        <i>Note: While we make a point to kill the next weakest player, we recommend you spin it as a "random" player dies to increase the impact on game-play from this plot twist.</i>
-    </script>
-
-    <script id="plot-twist-body-revive-team-captains-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>All dead team captains will be revived.</li>
-            <li>All players will be assigned a random target.</li>            
-        </ol>
-    </script>
-
-    <script id="plot-twist-body-revive-strongest-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>The player with the most kills from each team will be revived.</li>
-            <li>Ties for "strongest" for each team will be broken arbitrarily.</li>
-            <li>All players will be assigned a random target.</li>
-        </ol>
-        <i>Note: This plot twist works well with either "Strong Target The Weak" or "Put Strong In A Closed Loop" target assignment.</i><br />        
-    </script>
-
-    <script id="plot-twist-body-kill-innocent-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>Players with no kills will die silently.</li>
-            <li>All other players will be assigned a random target.</li>
-        </ol>
-        <i>Note: We strongly recommend you warn players this twist is coming.</i><br />
-    </script>
-
-    <script id="plot-twist-body-kill-inactive-template" type="text/template">
-        The following will happen if you implement this plot twist:<br />
-        <ol>
-            <li>Players who have not killed in the last X hours will die silently.</li>
-            <li>All other players will be assigned a random target.</li>
-        </ol>
-        <div class="input-group">
-             <input class="form-control" id="plot-twist-value-override" type="number" placeholder='Enter "X" Here' min="1" required/>
-             <span class="input-group-addon">Hours</span>
-        </div><br />
-        <i>Note: We strongly recommend you warn players this twist is coming X hours in advance.</i>
     </script>
 
     <script id="admin-email-users-template" type="text/template">   

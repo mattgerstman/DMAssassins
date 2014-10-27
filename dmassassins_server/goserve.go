@@ -132,12 +132,6 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 	}
 }
 
-func startPolling() {
-	for _ = range time.Tick(2 * time.Second) {
-		fmt.Println("yo")
-	}
-}
-
 // Starts the server, opens the database, and registers handlers
 func StartServer() {
 	var err error
@@ -147,6 +141,13 @@ func StartServer() {
 		LogWithSentry(appErr, nil, raven.ERROR)
 		log.Fatal("Could not connect to database")
 	}
+
+	appErr := LoadAllTimers()
+	if appErr != nil {
+		fmt.Println(appErr)
+		LogWithSentry(appErr, nil, raven.ERROR)
+	}
+
 	//go startPolling()
 
 	// appErr := PostKillTweet()

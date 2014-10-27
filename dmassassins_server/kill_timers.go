@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"strconv"
 	"time"
@@ -20,12 +21,63 @@ type KillTimer struct {
 	ExecuteTs int64
 }
 
+// reloads all timers in the database
+func LoadAllTimers() (appErr *ApplicationError) {
+	// Get all existing kill timers
+	rows, err := db.Query(`SELECT game_id, execute_ts FROM dm_kill_timers`)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	// Loop through the kill timers
+	for rows.Next() {
+		var gameIdBuffer string
+		var executeTs int64
+		err := rows.Scan(&gameIdBuffer, &executeTs)
+		// We almost never have scanning errors, but if we do this
+		if err != nil {
+			msg := `Error loading timer`
+			appErr := NewApplicationError(msg, err, ErrCodeDatabase)
+			LogWithSentry(appErr, map[string]string{"game_id": gameIdBuffer}, raven.ERROR)
+			continue
+		}
+		// Get game id
+		gameId := uuid.Parse(gameIdBuffer)
+		// Get game
+		game, appErr := GetGameById(gameId)
+		if appErr != nil {
+			LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.ERROR)
+			continue
+		}
+		// Load timer
+		game.LoadTimer(executeTs)
+	}
+	return nil
+}
+
+// Loads a single timer and calls it after the set amount of time
+func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
+	nowTime := time.Now()
+	now := nowTime.Unix()
+	timeDiff := executeTs - now
+	duration := time.Duration(timeDiff) * time.Second
+	if timeDiff <= 0 {
+		duration = 1 * time.Minute
+	}
+	fmt.Println(`Loading timer for ` + game.GameId.String())
+	fmt.Print(`Executing in `)
+	fmt.Println(duration)
+	return time.AfterFunc(duration, game.KillTimerHandler)
+}
+
+// Creates a new kill timer and inserts it into the database
 func (game *Game) NewKillTimer(tx *sql.Tx, hours int64) (timer *time.Timer, appErr *ApplicationError) {
 
 	nowTime := time.Now()
 	now := nowTime.Unix()
+	// calculate when we need to executre
 	executeTs := (hours * SecInHour) + now
 
+	// Insert into db
 	insertTimer, err := db.Prepare(`INSERT INTO dm_kill_timers (game_id, create_ts, execute_ts) VALUES ($1, $2, $3)`)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -35,22 +87,22 @@ func (game *Game) NewKillTimer(tx *sql.Tx, hours int64) (timer *time.Timer, appE
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
-	duration := time.Duration(now-executeTs) * time.Second
-
-	return time.AfterFunc(duration, game.KillTimerHandler), nil
+	// Load the actual timer
+	return game.LoadTimer(executeTs), nil
 }
 
+// Handler for a timed kill
 func (game *Game) KillTimerHandler() {
 	appErr := game.ExecuteKillTimer()
 	if appErr == nil {
 		return
 	}
-
+	// if it fails try again in 10 minutes and log it
 	time.AfterFunc(10*time.Minute, game.KillTimerHandler)
 	LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
 }
 
+// Gets the min kill time and executes the kill timer
 func (game *Game) ExecuteKillTimer() (appErr *ApplicationError) {
 	var minKillTime int64
 	err := db.QueryRow(`SELECT create_ts FROM dm_kill_timers where game_id = $1`, game.GameId.String()).Scan(&minKillTime)
@@ -67,6 +119,8 @@ func (game *Game) ExecuteKillTimer() (appErr *ApplicationError) {
 
 // Kill all the players who havent killed in the past x hours and randomize targets
 func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *ApplicationError) {
+
+	fmt.Println(`Killing for: ` + game.GameName)
 
 	// Get last_killed value for all users
 	rows, err := db.Query(`SELECT DISTINCT ON (m.user_id) m.user_id, p.value FROM dm_user_game_mapping AS m LEFT OUTER JOIN dm_user_properties AS p ON m.user_id = p.user_id AND p.key='last_killed' WHERE m.game_id = $1 AND m.alive = true AND (m.user_role = 'dm_captain' OR m.user_role='dm_user')`, game.GameId.String())
@@ -135,6 +189,8 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	// Assign new targets
 	appErr = game.AssignTargetsByTransactional(tx, `normal`)
 	if appErr != nil {
 		tx.Rollback()
@@ -154,6 +210,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Commit the transaction
 	err = tx.Commit()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)

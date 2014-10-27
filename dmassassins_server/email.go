@@ -444,7 +444,7 @@ func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *Appli
 	htmlT.Execute(&htmlBodyBuffer, emailData)
 
 	// Set up the subject and contents of the email
-	subject := game.GameName + `DMAssassins - Plot Twist!`
+	subject := game.GameName + ` DMAssassins - Plot Twist!`
 	tag := `PlotTwist`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
