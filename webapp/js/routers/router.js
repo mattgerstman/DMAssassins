@@ -242,10 +242,10 @@ var app = app || {
             this.render();
         },
         users: function() {            
+            app.Running.Teams.fetch();  
             var view = new app.Views.AdminUsersView();
             app.Running.AppView.setCurrentView(view);            
-            app.Running.currentView.collection.fetch({reset: true});
-            app.Running.Teams.fetch();             
+            app.Running.currentView.collection.fetch({reset: true});           
             this.render();
         },
         edit_rules: function() {
