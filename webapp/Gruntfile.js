@@ -42,7 +42,14 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      files: '<%= concat.dist.src %>',
+      files: [
+          'js/lib/*.js',
+          'js/models/*.js',
+          'js/collections/*.js',
+          'js/views/*.js',
+          'js/routers/*.js',
+          'js/*.js'
+        ],
       gruntfile: {
         src: 'Gruntfile.js'
       },      

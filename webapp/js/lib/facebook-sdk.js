@@ -27,6 +27,7 @@ var app = app || {
     
     return;
 
+/*
 	if (response.status === 'connected') {
 		// User is logged into DMAssassins and Facebook.
 		app.Session.createSession(response, function(){
@@ -37,6 +38,7 @@ var app = app || {
 		// User needs to log in
 		app.Running.Router.navigate('login');
     }
+*/
 
   }
 
