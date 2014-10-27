@@ -1,1 +1,1 @@
-var SPY = '/assets/img/spy.jpg';
+var SPY = '/assets/img/spy.png';
