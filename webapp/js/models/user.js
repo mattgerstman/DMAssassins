@@ -122,6 +122,9 @@ var app = app || {
                         });
                         return;
                     }
+                },
+                error: function(model, response){
+                    alert(response.responseText);
                 }
             });
         },

@@ -114,7 +114,7 @@ var app = app || {
 
             /*
 			Variables I use when shit's not routing properly */
-            //
+            /*/
 			console.log('path:', path);
 			console.log('needGameAndAuth: ', needGameAndAuth);
 			console.log('hasGame: ', hasGame);

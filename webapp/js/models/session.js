@@ -35,7 +35,6 @@ var app = app || {
                 sessionStorage.setItem('test', 0);
             }
             catch (err) {
-                console.log(err);
                 this.supportStorage = false;
             }
         },
@@ -61,7 +60,6 @@ var app = app || {
             } else {
                 Backbone.Model.prototype.set.call(this, key, value);
             }
-            console.log(this);
             return this;
         },
 
