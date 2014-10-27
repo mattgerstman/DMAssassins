@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	//	"fmt"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -142,11 +142,11 @@ func StartServer() {
 		log.Fatal("Could not connect to database")
 	}
 
-	// appErr := LoadAllTimers()
-	// if appErr != nil {
-	// 	fmt.Println(appErr)
-	// 	LogWithSentry(appErr, nil, raven.ERROR)
-	// }
+	appErr := LoadAllTimers()
+	if appErr != nil {
+		fmt.Println(appErr)
+		LogWithSentry(appErr, nil, raven.ERROR)
+	}
 
 	//go startPolling()
 
