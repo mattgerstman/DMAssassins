@@ -4,7 +4,9 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 type GameMapping struct {
@@ -195,6 +197,11 @@ func (gameMapping *GameMapping) LeaveGame(secret string) (appErr *ApplicationErr
 		if appErr != nil {
 			return appErr
 		}
+		// If we don't have an assassin confirm the secret
+	} else if !strings.EqualFold(secret, gameMapping.Secret) {
+		msg := fmt.Sprintf("Invalid secret: %s", secret)
+		err := errors.New("Invalid Secret")
+		return NewApplicationError(msg, err, ErrCodeInvalidSecret)
 	}
 
 	// Delete the game mapping from the db
