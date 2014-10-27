@@ -27,7 +27,7 @@ var app = app || {
 	if (response.status === 'connected') {
 		// User is logged into DMAssassins and Facebook.
 		app.Session.createSession(response, function(){
-	});
+	    });
 
 
     } else {
