@@ -70,7 +70,7 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 	}
 	fmt.Println(`regular`)
 	// Get players to assign targets with
-	users, appErr := game.GetAllActivePlayersAsUUIDSlice()
+	users, appErr := game.GetAllActivePlayersAsUUIDSlice(tx)
 	if appErr != nil {
 		return appErr
 	}
@@ -92,7 +92,7 @@ type targetPair struct {
 func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 	var userIdBuffer, targetIdBuffer string
 	var targets []*targetPair
-	rows, err := db.Query(`SELECT user_id, target_id FROM dm_user_targets WHERE game_id = $1`, game.GameId.String())
+	rows, err := tx.Query(`SELECT user_id, target_id FROM dm_user_targets WHERE game_id = $1`, game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -103,6 +103,10 @@ func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 		targetId := uuid.Parse(targetIdBuffer)
 		pair := &targetPair{targetId, nil, "", userId, nil, ""}
 		targets = append(targets, pair)
+	}
+	err = rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return game.insertTargetsWithDelete(tx, targets)
@@ -250,6 +254,10 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 		lastUserId = nextWeak
 		i += 2
 	}
+	err := rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// have last user target first strong user
 	lastTarget := &targetPair{lastUserId, nil, "", firstStrong, nil, ""}
@@ -302,6 +310,10 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 		// If they aren't a captain add them to the userList
 		userList[teamIdBuffer] = append(userList[teamIdBuffer], userId)
 		numUsers++
+	}
+	err := rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	numTeams := len(teamsList)
@@ -448,7 +460,7 @@ func (game *Game) insertTargets(tx *sql.Tx, targetList []*targetPair) (appErr *A
 	// loop through all targets
 	for _, pair := range targetList {
 		// Prepare the statement to insert the target row
-		insertTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
+		insertTarget, err := tx.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
 		if err != nil {
 			tx.Rollback()
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -487,9 +499,9 @@ func (game *Game) insertTargetsWithDelete(tx *sql.Tx, targetList []*targetPair) 
 }
 
 // Gets all active players for a game as a slice of uuids
-func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *ApplicationError) {
+func (game *Game) GetAllActivePlayersAsUUIDSlice(tx *sql.Tx) (users []uuid.UUID, appErr *ApplicationError) {
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
+	rows, err := tx.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -509,6 +521,11 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 		// Add to user array
 		users = append(users, userId)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return users, nil
 }
 
@@ -516,7 +533,7 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 func (game *Game) DeleteTargetsTransactional(tx *sql.Tx) (appErr *ApplicationError) {
 
 	// Prepare statement to delete targets
-	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
+	deleteTargets, err := tx.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

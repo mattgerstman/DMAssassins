@@ -117,7 +117,11 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
 		}
 	}
-
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	// Add the properties to the struct
 	game.Properties = properties
 	return properties, nil

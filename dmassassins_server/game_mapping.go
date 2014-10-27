@@ -293,6 +293,11 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		users[userId.String()] = user
 		userIds = append(userIds, userId.String())
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// Build Sql query for properties
 	max := len(userIds)
@@ -319,6 +324,11 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		var userIdBuffer, key, value string
 		rows.Scan(&userIdBuffer, &key, &value)
 		users[userIdBuffer].Properties[key] = value
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return users, nil
@@ -411,6 +421,11 @@ func (game *Game) getStrongPlayers() (strong []uuid.UUID, appErr *ApplicationErr
 		strongUserId := uuid.Parse(strongUserIdBuffer)
 		strong = append(strong, strongUserId)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return strong, nil
 }
 
@@ -437,6 +452,11 @@ func (game *Game) getStrongPlayersWithState(alive bool) (strong []uuid.UUID, app
 		// Add strong userId to strong slice
 		strongUserId := uuid.Parse(strongUserIdBuffer)
 		strong = append(strong, strongUserId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return strong, nil
 }
@@ -465,6 +485,11 @@ func (game *Game) getWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) 
 		// Add weak userId to weak slice
 		weakUserId := uuid.Parse(weakUserIdBuffer)
 		weak = append(weak, weakUserId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	weak = append(weak, firstWeakUserId)
 	return weak, nil

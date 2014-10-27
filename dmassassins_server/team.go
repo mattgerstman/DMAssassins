@@ -65,6 +65,11 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 		team := &Team{teamId, game.GameId, teamName}
 		teams[teamId.String()] = team
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return teams, nil
 }
 
@@ -82,6 +87,11 @@ func (game *Game) GetActiveTeamIds() (teamsList []uuid.UUID, appErr *Application
 		}
 		teamId := uuid.Parse(teamIdBuffer)
 		teamsList = append(teamsList, teamId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return teamsList, nil
 }
@@ -112,6 +122,11 @@ func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 		teamId := uuid.Parse(teamIdBuffer.String)
 		team := &Team{teamId, game.GameId, teamName}
 		teams = append(teams, team)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return teams, nil
 }
@@ -331,7 +346,11 @@ func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *Applicat
 			return false, nil
 		}
 	}
-
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	rows, err = tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -345,6 +364,11 @@ func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *Applicat
 		if numCaptains != 1 {
 			return false, nil
 		}
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return true, nil

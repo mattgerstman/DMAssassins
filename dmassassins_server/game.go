@@ -223,6 +223,12 @@ func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
 		game := &Game{gameId, gameName, gameStarted, hasPassword, properties}
 		games = append(games, game)
 	}
+	// Close the rows
+	err := rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return games, nil
 }
 

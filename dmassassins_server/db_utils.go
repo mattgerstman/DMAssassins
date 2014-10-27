@@ -32,6 +32,11 @@ func ConvertUserIdRowsToSlice(rows *sql.Rows) (users []uuid.UUID, appErr *Applic
 		// append the uuid
 		users = append(users, userId)
 	}
+	err := rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	// Return the users list
 	return users, nil
 }

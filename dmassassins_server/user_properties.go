@@ -113,6 +113,11 @@ func (user *User) GetUserProperties() (properties map[string]string, appErr *App
 			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
 		}
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	properties["name"] = properties["first_name"] + " " + properties["last_name"]
 	user.Properties = properties
 	return properties, nil

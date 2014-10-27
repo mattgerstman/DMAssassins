@@ -51,6 +51,11 @@ func LoadAllTimers() (appErr *ApplicationError) {
 		// Load timer
 		game.LoadTimer(executeTs)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return nil
 }
 
@@ -61,7 +66,7 @@ func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
 	timeDiff := executeTs - now
 	duration := time.Duration(timeDiff) * time.Second
 	if timeDiff <= 0 {
-		duration = 1 * time.Minute
+		duration = 10 * time.Second
 	}
 	fmt.Println(`Loading timer for ` + game.GameId.String())
 	fmt.Print(`Executing in `)
@@ -162,6 +167,11 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 		userId := uuid.Parse(userIdBuffer)
 		toBeKilled = append(toBeKilled, userId)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// Create a interface slice to store the users to be killed and the gameId
 	toBeKilledInterface := ConvertUUIDSliceToInterface(toBeKilled)
@@ -179,7 +189,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 	}
 
 	// Kill the users
-	killUsers, err := db.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE game_id = $1 AND user_id IN (` + params + `)`)
+	killUsers, err := tx.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE game_id = $1 AND user_id IN (` + params + `)`)
 	if err != nil {
 		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -199,7 +209,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 	}
 
 	// Kill the users
-	removeTimer, err := db.Prepare(`DELETE FROM dm_kill_timers WHERE game_id = $1`)
+	removeTimer, err := tx.Prepare(`DELETE FROM dm_kill_timers WHERE game_id = $1`)
 	if err != nil {
 		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
