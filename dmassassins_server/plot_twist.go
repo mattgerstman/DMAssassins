@@ -10,11 +10,11 @@ import (
 )
 
 type PlotTwist struct {
+	AssignTargets string `json:"assign_targets"`
 	KillMode      string `json:"kill_mode"`
 	KillTimer     int64  `json:"kill_timer"`
-	AssignTargets string `json:"assign_targets"`
+	RequireTeams  bool   `json:"require_teams"`
 	Revive        string `json:"revive"`
-	SendEmail     string `json:"send_email"`
 }
 
 // Gets plot twist from the plot twist config
@@ -106,6 +106,17 @@ func (game *Game) ActivatePlotTwist(twistName string) (appErr *ApplicationError)
 	twist, appErr := GetPlotTwist(twistName)
 	if appErr != nil {
 		return appErr
+	}
+
+	// Mae sure we have teams if we need them
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if appErr != nil {
+		return appErr
+	}
+	if teamsEnabled != `true` && twist.RequireTeams {
+		msg := "Incompatible Plot Twist"
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
 	}
 
 	tx, err := db.Begin()
@@ -273,15 +284,6 @@ func (user *User) HandlePlotTwistOnKill(tx *sql.Tx, oldTargetId, gameId, teamId 
 	if appErr != nil {
 		return appErr
 	}
-
-	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
-	if appErr != nil {
-		return appErr
-	}
-	if teamsEnabled != `true` {
-		return nil
-	}
-
 	// Check for successive kills plot twist
 	killMode, appErr := game.GetGameProperty(`kill_mode`)
 	if appErr != nil {

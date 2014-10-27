@@ -25,7 +25,6 @@ var app = app || {
         // default profile properties
         defaults: {
             'plot_twist_name': '',
-            'plot_twist_value': '',
             'send_email': false
         },
         url: function(){            

@@ -28,7 +28,9 @@ var app = app || {
             'click .start-game': 'startGameModal',
             'click .start-game-submit': 'startGame',
             'click .end-game': 'endGameModal',
-            'click .end-game-submit': 'endGame'
+            'click .end-game-submit': 'endGame',
+            'click a':'loadTwistModal',
+            'click .twist-submit':'savePlotTwist'
 
         },
         initialize: function(){
@@ -102,7 +104,88 @@ var app = app || {
                 }
             });
         },
-                
+        twistModalOptions: {
+            randomize_targets: {
+                id:           '#plot-twist-body-randomize-targets-template',
+                title:        'Randomize Targets',
+                twist_name:   'randomize_targets',
+                submit_class: 'btn-primary',
+                submit_text:  'Change Targets',
+                checked:       true
+            },
+            reverse_targets: {
+                id:           '#plot-twist-body-reverse-targets-template',
+                title:        'Reverse Targets',
+                twist_name:   'reverse_targets',
+                submit_class: 'btn-primary',
+                submit_text:  'Change Targets',
+                checked:       true
+            },
+            successive_kills: {
+                id:           '#plot-twist-body-successive-kills-template',
+                title:        'Kill Mode - Successive Kills Count Double',
+                twist_name:   'successive_kills',
+                submit_class: 'btn-primary',
+                submit_text:  'Enable Plot Twist',
+                checked:       false
+            },
+            strong_weak: {
+                id:           '#plot-twist-body-strong-weak-template',
+                title:        'Strong Target Weak',
+                twist_name:   'strong_weak',
+                submit_class: 'btn-primary',
+                submit_text:  'Enable Plot Twist',
+                checked:       true
+            },
+            strong_closed: {
+                id:           '#plot-twist-body-strong-closed-template',
+                title:        'Put Strong Players in a Closed Loop',
+                twist_name:   'strong_closed',
+                submit_class: 'btn-primary',
+                submit_text:  'Enable Plot Twist',
+                checked:       true
+            },
+            timer_24: {
+                id:           '#plot-twist-body-timer-24-template',
+                title:        '24 Hours To Kill',
+                twist_name:   'timer_24',
+                submit_class: 'btn-primary',
+                submit_text:  'Start Timer',
+                checked:       true
+            }
+        },
+        loadTwistModal: function(e){
+            e.preventDefault();
+            var twist = $(e.currentTarget).attr('id');            
+            var data = this.twistModalOptions[twist];
+            
+            var modal = _.template($('#plot-twist-modal-template').html());
+            
+            var detailVars = {};
+            detailVars.teams_enabled = this.model.areTeamsEnabled();
+
+            var details = _.template($(data.id).html());
+            data.details = details(detailVars);
+            
+            var modalHTML = modal(data);
+            $('#plot-twist-modal-container').html(modalHTML);
+            $('#plot-twist-modal').modal();
+            
+        },
+        savePlotTwist: function(e){
+            e.preventDefault();
+            
+            var button = $(e.currentTarget);
+            var data = {};
+            data.plot_twist_name  = button.data('twist-name');
+            data.send_email       = $('#send-twist-email').is(':checked');
+            
+
+            var plotTwist = new app.Models.PlotTwist(data);
+            plotTwist.save();    
+            $('#plot-twist-modal').modal('hide');
+            
+        },                
         render: function(){
             $('.modal-backdrop').remove();            
             var data = this.model.attributes;

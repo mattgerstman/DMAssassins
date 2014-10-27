@@ -1,0 +1,9 @@
+Hey %recipient.first_name%,
+
+Bob Dylan once wrote The Times They Are a-Changin; Fortunately for you, this plot twist is relatively simple. Targets have been randomized and there are no special new rules. Don't get too comfortable however, another more challenging plot twist could happen at any moment.
+Log in to check out your new target!
+
+Good Luck!
+The DMAssassins Team
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

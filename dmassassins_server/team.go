@@ -314,11 +314,11 @@ func (team *Team) GetTeamCaptainId() (captainId uuid.UUID, appErr *ApplicationEr
 }
 
 // is it safe to assign targets by teams
-func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
+func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *ApplicationError) {
 	var numUsers, numCaptains int
 	var teamIdBuffer string
 
-	rows, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	rows, err := tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -332,7 +332,7 @@ func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) 
 		}
 	}
 
-	rows, err = db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	rows, err = tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

@@ -53,14 +53,14 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
-		canAssign, appErr := game.CanAssignByTeams()
+		canAssign, appErr := game.CanAssignByTeams(tx)
 		if appErr != nil {
 			return appErr
 		}
 
 		if canAssign {
 			// Get all players in the game
-			rows, appErr := game.GetAllActivePlayersAsRows()
+			rows, appErr := game.getAllActivePlayersAsRows(tx)
 			if appErr != nil {
 				return appErr
 			}
@@ -257,9 +257,9 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 	return game.insertTargetsWithDelete(tx, targets)
 }
 
-func (game *Game) GetAllActivePlayersAsRows() (rows *sql.Rows, appErr *ApplicationError) {
+func (game *Game) getAllActivePlayersAsRows(tx *sql.Tx) (rows *sql.Rows, appErr *ApplicationError) {
 	// Get new target list
-	rows, err := db.Query(`SELECT user_id, team_id, user_role FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
+	rows, err := tx.Query(`SELECT user_id, team_id, user_role FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

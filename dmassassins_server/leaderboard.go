@@ -31,7 +31,7 @@ func getQuery(teamsEnabled bool) (query string) {
 	if teamsEnabled {
 		query += `, dm_teams as team`
 	}
-	query += ` WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND map.game_id = $1`
+	query += ` WHERE map.user_id = first_name.user_id AND map.user_id = last_name.user_id AND first_name.key = 'first_name' AND last_name.key = 'last_name' AND map.game_id = $1 AND (map.user_role = 'dm_user' OR map.user_role = 'dm_captain')`
 	if teamsEnabled {
 		query += ` AND (team.team_id = map.team_id)`
 	}
