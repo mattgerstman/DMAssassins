@@ -128,8 +128,7 @@ var app = app || {
 
         },
         recoverSession: function() {
-            var response = this.get('response');
-            console.log(response);
+            var response = this.get('response');        
             this.handleResponse(response);
         },
         handleResponse: function(response) {
