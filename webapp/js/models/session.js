@@ -99,6 +99,11 @@ var app = app || {
 
                 } else {
 
+                    if( navigator.userAgent.match('CriOS') )
+                    {
+                        window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ config.CLIENT_ROOT+'%23login&scope=email,user_friends,public_profile', '', null);
+                        return;
+                    }
                     FB.login(function(response) {
                         parent.createSession(response);
 
