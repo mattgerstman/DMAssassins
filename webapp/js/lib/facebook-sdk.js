@@ -17,13 +17,17 @@ var app = app || {
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
 
-    if (!app.Session.get('authenticated'))
+    var authenticated =  app.Session.get('authenticated');
+    if ((authenticated === true) || (authenticated =='true'))
     {
-    	// If we're already authenticated don't bother creating a session
+        // If we're already authenticated recover the previous session
+        app.Session.recoverSession();
 	    return;
     }
+    
+    return;
 
-
+/*
 	if (response.status === 'connected') {
 		// User is logged into DMAssassins and Facebook.
 		app.Session.createSession(response, function(){
@@ -31,9 +35,10 @@ var app = app || {
 
 
     } else {
-		// User needss to log in
+		// User needs to log in
 		app.Running.Router.navigate('login');
     }
+*/
 
   }
 

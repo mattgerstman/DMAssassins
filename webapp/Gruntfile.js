@@ -5,11 +5,11 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // Metadata.
     pkg: grunt.file.readJSON('package.json'),
-    banner: '/*! <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ' +
+    banner: '/*\n * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= pkg.code_name %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
-      '<%= pkg.homepage ? "* " + pkg.homepage + "\\n" : "" %>' +
-      '* Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;' +
-      ' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */\n',
+      '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
+      ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;\n' +
+      ' */\n',
     // Task configuration.
     concat: {
       options: {
@@ -18,6 +18,10 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
+          'bower_components/base64/base64.js',
+          'bower_components/marked/lib/marked.js',
+          'bower_components/bootstrap-markdown/js/bootstrap-markdown.js',
+          'js/config.js',
           'js/lib/*.js',
           'js/models/*.js',
           'js/collections/*.js',
@@ -30,7 +34,8 @@ module.exports = function(grunt) {
     },
     uglify: {
       options: {
-        banner: '<%= banner %>'
+        banner: '<%= banner %>',
+        sourceMap: true
       },
       dist: {
         src: '<%= concat.dist.dest %>',
@@ -38,7 +43,15 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      files: '<%= concat.dist.src %>',
+      files: [
+          'js/config.js',
+          'js/lib/*.js',
+          'js/models/*.js',
+          'js/collections/*.js',
+          'js/views/*.js',
+          'js/routers/*.js',
+          'js/*.js'
+        ],
       gruntfile: {
         src: 'Gruntfile.js'
       },      
@@ -49,11 +62,13 @@ module.exports = function(grunt) {
       },
       dev: {
           NODE_ENV: 'DEVELOPMENT',
-          BETA: '<%= pkg.beta %>'
+          BETA: '<%= pkg.beta %>',
+          BANNER: '<%= banner %>',
       },
       prod : {
           NODE_ENV: 'PRODUCTION',
           BETA: '<%= pkg.beta %>',
+          BANNER: '<%= banner %>',
       }
     },
     preprocess: {
@@ -63,15 +78,7 @@ module.exports = function(grunt) {
       },
       prod : {
           src : 'index.html.template',
-          dest : 'index.html',
-          options : {
-              context : {
-                  name : '<%= pkg.name %>',
-                  version : '<%= pkg.version %>',                  
-                  now : '<%= now %>',
-                  ver : '<%= ver %>'
-              }
-          }
+          dest : 'index.html'
       }
     },
     cssmin: {

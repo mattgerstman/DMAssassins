@@ -25,17 +25,16 @@ var app = app || {
         initialize: function() {
 
             // Check for localstorage support
-            if (Storage && sessionStorage) {
+            if (Storage && localStorage) {
                 this.supportStorage = true;
             }
             if (!this.supportStorage) {
                 return;
             }
             try {
-                sessionStorage.setItem('test', 0);
+                localStorage.setItem('test', 0);
             }
             catch (err) {
-                console.log(err);
                 this.supportStorage = false;
             }
         },
@@ -43,7 +42,7 @@ var app = app || {
         // returns data stored in the session
         get: function(key) {
             if (this.supportStorage) {
-                var data = sessionStorage.getItem(key);
+                var data = localStorage.getItem(key);
                 if (data && data[0] === '{') {
                     return JSON.parse(data);
                 } else {
@@ -57,18 +56,17 @@ var app = app || {
         // sets a session variable
         set: function(key, value) {
             if (this.supportStorage) {
-                sessionStorage.setItem(key, value);
+                localStorage.setItem(key, value);
             } else {
                 Backbone.Model.prototype.set.call(this, key, value);
             }
-            console.log(this);
             return this;
         },
 
         // unsets a session
         unset: function(key) {
             if (this.supportStorage) {
-                sessionStorage.removeItem(key);
+                localStorage.removeItem(key);
             } else {
                 Backbone.Model.prototype.unset.call(this, key);
             }
@@ -78,7 +76,7 @@ var app = app || {
         // clears all data from the session
         clear: function() {
             if (this.supportStorage) {
-                sessionStorage.clear();
+                localStorage.clear();
             } else {
                 Backbone.Model.prototype.clear(this);
             }
@@ -129,29 +127,11 @@ var app = app || {
             });
 
         },
-
-        // takes a facebook response and creates a session from it
-        createSession: function(response) {
-
-            var game_id = this.get('game_id');
-
-            var data = {
-                'facebook_id': response.authResponse.userID,
-                'facebook_token': response.authResponse.accessToken,
-                'game_id': game_id
-            };
-
-            var that = this;
-
-            // performs the ajax request to the server to get session data
-            var login = $.ajax({
-                url: this.url,
-                data: data,
-                type: 'POST'
-            });
-
-            // after the ajax request run this function
-            login.done(function(response) {
+        recoverSession: function() {
+            var response = this.get('response');        
+            this.handleResponse(response);
+        },
+        handleResponse: function(response) {
 
                 // store all reponse data in the new session immediately
                 var parsedGames    = app.Running.Games.parse(response.games);
@@ -165,7 +145,6 @@ var app = app || {
                 {
                     rules = {rules: (game.game_properties.rules || null)};
                 }
-
                 target.assassin_id = response.user.user_id;
 
                 // reload the data for all models
@@ -174,9 +153,10 @@ var app = app || {
                 app.Running.LeaderboardModel.set(leaderboard);
                 app.Running.RulesModel.set(rules);
                 app.Running.Games.reset(games);
+                
 
                 // store the basic auth token in the session in case we need to reload it on app launch
-                that.storeSession(response);
+                app.Session.storeSession(response);
                 if (game.game_id) {
                     app.Running.Games.setActiveGame(game.game_id, true);
                     app.Running.Games.getActiveGame().set(game);
@@ -201,9 +181,29 @@ var app = app || {
                     trigger: true
                 });
 
+        },
+        // takes a facebook response and creates a session from it
+        createSession: function(response) {
 
+            var game_id = this.get('game_id');
 
+            var data = {
+                'facebook_id': response.authResponse.userID,
+                'facebook_token': response.authResponse.accessToken,
+                'game_id': game_id
+            };
+
+            var that = this;
+
+            // performs the ajax request to the server to get session data
+            var login = $.ajax({
+                url: this.url,
+                data: data,
+                type: 'POST'
             });
+
+            // after the ajax request run this function
+            login.done(that.handleResponse);
 
             // if theres a login error direct them to the login screen
             login.fail(function() {
@@ -222,6 +222,7 @@ var app = app || {
             // store a boolean to determine if we're authenticated
             this.set('authenticated', true);
             this.set('has_game', data.game !== null);
+            this.set('response', JSON.stringify(data));
             this.storeBasicAuth(data);
         },
         // stores all the basic auth variables in the session
