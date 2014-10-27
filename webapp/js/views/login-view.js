@@ -34,13 +34,7 @@ var app = app || {
             var button = $(e.currentTarget);
             var width = button.width();
             button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
-<<<<<<< Updated upstream
             button.attr('disabled', true);              
-
-=======
-            button.attr('disabled', true);
-                       
->>>>>>> Stashed changes
             this.model.login();
         },
         // render the login page

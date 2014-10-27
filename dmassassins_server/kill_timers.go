@@ -98,6 +98,7 @@ func (game *Game) KillTimerHandler() {
 		return
 	}
 	// if it fails try again in 10 minutes and log it
+	fmt.Println(appErr)
 	time.AfterFunc(10*time.Minute, game.KillTimerHandler)
 	LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
 }
