@@ -90,8 +90,6 @@
                             <ul id="admin_dropdown" role="menu" class="dropdown-menu">
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Manage Users</a></li>
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li>
-                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_plot_twists"><a href="#plot_twists">Plot Twists</a></li>
-                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_email_users"><a href="#email_users">Email Users</a></li>
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>
                             </ul>
                         </li>
@@ -1007,7 +1005,6 @@
     <script src="js/models/leaderboard.js" type="text/javascript"></script>
     <script src="js/models/rules.js" type="text/javascript"></script>
     <script src="js/models/plot-twist.js" type="text/javascript"></script>
-    <script src="js/models/user-emails.js" type="text/javascript"></script>
 
     <script src="js/collections/games.js" type="text/javascript"></script>
     <script src="js/collections/users.js" type="text/javascript"></script>
@@ -1023,7 +1020,6 @@
     <script src="js/views/admin-users-view.js" type="text/javascript"></script>
     <script src="js/views/admin-edit-rules-view.js" type="text/javascript"></script>
     <script src="js/views/admin-game-settings-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-email-users.js" type="text/javascript"></script>
 
     <script src="js/views/app-view.js" type="text/javascript"></script>
     <script src="js/views/nav-view.js" type="text/javascript"></script>
