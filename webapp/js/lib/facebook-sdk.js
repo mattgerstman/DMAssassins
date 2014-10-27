@@ -24,7 +24,8 @@ var app = app || {
         app.Session.recoverSession();
 	    return;
     }
-
+    
+    return;
 
 	if (response.status === 'connected') {
 		// User is logged into DMAssassins and Facebook.
@@ -33,7 +34,7 @@ var app = app || {
 
 
     } else {
-		// User needss to log in
+		// User needs to log in
 		app.Running.Router.navigate('login');
     }
 
