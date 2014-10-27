@@ -17,9 +17,11 @@ var app = app || {
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
 
-    if (!app.Session.get('authenticated'))
+    var authenticated =  app.Session.get('authenticated');
+    if ((authenticated === true) || (authenticated =='true'))
     {
-    	// If we're already authenticated don't bother creating a session
+        // If we're already authenticated recover the previous session
+        app.Session.recoverSession();
 	    return;
     }
 
