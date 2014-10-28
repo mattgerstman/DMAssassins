@@ -71,8 +71,8 @@ type ApplicationError struct {
 }
 
 // Error returns a human-readable representation of a ApplicationError.
-func (err *ApplicationError) Error() (msg string) {
-	return err.Msg
+func (appErr *ApplicationError) Error() (msg string) {
+	return appErr.Err.Error()
 }
 
 // Creates a raven stacktrace
