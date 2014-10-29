@@ -118,7 +118,7 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 		} else {
 			// Fail silently if a single property spazzes out (should never happen but who knows)
 			appErr := NewApplicationError("Error getting game properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
+			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING, nil)
 		}
 	}
 	// Close the rows

@@ -156,7 +156,9 @@ func deleteGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	// Inform users the game has ended
 	_, appErr = game.sendGameOverEmail()
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING)
+		extra := make(map[string]interface{})
+		extra[`game_id`] = gameId
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
 	}
 
 	return game, nil
