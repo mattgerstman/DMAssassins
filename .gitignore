@@ -14,3 +14,7 @@ webapp/index.html
 db_dump.sql
 
 dmassassins_server/npm-debug.log
+
+dmassassins_server/game.go
+
+webapp/npm-debug.log

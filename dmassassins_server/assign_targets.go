@@ -11,18 +11,22 @@ import (
 
 // Assigns targets using a methodology, wrapps the inner function in a transaction
 func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationError) {
+	// begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
+	// Run internal assign targets
 	appErr = game.AssignTargetsByTransactional(tx, assignmentType)
 	if appErr != nil {
 		tx.Rollback()
 		return appErr
 	}
-
-	tx.Commit()
+	// error check the transaction commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return nil
 }
 
@@ -549,18 +553,24 @@ func (game *Game) DeleteTargetsTransactional(tx *sql.Tx) (appErr *ApplicationErr
 // Deletes all targets for a game
 func (game *Game) DeleteTargets() (appErr *ApplicationError) {
 
+	// Begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Run internal delete code
 	appErr = game.DeleteTargetsTransactional(tx)
 	if appErr != nil {
 		tx.Rollback()
 		return appErr
 	}
 
-	tx.Commit()
+	// Check commit for error
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return nil
 }
 

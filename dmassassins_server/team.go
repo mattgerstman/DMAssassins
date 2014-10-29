@@ -135,17 +135,10 @@ func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 func (game *Game) NewTeam(teamName string) (team *Team, appErr *ApplicationError) {
 	// Generate a uuid and insert the team
 	teamId := uuid.NewRandom()
-	res, err := db.Exec(`INSERT INTO dm_teams (team_id, game_id, team_name) VALUES ($1,$2,$3)`, teamId.String(), game.GameId.String(), teamName)
+	_, err := db.Exec(`INSERT INTO dm_teams (team_id, game_id, team_name) VALUES ($1,$2,$3)`, teamId.String(), game.GameId.String(), teamName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
-	// Make sure the insert worked
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return nil, appErr
-	}
-
 	// Return the team
 	return &Team{teamId, game.GameId, teamName}, nil
 }
@@ -180,18 +173,18 @@ func DeleteTeam(teamId uuid.UUID) (appErr *ApplicationError) {
 	}
 
 	// Execute the statement to delete the team
-	res, err := tx.Stmt(deleteTeam).Exec(teamId.String())
+	_, err = tx.Stmt(deleteTeam).Exec(teamId.String())
 	if err != nil {
 		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return appErr
+	// Comit transactin and check for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	tx.Commit()
 	return nil
 }
 
@@ -298,15 +291,10 @@ func (user *User) LeaveTeam(teamId uuid.UUID) (gameMapping *GameMapping, appErr 
 
 // Rename a team
 func (team *Team) Rename(newName string) (appErr *ApplicationError) {
-	// Run teh update
-	res, err := db.Exec(`UPDATE dm_teams SET team_name = $1 WHERE team_id = $2`, newName, team.TeamId.String())
+	// Run the update
+	_, err := db.Exec(`UPDATE dm_teams SET team_name = $1 WHERE team_id = $2`, newName, team.TeamId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return appErr
 	}
 
 	team.TeamName = newName

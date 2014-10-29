@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
@@ -71,8 +70,8 @@ type ApplicationError struct {
 }
 
 // Error returns a human-readable representation of a ApplicationError.
-func (err *ApplicationError) Error() (msg string) {
-	return err.Msg
+func (appErr *ApplicationError) Error() (msg string) {
+	return appErr.Err.Error()
 }
 
 // Creates a raven stacktrace
@@ -84,19 +83,6 @@ func trace() (stacktrace *raven.Stacktrace) {
 func NewApplicationError(msg string, err error, code int) (appErr *ApplicationError) {
 	exception := raven.NewException(err, trace())
 	return &ApplicationError{msg, err, code, exception}
-}
-
-// Determines if rows were affected in a sql result, reduces boilerplate on errors
-func WereRowsAffected(res sql.Result) (appErr *ApplicationError) {
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
-	}
-
-	if rowsAffected == 0 {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
-	}
-	return nil
 }
 
 // LogWithSentry sends error report to sentry and records event id and error name to the logs

@@ -60,10 +60,14 @@ func (user *User) SetUserProperty(key string, value string) (appErr *Application
 	appErr = user.SetUserPropertyTransactional(tx, key, value)
 	if appErr != nil {
 		tx.Rollback()
-		return
+		return appErr
 	}
 
-	tx.Commit()
+	// Check transaction for errors and commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	return nil
 }

@@ -23,8 +23,12 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 		return appErr
 	}
 
-	// Commit transaction
-	tx.Commit()
+	// Commit transaction, check for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return nil
 }
 
