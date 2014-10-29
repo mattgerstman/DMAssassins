@@ -148,7 +148,7 @@ func StartServer() {
 	appErr := LoadAllTimers()
 	if appErr != nil {
 		fmt.Println(appErr)
-		LogWithSentry(appErr, nil, raven.ERROR)
+		LogWithSentry(appErr, nil, raven.ERROR, nil)
 	}
 
 	//go startPolling()
