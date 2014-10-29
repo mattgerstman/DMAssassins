@@ -51,8 +51,7 @@ var app = app || {
     cookie     : true,  // enable cookies to allow the server to access
                         // the session
     xfbml      : true,  // parse social plugins on this page
-    version    : 'v2.0', // use version 2.0
-    status	   : true
+    version    : 'v2.0' // use version 2.0
   });
 
   app.Running.FB = FB;
