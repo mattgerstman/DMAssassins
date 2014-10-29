@@ -240,14 +240,14 @@ func killWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId uuid.UUID) (appErr *App
 	if appErr == nil {
 		gameName = game.GameName
 	} else {
-		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
 	}
 
 	// DROIDS switch to plot twist email
 	// Inform the assassin they have a new target
 	_, appErr = assassin.SendNewTargetEmail(gameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
 
 	}
 

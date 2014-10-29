@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
+	"net/http"
 )
 
 // Error codes are multiples of http codes for easy mapping
@@ -99,15 +101,37 @@ func WereRowsAffected(res sql.Result) (appErr *ApplicationError) {
 	return nil
 }
 
-// LogWithSentry sends error report to sentry and records event id and error name to the logs
-func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, interfaces ...raven.Interface) {
-	client, _ := raven.NewClient(Config.SentryDSN, tags)
-	passthrough := append(interfaces, appErr.Exception)
+// Converts a request into useful data for sentry
+func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
+	extra = make(map[string]interface{})
 
-	packet := raven.NewPacket(appErr.Error(), passthrough...)
+	// Get the request and form values
+	extra[`request`] = raven.NewHttp(r)
+	extra[`request_form_values`] = r.Form
+
+	// Convert the data input to a map of string to interface
+	body := make(map[string]interface{})
+	decoder := json.NewDecoder(r.Body)
+
+	// Probably the only time in the codebase its worth it to completely ignore an error
+	err := decoder.Decode(&body)
+	_ = err
+
+	// set the request_body section and return it
+	extra[`request_body`] = body
+	return extra
+}
+
+// LogWithSentry sends error report to sentry and records event id and error name to the logs
+func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, extra map[string]interface{}) {
+	client, _ := raven.NewClient(Config.SentryDSN, nil)
+
+	packet := raven.NewPacket(appErr.Error(), appErr.Exception)
 	packet.Level = level
 	packet.AddTags(tags)
-	eventID, err := client.Capture(packet, nil)
+	packet.Extra = extra
+	eventID, err := client.Capture(packet, tags)
+
 	if err == nil {
 		log.Print("Sentry failed to capture error below with message: ")
 		log.Println(err)
