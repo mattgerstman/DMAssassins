@@ -110,15 +110,11 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	}
 
 	// Update the user role
-	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	// Validate it affected at least one row
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
-	}
+
 	// Change the role on the user struct
 	gameMapping.UserRole = role
 	return nil
@@ -169,13 +165,9 @@ func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 
 // deletes the actual game mapping from the db
 func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
-	res, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
+	_, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
 	}
 
 	// the game mapping no longer exists so  set it to nil
@@ -395,7 +387,13 @@ func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	tx.Commit()
+	// check transaction for errors
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	gameMapping.Alive = true
 
 	return assassinId, targetId, nil
