@@ -88,22 +88,57 @@ var app = app || {
 
             var parent = this;
 
+            try
+            {
+                if (!FB) {
+                    throw new Error ('Error loading Facebook SDK');
+                }                
+            }
+            catch (e)
+            {
+                Raven.captureException(e)
+                alert('There was an issue connecting to Facebook, please refresh and try again in a minute.');
+
+            }
+
             FB.getLoginStatus(function(response) {
+                console.log(response);
                 if (response.status === 'connected') {
                     // Logged into your app and Facebook.
                     //console.log(response);
-                    parent.createSession(response);
-
+                    
+                    try 
+                    {
+                        if (!response.authResponse)
+                            throw new Error('Error processing facebook login');
+                            
+                        parent.createSession(response);                        
+                    }
+                    catch (e)
+                    {
+                        Raven.captureException(e, {extra: response})
+                        alert('Your session has expired. Please log in again.');
+                    }
 
                 } else if (response.status === 'not_authorized') {
 
                     // The person is logged into Facebook, but not your app.
                     FB.login(function(response) {
-                        parent.createSession(response);
+                        
+                        if (response.authResponse)
+                        {
+                            parent.createSession(response);    
+                        }
+                        else
+                        {
+                            alert('You must authorize Facebook to play DMAssassins!');
+                            location.reload();
+                        }
+                        
 
                         // scope are the facebook permissions we're requesting
                     }, {
-                        scope: 'public_profile,email,user_friends,user_photos'
+                        scope: 'public_profile,email,user_friends'//,user_photos'
                     });
 
                 } else {
@@ -118,7 +153,7 @@ var app = app || {
 
                         // scope are the facebook permissions we're requesting
                     }, {
-                        scope: 'public_profile,email,user_friends,user_photos'
+                        scope: 'public_profile,email,user_friends'//,user_photos'
                     });
 
                     // The person is not logged into Facebook, so we're not sure if
@@ -130,6 +165,7 @@ var app = app || {
         recoverSession: function() {
             var response = this.get('response');        
             this.handleResponse(response);
+//            this.login();
         },
         handleResponse: function(response) {
 
@@ -147,13 +183,18 @@ var app = app || {
                 }
                 target.assassin_id = response.user.user_id;
 
+                // Set user id in case an error occurs
+                Raven.setUser({
+                    user_id: user.user_id,
+                    game_id: game.game_id
+                });
+
                 // reload the data for all models
                 app.Running.User.set(user);
                 app.Running.TargetModel.set(target);
                 app.Running.LeaderboardModel.set(leaderboard);
                 app.Running.RulesModel.set(rules);
                 app.Running.Games.reset(games);
-                
 
                 // store the basic auth token in the session in case we need to reload it on app launch
                 app.Session.storeSession(response);
@@ -202,6 +243,7 @@ var app = app || {
                 type: 'POST'
             });
 
+            console.log(data);
             // after the ajax request run this function
             login.done(that.handleResponse);
 

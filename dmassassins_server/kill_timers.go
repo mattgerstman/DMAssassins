@@ -37,7 +37,7 @@ func LoadAllTimers() (appErr *ApplicationError) {
 		if err != nil {
 			msg := `Error loading timer`
 			appErr := NewApplicationError(msg, err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"game_id": gameIdBuffer}, raven.ERROR)
+			LogWithSentry(appErr, map[string]string{"game_id": gameIdBuffer}, raven.ERROR, nil)
 			continue
 		}
 		// Get game id
@@ -45,7 +45,7 @@ func LoadAllTimers() (appErr *ApplicationError) {
 		// Get game
 		game, appErr := GetGameById(gameId)
 		if appErr != nil {
-			LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.ERROR)
+			LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.ERROR, nil)
 			continue
 		}
 		// Load timer
@@ -105,7 +105,7 @@ func (game *Game) KillTimerHandler() {
 	// if it fails try again in 10 minutes and log it
 	fmt.Println(appErr)
 	time.AfterFunc(10*time.Minute, game.KillTimerHandler)
-	LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING)
+	LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING, nil)
 }
 
 // Gets the min kill time and executes the kill timer

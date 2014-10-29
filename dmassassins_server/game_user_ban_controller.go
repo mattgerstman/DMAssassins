@@ -40,20 +40,22 @@ func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
+	extra := GetExtraDataFromRequest(r)
+
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
 		return nil
 
 	}
 	game, appErr := GetGameById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
 		return nil
 	}
 	_, appErr = user.SendBanhammerEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
 		return nil
 	}
 
