@@ -26,7 +26,7 @@ func startGameInner() (appErr *ApplicationError) {
 func startGame() {
 	appErr := startGameInner()
 	if appErr != nil {
-		LogWithSentry(appErr, nil, raven.ERROR)
+		LogWithSentry(appErr, nil, raven.ERROR, nil)
 		fmt.Println(appErr.Msg)
 		fmt.Println(appErr.Err)
 		fmt.Println(appErr.Code)

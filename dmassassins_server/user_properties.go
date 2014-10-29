@@ -110,7 +110,7 @@ func (user *User) GetUserProperties() (properties map[string]string, appErr *App
 		} else {
 			// Fail silently if a single property spazzes out (should never happen but who knows)
 			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil)
 		}
 	}
 	properties["name"] = properties["first_name"] + " " + properties["last_name"]

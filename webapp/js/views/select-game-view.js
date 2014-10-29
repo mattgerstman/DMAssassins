@@ -113,7 +113,8 @@ var app = app || {
             if (teams_enabled && !team_id) {
                 this.badTeam();
                 return;
-            }            
+            }
+            $(event.currentTarget).addClass('disabled').text('Joining');
             app.Running.Games.joinGame(game_id, password, team_id);
         },
         badPassword: function(){

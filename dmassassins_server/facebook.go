@@ -25,7 +25,6 @@ func getFacebookSession(token string) (fbSession *fb.Session) {
 }
 
 // Creates a user from a facebook_auth token
-
 func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *ApplicationError) {
 
 	session := getFacebookSession(facebookToken)
@@ -49,7 +48,9 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	err = res.DecodeField("email", &email)
 	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
+		email = `none-provided@dmassassins.com`
+		appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil)
 	}
 
 	err = res.DecodeField("link", &facebook)
@@ -85,7 +86,9 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	_, appErr = user.SendUserWelcomeEmail()
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+		extra := make(map[string]interface{})
+		extra[`user`] = user
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
 	}
 
 	return user, nil
