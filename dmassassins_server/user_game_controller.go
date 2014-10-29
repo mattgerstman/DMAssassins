@@ -49,14 +49,15 @@ func putUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
+	extra := GetExtraDataFromRequest(r)
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
 		return game, nil
 	}
 	_, appErr = user.SendAdminWelcomeEmail()
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
 	}
 	return game, nil
 }

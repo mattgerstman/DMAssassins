@@ -46,14 +46,17 @@ func putGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Application
 	if teamId == nil {
 		return gameMapping, nil
 	}
+
+	extra := GetExtraDataFromRequest(r)
+
 	user, appErr = GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING, extra)
 		return gameMapping, nil
 	}
 	gameMapping, appErr = user.JoinTeam(teamId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING)
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING, extra)
 	}
 
 	return gameMapping, nil

@@ -14,3 +14,5 @@ webapp/index.html
 db_dump.sql
 
 dmassassins_server/npm-debug.log
+
+webapp/npm-debug.log
