@@ -102,6 +102,7 @@ var app = app || {
             }
 
             FB.getLoginStatus(function(response) {
+                console.log(response);
                 if (response.status === 'connected') {
                     // Logged into your app and Facebook.
                     //console.log(response);
@@ -164,7 +165,7 @@ var app = app || {
         recoverSession: function() {
             var response = this.get('response');        
             this.handleResponse(response);
-            this.login();                
+//            this.login();
         },
         handleResponse: function(response) {
 
@@ -182,7 +183,7 @@ var app = app || {
                 }
                 target.assassin_id = response.user.user_id;
 
-                // Set user id in case an error
+                // Set user id in case an error occurs
                 Raven.setUser({
                     user_id: user.user_id,
                     game_id: game.game_id
@@ -242,6 +243,7 @@ var app = app || {
                 type: 'POST'
             });
 
+            console.log(data);
             // after the ajax request run this function
             login.done(that.handleResponse);
 
