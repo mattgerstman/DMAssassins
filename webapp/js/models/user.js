@@ -59,7 +59,10 @@ var app = app || {
                     if (response.status == 401) {
                         that.trigger('join-error-password');
                         app.Running.Games.get(game_id).set('member', false);
-                        app.Running.Games.setActiveGame(last_game_id, true).set('member', true);
+                        if (!!last_game_id)
+                        {
+                            app.Running.Games.setActiveGame(last_game_id, true).set('member', true);    
+                        }                        
                     }
                 }
             });
