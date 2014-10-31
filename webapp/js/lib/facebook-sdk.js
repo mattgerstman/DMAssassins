@@ -23,11 +23,13 @@ $(function() {
         // If we're already authenticated recover the previous session
         app.Session.recoverSession();
 	    return;
-    }
-    
+    }    
+    return;
+  }
   FB.init({
     appId      : config.APP_ID,
     cookie     : true,  // enable cookies to allow the server to access
+                        // the session
     xfbml      : true,  // parse social plugins on this page
     version    : 'v2.0' // use version 2.0
   });

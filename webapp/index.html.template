@@ -10,7 +10,7 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta name="google-site-verification" content="yRrmu_JevwQq80UCPBJNVh1K-V-FbxVabk8wXBKpzgg" />
 
-    <title>DMAssassins</title>
+    <title>DMAssassins (beta)</title>
     <!-- @if NODE_ENV='PRODUCTION' -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -43,7 +43,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="#" class="navbar-brand">DMAssassins</a>
+                <a href="#" class="navbar-brand">DMAssassins (beta)</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -580,7 +580,7 @@
                     <div class="row">
                         <a class="thumbnail <% if (!teams_enabled) { %> default_cursor <%} %>">
                             <div class="thumbnail-wrapper">
-                                <img class="<% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
+                                <img class="img img-responsive full-width <% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
                             </div>
                         </a>
                     </div>
@@ -1004,8 +1004,9 @@
     </script>
 
     <script id="super-admin-targets-template" type="text/template">
-        <div class="container">
-            <% _.each(loops, function(loop){ %> 
+        <div class="container text-center">
+            <% _.each(loops, function(loop, i){ %> 
+                <h1>Loop <%= i + 1 %> - <%= loop.length %> Targets</h1>
                 <table class="js-targets-table stripe compact">
                     <thead>
                         <th>Assassin Name</th>
