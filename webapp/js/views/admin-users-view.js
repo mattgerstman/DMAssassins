@@ -135,7 +135,6 @@ var app = app || {
                 success: function(model, response){
                     console.log(model);
                     $('#edit_photo_modal').modal('hide');
-                    that.makeDraggable('#user_'+user_id);
                 },
                 error: function(model, response){
                     alert(response.responseText);
@@ -186,33 +185,6 @@ var app = app || {
                     }
                 }
             });                         
-        },
-        makeDraggable: function(selector) {
-            var that = this;            
-            var startFunc = function(e, ui) {
-                ui.helper.find('.user').remove();
-                ui.helper.removeClass('user-grid');
-                ui.helper.find('.drag-img').removeClass('hide');
-                ui.helper.find('.drag-img').animate({
-                    width: 50,
-                    height: 50             
-                }, 100);
-            };
-            
-            if (selector === undefined) {
-                selector = '.user-grid';
-            }
-            
-            this.$el.find(selector).draggable({
-                handle: '.thumbnail',
-                connectWith: '#team_list li',
-                tolerance: "pointer",
-                helper: 'clone',
-                forceHelperSize: true,
-                zIndex:5000,
-                start: startFunc,
-                cursorAt: {left:40, top:25}
-            });
         },
         makeDroppable: function() {
             var that = this;
@@ -430,7 +402,7 @@ var app = app || {
 
             if (teams_enabled)
             {
-                this.makeDraggable();
+//                this.makeDraggable();
                 this.makeDroppable();                
             }
             this.trigger('render');
