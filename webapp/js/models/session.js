@@ -90,7 +90,7 @@ var app = app || {
 
             try
             {
-                if (!FB) {
+                if (!app.Running.FB) {
                     throw new Error ('Error loading Facebook SDK');
                 }                
             }
@@ -101,7 +101,7 @@ var app = app || {
 
             }
 
-            FB.getLoginStatus(function(response) {
+            app.Running.FB.getLoginStatus(function(response) {
                 if (response.status === 'connected') {
                     // Logged into your app and Facebook.
                     //console.log(response);
@@ -122,7 +122,7 @@ var app = app || {
                 } else if (response.status === 'not_authorized') {
 
                     // The person is logged into Facebook, but not your app.
-                    FB.login(function(response) {
+                    app.Running.FB.login(function(response) {
                         
                         if (response.authResponse)
                         {
@@ -147,7 +147,7 @@ var app = app || {
                         window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ config.CLIENT_ROOT+'%23login&scope=email,user_friends,public_profile', '', null);
                         return;
                     }
-                    FB.login(function(response) {
+                    app.Running.FB.login(function(response) {
                         parent.createSession(response);
 
                         // scope are the facebook permissions we're requesting
@@ -248,7 +248,7 @@ var app = app || {
             // if theres a login error direct them to the login screen
             login.fail(function() {
                 that.clear();
-                FB.getLoginStatus(function(response) {
+                app.Running.FB.getLoginStatus(function(response) {
                     statusChangeCallback(response);
                 });
                 Backbone.history.navigate('login', {

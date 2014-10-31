@@ -18,11 +18,11 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'bower_components/base64/base64.js',
-          'bower_components/marked/lib/marked.js',
-          'bower_components/bootstrap-markdown/js/bootstrap-markdown.js',
           'js/config.js',
           'js/lib/*.js',
+          'bower_components/base64/base64.js',
+          'bower_components/marked/lib/marked.js',
+          'bower_components/bootstrap-markdown/js/bootstrap-markdown.js',          
           'js/models/*.js',
           'js/collections/*.js',
           'js/views/*.js',
