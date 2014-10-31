@@ -96,13 +96,12 @@ var app = app || {
             }
             catch (e)
             {
-                Raven.captureException(e)
+                Raven.captureException(e);
                 alert('There was an issue connecting to Facebook, please refresh and try again in a minute.');
 
             }
 
             FB.getLoginStatus(function(response) {
-                console.log(response);
                 if (response.status === 'connected') {
                     // Logged into your app and Facebook.
                     //console.log(response);
@@ -116,7 +115,7 @@ var app = app || {
                     }
                     catch (e)
                     {
-                        Raven.captureException(e, {extra: response})
+                        Raven.captureException(e, {extra: response});
                         alert('Your session has expired. Please log in again.');
                     }
 
@@ -163,9 +162,9 @@ var app = app || {
 
         },
         recoverSession: function() {
-            var response = this.get('response');        
+            var response = this.get('response');  
             this.handleResponse(response);
-//            this.login();
+            this.login();
         },
         handleResponse: function(response) {
 
@@ -233,7 +232,7 @@ var app = app || {
                 'facebook_token': response.authResponse.accessToken,
                 'game_id': game_id
             };
-
+            
             var that = this;
 
             // performs the ajax request to the server to get session data
@@ -243,7 +242,6 @@ var app = app || {
                 type: 'POST'
             });
 
-            console.log(data);
             // after the ajax request run this function
             login.done(that.handleResponse);
 

@@ -72,6 +72,32 @@ func (user *User) SetUserProperty(key string, value string) (appErr *Application
 	return nil
 }
 
+// Sets a map of new user properties
+func (user *User) SetUserProperties(newProperties map[string]string) (appErr *ApplicationError) {
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Loop through new properites and set them all
+	for key, value := range newProperties {
+		appErr = user.SetUserPropertyTransactional(tx, key, value)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	// Check transaction for errors and commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return nil
+}
+
 // Get a single User Property from the db
 func (user *User) GetUserProperty(key string) (property string, appErr *ApplicationError) {
 

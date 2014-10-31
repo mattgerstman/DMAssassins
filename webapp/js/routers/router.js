@@ -37,7 +37,8 @@ var app = app || {
             'users': 'users',
             'edit_rules': 'edit_rules',
             'switch_game': 'switch_game',
-            'game_settings': 'game_settings'
+            'game_settings': 'game_settings',
+            'targets': 'targets'
 
         },
         // routes that require we have a game that has been started
@@ -55,6 +56,9 @@ var app = app || {
         // routes that require is at least a game admin
         requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],        
 
+        // routes that require is a super admin
+        requiresSuperAdmin: ['#targets'],
+        
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
 
@@ -101,6 +105,9 @@ var app = app || {
             // do we need to be an admin
             var needAdmin = _.contains(this.requiresAdmin, path);
             
+            // do we need to be an admin
+            var needSuperAdmin = _.contains(this.requiresSuperAdmin, path);
+            
             // The active user's role in the current game
             var userRole = app.Running.User.getProperty('user_role');
             
@@ -109,6 +116,10 @@ var app = app || {
 
             // is the user an admin
             var isAdmin = AuthUtils.requiresAdmin(userRole);
+
+            // is the user a super admin
+            var isSuperAdmin = AuthUtils.requiresSuperAdmin(userRole);
+
 
 
 
@@ -166,7 +177,12 @@ var app = app || {
                     trigger: true
                 });
             // nothing is wrong! let them pass.	
-            } else {
+            } else if (needSuperAdmin && !isSuperAdmin) {
+                Backbone.history.navigate('', {
+                    trigger: true
+                });
+            }
+            else {
                 //No problem handle the route
                 return next();
             }
@@ -264,6 +280,12 @@ var app = app || {
             app.Running.UserEmails.fetch();
             app.Running.AppView.setCurrentView(view);
             this.render();                                     
+        },
+        targets: function() {        
+            var view = new app.Views.SuperAdminTargetsView();
+            app.Running.AppView.setCurrentView(view);
+            this.render();                 
+            app.Running.currentView.model.fetch({reset: true});
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {

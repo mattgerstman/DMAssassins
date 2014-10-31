@@ -120,6 +120,7 @@ var app = app || {
         badPassword: function(){
             $('#join_password_block').addClass('has-error');
             $('label[for=join_game_password]').text('Invalid Password:');
+            $('.join-game-submit').removeClass('disabled').text('Join');
         },
         badTeam: function(){
             $('#join_team_block').addClass('has-error');

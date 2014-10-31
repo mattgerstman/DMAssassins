@@ -35,8 +35,13 @@ func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
 	}
 
 	assassin, appErr := GetAssassin(gameMapping.UserId, gameMapping.GameId)
-	if appErr != nil {
+	if appErr != nil && appErr.Code != ErrCodeNotFoundUserId {
 		return appErr
+	}
+
+	// if we don't have an assassin just kill the damn user
+	if appErr != nil {
+		return gameMapping.MarkDead()
 	}
 
 	secret := gameMapping.Secret

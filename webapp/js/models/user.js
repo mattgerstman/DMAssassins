@@ -47,6 +47,7 @@ var app = app || {
             var last_game_id = app.Running.Games.getActiveGameId();
             this.save(null, {
                 url: config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/',
+                type: 'post',
                 headers: {
                     'X-DMAssassins-Game-Password': game_password,
                     'X-DMAssassins-Team-Id': team_id
@@ -59,7 +60,10 @@ var app = app || {
                     if (response.status == 401) {
                         that.trigger('join-error-password');
                         app.Running.Games.get(game_id).set('member', false);
-                        app.Running.Games.setActiveGame(last_game_id, true).set('member', true);
+                        if (!!last_game_id)
+                        {
+                            app.Running.Games.setActiveGame(last_game_id, true).set('member', true);    
+                        }                        
                     }
                 }
             });

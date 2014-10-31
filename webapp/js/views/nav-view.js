@@ -47,6 +47,7 @@ var app = app || {
             var data = {};
             data.is_captain = AuthUtils.requiresCaptain(role);
             data.is_admin = AuthUtils.requiresAdmin(role);
+            data.is_super_admin = AuthUtils.requiresSuperAdmin(role);
             
             this.$el.html(this.template(data));
             this.handleTarget();
