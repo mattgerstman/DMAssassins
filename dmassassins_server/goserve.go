@@ -31,6 +31,7 @@ const (
 	gameTeamPath        = "/game/{game_id}/team/"
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
 	gameRulesPath       = "/game/{game_id}/rules/"
+	gameTargetsPath     = "/game/{game_id}/targets/"
 
 	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
@@ -151,17 +152,6 @@ func StartServer() {
 		LogWithSentry(appErr, nil, raven.ERROR, nil)
 	}
 
-	//go startPolling()
-
-	// appErr := PostKillTweet()
-	// if appErr != nil {
-	// 	fmt.Println(appErr)
-	// 	LogWithSentry(appErr, nil, raven.ERROR)
-	// }
-
-	// startGame()
-	// generateTestUsers()
-
 	defer db.Close()
 
 	r := mux.NewRouter().StrictSlash(true)
@@ -171,9 +161,10 @@ func StartServer() {
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
+	r.HandleFunc(gameTargetsPath, GameTargetsHandler()).Methods("GET")
 
 	// Game then User
-	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT")
+	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT", "POST")
 	r.HandleFunc(gameUsersPath, GameUsersHandler()).Methods("GET")
 	r.HandleFunc(gameUsersEmailPath, GameUsersEmailHandler()).Methods("GET")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")

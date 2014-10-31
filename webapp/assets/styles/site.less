@@ -112,6 +112,7 @@ a,a:focus {
     }
 
     .thumbnail {
+        max-height:300px;
         margin:5px auto 10px auto;
     }
     .dead {
@@ -225,11 +226,22 @@ a,a:focus {
 
 .user_view .thumbnail {
     margin-bottom:10px;
+    max-height:300px;
+    max-width:300px;
 }
 
 .user_view .profile-buttons {
     margin-bottom:10px;
 }
+
+.thumbnail-wrapper {
+    max-height: 290px;
+    height:100vw;
+    img {
+        height:100%;
+    }
+}
+
 
 
 @media(max-width:1550px) {
@@ -245,6 +257,8 @@ a,a:focus {
         }
         .thumbnail {
             max-width: 290px;
+            max-height:290px;
+            overflow:hidden;
             margin:5px 10px 10px 10px;
         }
         .user-buttons {

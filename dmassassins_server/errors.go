@@ -103,6 +103,7 @@ func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
 	err := decoder.Decode(&body)
 	_ = err
 
+	fmt.Println(body)
 	// set the request_body section and return it
 	extra[`request_body`] = body
 	return extra

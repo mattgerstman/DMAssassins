@@ -91,13 +91,29 @@ func (game *Game) ReviveStrongestPlayers(tx *sql.Tx) (appErr *ApplicationError) 
 }
 
 // Revive a group of players
-func (game *Game) RevivePlayers(tx *sql.Tx, revive string) (appErr *ApplicationError) {
+func (game *Game) RevivePlayers(revive string) (appErr *ApplicationError) {
+
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	switch revive {
 	case `revive_strongest`:
-		return game.ReviveStrongestPlayers(tx)
+		appErr = game.ReviveStrongestPlayers(tx)
 	case `revive_captains`:
-		return game.ReviveCaptains(tx)
+		appErr = game.ReviveCaptains(tx)
 	}
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return nil
 }
 
@@ -119,17 +135,11 @@ func (game *Game) ActivatePlotTwist(twistName string) (appErr *ApplicationError)
 		return NewApplicationError(msg, err, ErrCodeInvalidPlotTwist)
 	}
 
-	tx, err := db.Begin()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
 	// Revive anyone we need to revive
 	revive := twist.Revive
 	if revive != `` {
-		appErr = game.RevivePlayers(tx, revive)
+		appErr = game.RevivePlayers(revive)
 		if appErr != nil {
-			tx.Rollback()
 			return appErr
 		}
 	}
@@ -137,33 +147,25 @@ func (game *Game) ActivatePlotTwist(twistName string) (appErr *ApplicationError)
 	// Assign targets
 	assignMode := twist.AssignTargets
 	if assignMode != `` {
-		appErr = game.AssignTargetsByTransactional(tx, assignMode)
+		appErr = game.AssignTargetsBy(assignMode)
 		if appErr != nil {
-			tx.Rollback()
 			return appErr
 		}
 	}
 
 	// Set kill mode
-	appErr = game.SetGamePropertyTransactional(tx, `kill_mode`, twist.KillMode)
+	appErr = game.SetGameProperty(`kill_mode`, twist.KillMode)
 	if appErr != nil {
-		tx.Rollback()
 		return appErr
 	}
 
 	// Set kill tiemr
 	killTimer := twist.KillTimer
 	if killTimer != 0 {
-		_, appErr = game.NewKillTimer(tx, killTimer)
+		_, appErr = game.NewKillTimer(killTimer)
 		if appErr != nil {
-			tx.Rollback()
 			return appErr
 		}
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return nil

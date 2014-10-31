@@ -1,6 +1,6 @@
 <!DOCTYPE HTML>
 <!--
-    
+
 <!-- @echo BANNER-->
 -->
 <html lang="en">
@@ -94,6 +94,9 @@
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Manage Users</a></li>
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li>
                                 <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>
+                                <% if (is_super_admin) { %>
+                                    <li class="nav_item dropdown_item" dropdown="admin" id="nav_targets"><a href="#targets">View Targets</a></li>
+                                <% } %>
                             </ul>
                         </li>
                     <% } else if (is_captain) { %>
@@ -304,7 +307,7 @@
 
                     </div>
                 </div>
-                <div id="create-game" class="container hide">                        
+                <div id="create-game" class="container hide">
                     <!-- @if BETA == "FALSE" -->
                         <form class="form-horizontal text-left" role="form">
                             <div class="form-group">
@@ -344,22 +347,22 @@
                             </div>
                         </form>
                     <!-- @endif -->
-                    <!-- @if BETA == "TRUE" -->  
+                    <!-- @if BETA == "TRUE" -->
                         <div class="row">
                             <div class="col-sm-offset-4 col-sm-4 hidden-xs text-center">
                                 We aren't quite ready to sell to the public. If you're interesting in beta pricing you can contact <a href="mailto:matt@dmassassins.com">matt@dmassassins.com</a>
                             </div>
                         </div><br />
                         <div class="row">
-                            <div class="col-sm-offset-4 col-sm-4 hidden-xs text-center">                            
+                            <div class="col-sm-offset-4 col-sm-4 hidden-xs text-center">
                                 <button class="btn btn-danger btn-block create-or-join-back">Back</button>
                             </div>
                         </div>
                         <div class="visible-xs-block text-center">
                             We aren't quite ready to sell to the public. If you're interesting in beta pricing you can contact <a href="mailto:matt@dmassassins.com">matt@dmassassins.com</a>
                             <button class="btn btn-danger btn-block create-or-join-back">Back</button>
-                        </div>       
-                     </div>          
+                        </div>
+                     </div>
                     <!-- @endif -->
                 </div>
                 <div id="join-game" class="container hide">
@@ -576,7 +579,9 @@
 
                     <div class="row">
                         <a class="thumbnail <% if (!teams_enabled) { %> default_cursor <%} %>">
-                           <img class="<% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
+                            <div class="thumbnail-wrapper">
+                                <img class="<% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
+                            </div>
                         </a>
                     </div>
                     <div class="user-data-text">
@@ -612,6 +617,9 @@
     	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
     	                        </div>
     	                        <div class="btn-group">
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default edit-photo">Photo</button>
+    	                        </div>
+    	                        <div class="btn-group">
     	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
     	                        </div>
     	                    </div>
@@ -621,13 +629,18 @@
     	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
     	                        </div>
     	                        <div class="btn-group">
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default edit-photo">Photo</button>
+    	                        </div>
+    	                        <div class="btn-group">
     	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
     	                        </div>
     	                    </div>
     					<% } %>
                      </div>
                     <% } else { %>
-                         <div class ="user-buttons"></div>
+                         <div class ="user-buttons">
+    	                        <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default btn-block edit-photo">Photo</button>
+                        </div>
                     <% } %>
             </div>
         </div>
@@ -648,6 +661,31 @@
 
 
         </div>
+
+        <div class="modal fade" id="edit_photo_modal" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Edit Photo</h4>
+              </div>
+              <form class="form" role="form">
+                  <div class="modal-body">
+                    <div class="user-photo-wrapper"></div>
+                    <p>If you'd like to change <strong><span class="user-name"></span></strong>'s photo enter a new url here.</p>
+                     <div class="form-group">
+                         <label for="photo_url">Photo Url:</label><input class="form-control" id="photo_url" type="text" placeholder ="Enter Photo URL"/>
+                     </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary btn-medium edit-photo-submit">Save</button>
+                  </div>
+              </form>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
 
         <div id="revive_user_modal" class="modal fade">
           <div class="modal-dialog">
@@ -764,7 +802,7 @@
                         <label for="game_password" class="control-label">Game Password:</label>
                         <input id="game_password" class="form-control" placeholder="Leave Blank For No Password" value="<%= game_properties.game_password %>"/>
                     </div>
-    
+
                     <div class="form-group">
                         <div class="checkbox">
                             <label for="teams_enabled">
@@ -773,7 +811,7 @@
                         </div>
                         <button class="btn btn-block btn-primary save-game">Save</button>
                     </div>
-    
+
                 </form>
                 <% if (!game_started) { %>
                     <button class="btn btn-block btn-success start-game">Start Game</button>
@@ -845,7 +883,7 @@
         <div id="plot-twist-modal-container"></div>
     </script>
 
-    <script id="plot-twist-modal-template" type="text/template">    
+    <script id="plot-twist-modal-template" type="text/template">
         <div id="plot-twist-modal" class="modal fade">
           <div class="modal-dialog">
             <div class="modal-content">
@@ -868,26 +906,26 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
                     <button type="submit" class="btn hidden-xs twist-submit <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
-                    
+
                     <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-block visible-xs twist-submit  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>                
+                    <button type="submit" class="btn btn-block visible-xs twist-submit  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
                 </div>
               </form>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-    </script>   
-    
+    </script>
+
     <script id="plot-twist-body-randomize-targets-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
             <li>All users will have a new target</li>
             <% if (teams_enabled) { %>
                 <li>We will attempt to give all users a target from a different team.</li>
-                <li>We will attempt to prevent team captains from targeting each other.</li>        
-                <li>Users will be emailed informing them of the plot twist</li>        
+                <li>We will attempt to prevent team captains from targeting each other.</li>
+                <li>Users will be emailed informing them of the plot twist</li>
             <% } %>
-        </ol>                
+        </ol>
     </script>
 
     <script id="plot-twist-body-reverse-targets-template" type="text/template">
@@ -896,12 +934,12 @@
             <li>All users will target their current assassin.</li>
             <li>All users will be targeted by their current target.</li>
             <li>Users will be emailed informing them of the plot twist</li>
-        </ol>                
+        </ol>
     </script>
 
     <script id="plot-twist-body-successive-kills-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
-        <ol>            
+        <ol>
             <li>All users will have a new target</li>
             <li>If a player makes a kill and has already killed in the last 24 hours they will get two points.</li>
             <li>A player will get no more than 2 points per kill.</li>
@@ -925,7 +963,7 @@
     <script id="plot-twist-body-strong-closed-template" type="text/template">
         The following will happen if you implement this plot twist:<br />
         <ol>
-            <li>If the player with the most kills for their team is dead, they will be revived.</li>    
+            <li>If the player with the most kills for their team is dead, they will be revived.</li>
             <li>The player with the most kills from each team will be assigned another "strong" player from another team.</li>
             <li>Strong players will be in their own mini game and will not be able to target regular users until targets are reassigned.</li>
             <li>Ties for "strongest" for each team will be broken arbitrarily</li>
@@ -944,10 +982,10 @@
         </ol>
     </script>
 
-    <script id="admin-email-users-template" type="text/template">   
+    <script id="admin-email-users-template" type="text/template">
         <div class="container text-center">
             <p>This page serves as a placeholder during beta to allow a game admin to email the players of a game. They can either click the "Email Alive" or "Email All" buttons or copy and paste the list of emails below.<br />
-                <i>Note: The only users listed are those that have not opted out from in-game emails</i>                
+                <i>Note: The only users listed are those that have not opted out from in-game emails</i>
             </p>
 
             <a href="mailto:?subject=DMAssassins&bcc=<% _.each(alive, function(email){ %><%= email %>,<% }) %>">
@@ -956,12 +994,45 @@
             <a href="mailto:?subject=DMAssassins&bcc=<% _.each(all, function(email){ %><%= email %>,<% }) %>">
                 <button class="btn btn-primary js-email-users">Email All</button>
             </a>
-            <br />                       
+            <br />
             <div class="emails">
                 <% _.each(all, function(email){ %>
-                    <%= email %>, 
-                <% }) %>            
+                    <%= email %>,
+                <% }) %>
             </div>
+        </div>
+    </script>
+
+    <script id="super-admin-targets-template" type="text/template">
+        <div class="container">
+            <% _.each(loops, function(loop){ %> 
+                <table class="js-targets-table stripe compact">
+                    <thead>
+                        <th>Assassin Name</th>
+                        <th>Assassin Team</th>
+                        <th>Assassin Role</th>
+                        <th>Assassin Kills</th>
+                        <th>Target Name</th>
+                        <th>Target Team</th>
+                        <th>Target Role</th>
+                        <th>Target Kills</th>
+                    </thead>
+                    <tbody>
+                        <% _.each(loop, function(pair) { %>
+                            <tr>
+                                <td><%= pair.assassin_name %></td>
+                                <td><%= pair.assassin_team_name %></td>
+                                <td><%= pair.assassin_user_role %></td>
+                                <td><%= pair.assassin_kills %></td>
+                                <td><%= pair.target_name %></td>
+                                <td><%= pair.target_team_name %></td>
+                                <td><%= pair.target_user_role %></td>
+                                <td><%= pair.target_kills %></td>
+                            </tr>
+                        <% }) %>                        
+                    </tbody>
+                </table>
+            <% }) %>
         </div>
     </script>
 
@@ -1007,6 +1078,7 @@
     <script src="js/models/leaderboard.js" type="text/javascript"></script>
     <script src="js/models/rules.js" type="text/javascript"></script>
     <script src="js/models/plot-twist.js" type="text/javascript"></script>
+    <script src="js/models/targets.js" type="text/javascript"></script>
 
     <script src="js/collections/games.js" type="text/javascript"></script>
     <script src="js/collections/users.js" type="text/javascript"></script>
@@ -1022,6 +1094,8 @@
     <script src="js/views/admin-users-view.js" type="text/javascript"></script>
     <script src="js/views/admin-edit-rules-view.js" type="text/javascript"></script>
     <script src="js/views/admin-game-settings-view.js" type="text/javascript"></script>
+
+    <script src="js/views/super-admin-targets-view.js" type="text/javascript"></script>
 
     <script src="js/views/app-view.js" type="text/javascript"></script>
     <script src="js/views/nav-view.js" type="text/javascript"></script>

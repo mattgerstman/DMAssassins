@@ -94,6 +94,7 @@ a:focus {
   max-width: 300px;
 }
 .admin-users-body .thumbnail {
+  max-height: 300px;
   margin: 5px auto 10px auto;
 }
 .admin-users-body .dead {
@@ -199,9 +200,18 @@ a:focus {
 }
 .user_view .thumbnail {
   margin-bottom: 10px;
+  max-height: 300px;
+  max-width: 300px;
 }
 .user_view .profile-buttons {
   margin-bottom: 10px;
+}
+.thumbnail-wrapper {
+  max-height: 290px;
+  height: 100vw;
+}
+.thumbnail-wrapper img {
+  height: 100%;
 }
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {
@@ -214,6 +224,8 @@ a:focus {
   }
   .admin-users-body .thumbnail {
     max-width: 290px;
+    max-height: 290px;
+    overflow: hidden;
     margin: 5px 10px 10px 10px;
   }
   .admin-users-body .user-buttons {

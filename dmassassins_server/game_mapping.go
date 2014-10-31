@@ -310,6 +310,10 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	err = stmt.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// Add properties to users
 	for rows.Next() {
@@ -513,4 +517,14 @@ func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *A
 	gameId := uuid.Parse(gameIdBuffer)
 	return &GameMapping{user.UserId, gameId, teamId, userRole, secret, kills, alive}, nil
 
+}
+
+// Sets a user as dead without going through the motions of using their assassin
+func (gameMapping *GameMapping) MarkDead() (appErr *ApplicationError) {
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	gameMapping.Alive = false
+	return nil
 }

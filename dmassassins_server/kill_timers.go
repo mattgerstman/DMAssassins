@@ -74,8 +74,26 @@ func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
 	return time.AfterFunc(duration, game.KillTimerHandler)
 }
 
+func (game *Game) NewKillTimer(hours int64) (timer *time.Timer, appErr *ApplicationError) {
+	tx, err := db.Begin()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	timer, appErr = game.NewKillTimerTransactional(tx, hours)
+	if appErr != nil {
+		tx.Rollback()
+		return nil, appErr
+	}
+	err = tx.Commit()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return timer, nil
+}
+
 // Creates a new kill timer and inserts it into the database
-func (game *Game) NewKillTimer(tx *sql.Tx, hours int64) (timer *time.Timer, appErr *ApplicationError) {
+func (game *Game) NewKillTimerTransactional(tx *sql.Tx, hours int64) (timer *time.Timer, appErr *ApplicationError) {
 
 	nowTime := time.Now()
 	now := nowTime.Unix()

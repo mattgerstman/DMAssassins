@@ -30,6 +30,7 @@ var app = app || {
             'click .ban-user': 'banUserModal',
             'click .kill-user': 'killUserModal',
             'click .revive-user': 'reviveUserModal',
+            'click .edit-photo': 'editPhotoModal',
             'click .ban-user-submit': 'banUser',
             'click .kill-user-submit': 'killUser',
             'click .revive-user-submit': 'reviveUser',
@@ -46,6 +47,7 @@ var app = app || {
             'click .save-edit-team': 'saveEditTeam',
             'click .delete-team': 'deleteTeamModal',
             'click .delete-team-submit': 'deleteTeam',
+            'click .edit-photo-submit': 'editPhoto',
             'mouseover .teams': 'sidebarMouseover',
             'mouseout .teams': 'sidebarMouseout'
         },
@@ -80,7 +82,18 @@ var app = app || {
             $('#revive_user_modal .user-name').text(user_name);
             $('#revive_user_modal').modal();  
         },
-               
+        editPhotoModal: function(event) {
+            var user_name = $(event.currentTarget).data('user-name');
+            var user_id = $(event.currentTarget).data('user-id');
+
+            var user = this.collection.get(user_id);
+            var photo_url = user.getProperty('photo');
+            $('#edit_photo_modal .user-photo-wrapper').html('<img src="'+photo_url+'" class="thumbnail">');
+            $('#photo_url').val(photo_url);
+            $('.edit-photo-submit').data('user-id', user_id);
+            $('#edit_photo_modal .user-name').text(user_name);
+            $('#edit_photo_modal').modal();  
+        },               
         banUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
@@ -100,6 +113,7 @@ var app = app || {
         killUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
+            var that = this;
 	      	user.kill();
 	      	$('#kill_user_modal').modal('hide');
         },
@@ -110,7 +124,25 @@ var app = app || {
 	      	user.revive();
 	      	$('#revive_user_modal').modal('hide');
         },
-
+        editPhoto: function(event) {
+            event.preventDefault();
+        	var user_id = $(event.currentTarget).data('user-id');
+	      	var user = this.collection.get(user_id);
+	      	var photo_url = $('#photo_url').val();
+	      	var that = this;
+            user.setProperty('photo', photo_url);
+            user.save(null, {
+                success: function(model, response){
+                    console.log(model);
+                    $('#edit_photo_modal').modal('hide');
+                    that.makeDraggable('#user_'+user_id);
+                },
+                error: function(model, response){
+                    alert(response.responseText);
+                }    
+            });
+	      	
+        },
         selectChangeTeam: function(event){
             var user_id = $(event.currentTarget).data('user-id');
             var team_id = $(event.currentTarget).find('option:selected').val();
@@ -155,7 +187,7 @@ var app = app || {
                 }
             });                         
         },
-        makeDraggable: function() {
+        makeDraggable: function(selector) {
             var that = this;            
             var startFunc = function(e, ui) {
                 ui.helper.find('.user').remove();
@@ -167,7 +199,11 @@ var app = app || {
                 }, 100);
             };
             
-            this.$el.find('.user-grid').draggable({
+            if (selector === undefined) {
+                selector = '.user-grid';
+            }
+            
+            this.$el.find(selector).draggable({
                 handle: '.thumbnail',
                 connectWith: '#team_list li',
                 tolerance: "pointer",

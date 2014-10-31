@@ -317,16 +317,17 @@ func (team *Team) GetTeamCaptainId() (captainId uuid.UUID, appErr *ApplicationEr
 }
 
 // is it safe to assign targets by teams
-func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *ApplicationError) {
+func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
 	var numUsers, numCaptains int
 	var teamIdBuffer string
 
-	rows, err := tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	rows1, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	for rows.Next() {
-		err = rows.Scan(&numUsers, &teamIdBuffer)
+
+	for rows1.Next() {
+		err = rows1.Scan(&numUsers, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -335,17 +336,18 @@ func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *Applicat
 		}
 	}
 	// Close the rows
-	err = rows.Close()
-	if err != nil {
-		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	rows, err = tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	err = rows1.Close()
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	for rows.Next() {
-		err = rows.Scan(&numCaptains, &teamIdBuffer)
+	rows2, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	for rows2.Next() {
+		err = rows2.Scan(&numCaptains, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -354,7 +356,7 @@ func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *Applicat
 		}
 	}
 	// Close the rows
-	err = rows.Close()
+	err = rows2.Close()
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
