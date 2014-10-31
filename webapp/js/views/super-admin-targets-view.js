@@ -1,5 +1,5 @@
 //
-// js/views/admin-user-view.js
+// js/views/super-admin-targets-view.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
@@ -20,7 +20,6 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.SuperAdminTargetsView = Backbone.View.extend({
-
         template: _.template($('#super-admin-targets-template').html()),
         tagName:'div',
         events: {
@@ -40,7 +39,18 @@ var app = app || {
             var options = {
                 paging: false,
                 searching: false,
-                info: false
+                info: false,
+                aaSorting:[],
+                aoColumns:[
+                    null,
+                    null,
+                    null,
+                    null,                                        
+                    null,
+                    null,
+                    null,
+                    null
+                ]
             };
             
             this.$el.find('.js-targets-table').dataTable(options);

@@ -206,12 +206,13 @@ a:focus {
 .user_view .profile-buttons {
   margin-bottom: 10px;
 }
-.thumbnail-wrapper {
-  max-height: 290px;
-  height: 100vw;
+.user-grid .thumbnail-wrapper {
+  padding-bottom: 100%;
+  position: relative;
+  overflow: hidden;
 }
-.thumbnail-wrapper img {
-  height: 100%;
+.user-grid img {
+  position: absolute;
 }
 @media (max-width: 1550px) {
   .admin-users-body .user-grid {
