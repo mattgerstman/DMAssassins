@@ -10,7 +10,7 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta name="google-site-verification" content="yRrmu_JevwQq80UCPBJNVh1K-V-FbxVabk8wXBKpzgg" />
 
-    <title>DMAssassins</title>
+    <title>DMAssassins (beta)</title>
     <!-- @if NODE_ENV='PRODUCTION' -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -43,7 +43,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="#" class="navbar-brand">DMAssassins</a>
+                <a href="#" class="navbar-brand">DMAssassins (beta)</a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
