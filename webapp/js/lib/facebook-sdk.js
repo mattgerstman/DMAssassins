@@ -8,7 +8,7 @@ var app = app || {
 };
 
 
-
+$(function() {
 
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
@@ -23,29 +23,9 @@ var app = app || {
         // If we're already authenticated recover the previous session
         app.Session.recoverSession();
 	    return;
-    }
-    
+    }    
     return;
-
-/*
-	if (response.status === 'connected') {
-		// User is logged into DMAssassins and Facebook.
-		app.Session.createSession(response, function(){
-	    });
-
-
-    } else {
-		// User needs to log in
-		app.Running.Router.navigate('login');
-    }
-*/
-
   }
-
-
-
-
-  window.fbAsyncInit = function() {
   FB.init({
     appId      : config.APP_ID,
     cookie     : true,  // enable cookies to allow the server to access
@@ -69,19 +49,8 @@ var app = app || {
   // These three cases are handled in the callback function.
 
 
-	  FB.getLoginStatus(function(response) {
-	    statusChangeCallback(response);
-	  });
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
 
-
-  };
-
-  // Load the SDK asynchronously
-  (function(d, s, id) {
-    var js, fjs = d.getElementsByTagName(s)[0];
-    if (d.getElementById(id)) return;
-    js = d.createElement(s); js.id = id;
-	js.src = "//connect.facebook.net/en_US/sdk.js";
-//    js.src = "//connect.facebook.net/en_US/sdk/debug.js";
-    fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'facebook-jssdk'));
+});
