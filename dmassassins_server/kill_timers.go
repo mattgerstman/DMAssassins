@@ -134,22 +134,29 @@ func (game *Game) ExecuteKillTimer() (appErr *ApplicationError) {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	appErr = game.KillPlayersWhoHaventKilledSince(minKillTime)
+	// Kill users
+	killedUsers, appErr := game.KillPlayersWhoHaventKilledSince(minKillTime)
 	if appErr != nil {
 		return appErr
+	}
+
+	// Inform users the countdown is over
+	appErr = game.SendTimerExpiredEmail(killedUsers)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.ERROR, nil)
 	}
 	return nil
 }
 
 // Kill all the players who havent killed in the past x hours and randomize targets
-func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *ApplicationError) {
+func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (killedUsers []uuid.UUID, appErr *ApplicationError) {
 
 	fmt.Println(`Killing for: ` + game.GameName)
 
 	// Get last_killed value for all users
 	rows, err := db.Query(`SELECT DISTINCT ON (m.user_id) m.user_id, p.value FROM dm_user_game_mapping AS m LEFT OUTER JOIN dm_user_properties AS p ON m.user_id = p.user_id AND p.key='last_killed' WHERE m.game_id = $1 AND m.alive = true AND (m.user_role = 'dm_captain' OR m.user_role='dm_user')`, game.GameId.String())
 	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	var toBeKilled []uuid.UUID
@@ -161,7 +168,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 		// Scan userId and lastKilled
 		err = rows.Scan(&userIdBuffer, &lastKilledBuffer)
 		if err != nil {
-			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
 		// Set up lastKilled in advance
@@ -172,7 +179,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 		if lastKilledBuffer.Valid {
 			lastKilled, err = strconv.ParseInt(lastKilledBuffer.String, 10, 64)
 			if err != nil {
-				return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+				return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 			}
 		}
 
@@ -188,7 +195,7 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 	// Close the rows
 	err = rows.Close()
 	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Create a interface slice to store the users to be killed and the gameId
@@ -203,47 +210,47 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (appErr *Ap
 	// Beging transaction for inserts
 	tx, err := db.Begin()
 	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Kill the users
 	killUsers, err := tx.Prepare(`UPDATE dm_user_game_mapping SET alive = false WHERE game_id = $1 AND user_id IN (` + params + `)`)
 	if err != nil {
 		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	_, err = tx.Stmt(killUsers).Exec(toBeKilledUpdate...)
 	if err != nil {
 		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Assign new targets
 	appErr = game.AssignTargetsByTransactional(tx, `normal`)
 	if appErr != nil {
 		tx.Rollback()
-		return appErr
+		return nil, appErr
 	}
 
 	// Kill the users
 	removeTimer, err := tx.Prepare(`DELETE FROM dm_kill_timers WHERE game_id = $1`)
 	if err != nil {
 		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	_, err = tx.Stmt(removeTimer).Exec(game.GameId.String())
 	if err != nil {
 		tx.Rollback()
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Commit the transaction
 	err = tx.Commit()
 	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	return nil
+	return toBeKilled, nil
 }
