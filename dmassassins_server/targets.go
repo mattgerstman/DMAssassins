@@ -119,7 +119,7 @@ func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 // Put strong users in a closed loop and other users in a regular loop
 func (game *Game) assignClosedStrongLoop(tx *sql.Tx) (appErr *ApplicationError) {
 	// Gets the strongest players
-	strong, appErr := game.getStrongPlayers()
+	strong, appErr := game.GetStrongPlayers()
 	if appErr != nil {
 		return appErr
 	}
@@ -169,12 +169,12 @@ func (game *Game) getPlayersNotInSlice(userSlice []interface{}) (rows *sql.Rows,
 // have the strongest players target the weakest ones, don't be concerned about teams/captains
 func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) {
 	// Get strong players
-	strong, appErr := game.getStrongPlayers()
+	strong, appErr := game.GetStrongPlayers()
 	if appErr != nil {
 		return appErr
 	}
 	// Get weak players
-	weak, appErr := game.getWeakPlayers()
+	weak, appErr := game.GetWeakPlayers()
 	if appErr != nil {
 		return appErr
 	}
@@ -195,29 +195,25 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 		return appErr
 	}
 
-	// Get number of players
-	numPlayers, appErr := game.GetNumActivePlayers()
-	if appErr != nil {
-		return appErr
+	// INSERT REGULAR PAIRS
+
+	// Scan first id
+	var firstUserIdBuffer string
+
+	rows.Next()
+	err := rows.Scan(&firstUserIdBuffer)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Get number of teams
-	numTeams := len(weak)
+	// set first id
+	firstUserId := uuid.Parse(firstUserIdBuffer)
 
-	// Determine how often to insert a strong/weak pair
-	insertNum := (numPlayers / numTeams) - 1
+	// set lastUserId to firstUser Id
+	lastUserId := firstUserId
 
-	// Create first strong/weak pair and make them the first target
 	var targets []*targetPair
-	firstStrong, strong := strong[0], strong[1:]
-	firstWeak, weak := weak[0], weak[1:]
-	firstPair := &targetPair{firstStrong, nil, "", firstWeak, nil, ""}
 
-	targets = append(targets, firstPair)
-
-	// we already have one pair
-	i := 1
-	lastUserId := firstWeak
 	for rows.Next() {
 		// Get userId
 		var userIdBuffer string
@@ -235,40 +231,70 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 
 		// Set last userId and increment
 		lastUserId = userId
-		i++
-
-		// Unless we're at the right point to insert just continue
-		if (i % insertNum) != 0 {
-			continue
-		}
-
-		// If we're out of strong/weak make it so we won't get here again
-		if len(strong) == 0 {
-			insertNum = numPlayers + 1
-			continue
-		}
-
-		var nextStrong, nextWeak uuid.UUID
-		// Get next strong/weak pair
-		nextStrong, strong = strong[0], strong[1:]
-		nextWeak, weak = weak[0], weak[1:]
-
-		// Set up next strong/weak pair and insert it
-		newPair := &targetPair{lastUserId, nil, "", nextStrong, nil, ""}
-		strongWeakPair := &targetPair{nextStrong, nil, "", nextWeak, nil, ""}
-		targets = append(targets, newPair, strongWeakPair)
-
-		lastUserId = nextWeak
-		i += 2
 	}
-	err := rows.Close()
+
+	err = rows.Close()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// have last user target first strong user
-	lastTarget := &targetPair{lastUserId, nil, "", firstStrong, nil, ""}
-	targets = append(targets, lastTarget)
+	// have last user target the first
+	pair := &targetPair{lastUserId, nil, "", firstUserId, nil, ""}
+	// Add pair to targets slice
+	targets = append(targets, pair)
+
+	// INSERT STRONG WEAK PAIRS
+
+	// Get number of players
+	numPlayers, appErr := game.GetNumActivePlayers()
+	if appErr != nil {
+		return appErr
+	}
+
+	// Get number of teams
+	numTeams := len(weak)
+
+	// Determine how often to insert a strong/weak pair
+	insertNum := (numPlayers / numTeams) - 1
+	modCounter := 0
+	j := 1
+	for len(strong) != 0 {
+		for index, currentPair := range targets {
+			if (modCounter % insertNum) == 0 {
+
+				if (currentPair.AssassinUserRole != ``) || (currentPair.TargetUserRole != ``) {
+					continue
+				}
+
+				var nextStrong, nextWeak uuid.UUID
+				// Get next strong/weak pair
+				nextStrong, strong = strong[0], strong[1:]
+				nextWeak, weak = weak[0], weak[1:]
+
+				oldAssassin := currentPair.AssassinId
+				oldTarget := currentPair.TargetId
+
+				fmt.Println(j)
+				j++
+				fmt.Println(nextStrong)
+				fmt.Println(nextWeak)
+
+				// Replace current pair with the old assassin targeting the strong player
+				targets[index] = &targetPair{oldAssassin, nil, "", nextStrong, nil, "strong"}
+
+				// Create strong/weak pair
+				strongWeakPair := &targetPair{nextStrong, nil, "strong", nextWeak, nil, "weak"}
+				weakTargetPair := &targetPair{nextWeak, nil, "weak", oldTarget, nil, ""}
+				targets = append(targets, strongWeakPair, weakTargetPair)
+
+			}
+			modCounter++
+		}
+	}
+
+	fmt.Println(strong)
+	fmt.Println(weak)
+
 	return game.insertTargetsWithDelete(tx, targets)
 }
 

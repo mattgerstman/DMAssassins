@@ -40,6 +40,8 @@ var app = app || {
         idAttribute : 'user_id',
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
+            if (!game_id)
+                return null;
             return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';           
         },       
         joinGame: function(game_id, game_password, team_id) {

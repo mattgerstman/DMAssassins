@@ -9,7 +9,7 @@ import (
 
 // GET - Wrapper for game.GetTargets()
 func getTargets(r *http.Request) (targets map[string]*SuperTargetPair, appErr *ApplicationError) {
-	//_, appErr = RequiresSuperAdmin(r)
+	_, appErr = RequiresSuperAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
