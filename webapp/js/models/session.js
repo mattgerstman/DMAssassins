@@ -248,6 +248,7 @@ var app = app || {
             // if theres a login error direct them to the login screen
             login.fail(function(serverResponse) {
                 Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, server_response: serverResponse}});
+                that.clear();
                 alert('An error occurred, please refresh and try again');
                 Backbone.history.navigate('', {
                     trigger: true
