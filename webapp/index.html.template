@@ -10,8 +10,8 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta name="google-site-verification" content="yRrmu_JevwQq80UCPBJNVh1K-V-FbxVabk8wXBKpzgg" />
 
-    <title>DMAssassins (beta)</title>
     <!-- @if NODE_ENV='PRODUCTION' -->
+    <title>DMAssassins (beta)</title>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.2.1/bootstrap-social.min.css" rel="stylesheet" type="text/css">
@@ -20,6 +20,7 @@
     <link href="dist/<!-- @echo VERSION -->/DMAssassins.min.css" rel="stylesheet" type="text/css">
     <!-- @endif -->
     <!-- @if NODE_ENV='DEVELOPMENT' -->
+    <title>DevAssassins</title>
     <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/fontawesome/css/font-awesome.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/bootstrap-social-buttons/social-buttons.css" rel="stylesheet" type="text/css">
@@ -43,7 +44,12 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                <!-- @if NODE_ENV='PRODUCTION' -->
                 <a href="#" class="navbar-brand">DMAssassins (beta)</a>
+                <!-- @endif -->
+                <!-- @if NODE_ENV='DEVELOPMENT' -->
+                <a href="#" class="navbar-brand">DevAssassins</a>
+                <!-- @endif -->
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->

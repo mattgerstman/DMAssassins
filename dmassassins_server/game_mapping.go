@@ -405,7 +405,7 @@ func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr
 }
 
 // Get a slice of the strongest player for each team, ties are broken arbitrarily
-func (game *Game) getStrongPlayers() (strong []uuid.UUID, appErr *ApplicationError) {
+func (game *Game) GetStrongPlayers() (strong []uuid.UUID, appErr *ApplicationError) {
 	// segregate strong users
 	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills desc`, game.GameId.String())
 	if err != nil {
@@ -464,7 +464,7 @@ func (game *Game) getStrongPlayersWithState(alive bool) (strong []uuid.UUID, app
 }
 
 // Get a slice of the weakest player for each team, ties are broken arbitrarily
-func (game *Game) getWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) {
+func (game *Game) GetWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) {
 	// segregate weak users
 	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills asc`, game.GameId.String())
 	if err != nil {

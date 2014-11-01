@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
@@ -95,17 +94,6 @@ func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
 	extra[`request`] = raven.NewHttp(r)
 	extra[`request_form_values`] = r.Form
 
-	// Convert the data input to a map of string to interface
-	body := make(map[string]interface{})
-	decoder := json.NewDecoder(r.Body)
-
-	// Probably the only time in the codebase its worth it to completely ignore an error
-	err := decoder.Decode(&body)
-	_ = err
-
-	fmt.Println(body)
-	// set the request_body section and return it
-	extra[`request_body`] = body
 	return extra
 }
 
