@@ -18,6 +18,11 @@ var app = app || {
             return _.values(response);
         },
         tryFetch: function(){
+            var game_id = app.Running.Games.getActiveGameId();
+            if (!game_id)
+            {
+                return;
+            }
             // The active user's role in the current game
             var userRole = app.Running.User.getProperty('user_role');
             
