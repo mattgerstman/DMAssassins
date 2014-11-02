@@ -161,10 +161,23 @@ var app = app || {
             });
 
         },
-        recoverSession: function() {
-            // var response = this.get('response');  
-            // this.handleResponse(response);
-            this.login();
+        recoverSession: function(response) {
+            if (response.status === 'connected') {
+                // Logged into your app and Facebook.                
+                try 
+                {
+                    if (!response.authResponse)
+                        throw new Error('Error processing facebook login');
+                        
+                    parent.createSession(response);                        
+                }
+                catch (e)
+                {
+                    Raven.captureException(e, {extra: response});
+                    alert('Your session has expired. Please log in again.');
+                }
+
+            }
         },
         handleResponse: function(response) {
 
