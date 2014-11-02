@@ -170,18 +170,17 @@ var app = app || {
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
                         
-                    this.createSession(response);                        
+                    return this.createSession(response);
                 }
                 catch (e)
                 {
                     Raven.captureException(e, {extra: response});
-                    this.clear();
-                    Backbone.history.navigate('', {
-                        trigger: true
-                    });
-                }
-
+                }                
             }
+            this.clear();
+            Backbone.history.navigate('', {
+                trigger: true
+            });
         },
         handleResponse: function(response) {
 
