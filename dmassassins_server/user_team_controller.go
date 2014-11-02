@@ -17,7 +17,7 @@ func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 	vars := mux.Vars(r)
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + vars["user_id"]
+		msg := "Invalid UUID: user_id " + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
@@ -30,7 +30,7 @@ func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 
 	teamId := uuid.Parse(vars["team_id"])
 	if teamId == nil {
-		msg := "Invalid UUID: team_id" + vars["team_id"]
+		msg := "Invalid UUID: team_id " + vars["team_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
@@ -48,7 +48,7 @@ func getGameUserTeam(r *http.Request) (*Team, *ApplicationError) {
 
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + vars["user_id"]
+		msg := "Invalid UUID: user_id " + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
@@ -60,7 +60,7 @@ func getGameUserTeam(r *http.Request) (*Team, *ApplicationError) {
 
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
@@ -79,7 +79,7 @@ func deleteGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Appl
 
 	userId := uuid.Parse(vars["user_id"])
 	if userId == nil {
-		msg := "Invalid UUID: user_id" + vars["user_id"]
+		msg := "Invalid UUID: user_id " + vars["user_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
@@ -92,7 +92,7 @@ func deleteGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *Appl
 
 	teamId := uuid.Parse(vars["team_id"])
 	if teamId == nil {
-		msg := "Invalid UUID: team_id" + vars["team_id"]
+		msg := "Invalid UUID: team_id " + vars["team_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}

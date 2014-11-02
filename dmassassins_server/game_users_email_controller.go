@@ -17,7 +17,7 @@ func getGameUsersEmails(r *http.Request) (emails map[string][]string, appErr *Ap
 
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
