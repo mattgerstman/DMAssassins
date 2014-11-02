@@ -60,10 +60,40 @@ func (user *User) SetUserProperty(key string, value string) (appErr *Application
 	appErr = user.SetUserPropertyTransactional(tx, key, value)
 	if appErr != nil {
 		tx.Rollback()
-		return
+		return appErr
 	}
 
-	tx.Commit()
+	// Check transaction for errors and commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return nil
+}
+
+// Sets a map of new user properties
+func (user *User) SetUserProperties(newProperties map[string]string) (appErr *ApplicationError) {
+	// Start a transaction so we can rollback if something blows up
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Loop through new properites and set them all
+	for key, value := range newProperties {
+		appErr = user.SetUserPropertyTransactional(tx, key, value)
+		if appErr != nil {
+			tx.Rollback()
+			return appErr
+		}
+	}
+
+	// Check transaction for errors and commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	return nil
 }
@@ -112,6 +142,11 @@ func (user *User) GetUserProperties() (properties map[string]string, appErr *App
 			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
 			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil)
 		}
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	properties["name"] = properties["first_name"] + " " + properties["last_name"]
 	user.Properties = properties

@@ -23,8 +23,12 @@ func (game *Game) SetGameProperty(key string, value string) (appErr *Application
 		return appErr
 	}
 
-	// Commit transaction
-	tx.Commit()
+	// Commit transaction, check for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return nil
 }
 
@@ -117,7 +121,11 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING, nil)
 		}
 	}
-
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	// Add the properties to the struct
 	game.Properties = properties
 	return properties, nil

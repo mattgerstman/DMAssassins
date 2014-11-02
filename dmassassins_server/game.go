@@ -18,15 +18,9 @@ type Game struct {
 
 // Rename a game
 func (game *Game) Rename(newName string) (appErr *ApplicationError) {
-	res, err := db.Exec(`UPDATE dm_games SET game_name = $1 WHERE game_id = $2`, newName, game.GameId.String())
+	_, err := db.Exec(`UPDATE dm_games SET game_name = $1 WHERE game_id = $2`, newName, game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Make sure at least one game was affected
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
 	}
 
 	// Set the name in the struct if we use it later
@@ -37,15 +31,9 @@ func (game *Game) Rename(newName string) (appErr *ApplicationError) {
 
 // Change a game's password
 func (game *Game) ChangePassword(newPassword string) (appErr *ApplicationError) {
-	res, err := db.Exec(`UPDATE dm_games SET game_password = $1 WHERE game_id = $2`, newPassword, game.GameId.String())
+	_, err := db.Exec(`UPDATE dm_games SET game_password = $1 WHERE game_id = $2`, newPassword, game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Make sure at least one game was affected
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
 	}
 
 	// Set the password in the struct if we use it later
@@ -121,7 +109,11 @@ func (game *Game) End() (appErr *ApplicationError) {
 		tx.Rollback()
 		return appErr
 	}
-	tx.Commit()
+	// Check transaction for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	game.Started = false
 	return nil
@@ -178,15 +170,9 @@ func (game *Game) Start() (appErr *ApplicationError) {
 		return appErr
 	}
 	// Set started = true
-	res, err := db.Exec("UPDATE dm_games SET game_started = true WHERE game_id = $1", game.GameId.String())
+	_, err := db.Exec("UPDATE dm_games SET game_started = true WHERE game_id = $1", game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	// Make sure we affected at least one row
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
 	}
 
 	// Update the given struct
@@ -223,6 +209,12 @@ func parseGameRows(rows *sql.Rows) (games []*Game, appErr *ApplicationError) {
 		game := &Game{gameId, gameName, gameStarted, hasPassword, properties}
 		games = append(games, game)
 	}
+	// Close the rows
+	err := rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return games, nil
 }
 
@@ -307,13 +299,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 	// Generate a UUID and execute the statement to insert the game into the db
 	gameId := uuid.NewRandom()
-	res, err := tx.Stmt(newGame).Exec(gameId.String(), gameName, gamePassword)
-	// Check to make sure the insert happened
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		tx.Rollback()
-		return nil, NoRowsAffectedAppErr
-	}
+	_, err = tx.Stmt(newGame).Exec(gameId.String(), gameName, gamePassword)
 
 	// Create a user secret for the game
 	secret, appErr := NewSecret(3)
@@ -330,19 +316,18 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 
 	// Executre the statement to insert the game creator(admin) into the game
 	role := "dm_admin"
-	res, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role, secret)
+	_, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role, secret)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Check to make sure the insert happened
-	NoRowsAffectedAppErr = WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
+	// Check transaction for errors
+	err = tx.Commit()
+	if err != nil {
 		tx.Rollback()
-		return nil, NoRowsAffectedAppErr
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	tx.Commit()
 	hasPassword := gamePassword != ""
 
 	properties := make(map[string]string)

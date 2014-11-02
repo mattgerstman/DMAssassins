@@ -11,18 +11,22 @@ import (
 
 // Assigns targets using a methodology, wrapps the inner function in a transaction
 func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationError) {
+	// begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
+	// Run internal assign targets
 	appErr = game.AssignTargetsByTransactional(tx, assignmentType)
 	if appErr != nil {
 		tx.Rollback()
 		return appErr
 	}
-
-	tx.Commit()
+	// error check the transaction commit
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return nil
 }
 
@@ -40,7 +44,7 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 		return game.assignStrongTargetWeak(tx)
 	}
 
-	if assignmentType == `closed_strong` {
+	if assignmentType == `strong_closed` {
 		fmt.Println(`closed_strong`)
 		return game.assignClosedStrongLoop(tx)
 	}
@@ -53,14 +57,14 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
-		canAssign, appErr := game.CanAssignByTeams(tx)
+		var canAssign bool
+		canAssign, appErr := game.CanAssignByTeams()
 		if appErr != nil {
 			return appErr
 		}
-
 		if canAssign {
 			// Get all players in the game
-			rows, appErr := game.getAllActivePlayersAsRows(tx)
+			rows, appErr := game.getAllActivePlayersAsRows()
 			if appErr != nil {
 				return appErr
 			}
@@ -92,7 +96,7 @@ type targetPair struct {
 func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 	var userIdBuffer, targetIdBuffer string
 	var targets []*targetPair
-	rows, err := db.Query(`SELECT user_id, target_id FROM dm_user_targets WHERE game_id = $1`, game.GameId.String())
+	rows, err := tx.Query(`SELECT user_id, target_id FROM dm_user_targets WHERE game_id = $1`, game.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -104,6 +108,10 @@ func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 		pair := &targetPair{targetId, nil, "", userId, nil, ""}
 		targets = append(targets, pair)
 	}
+	err = rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	return game.insertTargetsWithDelete(tx, targets)
 }
@@ -111,7 +119,7 @@ func (game *Game) reverseTargets(tx *sql.Tx) (appErr *ApplicationError) {
 // Put strong users in a closed loop and other users in a regular loop
 func (game *Game) assignClosedStrongLoop(tx *sql.Tx) (appErr *ApplicationError) {
 	// Gets the strongest players
-	strong, appErr := game.getStrongPlayers()
+	strong, appErr := game.GetStrongPlayers()
 	if appErr != nil {
 		return appErr
 	}
@@ -125,12 +133,15 @@ func (game *Game) assignClosedStrongLoop(tx *sql.Tx) (appErr *ApplicationError) 
 	// Converts strong players to an interface
 	strongInterface := ConvertUUIDSliceToInterface(strong)
 
+	fmt.Println(strong)
+
 	// Gets players not in the strong slice
 	regularPlayers, appErr := game.getPlayersNotInSlice(strongInterface)
 	if appErr != nil {
 		return appErr
 	}
 
+	fmt.Println(regularPlayers)
 	// Converts the rows from get players not in slice to a slice
 	users, appErr := ConvertUserIdRowsToSlice(regularPlayers)
 	if appErr != nil {
@@ -158,12 +169,12 @@ func (game *Game) getPlayersNotInSlice(userSlice []interface{}) (rows *sql.Rows,
 // have the strongest players target the weakest ones, don't be concerned about teams/captains
 func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) {
 	// Get strong players
-	strong, appErr := game.getStrongPlayers()
+	strong, appErr := game.GetStrongPlayers()
 	if appErr != nil {
 		return appErr
 	}
 	// Get weak players
-	weak, appErr := game.getWeakPlayers()
+	weak, appErr := game.GetWeakPlayers()
 	if appErr != nil {
 		return appErr
 	}
@@ -184,29 +195,25 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 		return appErr
 	}
 
-	// Get number of players
-	numPlayers, appErr := game.GetNumActivePlayers()
-	if appErr != nil {
-		return appErr
+	// INSERT REGULAR PAIRS
+
+	// Scan first id
+	var firstUserIdBuffer string
+
+	rows.Next()
+	err := rows.Scan(&firstUserIdBuffer)
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Get number of teams
-	numTeams := len(weak)
+	// set first id
+	firstUserId := uuid.Parse(firstUserIdBuffer)
 
-	// Determine how often to insert a strong/weak pair
-	insertNum := (numPlayers / numTeams) - 1
+	// set lastUserId to firstUser Id
+	lastUserId := firstUserId
 
-	// Create first strong/weak pair and make them the first target
 	var targets []*targetPair
-	firstStrong, strong := strong[0], strong[1:]
-	firstWeak, weak := weak[0], weak[1:]
-	firstPair := &targetPair{firstStrong, nil, "", firstWeak, nil, ""}
 
-	targets = append(targets, firstPair)
-
-	// we already have one pair
-	i := 1
-	lastUserId := firstWeak
 	for rows.Next() {
 		// Get userId
 		var userIdBuffer string
@@ -224,42 +231,70 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 
 		// Set last userId and increment
 		lastUserId = userId
-		i++
-
-		// Unless we're at the right point to insert just continue
-		if (i % insertNum) != 0 {
-			continue
-		}
-
-		// If we're out of strong/weak make it so we won't get here again
-		if len(strong) == 0 {
-			insertNum = numPlayers + 1
-			continue
-		}
-
-		var nextStrong, nextWeak uuid.UUID
-		// Get next strong/weak pair
-		nextStrong, strong = strong[0], strong[1:]
-		nextWeak, weak = weak[0], weak[1:]
-
-		// Set up next strong/weak pair and insert it
-		newPair := &targetPair{lastUserId, nil, "", nextStrong, nil, ""}
-		strongWeakPair := &targetPair{nextStrong, nil, "", nextWeak, nil, ""}
-		targets = append(targets, newPair, strongWeakPair)
-
-		lastUserId = nextWeak
-		i += 2
 	}
 
-	// have last user target first strong user
-	lastTarget := &targetPair{lastUserId, nil, "", firstStrong, nil, ""}
-	targets = append(targets, lastTarget)
+	err = rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// have last user target the first
+	pair := &targetPair{lastUserId, nil, "", firstUserId, nil, ""}
+	// Add pair to targets slice
+	targets = append(targets, pair)
+
+	// INSERT STRONG WEAK PAIRS
+
+	// Get number of players
+	numPlayers, appErr := game.GetNumActivePlayers()
+	if appErr != nil {
+		return appErr
+	}
+
+	// Get number of teams
+	numTeams := len(weak)
+
+	// Determine how often to insert a strong/weak pair
+	insertNum := (numPlayers / numTeams) - 1
+	modCounter := 0
+	for len(strong) != 0 {
+		for index, currentPair := range targets {
+			if (modCounter % insertNum) == 0 {
+
+				if (currentPair.AssassinUserRole != ``) || (currentPair.TargetUserRole != ``) {
+					continue
+				}
+				if len(strong) == 0 {
+					break
+				}
+
+				var nextStrong, nextWeak uuid.UUID
+				// Get next strong/weak pair
+				nextStrong, strong = strong[0], strong[1:]
+				nextWeak, weak = weak[0], weak[1:]
+
+				oldAssassin := currentPair.AssassinId
+				oldTarget := currentPair.TargetId
+
+				// Replace current pair with the old assassin targeting the strong player
+				targets[index] = &targetPair{oldAssassin, nil, "", nextStrong, nil, "strong"}
+
+				// Create strong/weak pair
+				strongWeakPair := &targetPair{nextStrong, nil, "strong", nextWeak, nil, "weak"}
+				weakTargetPair := &targetPair{nextWeak, nil, "weak", oldTarget, nil, ""}
+				targets = append(targets, strongWeakPair, weakTargetPair)
+
+			}
+			modCounter++
+		}
+	}
+
 	return game.insertTargetsWithDelete(tx, targets)
 }
 
-func (game *Game) getAllActivePlayersAsRows(tx *sql.Tx) (rows *sql.Rows, appErr *ApplicationError) {
+func (game *Game) getAllActivePlayersAsRows() (rows *sql.Rows, appErr *ApplicationError) {
 	// Get new target list
-	rows, err := tx.Query(`SELECT user_id, team_id, user_role FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
+	rows, err := db.Query(`SELECT user_id, team_id, user_role FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -302,6 +337,10 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 		// If they aren't a captain add them to the userList
 		userList[teamIdBuffer] = append(userList[teamIdBuffer], userId)
 		numUsers++
+	}
+	err := rows.Close()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	numTeams := len(teamsList)
@@ -448,7 +487,7 @@ func (game *Game) insertTargets(tx *sql.Tx, targetList []*targetPair) (appErr *A
 	// loop through all targets
 	for _, pair := range targetList {
 		// Prepare the statement to insert the target row
-		insertTarget, err := db.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
+		insertTarget, err := tx.Prepare(`INSERT INTO dm_user_targets (user_id, target_id, game_id) VALUES ($1, $2, $3)`)
 		if err != nil {
 			tx.Rollback()
 			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -488,7 +527,7 @@ func (game *Game) insertTargetsWithDelete(tx *sql.Tx, targetList []*targetPair) 
 
 // Gets all active players for a game as a slice of uuids
 func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *ApplicationError) {
-	// Get new target list
+
 	rows, err := db.Query(`SELECT user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY random()`, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -509,6 +548,11 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 		// Add to user array
 		users = append(users, userId)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return users, nil
 }
 
@@ -516,7 +560,7 @@ func (game *Game) GetAllActivePlayersAsUUIDSlice() (users []uuid.UUID, appErr *A
 func (game *Game) DeleteTargetsTransactional(tx *sql.Tx) (appErr *ApplicationError) {
 
 	// Prepare statement to delete targets
-	deleteTargets, err := db.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
+	deleteTargets, err := tx.Prepare(`DELETE FROM dm_user_targets WHERE game_id = $1`)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -532,18 +576,24 @@ func (game *Game) DeleteTargetsTransactional(tx *sql.Tx) (appErr *ApplicationErr
 // Deletes all targets for a game
 func (game *Game) DeleteTargets() (appErr *ApplicationError) {
 
+	// Begin transaction
 	tx, err := db.Begin()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Run internal delete code
 	appErr = game.DeleteTargetsTransactional(tx)
 	if appErr != nil {
 		tx.Rollback()
 		return appErr
 	}
 
-	tx.Commit()
+	// Check commit for error
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return nil
 }
 
@@ -583,4 +633,45 @@ func (game *Game) assignTargets(tx *sql.Tx, users []uuid.UUID, skipDelete bool) 
 	}
 	return game.insertTargetsWithDelete(tx, targets)
 
+}
+
+type SuperTargetPair struct {
+	AssassinId       uuid.UUID `json:"assassin_id"`
+	AssassinName     string    `json:"assassin_name"`
+	AssassinTeam     string    `json:"assassin_team_name"`
+	AssassinUserRole string    `json:"assassin_user_role"`
+	AssassinKills    int       `json:"assassin_kills"`
+	TargetId         uuid.UUID `json:"target_id"`
+	TargetName       string    `json:"target_name"`
+	TargetTeam       string    `json:"target_team_name"`
+	TargetUserRole   string    `json:"target_user_role"`
+	TargetKills      int       `json:"target_kills"`
+}
+
+// Get all targets for a game for the super admin panel
+func (game *Game) GetTargets() (targets map[string]*SuperTargetPair, appErr *ApplicationError) {
+	rows, err := db.Query(`select t.user_id, p1.value, p2.value, team1.team_name, m.user_role, m.kills, t.target_id, p3.value, p4.value, team2.team_name, g.user_role, g.kills FROM dm_user_targets AS t, dm_user_properties AS p1, dm_user_properties AS p2, dm_user_properties AS p3, dm_user_properties AS p4, dm_teams as team1, dm_teams as team2, dm_user_game_mapping AS m, dm_user_game_mapping AS g WHERE t.user_id = p1.user_id AND p1.key='first_name' AND t.user_id = p2.user_id AND p2.key='last_name' AND team1.team_id = m.team_id AND team2.team_id = g.team_id AND m.user_id = t.user_id AND g.user_id = t.target_id AND p3.user_id = t.target_id AND p3.key='first_name' AND p4.user_id = t.target_id AND p4.key='last_name' AND t.game_id = $1`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	targets = make(map[string]*SuperTargetPair)
+
+	for rows.Next() {
+		var assassinIdBuffer, assassinFirstName, assassinLastName, assassinTeam, assassinUserRole, targetIdBuffer, targetFirstName, targetLastName, targetTeam, targetUserRole string
+		var assassinKills, targetKills int
+
+		err := rows.Scan(&assassinIdBuffer, &assassinFirstName, &assassinLastName, &assassinTeam, &assassinUserRole, &assassinKills, &targetIdBuffer, &targetFirstName, &targetLastName, &targetTeam, &targetUserRole, &targetKills)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		assassinId := uuid.Parse(assassinIdBuffer)
+		assassinName := assassinFirstName + ` ` + assassinLastName
+		targetId := uuid.Parse(targetIdBuffer)
+		targetName := targetFirstName + ` ` + targetLastName
+
+		newPair := &SuperTargetPair{assassinId, assassinName, assassinTeam, assassinUserRole, assassinKills, targetId, targetName, targetTeam, targetUserRole, targetKills}
+		targets[assassinIdBuffer] = newPair
+	}
+	return targets, nil
 }

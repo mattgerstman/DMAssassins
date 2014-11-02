@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	//	"fmt"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -31,6 +31,7 @@ const (
 	gameTeamPath        = "/game/{game_id}/team/"
 	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
 	gameRulesPath       = "/game/{game_id}/rules/"
+	gameTargetsPath     = "/game/{game_id}/targets/"
 
 	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
@@ -145,22 +146,11 @@ func StartServer() {
 		log.Fatal("Could not connect to database")
 	}
 
-	// appErr := LoadAllTimers()
-	// if appErr != nil {
-	// 	fmt.Println(appErr)
-	// 	LogWithSentry(appErr, nil, raven.ERROR)
-	// }
-
-	//go startPolling()
-
-	// appErr := PostKillTweet()
-	// if appErr != nil {
-	// 	fmt.Println(appErr)
-	// 	LogWithSentry(appErr, nil, raven.ERROR)
-	// }
-
-	// startGame()
-	// generateTestUsers()
+	appErr := LoadAllTimers()
+	if appErr != nil {
+		fmt.Println(appErr)
+		LogWithSentry(appErr, nil, raven.ERROR, nil)
+	}
 
 	defer db.Close()
 
@@ -171,9 +161,10 @@ func StartServer() {
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
 	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
+	r.HandleFunc(gameTargetsPath, GameTargetsHandler()).Methods("GET")
 
 	// Game then User
-	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT")
+	r.HandleFunc(gameUserPath, GameUserHandler()).Methods("GET", "DELETE", "PUT", "POST")
 	r.HandleFunc(gameUsersPath, GameUsersHandler()).Methods("GET")
 	r.HandleFunc(gameUsersEmailPath, GameUsersEmailHandler()).Methods("GET")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")

@@ -68,7 +68,7 @@ func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
@@ -101,7 +101,7 @@ func getGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
@@ -136,7 +136,7 @@ func deleteGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}

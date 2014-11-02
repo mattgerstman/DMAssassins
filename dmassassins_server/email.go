@@ -2,8 +2,12 @@ package main
 
 import (
 	"bytes"
+	"code.google.com/p/go-uuid/uuid"
+	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mailgun/mailgun-go"
 	"text/template"
+	"time"
 )
 
 // Remove users from the list that shouldn't receive emails
@@ -11,7 +15,7 @@ import (
 // Sometimes we need to determine if they're alive or not
 func parseEmailableUsers(users map[string]*User, onlyAlive bool) (userList []*User) {
 	for _, user := range users {
-		// If we only want to email living users, skip the dead oens
+		// If we only want to email living users, skip the dead ones
 		if onlyAlive {
 			if alive, ok := user.Properties["alive"]; ok {
 				if alive != "true" {
@@ -413,7 +417,30 @@ func (game *Game) sendGameOverEmail() (id string, appErr *ApplicationError) {
 
 }
 
-// Inform users of a plot tiwst
+// Gets email data for a plot twist
+func getPlotTwistEmailData(twistName string) (emailData map[string]interface{}) {
+	emailData = map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+	twist, appErr := GetPlotTwist(twistName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"plot_twist": twistName}, raven.WARNING, nil)
+		return
+	}
+	if twist.KillTimer == 0 {
+		return
+	}
+	// calculate killTimer deadline
+	now := time.Now()
+	fmt.Println(twist.KillTimer)
+	executeTime := now.Add(time.Duration(twist.KillTimer) * time.Hour)
+	deadline := executeTime.Format(`Monday at 3:04 PM MST`)
+	emailData[`Deadline`] = deadline
+	return
+
+}
+
+// Inform users of a plot twist
 func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *ApplicationError) {
 
 	// Get all users for the game that we're allowed to email
@@ -423,10 +450,7 @@ func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *Appli
 	}
 
 	var bodyBuffer bytes.Buffer
-	emailData := map[string]interface{}{
-		"GameName":  game.GameName,
-		"APIDomain": Config.APIDomain,
-	}
+	emailData := getPlotTwistEmailData(twistName)
 
 	// Compile the plain email template
 	t, err := template.ParseFiles("templates/plot_twists/" + twistName + ".txt")
@@ -452,6 +476,217 @@ func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *Appli
 	// Send the email
 	return sendEmail(subject, body, htmlBody, tag, users)
 
+}
+
+// Send an email to a user who has a new target due to the defend the weak kill mode
+func (user *User) SendDefendWeakNewTargetEmail(gameName string) (id string, appErr *ApplicationError) {
+	// Make sure we're allowed to email the user
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/defend_weak_new_target.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/defend_weak_new_target.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := gameName + ` DMAssassins - You have a new target!`
+	tag := `DefendWeakNewTarget`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Wrap the user in a slice for the sending function
+	users := []*User{user}
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+// Send an email to a user who has died due to the defend the weak kill mode
+func (user *User) SendDefendWeakKilledEmail(gameName string) (id string, appErr *ApplicationError) {
+	// Make sure we're allowed to email the user
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  gameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/defend_weak_died.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/defend_weak_died.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := gameName + ` DMAssassins - Plot Twist: You're Dead`
+	tag := `DefendWeakKilled`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Wrap the user in a slice for the sending function
+	users := []*User{user}
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+// Seperate users who were killed in a plot twist from those who are alive/already dead
+func splitTheDead(users []*User, killedUsers []uuid.UUID) (aliveUsers, deadUsers []*User) {
+	// Convert killedUsers to a map for constant lookup
+	killedUsersMap := make(map[string]bool)
+	for _, userId := range killedUsers {
+		killedUsersMap[userId.String()] = true
+	}
+
+	// split alive and killed users throw out already dead users
+
+	for _, user := range users {
+		userIdKey := user.UserId.String()
+		// If the user was killed append them to the dead list
+		if _, ok := killedUsersMap[userIdKey]; ok {
+			deadUsers = append(deadUsers, user)
+			continue
+		}
+		// if the user wasn't alive going in ignore them
+		if alive, ok := user.Properties["alive"]; ok {
+			if alive != "true" {
+				continue
+			}
+		}
+
+		// Append all the living users to the ok list
+		aliveUsers = append(aliveUsers, user)
+
+	}
+	return aliveUsers, deadUsers
+}
+
+// Email users who survived the timer
+func (game *Game) sendSurvivedTimerEmail(users []*User) (id string, appErr *ApplicationError) {
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/timer_survived.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/timer_survived.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := game.GameName + ` DMAssassins - You Survived The Countdown!`
+	tag := `SurvivedTimer`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+}
+
+// Email users who were killed by the timer
+func (game *Game) sendKilledByTimerEmail(users []*User) (id string, appErr *ApplicationError) {
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/timer_killed.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/timer_killed.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := game.GameName + ` DMAssassins - You Missed The Countdown!`
+	tag := `KilledByTimer`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+}
+
+// Send an email for an expired timer
+func (game *Game) SendTimerExpiredEmail(killedUsers []uuid.UUID) (appErr *ApplicationError) {
+	// Get all users for the game
+	users, appErr := game.getEmailableUsersForGame(false)
+	if appErr != nil {
+		return appErr
+	}
+
+	// Seperate the killed from the living
+	aliveUsers, deadUsers := splitTheDead(users, killedUsers)
+
+	// Inform users they survived the countdown
+	_, appErr = game.sendSurvivedTimerEmail(aliveUsers)
+	if appErr != nil {
+		return appErr
+	}
+
+	// Inform users they didn't survive the countdown
+	_, appErr = game.sendKilledByTimerEmail(deadUsers)
+	if appErr != nil {
+		return appErr
+	}
+	return nil
 }
 
 // Send an email through mailgun

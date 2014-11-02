@@ -110,15 +110,11 @@ func (gameMapping *GameMapping) ChangeRole(role string) (appErr *ApplicationErro
 	}
 
 	// Update the user role
-	res, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET user_role = $1 WHERE user_id = $2 AND game_id = $3`, role, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	// Validate it affected at least one row
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
-	}
+
 	// Change the role on the user struct
 	gameMapping.UserRole = role
 	return nil
@@ -169,13 +165,9 @@ func (game *Game) GetAdmin() (admin *User, appErr *ApplicationError) {
 
 // deletes the actual game mapping from the db
 func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
-	res, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
+	_, err := db.Exec(`DELETE from dm_user_game_mapping WHERE user_id = $1 and game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
 	}
 
 	// the game mapping no longer exists so  set it to nil
@@ -293,6 +285,11 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		users[userId.String()] = user
 		userIds = append(userIds, userId.String())
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// Build Sql query for properties
 	max := len(userIds)
@@ -313,12 +310,21 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+	err = stmt.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 
 	// Add properties to users
 	for rows.Next() {
 		var userIdBuffer, key, value string
 		rows.Scan(&userIdBuffer, &key, &value)
 		users[userIdBuffer].Properties[key] = value
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return users, nil
@@ -385,7 +391,13 @@ func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr
 		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	tx.Commit()
+	// check transaction for errors
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	gameMapping.Alive = true
 
 	return assassinId, targetId, nil
@@ -393,7 +405,7 @@ func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr
 }
 
 // Get a slice of the strongest player for each team, ties are broken arbitrarily
-func (game *Game) getStrongPlayers() (strong []uuid.UUID, appErr *ApplicationError) {
+func (game *Game) GetStrongPlayers() (strong []uuid.UUID, appErr *ApplicationError) {
 	// segregate strong users
 	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills desc`, game.GameId.String())
 	if err != nil {
@@ -410,6 +422,11 @@ func (game *Game) getStrongPlayers() (strong []uuid.UUID, appErr *ApplicationErr
 		// Add strong userId to strong slice
 		strongUserId := uuid.Parse(strongUserIdBuffer)
 		strong = append(strong, strongUserId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return strong, nil
 }
@@ -438,11 +455,16 @@ func (game *Game) getStrongPlayersWithState(alive bool) (strong []uuid.UUID, app
 		strongUserId := uuid.Parse(strongUserIdBuffer)
 		strong = append(strong, strongUserId)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return strong, nil
 }
 
 // Get a slice of the weakest player for each team, ties are broken arbitrarily
-func (game *Game) getWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) {
+func (game *Game) GetWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) {
 	// segregate weak users
 	rows, err := db.Query(`SELECT DISTINCT ON (team_id) user_id FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND (user_role = 'dm_user' OR user_role = 'dm_captain') ORDER BY team_id, kills asc`, game.GameId.String())
 	if err != nil {
@@ -465,6 +487,11 @@ func (game *Game) getWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) 
 		// Add weak userId to weak slice
 		weakUserId := uuid.Parse(weakUserIdBuffer)
 		weak = append(weak, weakUserId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	weak = append(weak, firstWeakUserId)
 	return weak, nil
@@ -490,4 +517,14 @@ func (user *User) GetArbitraryGameMapping() (gameMapping *GameMapping, appErr *A
 	gameId := uuid.Parse(gameIdBuffer)
 	return &GameMapping{user.UserId, gameId, teamId, userRole, secret, kills, alive}, nil
 
+}
+
+// Sets a user as dead without going through the motions of using their assassin
+func (gameMapping *GameMapping) MarkDead() (appErr *ApplicationError) {
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET alive = false WHERE user_id = $1 AND game_id = $2`, gameMapping.UserId.String(), gameMapping.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	gameMapping.Alive = false
+	return nil
 }

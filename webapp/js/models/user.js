@@ -40,6 +40,8 @@ var app = app || {
         idAttribute : 'user_id',
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
+            if (!game_id)
+                return null;
             return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';           
         },       
         joinGame: function(game_id, game_password, team_id) {
@@ -47,6 +49,7 @@ var app = app || {
             var last_game_id = app.Running.Games.getActiveGameId();
             this.save(null, {
                 url: config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/',
+                type: 'post',
                 headers: {
                     'X-DMAssassins-Game-Password': game_password,
                     'X-DMAssassins-Team-Id': team_id

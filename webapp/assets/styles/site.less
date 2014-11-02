@@ -112,6 +112,7 @@ a,a:focus {
     }
 
     .thumbnail {
+        max-height:300px;
         margin:5px auto 10px auto;
     }
     .dead {
@@ -225,12 +226,30 @@ a,a:focus {
 
 .user_view .thumbnail {
     margin-bottom:10px;
+    max-height:300px;
+    max-width:300px;
 }
 
 .user_view .profile-buttons {
     margin-bottom:10px;
 }
 
+.user-grid .thumbnail-wrapper{
+    padding-bottom:100%;
+    position:relative;    
+    overflow:hidden;
+
+}
+
+.thumbnail {
+    max-width: 290px;
+    max-height:290px;
+    overflow:hidden;
+}
+
+.user-grid img {
+    position:absolute;
+}
 
 @media(max-width:1550px) {
 
@@ -244,7 +263,6 @@ a,a:focus {
             margin-bottom:0;
         }
         .thumbnail {
-            max-width: 290px;
             margin:5px 10px 10px 10px;
         }
         .user-buttons {
