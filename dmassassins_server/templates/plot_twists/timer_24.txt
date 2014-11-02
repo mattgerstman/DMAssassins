@@ -1,6 +1,6 @@
 Hey %recipient.first_name%,
 
-Bob Dylan once wrote The Times They Are a-Changin' and we'd like to thing he was writing about us. Everyone has a new target, you have 24 hours to kill them, or we kill you.
+Bob Dylan once wrote The Times They Are a-Changin' and we'd like to thing he was writing about us. Everyone has a new target, you have until {{.Deadline}} to kill them, or we kill you.
 Log in to check out your new target!
 
 Good Luck!

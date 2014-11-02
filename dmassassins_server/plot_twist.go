@@ -269,7 +269,7 @@ func killWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId uuid.UUID) (appErr *App
 func (user *User) handleDefendWeak(tx *sql.Tx, oldTargetId, gameId, teamId uuid.UUID) (appErr *ApplicationError) {
 
 	// Get the weakest player's id
-	rows, err := db.Query(`SELECT * FROM (SELECT *, RANK() OVER (PARTITION BY team_id ORDER BY kills ASC) AS rnum FROM dm_user_game_mapping WHERE  (alive = true OR user_id = $1)) s WHERE s.team_id = $2 AND s.rnum = 1;`, oldTargetId.String(), teamId.String())
+	rows, err := db.Query(`SELECT user_id FROM (SELECT *, RANK() OVER (PARTITION BY team_id ORDER BY kills ASC) AS rnum FROM dm_user_game_mapping WHERE  (alive = true OR user_id = $1)) s WHERE s.team_id = $2 AND s.rnum = 1;`, oldTargetId.String(), teamId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

@@ -257,13 +257,15 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 	// Determine how often to insert a strong/weak pair
 	insertNum := (numPlayers / numTeams) - 1
 	modCounter := 0
-	j := 1
 	for len(strong) != 0 {
 		for index, currentPair := range targets {
 			if (modCounter % insertNum) == 0 {
 
 				if (currentPair.AssassinUserRole != ``) || (currentPair.TargetUserRole != ``) {
 					continue
+				}
+				if len(strong) == 0 {
+					break
 				}
 
 				var nextStrong, nextWeak uuid.UUID
@@ -273,11 +275,6 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 
 				oldAssassin := currentPair.AssassinId
 				oldTarget := currentPair.TargetId
-
-				fmt.Println(j)
-				j++
-				fmt.Println(nextStrong)
-				fmt.Println(nextWeak)
 
 				// Replace current pair with the old assassin targeting the strong player
 				targets[index] = &targetPair{oldAssassin, nil, "", nextStrong, nil, "strong"}
@@ -291,9 +288,6 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 			modCounter++
 		}
 	}
-
-	fmt.Println(strong)
-	fmt.Println(weak)
 
 	return game.insertTargetsWithDelete(tx, targets)
 }

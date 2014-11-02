@@ -97,7 +97,7 @@ func (game *Game) NewKillTimerTransactional(tx *sql.Tx, hours int64) (timer *tim
 
 	nowTime := time.Now()
 	now := nowTime.Unix()
-	// calculate when we need to executre
+	// calculate when we need to executee
 	executeTs := (hours * SecInHour) + now
 
 	// Insert into db
