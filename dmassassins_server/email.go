@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"code.google.com/p/go-uuid/uuid"
+	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mailgun/mailgun-go"
 	"text/template"
+	"time"
 )
 
 // Remove users from the list that shouldn't receive emails
@@ -414,6 +417,29 @@ func (game *Game) sendGameOverEmail() (id string, appErr *ApplicationError) {
 
 }
 
+// Gets email data for a plot twist
+func getPlotTwistEmailData(twistName string) (emailData map[string]interface{}) {
+	emailData = map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+	twist, appErr := GetPlotTwist(twistName)
+	if appErr != nil {
+		LogWithSentry(appErr, map[string]string{"plot_twist": twistName}, raven.WARNING, nil)
+		return
+	}
+	if twist.KillTimer == 0 {
+		return
+	}
+	// calculate killTimer deadline
+	now := time.Now()
+	fmt.Println(twist.KillTimer)
+	executeTime := now.Add(time.Duration(twist.KillTimer) * time.Hour)
+	deadline := executeTime.Format(`Monday at 3:04 PM MST`)
+	emailData[`Deadline`] = deadline
+	return
+
+}
+
 // Inform users of a plot twist
 func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *ApplicationError) {
 
@@ -424,10 +450,7 @@ func (game *Game) SendPlotTwistEmail(twistName string) (id string, appErr *Appli
 	}
 
 	var bodyBuffer bytes.Buffer
-	emailData := map[string]interface{}{
-		"GameName":  game.GameName,
-		"APIDomain": Config.APIDomain,
-	}
+	emailData := getPlotTwistEmailData(twistName)
 
 	// Compile the plain email template
 	t, err := template.ParseFiles("templates/plot_twists/" + twistName + ".txt")
@@ -471,7 +494,7 @@ func (user *User) SendDefendWeakNewTargetEmail(gameName string) (id string, appE
 	}
 
 	// Compile the plain email template
-	t, err := template.ParseFiles("templates/defend_weak_new_target.txt")
+	t, err := template.ParseFiles("templates/plot_twists/defend_weak_new_target.txt")
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
 	}
@@ -479,7 +502,7 @@ func (user *User) SendDefendWeakNewTargetEmail(gameName string) (id string, appE
 
 	// Compile the HTML email template
 	var htmlBodyBuffer bytes.Buffer
-	htmlT, err := template.ParseFiles("templates/defend_weak_new_target.html")
+	htmlT, err := template.ParseFiles("templates/plot_twists/defend_weak_new_target.html")
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
 	}
@@ -511,11 +534,12 @@ func (user *User) SendDefendWeakKilledEmail(gameName string) (id string, appErr 
 	}
 	var bodyBuffer bytes.Buffer
 	emailData := map[string]interface{}{
+		"GameName":  gameName,
 		"APIDomain": Config.APIDomain,
 	}
 
 	// Compile the plain email template
-	t, err := template.ParseFiles("templates/defend_weak_died.txt")
+	t, err := template.ParseFiles("templates/plot_twists/defend_weak_died.txt")
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
 	}
@@ -523,7 +547,7 @@ func (user *User) SendDefendWeakKilledEmail(gameName string) (id string, appErr 
 
 	// Compile the HTML email template
 	var htmlBodyBuffer bytes.Buffer
-	htmlT, err := template.ParseFiles("templates/defend_weak_died.html")
+	htmlT, err := template.ParseFiles("templates/plot_twists/defend_weak_died.html")
 	if err != nil {
 		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
 	}

@@ -211,6 +211,11 @@ a:focus {
   position: relative;
   overflow: hidden;
 }
+.thumbnail {
+  max-width: 290px;
+  max-height: 290px;
+  overflow: hidden;
+}
 .user-grid img {
   position: absolute;
 }
@@ -224,9 +229,6 @@ a:focus {
     margin-bottom: 0;
   }
   .admin-users-body .thumbnail {
-    max-width: 290px;
-    max-height: 290px;
-    overflow: hidden;
     margin: 5px 10px 10px 10px;
   }
   .admin-users-body .user-buttons {

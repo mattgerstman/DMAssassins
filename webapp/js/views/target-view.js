@@ -67,7 +67,7 @@ var app = app || {
         },
         secretKeyup: function(e){
              if (e.keyCode == 13) {
-                 e.preventDefault();
+                e.preventDefault();
                 var secret = this.$el.find('#secret').val();
                 if (!secret) {
                     return;
