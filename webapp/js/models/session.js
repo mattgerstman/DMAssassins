@@ -174,7 +174,9 @@ var app = app || {
                 catch (e)
                 {
                     Raven.captureException(e, {extra: response});
-                    alert('Your session has expired. Please log in again.');
+                    Backbone.history.navigate('', {
+                        trigger: true
+                    });
                 }
 
             }
