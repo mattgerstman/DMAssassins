@@ -162,8 +162,8 @@ var app = app || {
 
         },
         recoverSession: function() {
-            var response = this.get('response');  
-            this.handleResponse(response);
+            // var response = this.get('response');  
+            // this.handleResponse(response);
             this.login();
         },
         handleResponse: function(response) {
