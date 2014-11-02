@@ -166,14 +166,16 @@ var app = app || {
                 // Logged into your app and Facebook.                
                 try 
                 {
+                    console.log(response);
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
                         
-                    parent.createSession(response);                        
+                    this.createSession(response);                        
                 }
                 catch (e)
                 {
                     Raven.captureException(e, {extra: response});
+                    this.clear();
                     Backbone.history.navigate('', {
                         trigger: true
                     });
