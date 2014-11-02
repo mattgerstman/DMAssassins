@@ -15,7 +15,7 @@ type PlotTwistPut struct {
 }
 
 func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
-	//_, appErr = RequiresAdmin(r)
+	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}

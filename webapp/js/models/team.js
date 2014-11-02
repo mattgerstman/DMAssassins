@@ -34,6 +34,9 @@ var app = app || {
             var user_id = this.get('user_id');
             var team_id = this.get('team_id');
            
+            if (!game_id)
+                return null;
+           
             if (!!user_id) {
                 return config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/team/' + team_id + '/';
             }

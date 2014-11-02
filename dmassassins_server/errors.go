@@ -1,8 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"encoding/json"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"log"
@@ -88,19 +86,6 @@ func NewApplicationError(msg string, err error, code int) (appErr *ApplicationEr
 	return &ApplicationError{msg, err, code, exception}
 }
 
-// Determines if rows were affected in a sql result, reduces boilerplate on errors
-func WereRowsAffected(res sql.Result) (appErr *ApplicationError) {
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
-	}
-
-	if rowsAffected == 0 {
-		return NewApplicationError("Internal Error", err, ErrCodeDatabaseNoRowsAffected)
-	}
-	return nil
-}
-
 // Converts a request into useful data for sentry
 func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
 	extra = make(map[string]interface{})
@@ -109,16 +94,6 @@ func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
 	extra[`request`] = raven.NewHttp(r)
 	extra[`request_form_values`] = r.Form
 
-	// Convert the data input to a map of string to interface
-	body := make(map[string]interface{})
-	decoder := json.NewDecoder(r.Body)
-
-	// Probably the only time in the codebase its worth it to completely ignore an error
-	err := decoder.Decode(&body)
-	_ = err
-
-	// set the request_body section and return it
-	extra[`request_body`] = body
 	return extra
 }
 

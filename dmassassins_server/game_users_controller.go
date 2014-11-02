@@ -17,7 +17,7 @@ func getGameUsers(r *http.Request) (users map[string]*User, appErr *ApplicationE
 
 	gameId := uuid.Parse(vars["game_id"])
 	if gameId == nil {
-		msg := "Invalid UUID: game_id" + vars["game_id"]
+		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}

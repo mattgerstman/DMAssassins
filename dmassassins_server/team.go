@@ -65,6 +65,11 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 		team := &Team{teamId, game.GameId, teamName}
 		teams[teamId.String()] = team
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return teams, nil
 }
 
@@ -82,6 +87,11 @@ func (game *Game) GetActiveTeamIds() (teamsList []uuid.UUID, appErr *Application
 		}
 		teamId := uuid.Parse(teamIdBuffer)
 		teamsList = append(teamsList, teamId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	return teamsList, nil
 }
@@ -113,6 +123,11 @@ func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 		team := &Team{teamId, game.GameId, teamName}
 		teams = append(teams, team)
 	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	return teams, nil
 }
 
@@ -120,17 +135,10 @@ func (game *Game) GetTeams() (teams []*Team, appErr *ApplicationError) {
 func (game *Game) NewTeam(teamName string) (team *Team, appErr *ApplicationError) {
 	// Generate a uuid and insert the team
 	teamId := uuid.NewRandom()
-	res, err := db.Exec(`INSERT INTO dm_teams (team_id, game_id, team_name) VALUES ($1,$2,$3)`, teamId.String(), game.GameId.String(), teamName)
+	_, err := db.Exec(`INSERT INTO dm_teams (team_id, game_id, team_name) VALUES ($1,$2,$3)`, teamId.String(), game.GameId.String(), teamName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
-	// Make sure the insert worked
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return nil, appErr
-	}
-
 	// Return the team
 	return &Team{teamId, game.GameId, teamName}, nil
 }
@@ -165,18 +173,18 @@ func DeleteTeam(teamId uuid.UUID) (appErr *ApplicationError) {
 	}
 
 	// Execute the statement to delete the team
-	res, err := tx.Stmt(deleteTeam).Exec(teamId.String())
+	_, err = tx.Stmt(deleteTeam).Exec(teamId.String())
 	if err != nil {
 		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return appErr
+	// Comit transactin and check for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	tx.Commit()
 	return nil
 }
 
@@ -283,15 +291,10 @@ func (user *User) LeaveTeam(teamId uuid.UUID) (gameMapping *GameMapping, appErr 
 
 // Rename a team
 func (team *Team) Rename(newName string) (appErr *ApplicationError) {
-	// Run teh update
-	res, err := db.Exec(`UPDATE dm_teams SET team_name = $1 WHERE team_id = $2`, newName, team.TeamId.String())
+	// Run the update
+	_, err := db.Exec(`UPDATE dm_teams SET team_name = $1 WHERE team_id = $2`, newName, team.TeamId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
-	}
-
-	appErr = WereRowsAffected(res)
-	if appErr != nil {
-		return appErr
 	}
 
 	team.TeamName = newName
@@ -314,16 +317,17 @@ func (team *Team) GetTeamCaptainId() (captainId uuid.UUID, appErr *ApplicationEr
 }
 
 // is it safe to assign targets by teams
-func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *ApplicationError) {
+func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
 	var numUsers, numCaptains int
 	var teamIdBuffer string
 
-	rows, err := tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	rows1, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	for rows.Next() {
-		err = rows.Scan(&numUsers, &teamIdBuffer)
+
+	for rows1.Next() {
+		err = rows1.Scan(&numUsers, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
@@ -331,20 +335,30 @@ func (game *Game) CanAssignByTeams(tx *sql.Tx) (canAssign bool, appErr *Applicat
 			return false, nil
 		}
 	}
-
-	rows, err = tx.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	// Close the rows
+	err = rows1.Close()
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	for rows.Next() {
-		err = rows.Scan(&numCaptains, &teamIdBuffer)
+	rows2, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	for rows2.Next() {
+		err = rows2.Scan(&numCaptains, &teamIdBuffer)
 		if err != nil {
 			return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 		if numCaptains != 1 {
 			return false, nil
 		}
+	}
+	// Close the rows
+	err = rows2.Close()
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	return true, nil

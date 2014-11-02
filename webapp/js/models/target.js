@@ -34,6 +34,8 @@ var app = app || {
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
+            if (!game_id)
+                return null;
             return config.WEB_ROOT + "game/" + game_id + '/user/' + this.get('assassin_id') + '/target/';
         },
         idAttribute: 'assassin_id',

@@ -202,18 +202,10 @@ func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *Application
 
 // Updates a user's facebook token
 func (user *User) UpdateToken(facebook_token string) (appErr *ApplicationError) {
-
-	res, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.UserId.String())
+	_, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.UserId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-
-	// Make sure update worked
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
-	}
-
 	return nil
 }
 
@@ -233,15 +225,11 @@ func (user *User) ChangeEmail(email string) (appErr *ApplicationError) {
 	if email == user.Email {
 		return nil
 	}
-	res, err := db.Exec(`UPDATE dm_users SET email = $1 WHERE user_id = $2`, email, user.UserId.String())
+	_, err := db.Exec(`UPDATE dm_users SET email = $1 WHERE user_id = $2`, email, user.UserId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	// Make sure update worked
-	NoRowsAffectedAppErr := WereRowsAffected(res)
-	if NoRowsAffectedAppErr != nil {
-		return NoRowsAffectedAppErr
-	}
+
 	user.Email = email
 	return nil
 }
@@ -258,7 +246,13 @@ func (user *User) KillTarget(gameId uuid.UUID, secret string, trueKill bool) (ne
 		tx.Rollback()
 		return nil, nil, appErr
 	}
-	tx.Commit()
+
+	// Check for errors on transaction commit
+	err = tx.Commit()
+	if err != nil {
+		return nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
 	return newTargetId, oldTargetId, nil
 }
 

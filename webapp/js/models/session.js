@@ -162,9 +162,9 @@ var app = app || {
 
         },
         recoverSession: function() {
-            var response = this.get('response');        
+            var response = this.get('response');  
             this.handleResponse(response);
-//            this.login();
+            this.login();
         },
         handleResponse: function(response) {
 
@@ -232,7 +232,7 @@ var app = app || {
                 'facebook_token': response.authResponse.accessToken,
                 'game_id': game_id
             };
-
+            
             var that = this;
 
             // performs the ajax request to the server to get session data
@@ -249,7 +249,8 @@ var app = app || {
             login.fail(function(serverResponse) {
                 Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, server_response: serverResponse}});
                 that.clear();
-                alert('An error occurred, please refresh and try again');
+
+                alert('An error occurred. Please try again later.');
                 Backbone.history.navigate('', {
                     trigger: true
                 });

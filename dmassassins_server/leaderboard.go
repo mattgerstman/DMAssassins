@@ -88,7 +88,11 @@ func (game *Game) GetLeaderboard() (leaderboard *Leaderboard, appErr *Applicatio
 		entry := &UserLeaderboardEntry{name, kills, alive, teamName}
 		userLeaderboard = append(userLeaderboard, entry)
 	}
-
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
 	// Set up the overall leaderboard object
 	leaderboard = &Leaderboard{teamsEnabled, userLeaderboard, teamKills}
 
