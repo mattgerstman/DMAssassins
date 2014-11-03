@@ -1,0 +1,8 @@
+Hey %recipient.first_name%,
+
+This email is to notify you that you are subscribed to DMAssassins emails at this address. If this is the correct email, you do not need to take any action at this time.
+
+Sincerely,
+The DMAssassins Team
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
