@@ -203,6 +203,16 @@ var app = app || {
                     user_id: user.user_id,
                     game_id: game.game_id
                 });
+                
+                if (!response.token) {
+                    Raven.captureException(new Error("Server didn't return token"), {extra: user});
+                    alert('An unexpected error occurred. Please try again');
+                    app.Session.clear();
+                    Backbone.history.navigate('', {
+                        trigger: true
+                    });
+                    return;
+                }
 
                 // reload the data for all models
                 app.Running.User.set(user);
