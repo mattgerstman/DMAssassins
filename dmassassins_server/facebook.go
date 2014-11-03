@@ -88,6 +88,13 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 		return nil, appErr
 	}
 
+	appErr = user.UpdateToken(facebookToken)
+	if appErr != nil {
+		extra := make(map[string]interface{})
+		extra[`user`] = user
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
+	}
+
 	_, appErr = user.SendUserWelcomeEmail()
 	if appErr != nil {
 		extra := make(map[string]interface{})
