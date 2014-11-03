@@ -650,7 +650,16 @@ type SuperTargetPair struct {
 
 // Get all targets for a game for the super admin panel
 func (game *Game) GetTargets() (targets map[string]*SuperTargetPair, appErr *ApplicationError) {
-	rows, err := db.Query(`select t.user_id, p1.value, p2.value, team1.team_name, m.user_role, m.kills, t.target_id, p3.value, p4.value, team2.team_name, g.user_role, g.kills FROM dm_user_targets AS t, dm_user_properties AS p1, dm_user_properties AS p2, dm_user_properties AS p3, dm_user_properties AS p4, dm_teams as team1, dm_teams as team2, dm_user_game_mapping AS m, dm_user_game_mapping AS g WHERE t.user_id = p1.user_id AND p1.key='first_name' AND t.user_id = p2.user_id AND p2.key='last_name' AND team1.team_id = m.team_id AND team2.team_id = g.team_id AND m.user_id = t.user_id AND g.user_id = t.target_id AND p3.user_id = t.target_id AND p3.key='first_name' AND p4.user_id = t.target_id AND p4.key='last_name' AND t.game_id = $1`, game.GameId.String())
+
+	sql := `select t.user_id, p1.value, p2.value, team1.team_name, m.user_role, m.kills, t.target_id, p3.value, p4.value, team2.team_name, g.user_role, g.kills FROM dm_user_targets AS t, dm_user_properties AS p1, dm_user_properties AS p2, dm_user_properties AS p3, dm_user_properties AS p4, dm_teams as team1, dm_teams as team2, dm_user_game_mapping AS m, dm_user_game_mapping AS g WHERE t.user_id = p1.user_id AND p1.key='first_name' AND t.user_id = p2.user_id AND p2.key='last_name' AND team1.team_id = m.team_id AND team2.team_id = g.team_id AND m.user_id = t.user_id AND g.user_id = t.target_id AND p3.user_id = t.target_id AND p3.key='first_name' AND p4.user_id = t.target_id AND p4.key='last_name' AND t.game_id = $1`
+
+	// If teams aren't enabled use the no team version of the query
+	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	if (appErr != nil) || (teamsEnabled != `true`) {
+		sql = `select t.user_id, p1.value, p2.value, 'No Team', m.user_role, m.kills, t.target_id, p3.value, p4.value, 'No Team', g.user_role, g.kills FROM dm_user_targets AS t, dm_user_properties AS p1, dm_user_properties AS p2, dm_user_properties AS p3, dm_user_properties AS p4, dm_user_game_mapping AS m, dm_user_game_mapping AS g WHERE t.user_id = p1.user_id AND p1.key='first_name' AND t.user_id = p2.user_id AND p2.key='last_name' AND m.user_id = t.user_id AND g.user_id = t.target_id AND p3.user_id = t.target_id AND p3.key='first_name' AND p4.user_id = t.target_id AND p4.key='last_name' AND t.game_id = $1`
+	}
+
+	rows, err := db.Query(sql, game.GameId.String())
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

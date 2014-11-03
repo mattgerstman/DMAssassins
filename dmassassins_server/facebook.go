@@ -8,8 +8,9 @@ import (
 	fb "github.com/huandu/facebook"
 )
 
+// Returns facebook app
 func getFbApp() *fb.App {
-	fb.Version = "v2.0"
+	fb.Version = "v2.2"
 	var app = fb.New(Config.FBAppId, Config.FBAppSecret)
 	app.RedirectUri = "http://dmassassins.com"
 	return app
