@@ -234,7 +234,7 @@ func (user *User) SendBanhammerEmail(GameName string) (id string, appErr *Applic
 
 	// Set up the subject and contents of the email
 	subject := `You Have Been Banned From ` + GameName + ` DMAssassins`
-	tag := `WelcomeUser`
+	tag := `Banhammer`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
 
@@ -324,6 +324,50 @@ func (user *User) SendUserWelcomeEmail() (id string, appErr *ApplicationError) {
 	// Set up the subject and contents of the email
 	subject := `Welcome to DMAssassins!`
 	tag := `WelcomeUser`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Wrap the user in a slice for the sending function
+	users := []*User{user}
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
+// Inform a user their email has changed
+func (user *User) SendChangeEmailEmail() (id string, appErr *ApplicationError) {
+	// Make sure we're allowed to email the user
+	allowEmail, appErr := user.GetUserProperty("allow_email")
+	if appErr != nil {
+		return "", nil
+	}
+	if allowEmail != "true" {
+		return "", nil
+	}
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/change-email.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/change-email.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := `DMAssassins - Email Notification`
+	tag := `ChangeEmail`
 	body := bodyBuffer.String()
 	htmlBody := htmlBodyBuffer.String()
 

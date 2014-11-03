@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -26,14 +27,26 @@ func postGameUserEmail(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
+	// Change email property
 	email := r.FormValue("email")
 	appErr = user.ChangeEmail(email)
 	if appErr != nil {
 		return appErr
 	}
 
+	// Set allow email
 	allowEmail := r.FormValue("allow_email")
 	appErr = user.SetUserProperty("allow_email", allowEmail)
+	if appErr != nil {
+		return appErr
+	}
+
+	// Notify the user their email settings have changed
+	_, appErr = user.SendChangeEmailEmail()
+	if appErr != nil {
+		extra := GetExtraDataFromRequest(r)
+		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
+	}
 
 	return appErr
 }

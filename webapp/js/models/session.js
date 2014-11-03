@@ -170,18 +170,17 @@ var app = app || {
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
                         
-                    this.createSession(response);                        
+                    return this.createSession(response);
                 }
                 catch (e)
                 {
                     Raven.captureException(e, {extra: response});
-                    this.clear();
-                    Backbone.history.navigate('', {
-                        trigger: true
-                    });
-                }
-
+                }                
             }
+            this.clear();
+            Backbone.history.navigate('', {
+                trigger: true
+            });
         },
         handleResponse: function(response) {
 
@@ -204,6 +203,16 @@ var app = app || {
                     user_id: user.user_id,
                     game_id: game.game_id
                 });
+                
+                if (!response.token) {
+                    Raven.captureException(new Error("Server didn't return token"), {extra: user});
+                    alert('An unexpected error occurred. Please try again');
+                    app.Session.clear();
+                    Backbone.history.navigate('', {
+                        trigger: true
+                    });
+                    return;
+                }
 
                 // reload the data for all models
                 app.Running.User.set(user);
