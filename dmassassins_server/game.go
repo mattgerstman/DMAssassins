@@ -152,17 +152,17 @@ func (game *Game) Start() (appErr *ApplicationError) {
 		return NewApplicationError("You must have at least 4 players to start a game", err, ErrCodeNeedMorePlayers)
 	}
 
-	// If teams are enabled make sure all users have a team to start
-	teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
-	if appErr != nil {
-		return appErr
-	}
-	if teamsEnabled == `true` {
-		anyPlayersNeedTeams := game.doAnyPlayersNeedTeams()
-		if anyPlayersNeedTeams != nil {
-			return anyPlayersNeedTeams
-		}
-	}
+	// // If teams are enabled make sure all users have a team to start
+	// teamsEnabled, appErr := game.GetGameProperty(`teams_enabled`)
+	// if appErr != nil {
+	// 	return appErr
+	// }
+	// if teamsEnabled == `true` {
+	// 	anyPlayersNeedTeams := game.doAnyPlayersNeedTeams()
+	// 	if anyPlayersNeedTeams != nil {
+	// 		return anyPlayersNeedTeams
+	// 	}
+	// }
 
 	// First assign targets for the game
 	appErr = game.AssignTargetsBy(`normal`)
