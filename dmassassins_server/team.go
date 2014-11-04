@@ -318,6 +318,12 @@ func (team *Team) GetTeamCaptainId() (captainId uuid.UUID, appErr *ApplicationEr
 
 // is it safe to assign targets by teams
 func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) {
+
+	appErr = game.doAnyPlayersNeedTeams()
+	if appErr != nil {
+		return false, nil
+	}
+
 	var numUsers, numCaptains int
 	var teamIdBuffer string
 
