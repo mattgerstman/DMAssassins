@@ -58,10 +58,11 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
 		var canAssign bool
-		canAssign, appErr := game.CanAssignByTeams()
-		if appErr != nil {
-			return appErr
-		}
+		canAssign = true
+		// canAssign, appErr := game.CanAssignByTeams()
+		// if appErr != nil {
+		// 	return appErr
+		// }
 		if canAssign {
 			// Get all players in the game
 			rows, appErr := game.getAllActivePlayersAsRows()
