@@ -23,15 +23,14 @@ var app = app || {
         url: config.WEB_ROOT + 'session/',
 
         initialize: function() {
-
-            // Check for localstorage support
-            if (Storage && localStorage) {
-                this.supportStorage = true;
-            }
-            if (!this.supportStorage) {
-                return;
-            }
             try {
+                // Check for localstorage support
+                if (Storage && localStorage) {
+                    this.supportStorage = true;
+                }
+                if (!this.supportStorage) {
+                    return;
+                }
                 localStorage.setItem('test', 0);
             }
             catch (err) {
@@ -148,7 +147,16 @@ var app = app || {
                         return;
                     }
                     app.Running.FB.login(function(response) {
-                        parent.createSession(response);
+                        
+                        if (response.authResponse)
+                        {
+                            parent.createSession(response);    
+                        }
+                        else
+                        {
+                            alert('You must authorize Facebook to play DMAssassins!');
+                            location.reload();
+                        }
 
                         // scope are the facebook permissions we're requesting
                     }, {
@@ -166,7 +174,6 @@ var app = app || {
                 // Logged into your app and Facebook.                
                 try 
                 {
-                    console.log(response);
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
                         
@@ -265,22 +272,33 @@ var app = app || {
             var login = $.ajax({
                 url: this.url,
                 data: data,
-                type: 'POST'
+                tryCount:0,
+                retryLimit:3,
+                type: 'POST',
+                success: that.handleResponse,
+                error: function(serverResponse, textStatus, errorThrown) {                                
+                    Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, server_response: serverResponse, text_status: textStatus, error_thrown :errorThrown}});
+                    that.clear();
+
+                    // retry logic for login                    
+                    this.tryCount++;
+                    if (this.tryCount < this.retryLimit)
+                    {
+                        var loginCall = this;
+                        setTimeout(function(){
+                            $.ajax(loginCall);
+                        }, 100)
+                        return;
+                        
+                    }
+    
+                    alert('An error occurred. Please try again later.');
+                    Backbone.history.navigate('', {
+                        trigger: true
+                    });
+                }
             });
 
-            // after the ajax request run this function
-            login.done(that.handleResponse);
-
-            // if theres a login error direct them to the login screen
-            login.fail(function(serverResponse) {
-                Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, server_response: serverResponse}});
-                that.clear();
-
-                alert('An error occurred. Please try again later.');
-                Backbone.history.navigate('', {
-                    trigger: true
-                });
-            });
 
 
         },
