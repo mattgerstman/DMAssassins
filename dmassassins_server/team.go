@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MinUsersPerTeam = 5
+	MinUsersPerTeam = 3
 )
 
 type Team struct {
