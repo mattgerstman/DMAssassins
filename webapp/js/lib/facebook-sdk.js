@@ -17,6 +17,12 @@ $(function() {
     // Full docs on the response object can be found in the documentation
     // for FB.getLoginStatus().
 
+    if (!app)
+        return;
+        
+    if (!app.Session)
+        return;
+
     var authenticated =  app.Session.get('authenticated');
     if ((authenticated === true) || (authenticated =='true'))
     {
