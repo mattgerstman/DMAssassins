@@ -277,7 +277,7 @@ var app = app || {
                 type: 'POST',
                 success: that.handleResponse,
                 error: function(serverResponse, textStatus, errorThrown) {                                
-                    Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, server_response: serverResponse, text_status: textStatus, error_thrown :errorThrown}});
+                    Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, try_count: this.tryCount, server_response: serverResponse, text_status: textStatus, error_thrown :errorThrown}});
                     that.clear();
 
                     // retry logic for login                    
