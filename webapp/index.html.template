@@ -27,12 +27,12 @@
     <link href="/bower_components/bootstrap-social-buttons/social-buttons.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css" rel="stylesheet" type="text/css">
+    <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/site.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/sidebar.css" rel="stylesheet" type="text/css">
-
     <!-- @endif -->
 
-    <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
+
 
     <script id="nav-template" type="text/template">
         <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
