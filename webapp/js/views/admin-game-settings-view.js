@@ -30,7 +30,8 @@ var app = app || {
             'click .end-game': 'endGameModal',
             'click .end-game-submit': 'endGame',
             'click a':'loadTwistModal',
-            'click .twist-submit':'savePlotTwist'
+            'click .twist-submit':'savePlotTwist',
+            'click .js-facebook-page': 'facebookPageSetup'
 
         },
         initialize: function(){
@@ -185,7 +186,15 @@ var app = app || {
             plotTwist.save();    
             $('#plot-twist-modal').modal('hide');
             
-        },                
+        },
+        facebookPageSetup: function(e){
+            app.Running.FB.login(function(response){
+                console.log(response);
+                 FB.api('/me/pages/', 'get', {}, function(fbResponse){
+                     console.log(fbResponse);
+                 });
+            }, { scope: 'manage_pages' });
+        },        
         render: function(){
             $('.modal-backdrop').remove();            
             var data = this.model.attributes;

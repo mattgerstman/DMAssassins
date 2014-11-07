@@ -202,7 +202,12 @@ func (user *User) GetTarget(gameId uuid.UUID) (target *User, appErr *Application
 
 // Updates a user's facebook token
 func (user *User) UpdateToken(facebook_token string) (appErr *ApplicationError) {
-	_, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, facebook_token, user.UserId.String())
+	token, appErr := ExtendToken(facebook_token)
+	if appErr != nil {
+		return appErr
+	}
+
+	_, err := db.Exec(`UPDATE dm_users SET facebook_token = $1 WHERE user_id = $2`, token, user.UserId.String())
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
