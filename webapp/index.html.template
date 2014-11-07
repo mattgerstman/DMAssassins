@@ -820,6 +820,7 @@
                     </div>
 
                 </form>
+                <button class="btn btn-block btn-primary js-facebook-page">Setup DMAssassins Page</button>
                 <% if (!game_started) { %>
                     <button class="btn btn-block btn-success start-game">Start Game</button>
                 <% } else { %>

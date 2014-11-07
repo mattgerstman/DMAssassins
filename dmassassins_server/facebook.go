@@ -20,7 +20,6 @@ func getFbApp() *fb.App {
 func getFacebookSession(token string) (fbSession *fb.Session) {
 
 	app := getFbApp()
-
 	session := app.Session(token)
 	return session
 }
@@ -106,6 +105,17 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 }
 
+func ExtendToken(facebookToken string) (longLivedToken string, appErr *ApplicationError) {
+	// Query facebook session to make extend token
+	app := getFbApp()
+	longLivedToken, _, err := app.ExchangeToken(facebookToken)
+	if err != nil {
+		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
+	}
+	return longLivedToken, nil
+
+}
+
 // Get a user from the db by it's facebook_id, confirms that the id matches the id in the token
 // If there is no user in the DB with that facebook_id add them
 func getUserFromFacebookId(facebookId, facebookToken string) (user *User, appErr *ApplicationError) {
@@ -175,16 +185,12 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 
 	// Query facebook session to make sure token is valid
 	session := getFacebookSession(token)
-	res, err := session.Get("/debug_token", fb.Params{"input_token": token, "access_token": Config.FBAccessToken})
+	facebookId, err := session.User()
+	fmt.Println(facebookId)
 	if err != nil {
 		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
 
-	// Decode the facebook Id from the sessoin data
-	err = res.DecodeField("data.user_id", &facebookId)
-	if err != nil {
-		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
-	}
 	return facebookId, nil
 
 }

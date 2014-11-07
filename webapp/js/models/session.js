@@ -166,7 +166,6 @@ var app = app || {
                 // Logged into your app and Facebook.                
                 try 
                 {
-                    console.log(response);
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
                         
