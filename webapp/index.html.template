@@ -27,12 +27,12 @@
     <link href="/bower_components/bootstrap-social-buttons/social-buttons.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css" rel="stylesheet" type="text/css">
+    <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/site.css" rel="stylesheet" type="text/css">
     <link href="assets/styles/sidebar.css" rel="stylesheet" type="text/css">
-
     <!-- @endif -->
 
-    <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
+
 
     <script id="nav-template" type="text/template">
         <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
@@ -430,60 +430,60 @@
     </script>
     <script id="leaderboard-template" type="text/template">
     <div class="container">
-        <h3>Player Rankings</h3>
-            <table class="stripe compact" id="user_leaderboard_table">
+        <% if (teams_enabled) { %>
+            <h3>Team Rankings</h3>
+            <table class="stripe compact" id="team_leaderboard_table">
                 <thead>
-                    <th style="width:<%=user_col_width%>%">Name</th>
-                    <% if (teams_enabled) { %>
-                        <th style="width:<%=user_col_width%>%">Team</th>
-                    <% } %>
-                    <th style="width:<%=user_col_width%>%">Alive</th>
-                    <th style="width:<%=user_col_width%>%">Kills</th>
+                    <th>Team Name</th>
+                    <th>Total Players</th>
+                    <th>Players Left</th>
+                    <th>Kills</th>
+                    <th>Avg Kills</th>
                 </thead>
                 <tbody>
-                    <%
-                    _.each(users, function(user) {
-                    %>
-                    <tr>
-                        <td><%=user.name%></td>
-                        <% if (teams_enabled) { %>
-                            <td><%= user.team_name %></td>
-                        <% } %>
-                        <td><%=user.alive ? 'Yes' : 'No'%></td>
-                        <td><%=user.kills%></td>
-                    </tr>
-                    <%
-                    })
-                    %>
+                        <%
+                        _.each(teams, function(team, name) {
+                        %>
+                        <tr>
+                            <td style="width:<%=team_col_width%>%"><%=name%></td>
+                            <td style="width:<%=team_col_width%>%"><%=team.players%></td>
+                            <td style="width:<%=team_col_width%>%"><%=team.alive%></td>
+                            <td style="width:<%=team_col_width%>%"><%=team.kills%></td>
+                            <td style="width:<%=team_col_width%>%"><%=parseFloat(team.kills/team.players).toFixed(2)%></td>
+                        </tr>
+                        <%
+                        })
+                        %>
                 </tbody>
             </table>
-            <% if (teams_enabled) { %>
-                <h3>Team Rankings</h3>
-                <table class="stripe compact" id="team_leaderboard_table">
-                    <thead>
-                        <th>Team Name</th>
-                        <th>Total Players</th>
-                        <th>Players Left</th>
-                        <th>Kills</th>
-                        <th>Avg Kills</th>
-                    </thead>
-                    <tbody>
-                            <%
-                            _.each(teams, function(team, name) {
-                            %>
-                            <tr>
-                                <td style="width:<%=team_col_width%>%"><%=name%></td>
-                                <td style="width:<%=team_col_width%>%"><%=team.players%></td>
-                                <td style="width:<%=team_col_width%>%"><%=team.alive%></td>
-                                <td style="width:<%=team_col_width%>%"><%=team.kills%></td>
-                                <td style="width:<%=team_col_width%>%"><%=parseFloat(team.kills/team.players).toFixed(2)%></td>
-                            </tr>
-                            <%
-                            })
-                            %>
-                    </tbody>
-                </table>
-            <% } %>
+        <% } %>
+        <h3>Player Rankings</h3>
+        <table class="stripe compact" id="user_leaderboard_table">
+            <thead>
+                <th style="width:<%=user_col_width%>%">Name</th>
+                <% if (teams_enabled) { %>
+                    <th style="width:<%=user_col_width%>%">Team</th>
+                <% } %>
+                <th style="width:<%=user_col_width%>%">Alive</th>
+                <th style="width:<%=user_col_width%>%">Kills</th>
+            </thead>
+            <tbody>
+                <%
+                _.each(users, function(user) {
+                %>
+                <tr>
+                    <td><%=user.name%></td>
+                    <% if (teams_enabled) { %>
+                        <td><%= user.team_name %></td>
+                    <% } %>
+                    <td><%=user.alive ? 'Yes' : 'No'%></td>
+                    <td><%=user.kills%></td>
+                </tr>
+                <%
+                })
+                %>
+            </tbody>
+        </table>
     </div>
     </script>
     <script id="rules-template" type="text/template">
