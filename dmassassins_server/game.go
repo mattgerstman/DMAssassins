@@ -127,6 +127,7 @@ func (game *Game) doAnyPlayersNeedTeams() (appErr *ApplicationError) {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 	if count != 0 {
+		err := errors.New(`User tried to start teams game without assigning all players to a team`)
 		return NewApplicationError("Every player must be assigned a team to start", err, ErrCodePlayerMissingTeam)
 	}
 	return nil

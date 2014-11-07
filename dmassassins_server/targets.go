@@ -58,7 +58,8 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
 		var canAssign bool
-		canAssign, appErr := game.CanAssignByTeams()
+		canAssign = true
+		//canAssign, appErr := game.CanAssignByTeams()
 		if appErr != nil {
 			return appErr
 		}
@@ -426,6 +427,7 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 		captainTeamId := uuid.Parse(captainTeam)
 		// we have to use a marker to determine if we've found an appropriate pair to insert the captain in
 		foundPair := false
+		i += captainSpace
 		for !foundPair {
 			if i >= numUsers {
 				i = 0

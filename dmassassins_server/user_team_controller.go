@@ -9,7 +9,7 @@ import (
 
 // PUT - Add a user to a team
 func putGameUserTeam(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
-	_, appErr = RequiresAdmin(r)
+	_, appErr = RequiresCaptain(r)
 	if appErr != nil {
 		return nil, appErr
 	}
