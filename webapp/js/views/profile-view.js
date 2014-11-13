@@ -27,18 +27,18 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-            'keyup .js-email': 'emailEnter',
-            'click .js-email-settings': 'showEmailModal',
-            'click .js-email-settings-save': 'saveEmailSettings',
-            'click .js-profile-picture': 'showFullImage',
-            'click .js-quit-game': 'showQuitModal',
-            'click .js-quit-game-confirm': 'quitGame'
+            'keyup .js-email'               : 'emailEnter',
+            'click .js-email-settings'      : 'showEmailModal',
+            'click .js-email-settings-save' : 'saveEmailSettings',
+            'click .js-profile-picture'     : 'showFullImage',
+            'click .js-quit-game'           : 'showQuitModal',
+            'click .js-quit-game-confirm'   : 'quitGame'
 
         },
 
         // load profile picture in modal window
         showFullImage: function() {
-            $('.js-profile-modal-photo').modal();
+            $('.js-modal-profile-photo').modal();
         },
         // load quit confirm modal
         showQuitModal: function() {

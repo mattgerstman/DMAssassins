@@ -46,8 +46,8 @@ var app = app || {
             }
             
             this.$el.find(selector).draggable({
-                handle: '.js-user-photo',
-                connectWith: '.js-team-list li',
+                handle: '.js-draggable-photo',
+                connectWith: '.js-droppable-team',
                 tolerance: "pointer",
                 helper: 'clone',
                 forceHelperSize: true,

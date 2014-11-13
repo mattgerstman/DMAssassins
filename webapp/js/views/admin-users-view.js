@@ -35,8 +35,6 @@ var app = app || {
             'click  .js-create-new-team'    : 'createNewTeam',
             'click  .js-delete-team'        : 'deleteTeamModal',
             'click  .js-delete-team-submit' : 'deleteTeam',
-            'click  .js-edit-photo-submit'  : 'editPhoto',
-            'click  .js-edit-photo'         : 'editPhotoModal',
             'click  .js-edit-team'          : 'showEditTeamForm',
             'blur   .js-form-new-team input': 'blurTeamForm',
             'click  .js-kill-user'          : 'killUserModal',
@@ -84,18 +82,7 @@ var app = app || {
             $('.js-modal-revive-user .js-user-name').text(user_name);
             $('.js-modal-revive-user').modal();  
         },
-        editPhotoModal: function(event) {
-            var user_name = $(event.currentTarget).data('user-name');
-            var user_id = $(event.currentTarget).data('user-id');
-
-            var user = this.collection.get(user_id);
-            var photo_url = user.getProperty('photo');
-            $('.js-modal-edit-photo .user-photo-wrapper').html('<img src="'+photo_url+'" class="thumbnail">');
-            $('#js-photo-url').val(photo_url);
-            $('.js-edit-photo-submit').data('user-id', user_id);
-            $('.js-modal-edit-photo .js-user-name').text(user_name);
-            $('.js-modal-edit-photo').modal();  
-        },               
+          
         banUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
@@ -125,24 +112,6 @@ var app = app || {
 	      	var user = this.collection.get(user_id);
 	      	user.revive();
 	      	$('.js-modal-revive-user').modal('hide');
-        },
-        editPhoto: function(event) {
-            event.preventDefault();
-        	var user_id = $(event.currentTarget).data('user-id');
-	      	var user = this.collection.get(user_id);
-	      	var photo_url = $('#js-photo-url').val();
-	      	var that = this;
-            user.setProperty('photo', photo_url);
-            user.save(null, {
-                success: function(model, response){
-                    console.log(model);
-                    $('.js-modal-edit-photo').modal('hide');
-                },
-                error: function(model, response){
-                    alert(response.responseText);
-                }    
-            });
-	      	
         },
         selectChangeTeam: function(event){
             var user_id = $(event.currentTarget).data('user-id');
