@@ -27,13 +27,13 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-            'click .js-target-picture': 'showFullImage',
-            'click .js-kill-target': 'kill',
-            'keyup .js-target-secret': 'secretKeyup'
+            'click .js-kill-target'     : 'kill',
+            'click .js-target-picture'  : 'showFullImage',
+            'keyup .js-target-secret'   : 'secretKeyup'
         },
         // loads picture in a modal window
         showFullImage: function() {
-            $('.js-target-photo-modal').modal();
+            $('.js-modal-target-photo').modal();
         },
         // constructor
         initialize: function() {

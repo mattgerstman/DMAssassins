@@ -153,34 +153,48 @@ var app = app || {
         checkFields: function() {
             // Password field setup
             this.fixFields();
+            // get selected game
             var selected = this.$el.find('#js-select-game option:selected');
-            var need_password = selected.data('game-has-password');// == 'true';
+            // check if it needs a password
+            var need_password = selected.data('game-has-password');
+            
+            // grab the password field
             var passwordField = this.$el.find('#js-join-game-password');
+            
+            // Set it to no password if we don't have one
             var passwordPlaceholder = need_password ? '' : 'No Password';
+            
+            // If we do have one mark it as not disabled
             passwordField.attr('disabled', !need_password);
             passwordField.val(passwordPlaceholder);
             
+            // Get game model
             var game_id = selected.val();
             var game = app.Running.Games.get(game_id);
             if (!game) {
                 return;
             }
 
+            // Set teams to loading if the game has teams
             var teamField = this.$el.find('#js-join-game-team');
             teamField.find('#js-team-placeholder').text('Loading..');
 
+            // Set the teams
             var that = this;
             var url = config.WEB_ROOT + 'game/' + game_id + '/team/';
             app.Running.Teams.fetch({
                 url:url,
                 success:function(teams){        
-                    teamField.attr('disabled', false);
-                    var teamOptionsTemplate = _.template($('#select-game-team-option').html());
-                    var teamOptionsHTML = teamOptionsTemplate({teams: app.Running.Teams.toJSON()});
-                    teamField.html(teamOptionsHTML);
+                    // if there are no teams handle that appropraitely
                     if (!app.Running.Teams.length){
                         that.noTeams();
                     }
+                    // if we have teams mark it as not disabled
+                    teamField.attr('disabled', false);
+                    // render team select
+                    var teamOptionsTemplate = _.template($('#select-game-team-option').html());
+                    var teamOptionsHTML = teamOptionsTemplate({teams: app.Running.Teams.toJSON()});
+                    teamField.html(teamOptionsHTML);
                 },
                 error:function(){
                    that.noTeams();
