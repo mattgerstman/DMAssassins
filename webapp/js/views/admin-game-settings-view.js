@@ -21,18 +21,17 @@ var app = app || {
     'use strict';
     app.Views.AdminGameSettingsView = Backbone.View.extend({
 
-        template: _.template($('#admin-game-settings-template').html()),
+        template: _.template($('#template-admin-game-settings').html()),
         tagName:'div',
         events: {
-            'click .save-game': 'saveGame',
-            'click .start-game': 'startGameModal',
-            'click .start-game-submit': 'startGame',
-            'click .end-game': 'endGameModal',
-            'click .end-game-submit': 'endGame',
-            'click a':'loadTwistModal',
-            'click .twist-submit':'savePlotTwist',
-            'click .js-facebook-page': 'facebookPageSetup'
-
+            'click .js-end-game'            : 'endGameModal',
+            'click .js-end-game-submit'     : 'endGame',
+            'click .js-facebook-page'       : 'facebookPageSetup',
+            'click .js-open-plot-twist'     : 'loadTwistModal',
+            'click .js-save-game'           : 'saveGame',
+            'click .js-start-game'          : 'startGameModal',
+            'click .js-start-game-submit'   : 'startGame',
+            'click .js-submit-twist'        : 'savePlotTwist'
         },
         initialize: function(){
             this.model = app.Running.Games.getActiveGame();
@@ -43,9 +42,9 @@ var app = app || {
         saveGame: function(event){
             event.preventDefault();
             // Get values from form
-            var game_name = $('#game_name').val();
-            var game_password = $('#game_password').val();
-            var game_teams_enabled = $('#teams_enabled').is(':checked') ? 'true' : 'false';
+            var game_name = $('#js-input-game-name').val();
+            var game_password = $('#js-input-game-password').val();
+                var game_teams_enabled = $('#js-input-teams-enabled').is(':checked') ? 'true' : 'false';
             
             // Set values in model
             this.model.set({
@@ -57,22 +56,22 @@ var app = app || {
         
             // Save model
             var url = this.model.gameUrl();
-            $(".save-game").text('Saving...');
+            $(".js-save-game").text('Saving...');
             this.model.save(null, {
                 url: url,
                 success: function(model){
-                    $(".save-game").text('Saved');        
+                    $(".js-save-game").text('Saved');        
                     setTimeout(function(){
-                        $(".save-game").text('Save');    
+                        $(".js-save-game").text('Save');    
                     }, 1000);
                 }                
             });
         },
-        startGameModal: function(event) {
-          $('#start_game_modal').modal();
+        startGameModal: function(event) {        
+          $('.js-modal-start-game').modal();
         },
         startGame: function(event) {
-            $('#start_game_modal').modal('hide');
+            $('.js-modal-start-game').modal('hide');
             var that = this;
             var url = this.model.gameUrl();
             $.post(url, function(){
@@ -82,10 +81,10 @@ var app = app || {
             });
         },
         endGameModal: function(event) {
-          $('#end_game_modal').modal();
+          $('.js-modal-end-game').modal();
         },
         endGame: function(event) {
-            $('#end_game_modal').modal('hide');
+            $('.js-modal-end-game').modal('hide');
             var that = this;
             var url = this.model.gameUrl();
 
@@ -160,7 +159,7 @@ var app = app || {
             var twist = $(e.currentTarget).attr('id');            
             var data = this.twistModalOptions[twist];
             
-            var modal = _.template($('#plot-twist-modal-template').html());
+            var modal = _.template($('#template-modal-plot-twist').html());
             
             var detailVars = {};
             detailVars.teams_enabled = this.model.areTeamsEnabled();
@@ -169,8 +168,8 @@ var app = app || {
             data.details = details(detailVars);
             
             var modalHTML = modal(data);
-            $('#plot-twist-modal-container').html(modalHTML);
-            $('#plot-twist-modal').modal();
+            $('.js-wrapper-modal-plot-twist').html(modalHTML);
+            $('.js-modal-plot-twist').modal();
             
         },
         savePlotTwist: function(e){
@@ -179,12 +178,12 @@ var app = app || {
             var button = $(e.currentTarget);
             var data = {};
             data.plot_twist_name  = button.data('twist-name');
-            data.send_email       = $('#send-twist-email').is(':checked');
+            data.send_email       = $('.js-input-send-twist-email').is(':checked');
             
 
             var plotTwist = new app.Models.PlotTwist(data);
             plotTwist.save();    
-            $('#plot-twist-modal').modal('hide');
+            $('.js-modal-plot-twist').modal('hide');
             
         },
         facebookPageSetup: function(e){

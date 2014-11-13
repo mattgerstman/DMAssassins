@@ -57,21 +57,8 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
-		var canAssign bool
-		canAssign = true
-		//canAssign, appErr := game.CanAssignByTeams()
-		if appErr != nil {
-			return appErr
-		}
-		if canAssign {
-			// Get all players in the game
-			rows, appErr := game.getAllActivePlayersAsRows()
-			if appErr != nil {
-				return appErr
-			}
-			fmt.Println(`teams`)
-			return game.assignTargetsByTeams(tx, rows)
-		}
+		fmt.Println(`teams`)
+		return game.assignTargetsByTeams(tx)
 	}
 	fmt.Println(`regular`)
 	// Get players to assign targets with
@@ -303,7 +290,13 @@ func (game *Game) getAllActivePlayersAsRows() (rows *sql.Rows, appErr *Applicati
 }
 
 // Assign targets and space them out by team
-func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *ApplicationError) {
+func (game *Game) assignTargetsByTeams(tx *sql.Tx) (appErr *ApplicationError) {
+	// Get active players
+	rows, appErr := game.getAllActivePlayersAsRows()
+	if appErr != nil {
+		return appErr
+	}
+
 	// Get the list of team ids
 	teamsList, appErr := game.GetActiveTeamIds()
 	if appErr != nil {
@@ -360,8 +353,29 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 	lastUserTeam = firstUserTeam
 	lastUser = firstUser
 
+	// If we have more than 5 teams we may need to save some for later
+	saveSomeForLater := len(userList) > 5
+	if saveSomeForLater {
+		var largestTeamSize, smallestTeamSize int
+		for team := range userList {
+			currentTeamSize := len(team)
+			if largestTeamSize < currentTeamSize {
+				largestTeamSize = currentTeamSize
+			}
+			if smallestTeamSize > currentTeamSize {
+				smallestTeamSize = currentTeamSize
+			}
+		}
+		// If the largest team size is sufficiently larger than the smallest team size we need to save some targets for later
+		saveSomeForLater = largestTeamSize >= (smallestTeamSize * 3 / 2)
+	}
+
 	// While we still have users to assign
 	for assigned < numUsers {
+		if numTeams <= 3 && saveSomeForLater {
+			break
+		}
+
 		// Get a random team
 		randTeamIndex := rand.Intn(numTeams)
 		currentUserTeam = teamsList[randTeamIndex]
@@ -477,6 +491,53 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 		// Add a pair for the target
 		captainPair := &targetPair{captainId, captainTeamId, `dm_captain`, targetId, targetTeamId, targetUserRole}
 		targetList = append(targetList, captainPair)
+	}
+
+	// loop through all of our teams
+	for teamIdString, team := range userList {
+		// user the same counters for all sers to insert them
+		i := 0
+		j := 0
+		teamId := uuid.Parse(teamIdString)
+		// loop through each user on each team
+		for _, userId := range team {
+			foundPair := false
+
+			// keep looping until we have a proper pair
+			for !foundPair {
+				//
+				if i >= numUsers {
+					i = 0
+					j++
+				}
+
+				if j > triesForTeam {
+					foundPair = true
+					continue
+				}
+
+				// check the assassin/target teams to make sure they don't conflict
+				assassinTeamId, targetTeamId := targetList[i].AssassinTeamId, targetList[i].TargetTeamId
+
+				if uuid.Equal(teamId, assassinTeamId) {
+					i++
+					continue
+				}
+				if uuid.Equal(teamId, targetTeamId) {
+					i++
+					continue
+				}
+				foundPair = true
+			}
+			// Get all the assassin/target information
+			assassinId, assassinTeamId, assassinUserRole, targetId, targetTeamId, targetUserRole := targetList[i].AssassinId, targetList[i].AssassinTeamId, targetList[i].AssassinUserRole, targetList[i].TargetId, targetList[i].TargetTeamId, targetList[i].TargetUserRole
+			// Insert the captain after the assassin
+			targetList[i] = &targetPair{assassinId, assassinTeamId, assassinUserRole, userId, teamId, `dm_user`}
+			// Add a pair for the target
+			captainPair := &targetPair{userId, teamId, `dm_user`, targetId, targetTeamId, targetUserRole}
+			targetList = append(targetList, captainPair)
+			i += 3
+		}
 	}
 
 	return game.insertTargetsWithDelete(tx, targetList)

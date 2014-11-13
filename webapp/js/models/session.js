@@ -97,7 +97,6 @@ var app = app || {
             {
                 Raven.captureException(e);
                 alert('There was an issue connecting to Facebook, please refresh and try again in a minute.');
-
             }
 
             app.Running.FB.getLoginStatus(function(response) {
@@ -287,7 +286,7 @@ var app = app || {
                         var loginCall = this;
                         setTimeout(function(){
                             $.ajax(loginCall);
-                        }, 100)
+                        }, 100);
                         return;
                         
                     }

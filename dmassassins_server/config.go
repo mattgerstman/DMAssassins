@@ -7,18 +7,18 @@ import (
 )
 
 type Configuration struct {
-	APIDomain         string
-	FBAppId           string
-	FBAppSecret       string
-	FBAccessToken     string
-	DatabaseURL       string
-	SentryDSN         string
-	SupportEmail      string
-	MailGunPublicKey  string
-	MailGunPrivateKey string
-	MailGunDomain     string
-	MailGunSender     string
-	MailGunReplyTo    string
+	APIDomain         string `json:"api_domain"`
+	FBAppId           string `json:"fb_app_id"`
+	FBAppSecret       string `json:"fb_app_secret"`
+	FBAccessToken     string `json:"fb_access_token"`
+	DatabaseURL       string `json:"database_url"`
+	SentryDSN         string `json:"sentry_dsn"`
+	SupportEmail      string `json:"support_email"`
+	MailGunPublicKey  string `json:"mailgun_public_key"`
+	MailGunPrivateKey string `json:"mailgun_private_key"`
+	MailGunDomain     string `json:"mailgun_domain"`
+	MailGunSender     string `json:"mailgun_sender"`
+	MailGunReplyTo    string `json:"mailgun_replyto"`
 }
 
 var Config *Configuration

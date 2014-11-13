@@ -22,7 +22,7 @@ var app = app || {
         el: '#app',
         // constructor
         initialize: function() {
-            this.$body = $('#app_body');
+            this.$body = $('#js-wrapper-app');
         },
         // renders a page within the body of the app
         renderPage: function(page) {

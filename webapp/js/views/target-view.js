@@ -22,18 +22,18 @@ var app = app || {
     app.Views.TargetView = Backbone.View.extend({
 
 
-        template: _.template($('#target-template').html()),
+        template: _.template($('#template-target').html()),
         tagName: 'div',
 
         // The DOM events specific to an item.
         events: {
-            'click .thumbnail': 'showFullImage',
-            'click #kill': 'kill',
-            'keyup #secret': 'secretKeyup'
+            'click .js-target-picture': 'showFullImage',
+            'click .js-kill-target': 'kill',
+            'keyup .js-target-secret': 'secretKeyup'
         },
         // loads picture in a modal window
         showFullImage: function() {
-            $('#photoModal').modal();
+            $('.js-target-photo-modal').modal();
         },
         // constructor
         initialize: function() {
@@ -44,11 +44,11 @@ var app = app || {
         },
         // kills your target
         kill: function() {
-            var secret = this.$el.find('#secret').val();
+            var secret = this.$el.find('.js-target-secret').val();
             if (!secret) {
                 alert("Enter your target's secret to kill them!");
             }
-            $('#secret').val('');
+            $('.js-target-secret').val('');
             var view = this;
             this.model.destroy({
                 headers: {
@@ -68,7 +68,7 @@ var app = app || {
         secretKeyup: function(e){
              if (e.keyCode == 13) {
                 e.preventDefault();
-                var secret = this.$el.find('#secret').val();
+                var secret = this.$el.find('.js-target-secret').val();
                 if (!secret) {
                     return;
                 }                 

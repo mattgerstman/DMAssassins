@@ -34,7 +34,7 @@
 
 
 
-    <script id="nav-template" type="text/template">
+    <script id="template-nav" type="text/template">
         <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
           <div class="container">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -56,33 +56,33 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="main_nav">
                 <ul class="nav navbar-nav">
-                    <li class="nav_item" id="nav_target"><a href="#target">Target</a></li>
-                    <li class="nav_item" id="nav_my_profile"><a href="#my_profile">My Profile</a></li>
-                    <li class="nav_item" id="nav_leaderboard"><a href="#leaderboard">Leaderboard</a></li>
-                    <li class="nav_item" id="nav_rules"><a href="#rules">Rules</a></li>
+                    <li id="js-nav-target"><a class="js-nav-link" href="#target">Target</a></li>
+                    <li id="js-nav-my-profile"><a class="js-nav-link" href="#my_profile">My Profile</a></li>
+                    <li id="js-nav-leaderboard"><a class="js-nav-link" href="#leaderboard">Leaderboard</a></li>
+                    <li id="js-nav-rules"><a class="js-nav-link" href="#rules">Rules</a></li>
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="nav_item dropdown_parent" id="games_parent">
+                    <li class="js-dropdown-parent" id="js-dropdown-parent-games">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <div class="hidden-sm">
-                                <span id="games_header">
+                                <span class="js-header-games">
                                     Loading..
                                 </span>
                                 <span class="caret"></span>
                             </div>
                             <div class="visible-sm">
-                                <span id="games_header_short">
+                                <span class="js-header-games-short">
                                     Loading..
                                 </span>
                                 <span class="caret"></span>
                             </div>
                         </a>
-                        <ul class="dropdown-menu" role="menu" id="games_dropdown">
+                        <ul class="dropdown-menu" role="menu" id="js-nav-games-dropdown">
                         </ul>
                     </li>
                     <% if (is_admin) { %>
-                        <li id="admin_parent" class="nav_item dropdown_parent">
+                        <li id="js-dropdown-parent-admin" class="js-dropdown-parent">
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                 <div class="hidden-sm">
                                     <span id="admin_header">
@@ -98,37 +98,37 @@
                                 </div>
                             </a>
                             <ul id="admin_dropdown" role="menu" class="dropdown-menu">
-                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_users"><a href="#users">Manage Users</a></li>
-                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_edit_rules"><a href="#edit_rules">Edit Rules</a></li>
-                                <li class="nav_item dropdown_item" dropdown="admin" id="nav_game_settings"><a href="#game_settings">Game Settings</a></li>
+                                <li class="dropdown_item" dropdown="admin" id="js-nav-users"><a class="js-nav-link" href="#users">Manage Users</a></li>
+                                <li class="dropdown_item" dropdown="admin" id="js-nav-edit-rules"><a class="js-nav-link" href="#edit_rules">Edit Rules</a></li>
+                                <li class="dropdown_item" dropdown="admin" id="js-nav-game-settings"><a class="js-nav-link" href="#game_settings">Game Settings</a></li>
                                 <% if (is_super_admin) { %>
-                                    <li class="nav_item dropdown_item" dropdown="admin" id="nav_targets"><a href="#targets">View Targets</a></li>
+                                    <li class="dropdown_item" dropdown="admin" id="js-nav-targets"><a class="js-nav-link" href="#targets">View Targets</a></li>
                                 <% } %>
                             </ul>
                         </li>
                     <% } else if (is_captain) { %>
-                        <li class="nav_item" id="nav_users"><a href="#users">Manage Users</a></li>
+                        <li id="js-nav-users"><a class="js-nav-link" href="#users">Manage Users</a></li>
                     <% } %>
-                    <li class="nav_item" id="nav_logout"><a href="#logout">Logout</a></li>
+                    <li id="js-nav-logout"><a class="js-nav-link" href="#logout">Logout</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
 
     </script>
-    <script id="nav-game-template" type="text/template">
+    <script id="template-nav-game" type="text/template">
     <%
         _.each(games, function(game) {
         %>
-            <li id="nav_<%=game.game_id %>" class="nav_item dropdown_item game_name" dropdown="games"><a game_id="<%=game.game_id %>" class="switch_game" href="#switch_game"><%=game.game_name%></a></li>
+            <li id="js-nav-<%=game.game_id %>" class="dropdown_item js-game-name" dropdown="games"><a game_id="<%=game.game_id %>" class="switch_game js-nav-link" href="#switch_game"><%=game.game_name%></a></li>
         <%
         })
         %>
-        <li id="nav_create_game" class="nav_item dropdown_item" dropdown="games"><a href="#create_game">Create New Game</a></li>
-        <li id="nav_join_game" class="nav_item dropdown_item" dropdown="games"><a href="#join_game">Join New Game</a></li>
+        <li id="js-nav-create-game" class="dropdown_item" dropdown="games"><a class="js-nav-link" href="#create_game">Create New Game</a></li>
+        <li id="js-nav-join-game" class="dropdown_item" dropdown="games"><a class="js-nav-link" href="#join_game">Join New Game</a></li>
     </script>
-    <script id="target-template" type="text/template">
-    <div class="user_view">
+    <script id="template-target" type="text/template">
+        <div class="user_view">
              <div class="view text-center">
                 <div id="target_data">
                     <div class="row">
@@ -144,27 +144,27 @@
                         </div>
                     <% } %>
                 <div class="row">
-                    <a class="thumbnail">
+                    <a class="thumbnail js-target-picture">
                        <img src=<%= properties.photo_thumb %>>
                     </a>
                 </div>
                 <div class="row user-column">
                     <form class="form-inline kill-form" id="kill_form">
-                        <input class="form-control" placeholder="Enter Secret" id="secret"/>
-                        <button type="button" id="kill" class="btn btn-danger">Kill Target</button>
+                        <input class="form-control js-target-secret" placeholder="Enter Secret"/>
+                        <button type="button" class="btn btn-danger js-target-kill">Kill Target</button>
                     </form>
 
                 </div>
              </div>
         </div>
-        <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
+        <div class="modal fade js-target-photo-modal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
           <div class="modal-dialog">
             <img class="img-responsive center-block" src=<%= properties.photo %> />
           </div>
         </div>
 
     </script>
-    <script id="profile-template" type="text/template">
+    <script id="template-profile" type="text/template">
     <div class="user_view">
              <div class="view text-center">
                 <div id="target_data">
@@ -190,36 +190,36 @@
                     </div>
                 </div>
                 <div class="row">
-                    <a class="thumbnail">
+                    <a class="thumbnail js-profile-picture">
                        <img src=<%= properties.photo_thumb %>>
                     </a>
                 </div>
                 <% if (allow_quit) { %>
                     <div class="user-column btn-group btn-group-justified profile-buttons">
                         <div class="btn-group">
-                            <button type="button" class="btn btn-primary" id="email_settings">Email Settings</button>
+                            <button type="button" class="btn btn-primary js-email-settings">Email Settings</button>
                         </div>
                         <div class="btn-group">
-                            <button type="button" class="btn btn-danger" id="quit">Quit Game</button>
+                            <button type="button" class="btn btn-danger js-quit-game">Quit Game</button>
                         </div>
                     </div>
                 <% } else { %>
                     <div class="row user-column profile-buttons">
-                        <button class="btn btn-block btn-primary" id="email_settings">Email Settings</button>
+                        <button class="btn btn-block btn-primary js-email-settings">Email Settings</button>
                     </div>
                 <% } %>
              </div>
         </div>
-        <div class="modal fade" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
+        <div class="modal fade js-profile-modal-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
           <div class="modal-dialog">
             <img class="img-responsive center-block" src=<%= properties.photo %> />
           </div>
         </div>
 
-        <div id="quit_modal_wrapper">
+        <div class="js-wrapper-quit-modal">
 
         </div>
-        <div class="modal fade" id="email_modal" role="dialog">
+        <div class="modal fade js-modal-email-settings" role="dialog">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -231,12 +231,12 @@
                         <div class="form-group">
                             <label class="control-label" for=email>Email Address:</label>
                             <div class="">
-                                <input class="form-control" id="email" value="<%=email%>"/>
+                                <input class="form-control js-email" value="<%=email%>"/>
                             </div>
                         </div>
                         <div class="checkbox">
                             <label>
-                              <input type="checkbox" id="allow_email" <% if (allow_email){ %>checked<% } %>> Is it ok for us to send you emails?
+                              <input type="checkbox" class="js-allow-email" <% if (allow_email){ %>checked<% } %>> Is it ok for us to send you emails?
                             </label>
                         </div>
                         <em class="opt-out-warning">Note: If you opt out of emails, you will not receive updates if your target changes due to a plot twist.</em>
@@ -262,7 +262,7 @@
 
     <script id="quit-modal-template" type="text/template">
 
-        <div class="modal fade" id="quit_modal" role="dialog">
+        <div class="modal fade js-profile-quit-modal" role="dialog">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -273,12 +273,12 @@
                   <div class="modal-body">
                     <p>We're sad to see you go. If you really want to quit <strong><%=quit_game_name%></strong> please confirm by entering your secret:</p>
                      <div class="form-group">
-                         <label for="quit_secret" class="sr-only">Secret:</label><input class="form-control" id="quit_secret" type="text" placeholder ="Enter Secret"/>
+                         <label for="js-quit-secret" class="sr-only">Secret:</label><input class="form-control" id="js-quit-secret" type="text" placeholder ="Enter Secret"/>
                      </div>
                   </div>
                   <div class="modal-footer">
                     <button class="btn btn-default btn-medium" data-dismiss="modal">Nevermind</button>
-                    <button class="btn btn-danger btn-medium" id="quit_game_confirm">Quit</button>
+                    <button class="btn btn-danger btn-medium js-quit-game-confirm">Quit</button>
                   </div>
               </form>
             </div><!-- /.modal-content -->
@@ -288,7 +288,7 @@
     </script>
 
     <script id="select-game-team-option" type="text/template">
-        <option value="" id="team_placeholder">Select a Team</option>
+            <option value="" id="js-team-placeholder">Select a Team</option>
         <%
         _.each(teams, function(team){
         %>
@@ -300,139 +300,120 @@
 
     <script id="select-game-template" type="text/template">
         <div class="container-fluid">
-                <img src="/assets/img/logo.png" class="center-block img-responsive logo" />
-                <div id="create-or-join" class="">
+                <img src="/assets/img/logo.png" class="center-block img-responsive logo js-logo" />
+                <div class="js-create-or-join">
                     <div class="container col-md-offset-2 col-md-8 text-center">
                         <div class="hidden-xs">
-                            <button class="btn btn-facebook btn-lg show-create-game">Create A Game</button>
-                            <button class="btn btn-facebook btn-lg show-join-game">Join A Game</button>
+                            <button class="btn btn-facebook btn-lg js-show-create-game">Create A Game</button>
+                            <button class="btn btn-facebook btn-lg js-show-join-game">Join A Game</button>
                         </div>
                         <div class="visible-xs-block">
-                            <button class="btn btn-facebook btn-block show-create-game">Create A Game</button>
-                            <button class="btn btn-facebook btn-block show-join-game">Join A Game</button>
+                            <button class="btn btn-facebook btn-block js-show-create-game">Create A Game</button>
+                            <button class="btn btn-facebook btn-block js-show-join-game">Join A Game</button>
                         </div>
 
                     </div>
                 </div>
-                <div id="create-game" class="container hide">
-                    <!-- @if BETA == "FALSE" -->
-                        <form class="form-horizontal text-left" role="form">
-                            <div class="form-group">
-                                <h1 class="text-center col-sm-12 col-xs-12">Create a Game</h1>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-5 col-xs-5 control-label" for="create_game_name">Game Name:</label>
-                                <div class="col-sm-3 col-xs-7">
-                                    <input id="create_game_name" class="form-control"></input>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-sm-5 col-xs-5 control-label" for="create_game_need_password">Password protect?:</label>
-                                <div class="col-sm-3 col-xs-7">
-                                    <input id="create_game_need_password" type="checkbox"</input>
-                                </div>
-                            </div>
-                            <div id="create_password_block" class="form-group">
-                                <label class="col-sm-5 col-xs-5 control-label" for="create_game_password">Password:</label>
-                                <div class="col-sm-3 col-xs-7">
-                                    <input id="create_game_password" class="form-control" disabled></input>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="hidden-xs">
-                                    <div class="col-sm-offset-5 col-sm-2">
-                                        <button class="btn btn-default btn-block create-game-submit">Create</button>
-                                    </div>
-                                    <div class="col-sm-1">
-                                        <button class="btn btn-danger btn-block create-or-join-back">Back</button>
-                                    </div>
-                                </div>
-                                <div class="visible-xs-block">
-                                    <button class="btn btn-default btn-block create-game-submit">Create</button>
-                                    <button class="btn btn-danger btn-block create-or-join-back">Back</button>
-                                </div>
-                            </div>
-                        </form>
-                    <!-- @endif -->
-                    <!-- @if BETA == "TRUE" -->
-                        <div class="row">
-                            <div class="col-sm-offset-4 col-sm-4 hidden-xs text-center">
-                                We aren't quite ready to sell to the public. If you're interesting in beta pricing you can contact <a href="mailto:matt@dmassassins.com">matt@dmassassins.com</a>
-                            </div>
-                        </div><br />
-                        <div class="row">
-                            <div class="col-sm-offset-4 col-sm-4 hidden-xs text-center">
-                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                <div class="container hide js-create-game">
+                    <form class="form-horizontal text-left" role="form">
+                        <div class="form-group">
+                            <h1 class="text-center col-sm-12 col-xs-12">Create a Game</h1>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="create_game_name">Game Name:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="create_game_name" class="form-control"></input>
                             </div>
                         </div>
-                        <div class="visible-xs-block text-center">
-                            We aren't quite ready to sell to the public. If you're interesting in beta pricing you can contact <a href="mailto:matt@dmassassins.com">matt@dmassassins.com</a>
-                            <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                        <div class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="js-create-game-need-password">Password protect?:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="js-create-game-need-password" type="checkbox"</input>
+                            </div>
                         </div>
-                     </div>
-                    <!-- @endif -->
+                        <div id="create_password_block" class="form-group">
+                            <label class="col-sm-5 col-xs-5 control-label" for="js-create-game-password">Password:</label>
+                            <div class="col-sm-3 col-xs-7">
+                                <input id="js-create-game-password" class="form-control" disabled></input>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="hidden-xs">
+                                <div class="col-sm-offset-5 col-sm-2">
+                                    <button class="btn btn-default btn-block js-create-game-submit">Create</button>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button class="btn btn-danger btn-block js-create-or-join-back">Back</button>
+                                </div>
+                            </div>
+                            <div class="visible-xs-block">
+                                <button class="btn btn-default btn-block js-create-game-submit">Create</button>
+                                <button class="btn btn-danger btn-block js-create-or-join-back">Back</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div id="join-game" class="container hide">
+                <div class="container hide js-join-game">
                     <form class="form-horizontal text-left" role="form">
                         <div class="form-group">
                             <h1 class="text-center col-sm-12 col-xs-12">Select a Game</h1>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-5 col-xs-5 control-label" for="games">Game:</label>
+                            <label class="col-sm-5 col-xs-5 control-label" for="js-select-game">Game:</label>
                             <div class="col-sm-3 col-xs-7">
-                                <select id="games" class="form-control">
+                                <select id="js-select-game" class="form-control">
                                     <% _.each(games, function(game){ %>
-                                        <option value="<%= game.game_id %>" game_has_password="<%= game.game_has_password %>"><%= game.game_name %> </option>
+                                        <option value="<%= game.game_id %>" data-game-has-password="<%= game.game_has_password %>"><%= game.game_name %> </option>
                                     <% }) %>
                                 </select>
                             </div>
                         </div>
                         <div id="join_password_block" class="form-group">
-                            <label class="col-sm-5 col-xs-5 control-label" for="join_game_password">Password:</label>
+                            <label class="col-sm-5 col-xs-5 control-label" for="js-join-game-password">Password:</label>
                             <div class="col-sm-3 col-xs-7">
-                                <input id="join_game_password" class="form-control" disabled></input>
+                                <input id="js-join-game-password" class="form-control" disabled></input>
                             </div>
                         </div>
                         <div id="join_team_block" class="form-group">
-                            <label class="col-sm-5 col-xs-5 control-label" for="join_game_team">Team:</label>
+                            <label class="col-sm-5 col-xs-5 control-label" for="js-join-game-team">Team:</label>
                             <div class="col-sm-3 col-xs-7">
-                                <select id="join_game_team" class="form-control" disabled>
-                                    <option value="" id="team_placeholder">This Game Doesn't Have Teams</option>
+                                <select id="js-join-game-team" class="form-control" disabled>
+                                    <option value="" id="js-team-placeholder">This Game Doesn't Have Teams</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="hidden-xs">
                                 <div class="col-sm-offset-5 col-sm-2">
-                                    <button class="btn btn-default btn-block join-game-submit">Join</button>
+                                    <button class="btn btn-default btn-block js-join-game-submit">Join</button>
                                 </div>
                                 <div class="col-sm-1">
-                                    <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                                    <button class="btn btn-danger btn-block js-create-or-join-back">Back</button>
                                 </div>
                             </div>
                             <div class="visible-xs-block">
-                                <button class="btn btn-default btn-block join-game-submit">Join</button>
-                                <button class="btn btn-danger btn-block create-or-join-back">Back</button>
+                                <button class="btn btn-default btn-block js-join-game-submit">Join</button>
+                                <button class="btn btn-danger btn-block js-create-or-join-back">Back</button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
     </script>
-    <script id="login-template" type="text/template">
+    <script id="template-login" type="text/template">
     <div class="col-md-2"></div>
         <div class="container col-md-8">
             <img src="/assets/img/logo.png" class="center-block img-responsive logo" />
-            <button class="btn btn-facebook btn-lg center-block hidden-xs"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
+            <button class="btn btn-facebook js-login btn-lg center-block hidden-xs"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
         </div>
         <div class="col-md-2"></div>
         <button class="btn btn-facebook btn-block center-block visible-xs-block"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
     </script>
-    <script id="leaderboard-template" type="text/template">
+    <script id="template-leaderboard" type="text/template">
     <div class="container">
         <% if (teams_enabled) { %>
             <h3>Team Rankings</h3>
-            <table class="stripe compact" id="team_leaderboard_table">
+            <table class="stripe compact js-table-leaderboard-teams">
                 <thead>
                     <th>Team Name</th>
                     <th>Total Players</th>
@@ -458,7 +439,7 @@
             </table>
         <% } %>
         <h3>Player Rankings</h3>
-        <table class="stripe compact" id="user_leaderboard_table">
+        <table class="stripe compact js-table-leaderboard-users">
             <thead>
                 <th style="width:<%=user_col_width%>%">Name</th>
                 <% if (teams_enabled) { %>
@@ -486,13 +467,13 @@
         </table>
     </div>
     </script>
-    <script id="rules-template" type="text/template">
+    <script id="template-rules" type="text/template">
         <div class="container">
             <%= rules %>
         </div>
     </script>
 
-    <script id="admin-edit-rules-template" type="text/template">
+    <script id="template-admin-edit-rules" type="text/template">
         <div class="container">
             <div class="alert alert-info alert-dismissible">
                 <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
@@ -502,48 +483,48 @@
             If you'd like to write directly in markdown check out this <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank" class="alert-link">cheat sheet.</a>
             </div>
 
-            <textarea v-model="rules" id="rules-editor"><%= rules %></textarea>
+            <textarea v-model="rules" class="js-rules-editor"><%= rules %></textarea>
         </div>
     </script>
 
 
     <script id="admin-users-teams-template" type="text/template">
-        <li class="team" id="nav_team_all">
-            <a href="#" class="team-name" data-team-id="SHOW_ALL" >Show All</a>
+            <li class="team" id="js-nav-team-all">
+            <a href="#" class="js-team-name" data-team-id="SHOW_ALL" >Show All</a>
         </li>
-        <li class="team" id="nav_team_null">
-            <a href="#" class="team-name" data-team-id="NO_TEAM">No Team</a>
+        <li class="team" id="js-nav-team-null">
+            <a href="#" class="js-team-name" data-team-id="NO_TEAM">No Team</a>
         </li>
         <% if (is_admin) { %>
             <li class="new-team">
-                <a href="#" class="new-team-open">New Team</a>
-                <form class="new-team-form form-inline hide">
-                    <input placeholder="Enter Team Name" type="text" class="new-team-name form-control" />
-                    <a href="#" class="team-input-button create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
-                    <a href="#" class="team-input-button cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
+                <a href="#" class="js-new-team-open">New Team</a>
+                <form class="js-form-new-team new-team-form form-inline hide">
+                    <input placeholder="Enter Team Name" type="text" class="js-new-team-name form-control" />
+                    <a href="#" class="team-input-button js-create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
+                    <a href="#" class="team-input-button js-cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
                 </form>
             </li>
         <%
             }
         _.each(teams, function(team){
         %>
-            <li class="team team-droppable" id="nav_team_<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
+            <li class="team team-droppable" id="js-nav-team-<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
                 <div class="team-display">
-                    <a href="#" class="team-name" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
+                    <a href="#" class="js-team-name" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
                         <%= team.team_name %>
                     </a>
                 <% if (is_admin) { %>
     				<div class="team-buttons">
-    	                <a href="#" class="edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
-    					<a href="#" class="delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
+    	                <a href="#" class="edit-team js-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
+    					<a href="#" class="delete-team js-delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
                     </div>
                 <% } %>
                 </div>
                 <% if (is_admin) { %>
                     <form class="edit-team-form form-inline hide">
                         <input type="text" class="edit-team-name form-control" value="<%= team.team_name %>"/>
-                        <a href="#" class="team-input-button save-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok"></span></a>
-                        <a href="#" class="team-input-button cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
+                        <a href="#" class="team-input-button js-save-edit-team save-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok"></span></a>
+                        <a href="#" class="team-input-button js-cancel-edit-team cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
                     </form>
                 <% } %>
 
@@ -563,11 +544,11 @@
 
     </script>
 
-    <script id="admin-user-template" type="text/template">
+    <script id="template-admin-user" type="text/template">
 
-        <div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" id="user_<%= user_id %>" data-user-id="<%= user_id %>">
-             <img class="drag-img hide" src=<%= properties.photo_thumb %>>
-             <div class="user">
+        <div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" id="js-user-<%= user_id %>" data-user-id="<%= user_id %>">
+             <img class="drag-img js-drag-img hide" src=<%= properties.photo_thumb %>>
+             <div class="js-user user">
                  <div class="user-column text-center">
                     <div class="row">
                         <h3>
@@ -585,7 +566,7 @@
                     </div>
 
                     <div class="row">
-                        <a class="thumbnail <% if (!teams_enabled) { %> default_cursor <%} %>">
+                        <a class="thumbnail js-user-photo <% if (!teams_enabled) { %> default_cursor <%} %>">
                             <div class="thumbnail-wrapper">
                                 <img class="img img-responsive full-width <% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
                             </div>
@@ -594,8 +575,8 @@
                     <div class="user-data-text">
                         <% if (teams_enabled) { %>
                             <div class="row">
-                                <label>Team:<span class="team-saved" id="team_saved_<%= user_id %>" >Saved</span></label>
-                                <select class="user-team" data-user-id ="<%=user_id %>">
+                                <label>Team:<span class="team-saved" id="js-team-saved-<%= user_id %>" >Saved</span></label>
+                                <select class="js-user-team" data-user-id ="<%=user_id %>">
 
                                     <% if (properties.team == 'null') { %>
     	                                <option value ="">Select a Team</option>
@@ -607,8 +588,8 @@
                         <% } %>
                         <% if (is_admin) { %>
                             <div class="row">
-                                <label>Role:<span class="role-saved" id="role_saved_<%= user_id %>" >Saved</span></label>
-                                <select class="user-role" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
+                                <label>Role:<span class="role-saved" id="js-role-saved-<%= user_id %>" >Saved</span></label>
+                                <select class="js-user-role" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
 
                                     <% _.each(roles, function(role, role_id) { %>
                                         <option value="<%=role_id%>" <%= role_id === properties.user_role ? 'selected' : ''%>><%= role.pretty_name %></option>
@@ -619,34 +600,34 @@
                     </div>
                     <% if (is_admin) { %>
                         <% if (properties.alive =="true") { %>
-    	                    <div class ="user-buttons btn-group btn-group-justified kill-user-wrapper">
+    	                    <div class ="user-buttons btn-group btn-group-justified js-kill-user-wrapper">
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger js-ban-user">Ban</button>
     	                        </div>
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default edit-photo">Photo</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default js-edit-photo">Photo</button>
     	                        </div>
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger kill-user">Kill</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger js-kill-user">Kill</button>
     	                        </div>
     	                    </div>
     	                <% } else { %>
-    	                    <div class ="user-buttons btn-group btn-group-justified revive-user-wrapper">
+    	                    <div class ="user-buttons btn-group btn-group-justified js-revive-user-wrapper">
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger ban-user">Ban</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-danger js-ban-user">Ban</button>
     	                        </div>
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default edit-photo">Photo</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default js-edit-photo">Photo</button>
     	                        </div>
     	                        <div class="btn-group">
-    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary revive-user">Revive</button>
+    	                            <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-primary js-revive-user">Revive</button>
     	                        </div>
     	                    </div>
     					<% } %>
                      </div>
                     <% } else { %>
                          <div class ="user-buttons">
-    	                        <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default btn-block edit-photo">Photo</button>
+    	                        <button type="button" data-user-id ="<%=user_id %>" data-user-name ="<%=properties.first_name + ' ' + properties.last_name %>" class="btn btn-default btn-block js-edit-photo">Photo</button>
                         </div>
                     <% } %>
             </div>
@@ -656,9 +637,9 @@
 
     <script id="admin-users-template" type="text/template">
         <% if (teams_enabled) { %>
-            <div class="teams hidden-xs">
+            <div class="teams js-sidebar-teams hidden-xs">
                 <div class="sidebar-wrapper">
-                    <ul id="team_list" class="sidebar-nav">
+                    <ul class="sidebar-nav js-team-list">
 
                     </ul>
                 </div>
@@ -669,7 +650,7 @@
 
         </div>
 
-        <div class="modal fade" id="edit_photo_modal" role="dialog">
+        <div class="modal fade js-modal-edit-photo" role="dialog">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -679,14 +660,14 @@
               <form class="form" role="form">
                   <div class="modal-body">
                     <div class="user-photo-wrapper"></div>
-                    <p>If you'd like to change <strong><span class="user-name"></span></strong>'s photo enter a new url here.</p>
+                    <p>If you'd like to change <strong><span class="js-user-name"></span></strong>'s photo enter a new url here.</p>
                      <div class="form-group">
-                         <label for="photo_url">Photo Url:</label><input class="form-control" id="photo_url" type="text" placeholder ="Enter Photo URL"/>
+                         <label for="js-photo-url">Photo Url:</label><input class="form-control" id="js-photo-url" type="text" placeholder ="Enter Photo URL"/>
                      </div>
                   </div>
                   <div class="modal-footer">
                     <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
-                    <button class="btn btn-primary btn-medium edit-photo-submit">Save</button>
+                    <button class="btn btn-primary btn-medium js-edit-photo-submit">Save</button>
                   </div>
               </form>
             </div><!-- /.modal-content -->
@@ -694,7 +675,7 @@
         </div><!-- /.modal -->
 
 
-        <div id="revive_user_modal" class="modal fade">
+        <div class="modal fade js-modal-revive-user">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -702,15 +683,15 @@
                 <h4 class="modal-title">Revive User</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to revive <strong><span class="user-name"></span></strong>? This will revive them and randomly place them in the middle of another assassin/target pair.
+                <p>Are you sure you want to revive <strong><span class="js-user-name"></span></strong>? This will revive them and randomly place them in the middle of another assassin/target pair.
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary hidden-xs revive-user-submit">Revive User</button>
+                <button type="button" class="btn btn-primary hidden-xs js-revive-user-submit">Revive User</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-primary visible-xs revive-user-submit">Revive User</button>
+                <button type="button" class="btn btn-block btn-primary visible-xs js-revive-user-submit">Revive User</button>
 
               </div>
             </div><!-- /.modal-content -->
@@ -719,7 +700,7 @@
 
 
 
-        <div id="kill_user_modal" class="modal fade">
+        <div class="modal fade js-modal-kill-user">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -727,16 +708,16 @@
                 <h4 class="modal-title">Kill User</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to kill <strong><span class="user-name"></span></strong>? This will kill them as though their assassin has killed them.<br />
+                <p>Are you sure you want to kill <strong><span class="js-user-name"></span></strong>? This will kill them as though their assassin has killed them.<br />
                     <strong>If you want to ban the user completely close this window and click "Ban User."</strong>
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger hidden-xs kill-user-submit">Kill User</button>
+                <button type="button" class="btn btn-danger hidden-xs js-kill-user-submit">Kill User</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-danger visible-xs kill-user-submit">Kill User</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs js-kill-user-submit">Kill User</button>
 
               </div>
             </div><!-- /.modal-content -->
@@ -745,7 +726,7 @@
 
 
 
-        <div id="ban_user_modal" class="modal fade">
+        <div class="modal fade js-modal-ban-user">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -753,17 +734,17 @@
                 <h4 class="modal-title">Ban User</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to ban <strong><span class="user-name"></span></strong>? They will be permanently removed from the game and leaderboard. <br />
+                <p>Are you sure you want to ban <strong><span class="js-user-name"></span></strong>? They will be permanently removed from the game and leaderboard. <br />
                     <strong>This action cannot be undone.</strong><br />
                     If you just want to kill them close this window and click "Kill User."
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger hidden-xs ban-user-submit">Ban User</button>
+                <button type="button" class="btn btn-danger hidden-xs js-ban-user-submit">Ban User</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-danger visible-xs ban-user-submit">Ban User</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs js-ban-user-submit">Ban User</button>
 
               </div>
             </div><!-- /.modal-content -->
@@ -771,7 +752,7 @@
         </div><!-- /.modal -->
 
 
-        <div id="delete_team_modal" class="modal fade">
+        <div class="modal fade js-modal-delete-team">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -779,15 +760,15 @@
                 <h4 class="modal-title">Delete Team</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to delete team <strong><span class="team-name"></span></strong>? <br />This will remove all users from the team and delete it.
+                <p>Are you sure you want to delete team <strong><span class="js-delete-team-name"></span></strong>? <br />This will remove all users from the team and delete it.
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger hidden-xs delete-team-submit">Delete Team</button>
+                <button type="button" class="btn btn-danger hidden-xs js-delete-team-submit">Delete Team</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-danger visible-xs delete-team-submit">Delete Team</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs js-delete-team-submit">Delete Team</button>
 
               </div>
             </div><!-- /.modal-content -->
@@ -796,51 +777,51 @@
 
     </script>
 
-    <script id="admin-game-settings-template" type="text/template">
+    <script id="template-admin-game-settings" type="text/template">
         <div class="container">
             <div class="col-sm-4 col-sm-offset-1">
                 <h1 class="text-center">Settings</h1>
                 <form class="game-settings" role="form">
                     <div class="form-group">
-                        <label for="game_name" class="control-label">Game Name:</label>
-                        <input id="game_name" class="form-control" value="<%=game_name%>" />
+                        <label for="js-input-game-name" class="control-label">Game Name:</label>
+                        <input id="js-input-game-name" class="form-control" value="<%=game_name%>" />
                     </div>
                     <div class="form-group">
-                        <label for="game_password" class="control-label">Game Password:</label>
-                        <input id="game_password" class="form-control" placeholder="Leave Blank For No Password" value="<%= game_properties.game_password %>"/>
+                        <label for="js-input-game-password" class="control-label">Game Password:</label>
+                        <input id="js-input-game-password" class="form-control" placeholder="Leave Blank For No Password" value="<%= game_properties.game_password %>"/>
                     </div>
 
                     <div class="form-group">
                         <div class="checkbox">
-                            <label for="teams_enabled">
-                                <input id="teams_enabled" type="checkbox" <% if (teams_enabled) { %> checked <% } %>/> Enable Teams
+                            <label for="js-input-teams-enabled">
+                                <input id="js-input-teams-enabled" type="checkbox" <% if (teams_enabled) { %> checked <% } %>/> Enable Teams
                             </label>
                         </div>
-                        <button class="btn btn-block btn-primary save-game">Save</button>
+                        <button class="btn btn-block btn-primary js-save-game">Save</button>
                     </div>
 
                 </form>
                 <button class="btn btn-block btn-primary js-facebook-page">Setup DMAssassins Page</button>
                 <% if (!game_started) { %>
-                    <button class="btn btn-block btn-success start-game">Start Game</button>
+                    <button class="btn btn-block btn-success js-start-game">Start Game</button>
                 <% } else { %>
-                    <button class="btn btn-block btn-danger end-game">End Game</button>
+                    <button class="btn btn-block btn-danger js-end-game">End Game</button>
                 <% } %>
 
             </div>
             <div class="list-group col-sm-4 col-sm-offset-2">
                 <h1 class="text-center">Plot Twists</h1>
-                <a href="#" class="list-group-item" id="randomize_targets">Randomize Targets</a>
-                <a href="#" class="list-group-item" id="reverse_targets">Reverse Targets</a>
-                <a href="#" class="list-group-item" id="successive_kills">Successive Kills Count Double</a>
+                <a href="#" class="list-group-item js-open-plot-twist" id="randomize_targets">Randomize Targets</a>
+                <a href="#" class="list-group-item js-open-plot-twist" id="reverse_targets">Reverse Targets</a>
+                <a href="#" class="list-group-item js-open-plot-twist" id="successive_kills">Successive Kills Count Double</a>
                 <% if (teams_enabled) { %>
-                    <a href="#" class="list-group-item" id="strong_weak">Strong Target The Weak</a>
-                    <a href="#" class="list-group-item" id="strong_closed">Put Strongest In A Closed Loop</a>
+                    <a href="#" class="list-group-item js-open-plot-twist" id="strong_weak">Strong Target The Weak</a>
+                    <a href="#" class="list-group-item js-open-plot-twist" id="strong_closed">Put Strongest In A Closed Loop</a>
                 <% } %>
                 <a href="#" class="list-group-item" id="timer_24">24 Hours To Kill</a>
             </div>
         </div>
-        <div id="start_game_modal" class="modal fade">
+        <div class="modal fade js-modal-start-game">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -848,23 +829,23 @@
                 <h4 class="modal-title">Start Game</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to start the game <strong><span class="user-name"></span></strong>? This will immediately assign targets and notify all users the game has begun. <br />
+                <p>Are you sure you want to start the game <strong><span><%= game_name %></span></strong>? This will immediately assign targets and notify all users the game has begun. <br />
                     If you're not ready to start the game, close this window.
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success hidden-xs start-game-submit">Start Game</button>
+                <button type="button" class="btn btn-success hidden-xs js-start-game-submit">Start Game</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-success visible-xs start-game-submit">Start Game</button>
+                <button type="button" class="btn btn-block btn-success visible-xs js-start-game-submit">Start Game</button>
 
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-          <div id="end_game_modal" class="modal fade">
+          <div class="modal fade js-modal-end-game">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -872,27 +853,27 @@
                 <h4 class="modal-title">End Game</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to end the game <strong><span class="user-name"></span></strong>? This will immediately delete the game from dmassassins.com<br />
+                <p>Are you sure you want to end the game <strong><span><%= game_name %></span></strong>? This will immediately delete the game from dmassassins.com<br />
                     If you're not ready to end the game, close this window.
                 </p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger hidden-xs end-game-submit">End Game</button>
+                <button type="button" class="btn btn-danger hidden-xs js-end-game-submit">End Game</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-danger visible-xs end-game-submit">End Game</button>
+                <button type="button" class="btn btn-block btn-danger visible-xs js-end-game-submit">End Game</button>
 
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-        <div id="plot-twist-modal-container"></div>
+        <div class="js-wrapper-modal-plot-twist"></div>
     </script>
 
-    <script id="plot-twist-modal-template" type="text/template">
-        <div id="plot-twist-modal" class="modal fade">
+    <script id="template-modal-plot-twist" type="text/template">
+        <div class="modal fade js-modal-plot-twist">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -905,7 +886,7 @@
                     <!-- @if BETA == "FALSE" -->
                     <div class="checkbox">
                         <label>
-                          <input type="checkbox" id="send-twist-email" <% if (checked) { %> checked <% } %>> Should we email users about this plot twist?<br />
+                          <input type="checkbox" class="js-input-send-twist-email" <% if (checked) { %> checked <% } %>> Should we email users about this plot twist?<br />
                           <i>Note: If you plan to pair this plot twist with any others, we recommend you craft your own email to avoid spamming your users</i>
                         </label>
                     </div>
@@ -913,10 +894,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn hidden-xs twist-submit <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
+                    <button type="submit" class="btn hidden-xs js-submit-twist <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
 
                     <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-block visible-xs twist-submit  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
+                    <button type="submit" class="btn btn-block visible-xs js-submit-twist  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
                 </div>
               </form>
             </div><!-- /.modal-content -->
@@ -1011,7 +992,7 @@
         </div>
     </script>
 
-    <script id="super-admin-targets-template" type="text/template">
+    <script id="template-super-admin-targets" type="text/template">
         <div class="container text-center">
             <% _.each(loops, function(loop, i){ %> 
                 <h1>Loop <%= i + 1 %> - <%= loop.length %> Targets</h1>
@@ -1137,9 +1118,9 @@
 
 <body>
     <section id="app">
-        <section id="nav_body"></section>
+        <section id="js-wrapper-nav"></section>
 
-        <section class="container-fluid" id="app_body"></section>
+        <section class="container-fluid" id="js-wrapper-app"></section>
     </section>
 </body>
 </html>
