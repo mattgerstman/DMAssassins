@@ -170,7 +170,7 @@ func (gameMapping *GameMapping) delete() (appErr *ApplicationError) {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// the game mapping no longer exists so  set it to nil
+	// the game mapping no longer exists so set it to nil
 	gameMapping = nil
 	return nil
 }

@@ -27,29 +27,31 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-            'click .ban-user': 'banUserModal',
-            'click .kill-user': 'killUserModal',
-            'click .revive-user': 'reviveUserModal',
-            'click .edit-photo': 'editPhotoModal',
-            'click .ban-user-submit': 'banUser',
-            'click .kill-user-submit': 'killUser',
-            'click .revive-user-submit': 'reviveUser',
-            'change select.user-team': 'selectChangeTeam',
-            'change select.user-role': 'selectChangeRole',
-            'click  a.team-name ': 'sortByTeam',
-            'click .new-team-open': 'showNewTeam',
-            'click .create-new-team': 'createNewTeam',
-            'click .cancel-new-team': 'cancelNewTeam',
-            'keyup .new-team-name': 'newTeamKeypress',
-            'blur .new-team-form input': 'blurTeamForm',
-            'click .edit-team': 'showEditTeamForm',
-            'click .cancel-edit-team': 'cancelEditTeam',
-            'click .save-edit-team': 'saveEditTeam',
-            'click .delete-team': 'deleteTeamModal',
-            'click .delete-team-submit': 'deleteTeam',
-            'click .edit-photo-submit': 'editPhoto',
-            'mouseover .teams': 'sidebarMouseover',
-            'mouseout .teams': 'sidebarMouseout'
+
+            'click  .js-ban-user'           : 'banUserModal',
+            'click  .js-ban-user-submit'    : 'banUser',
+            'click  .js-cancel-edit-team'   : 'cancelEditTeam',            
+            'click  .js-cancel-new-team'    : 'cancelNewTeam',
+            'click  .js-create-new-team'    : 'createNewTeam',
+            'click  .js-delete-team'        : 'deleteTeamModal',
+            'click  .js-delete-team-submit' : 'deleteTeam',
+            'click  .js-edit-photo-submit'  : 'editPhoto',
+            'click  .js-edit-photo'         : 'editPhotoModal',
+            'click  .js-edit-team'          : 'showEditTeamForm',
+            'blur   .js-form-new-team input': 'blurTeamForm',
+            'click  .js-kill-user'          : 'killUserModal',
+            'click  .js-kill-user-submit'   : 'killUser',
+            'keyup  .js-new-team-name'      : 'newTeamKeypress',
+            'click  .js-new-team-open'      : 'showNewTeam',
+            'click  .js-revive-user'        : 'reviveUserModal',
+            'click  .js-revive-user-submit' : 'reviveUser',
+            'click  .js-save-edit-team'     : 'saveEditTeam',
+            'click  .js-team-name '         : 'sortByTeam',
+            'change .js-user-team'          : 'selectChangeTeam',
+            'change .js-user-role'          : 'selectChangeRole',
+
+            'mouseover .js-sidebar-teams'   : 'sidebarMouseover',
+            'mouseout  .js-sidebar-teams'   : 'sidebarMouseout'
         },
         team: undefined,
         // constructor
@@ -64,23 +66,23 @@ var app = app || {
         banUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
             var user_id = $(event.currentTarget).data('user-id');
-            $('.ban-user-submit').data('user-id', user_id);
-            $('#ban_user_modal .user-name').text(user_name);
-            $('#ban_user_modal').modal();
+            $('.js-ban-user-submit').data('user-id', user_id);
+            $('.js-modal-ban-user .js-user-name').text(user_name);
+            $('.js-modal-ban-user').modal();
         },
         killUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
             var user_id = $(event.currentTarget).data('user-id');
-            $('.kill-user-submit').data('user-id', user_id);
-            $('#kill_user_modal .user-name').text(user_name);
-            $('#kill_user_modal').modal();  
+            $('.js-kill-user-submit').data('user-id', user_id);
+            $('.js-modal-kill-user .js-user-name').text(user_name);
+            $('.js-modal-kill-user').modal();  
         },
         reviveUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
             var user_id = $(event.currentTarget).data('user-id');
-            $('.revive-user-submit').data('user-id', user_id);
-            $('#revive_user_modal .user-name').text(user_name);
-            $('#revive_user_modal').modal();  
+            $('.js-revive-user-submit').data('user-id', user_id);
+            $('.js-modal-revive-user .js-user-name').text(user_name);
+            $('.js-modal-revive-user').modal();  
         },
         editPhotoModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
@@ -88,11 +90,11 @@ var app = app || {
 
             var user = this.collection.get(user_id);
             var photo_url = user.getProperty('photo');
-            $('#edit_photo_modal .user-photo-wrapper').html('<img src="'+photo_url+'" class="thumbnail">');
-            $('#photo_url').val(photo_url);
-            $('.edit-photo-submit').data('user-id', user_id);
-            $('#edit_photo_modal .user-name').text(user_name);
-            $('#edit_photo_modal').modal();  
+            $('.js-modal-edit-photo .user-photo-wrapper').html('<img src="'+photo_url+'" class="thumbnail">');
+            $('#js-photo-url').val(photo_url);
+            $('.js-edit-photo-submit').data('user-id', user_id);
+            $('.js-modal-edit-photo .js-user-name').text(user_name);
+            $('.js-modal-edit-photo').modal();  
         },               
         banUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
@@ -101,8 +103,8 @@ var app = app || {
 		      	url: user.url() + 'ban/',
 		      	success: function(){
     		        var user_id = user.get('user_id');
-    		        $('#user_'+user_id).remove();
-    		        $('#ban_user_modal').modal('hide');      	
+    		        $('#js-user-'+user_id).remove();
+    		        $('.js-modal-ban-user').modal('hide');      	
 		      	},
 		      	error: function(response){
                     alert(response.responseText);
@@ -115,26 +117,26 @@ var app = app || {
 	      	var user = this.collection.get(user_id);
             var that = this;
 	      	user.kill();
-	      	$('#kill_user_modal').modal('hide');
+	      	$('.js-modal-kill-user').modal('hide');
         },
 
         reviveUser: function(event) {
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
 	      	user.revive();
-	      	$('#revive_user_modal').modal('hide');
+	      	$('.js-modal-revive-user').modal('hide');
         },
         editPhoto: function(event) {
             event.preventDefault();
         	var user_id = $(event.currentTarget).data('user-id');
 	      	var user = this.collection.get(user_id);
-	      	var photo_url = $('#photo_url').val();
+	      	var photo_url = $('#js-photo-url').val();
 	      	var that = this;
             user.setProperty('photo', photo_url);
             user.save(null, {
                 success: function(model, response){
                     console.log(model);
-                    $('#edit_photo_modal').modal('hide');
+                    $('.js-modal-edit-photo').modal('hide');
                 },
                 error: function(model, response){
                     alert(response.responseText);
@@ -163,7 +165,7 @@ var app = app || {
                 url: url,
                 data: {role: role_id},
                 success: function(){
-                    $('#role_saved_'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });    
+                    $('#js-role-saved-'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });    
                 },
                 error: function(response){
                     var originalRole = app.Running.Users.get(user_id).getProperty('user_role');
@@ -179,16 +181,16 @@ var app = app || {
             return team.save(null, {
                 success: function(){
                     that.collection.get(user_id).setProperty('team', team_name);
-                    $('#team_saved_'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });
+                    $('#js-team-saved-'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });
                     if (that.team !== undefined) {
-                        $('#user_'+user_id).remove();
+                        $('#js-user-'+user_id).remove();
                     }
                 }
             });                         
         },
         makeDroppable: function() {
             var that = this;
-            this.$el.find('#team_list li.team-droppable').droppable({
+            this.$el.find('.js-team-list li.team-droppable').droppable({
                 hoverClass: 'drop-hover',
                 tolerance: "pointer",
                 drop: function(event, ui) {
@@ -228,13 +230,13 @@ var app = app || {
         },
         showNewTeam: function(event) {            
             event.preventDefault();
-            this.$el.find('.new-team-open').addClass('hide');
-            this.$el.find('.new-team-form').removeClass('hide');
-            this.$el.find('.new-team-form input').focus();
+            this.$el.find('.js-new-team-open').addClass('hide');
+            this.$el.find('.js-form-new-team').removeClass('hide');
+            this.$el.find('.js-form-new-team input').focus();
         },
         hideNewTeam: function() {             
-            this.$el.find('.new-team-open').removeClass('hide');
-            this.$el.find('.new-team-form').addClass('hide');
+            this.$el.find('.js-new-team-open').removeClass('hide');
+            this.$el.find('.js-form-new-team').addClass('hide');
         },
         cancelNewTeam: function(event) {
             if (event)           
@@ -281,14 +283,14 @@ var app = app || {
         showEditTeamForm: function(event) {
             event.preventDefault();
             var team_id = $(event.currentTarget).data('team-id');
-            $('#nav_team_'+team_id).find('.edit-team-form').removeClass('hide');
-            $('#nav_team_'+team_id).find('.team-display').addClass('hide');
+            $('#js-nav-team-'+team_id).find('.edit-team-form').removeClass('hide');
+            $('#js-nav-team-'+team_id).find('.team-display').addClass('hide');
 
         },
         hideEditTeam: function(event) {
             var team_id = $(event.currentTarget).data('team-id');
-            $('#nav_team_'+team_id).find('.team-display').removeClass('hide');
-            $('#nav_team_'+team_id).find('.edit-team-form').addClass('hide');
+            $('#js-nav-team-'+team_id).find('.team-display').removeClass('hide');
+            $('#js-nav-team-'+team_id).find('.edit-team-form').addClass('hide');
         },
         cancelEditTeam: function(event) {
             if (event)           
@@ -299,7 +301,7 @@ var app = app || {
             event.preventDefault();
             var team_id = $(event.currentTarget).data('team-id');
             var team = app.Running.Teams.get(team_id);
-            var name = $('#nav_team_'+team_id).find('.edit-team-name').val();
+            var name = $('#js-nav-team-'+team_id).find('.edit-team-name').val();
             if (name == team.get('team_name'))
             {
                 this.hideEditTeam(event);
@@ -314,10 +316,10 @@ var app = app || {
             event.preventDefault();
             var team_name = $(event.currentTarget).data('team-name');
             var team_id = $(event.currentTarget).data('team-id');
-            $('.delete-team-submit').data('team-name', team_name);
-            $('.delete-team-submit').data('team-id', team_id);
-            $('#delete_team_modal .team-name').text(team_name);
-            $('#delete_team_modal').modal();
+            $('.js-delete-team-submit').data('team-name', team_name);
+            $('.js-delete-team-submit').data('team-id', team_id);
+            $('.js-delete-team-name').text(team_name);
+            $('.js-modal-delete-team').modal();
 
         },
         deleteTeam: function(event) {
@@ -339,11 +341,11 @@ var app = app || {
     	      	});
     	      	that.render();    	      	
             }});           
-            $('#delete_team_modal').modal('hide');
+            $('.js-modal-delete-team').modal('hide');
         },
         selectActiveTeam: function() {
             this.$el.find('.active').removeClass('active');
-            this.$el.find('#nav_team_'+this.team_id).addClass('active');
+            this.$el.find('#js-nav-team-'+this.team_id).addClass('active');
 
         },
         sidebarMouseover: function(){
@@ -365,7 +367,7 @@ var app = app || {
 			
             this.$el.html(this.template(data));
             
-            this.teams_view.setElement(this.$('#team_list')).render();
+            this.teams_view.setElement(this.$('.js-team-list')).render();
                     
             while (this.userViews.length)
             {   

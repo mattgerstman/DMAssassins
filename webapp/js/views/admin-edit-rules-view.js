@@ -22,7 +22,7 @@ var app = app || {
     app.Views.AdminEditRulesView = Backbone.View.extend({
 
 
-        template: _.template($('#admin-edit-rules-template').html()),
+        template: _.template($('#template-admin-edit-rules').html()),
         tagName: 'div',
 
         initialize: function(params) {
@@ -34,16 +34,16 @@ var app = app || {
         },
         loadEditor: function(){
             var that = this;
-            this.$el.find("#rules-editor").markdown({
+            this.$el.find(".js-rules-editor").markdown({
                 savable:true,
                 saveButtonClass: 'btn btn-md btn-primary',
-                footer: '<div class="saved hide">Saving...</div>',
+                footer: '<div class="saved js-saved hide">Saving...</div>',
                 onSave: function(event) {
                         var rules = event.getContent();
                         that.model.set('rules', rules);
-                        $('.saved').removeClass('hide');
+                        $('.js-saved').removeClass('hide');
                         that.model.save(null, {success: function(){
-                            $('.saved').text('Saved.').fadeOut(2000, function(){
+                            $('.js-saved').text('Saved.').fadeOut(2000, function(){
                                 $(this).text('Saving...');    
                             });
                             

@@ -197,9 +197,9 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 
 func PostKillTweet() (appErr *ApplicationError) {
 
-	//token := `CAAJJWeRefcEBAEqXaly1QCWEYCPo4g0wQwAUeATgKwZAwHUP0wuYXW0JgZCntYas2N7pG2lGdGZA8jVjwpGc5gp9wlK6hAwcby7qz6K27wYZCDcZAG2LRRxyR9g5GIlT9bDAd7mMarCOMpD7ZB6DGBLtcnwoKoIQyZABCFn03ExyKocxDoANZB9aOh1FhvJO9huyQiJdCD5GHqKocgWe4G6O10SCYhgT9a8ZD`
+	// token := `CAAJJWeRefcEBAEqXaly1QCWEYCPo4g0wQwAUeATgKwZAwHUP0wuYXW0JgZCntYas2N7pG2lGdGZA8jVjwpGc5gp9wlK6hAwcby7qz6K27wYZCDcZAG2LRRxyR9g5GIlT9bDAd7mMarCOMpD7ZB6DGBLtcnwoKoIQyZABCFn03ExyKocxDoANZB9aOh1FhvJO9huyQiJdCD5GHqKocgWe4G6O10SCYhgT9a8ZD`
 
-	//pageId := `1697108740514966`
+	// pageId := `1697108740514966`
 	res, err := fb.Get("/10152622020481913", fb.Params{"fields": "access_token", "access_token": Config.FBAccessToken})
 	fmt.Println(res)
 	if err != nil {

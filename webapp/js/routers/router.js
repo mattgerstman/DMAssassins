@@ -322,7 +322,8 @@ var app = app || {
                 if (fragment === '')
                     fragment = 'my_profile';
 
-                app.Running.NavView.highlight('#nav_' + fragment);
+                fragment = fragment.replace('_', '-');
+                app.Running.NavView.highlight('#js-nav-' + fragment);
                 app.Running.NavView.handleTarget();
                 app.Running.NavGameView.updateText();
             }

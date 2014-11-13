@@ -22,22 +22,23 @@ var app = app || {
     app.Views.ProfileView = Backbone.View.extend({
 
 
-        template: _.template($('#profile-template').html()),
+        template: _.template($('#template-profile').html()),
         tagName: 'div',
 
         // The DOM events specific to an item.
         events: {
-            'click .thumbnail': 'showFullImage',
-            'click #quit': 'showQuitModal',
-            'click #quit_game_confirm': 'quitGame',
-            'click #email_settings': 'showEmailModal',
+            'keyup .js-email': 'emailEnter',
+            'click .js-email-settings': 'showEmailModal',
             'click .js-email-settings-save': 'saveEmailSettings',
-            'keyup #email': 'emailEnter' 
+            'click .js-profile-picture': 'showFullImage',
+            'click .js-quit-game': 'showQuitModal',
+            'click .js-quit-game-confirm': 'quitGame'
+
         },
 
         // load profile picture in modal window
         showFullImage: function() {
-            $('#photoModal').modal();
+            $('.js-profile-modal-photo').modal();
         },
         // load quit confirm modal
         showQuitModal: function() {
@@ -46,16 +47,16 @@ var app = app || {
             };
             var template = _.template($('#quit-modal-template').html());
             var html = template(templateVars);
-            $('#quit_modal_wrapper').html(html);
-            $('#quit_modal').modal();
+            $('.js-wrapper-quit-modal').html(html);
+            $('.js-profile-quit-modal').modal();
         },
         quitGame: function() {
-            var secret = this.$el.find('#quit_secret').val();
+            var secret = this.$el.find('#js-quit-secret').val();
             this.model.quit(secret);
 
         },
         showEmailModal: function(){
-            $('#email_modal').modal();
+            $('.js-modal-email-settings').modal();
         },
         emailEnter: function(event) {
             if (event.which == 13) {
@@ -63,10 +64,10 @@ var app = app || {
             }  
         },
         saveEmailSettings: function(){
-            var email = $('#email').val();
-            var allow_email = $('#allow_email').is(':checked') ? 'true' : 'false';
+            var email = $('.js-email').val();
+            var allow_email = $('.js-allow-email').is(':checked') ? 'true' : 'false';
             this.model.saveEmailSettings(email, allow_email);
-            $('#email_modal').modal('hide');
+            $('.js-modal-email-settings').modal('hide');
         },
         // constructor
         initialize: function(params) {
@@ -81,7 +82,7 @@ var app = app || {
 
         },
         destroyCallback: function() {
-            $('#quit_modal').modal('hide');         
+            $('.js-profile-quit-modal').modal('hide');         
         },
         render: function() {
             $('.modal-backdrop').remove();
