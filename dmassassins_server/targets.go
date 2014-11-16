@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"errors"
 	"fmt"
 	"math/rand"
 	"time"
@@ -180,6 +181,34 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 		return appErr
 	}
 
+	// if we don't have even strong and weak players we're in trouble
+	if len(strong) != len(weak) {
+		return NewApplicationError("Internal Error", errors.New(`Strong List and Weak List have different lengths`), ErrCodeDatabase)
+	}
+
+	// Get number of teams
+	numTeams := len(weak)
+
+	for i := 0; i < numTeams; i++ {
+		if !uuid.Equal(strong[i], weak[i]) {
+			continue
+		}
+		numTeams--
+		next := i + 1
+		if next == numTeams {
+			strong = strong[:i]
+			weak = weak[:i]
+			i--
+			continue
+		}
+		strong = append(strong[:i], strong[next:]...)
+		weak = append(weak[:i], weak[next:]...)
+		i--
+
+	}
+
+	weak = append(weak[1:], weak[0])
+
 	// Select other users from the db
 	var strongWeak []interface{}
 	strongWeak = append(strongWeak, game.GameId.String())
@@ -251,9 +280,6 @@ func (game *Game) assignStrongTargetWeak(tx *sql.Tx) (appErr *ApplicationError) 
 	if appErr != nil {
 		return appErr
 	}
-
-	// Get number of teams
-	numTeams := len(weak)
 
 	// Determine how often to insert a strong/weak pair
 	insertNum := (numPlayers / numTeams) - 1

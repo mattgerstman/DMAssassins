@@ -471,12 +471,6 @@ func (game *Game) GetWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) 
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// We need to offset strong and weak to ensure that strong players aren't targetting their own weakest palyer
-	var firstWeakUserIdBuffer string
-	rows.Next()
-	rows.Scan(&firstWeakUserIdBuffer)
-	firstWeakUserId := uuid.Parse(firstWeakUserIdBuffer)
-
 	// parse weak users into slice
 	for rows.Next() {
 		var weakUserIdBuffer string
@@ -493,7 +487,6 @@ func (game *Game) GetWeakPlayers() (weak []uuid.UUID, appErr *ApplicationError) 
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	weak = append(weak, firstWeakUserId)
 	return weak, nil
 }
 

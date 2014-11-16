@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"strconv"
 	"time"
@@ -214,11 +215,14 @@ func (user *User) handleSuccessiveKills(tx *sql.Tx, gameId uuid.UUID) (appErr *A
 
 }
 
-// Kills the weakest player on a team
-func killWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId uuid.UUID) (appErr *ApplicationError) {
+// Kills the next weakest player on a team
+func killNextWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId, userId uuid.UUID) (appErr *ApplicationError) {
 	// Get the id for the weakest player's assasin
 	var assassingIdBuffer, secret string
-	err := db.QueryRow(`SELECT targets.user_id, map.secret FROM dm_user_targets as targets, dm_user_game_mapping as map WHERE targets.target_id = map.user_id AND map.game_id = $1 AND map.team_id = $2 AND alive = true ORDER BY map.kills ASC LIMIT 1`, gameId.String(), teamId.String()).Scan(&assassingIdBuffer, &secret)
+	err := db.QueryRow(`SELECT targets.user_id, map.secret FROM dm_user_targets as targets, dm_user_game_mapping as map WHERE targets.target_id = map.user_id AND map.game_id = $1 AND map.team_id = $2 AND map.user_id != $3 AND alive = true ORDER BY map.kills ASC LIMIT 1`, gameId.String(), teamId.String(), userId.String()).Scan(&assassingIdBuffer, &secret)
+	if err == sql.ErrNoRows {
+		return nil
+	}
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -285,7 +289,8 @@ func (user *User) handleDefendWeak(tx *sql.Tx, oldTargetId, gameId, teamId uuid.
 		// Compare the current weakest player and the given last target, if they match kill the next weakest player
 		weakUserId := uuid.Parse(weakUserIdBuffer)
 		if uuid.Equal(oldTargetId, weakUserId) {
-			return killWeakestPlayerForTeam(tx, gameId, teamId)
+			fmt.Println(`Kill weakest`)
+			return killNextWeakestPlayerForTeam(tx, gameId, teamId, oldTargetId)
 		}
 	}
 
