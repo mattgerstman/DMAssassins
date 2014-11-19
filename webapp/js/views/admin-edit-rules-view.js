@@ -37,7 +37,7 @@ var app = app || {
             this.$el.find(".js-rules-editor").markdown({
                 savable:true,
                 saveButtonClass: 'btn btn-md btn-primary',
-                footer: '<div class="saved js-saved hide">Saving...</div>',
+                footer: '<div class="rules-saved js-saved hide">Saving...</div>',
                 onSave: function(event) {
                         var rules = event.getContent();
                         that.model.set('rules', rules);

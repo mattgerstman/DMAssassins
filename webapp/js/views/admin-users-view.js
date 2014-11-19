@@ -159,8 +159,8 @@ var app = app || {
         },
         makeDroppable: function() {
             var that = this;
-            this.$el.find('.js-team-list li.team-droppable').droppable({
-                hoverClass: 'drop-hover',
+            this.$el.find('.js-team-list > li').droppable({
+                hoverClass: 'active',
                 tolerance: "pointer",
                 drop: function(event, ui) {
                     var user_id = ui.helper.data('user-id');

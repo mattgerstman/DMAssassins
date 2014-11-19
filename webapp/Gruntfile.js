@@ -82,18 +82,28 @@ module.exports = function(grunt) {
       dev: {
         options: {
           banner: '<%= banner %>',          
+          strictMath: true,
+          sourceMap: true,
+          outputSourceFiles: true,
+          sourceMapURL: 'DMAssassins.css.map',
+          sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map'
         },
         files: {
-          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/*.less'          
+          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/DMAssassins.less'          
         }
       },
       prod: {
         options: {
           banner: '<%= banner %>',
-          cleancss: true          
+          strictMath: true,
+          sourceMap: true,
+          outputSourceFiles: true,
+          sourceMapURL: 'DMAssassins.css.map',
+          sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map',
+          cleancss: true
         },
         files: {          
-          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/*.less'          
+          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/DMAssassins.less'          
         }
       }
     },

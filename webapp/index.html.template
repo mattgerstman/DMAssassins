@@ -28,7 +28,7 @@
     <link href="/bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
-    <link href="dist/<!-- @echo VERSION -->/DMAssassins..css" rel="stylesheet" type="text/css">
+    <link href="dist/<!-- @echo VERSION -->/DMAssassins.css" rel="stylesheet" type="text/css">
     <!-- @endif -->
 
 
@@ -143,16 +143,15 @@
                         </div>
                     <% } %>
                 <div class="row">
-                    <a class="thumbnail js-target-picture">
+                    <a class="thumbnail profile-thumbnail js-target-picture">
                        <img src=<%= properties.photo_thumb %>>
                     </a>
                 </div>
                 <div class="row user-column">
-                    <form class="form-inline kill-form" id="kill_form">
-                        <input class="form-control js-target-secret" placeholder="Enter Secret"/>
-                        <button type="button" class="btn btn-danger js-target-kill">Kill Target</button>
+                    <form class="form-inline">
+                        <input class="form-control input-secret js-target-secret" placeholder="Enter Secret"/>
+                        <button type="button" class="btn btn-danger btn-kill js-target-kill">Kill Target</button>
                     </form>
-
                 </div>
              </div>
         </div>
@@ -189,7 +188,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <a class="thumbnail js-profile-picture">
+                    <a class="thumbnail profile-thumbnail js-profile-picture">
                        <img src=<%= properties.photo_thumb %>>
                     </a>
                 </div>
@@ -487,43 +486,43 @@
     </script>
 
 
-    <script id="admin-users-teams-template" type="text/template">
-            <li class="team" id="js-nav-team-all">
-            <a href="#" class="js-team-name" data-team-id="SHOW_ALL" >Show All</a>
+    <script id="template-admin-users-teams" type="text/template">
+            <li class="sidebar-team" id="js-nav-team-all">
+            <a href="#" class="js-team-name sidebar-teamName" data-team-id="SHOW_ALL" >Show All</a>
         </li>
-        <li class="team" id="js-nav-team-null">
-            <a href="#" class="js-team-name" data-team-id="NO_TEAM">No Team</a>
+        <li class="sidebar-team" id="js-nav-team-null">
+            <a href="#" class="js-team-name sidebar-teamName" data-team-id="NO_TEAM">No Team</a>
         </li>
         <% if (is_admin) { %>
-            <li class="new-team">
-                <a href="#" class="js-new-team-open">New Team</a>
+            <li class="sidebar-team new-team">
+                <a href="#" class="js-new-team-open sidebar-teamName">New Team</a>
                 <form class="js-form-new-team new-team-form form-inline hide">
-                    <input placeholder="Enter Team Name" type="text" class="js-new-team-name form-control" />
-                    <a href="#" class="team-input-button js-create-new-team"><span class="glyphicon glyphicon-ok"></span></a>
-                    <a href="#" class="team-input-button js-cancel-new-team"><span class="glyphicon glyphicon-remove"></span></a>
+                    <input placeholder="Enter Team Name" type="text" class="js-new-team-name form-control sidebar-input" />
+                    <a href="#" class="js-create-new-team"><span class="glyphicon glyphicon-ok sidebar-glyphicon sidebar-glyphicon-success"></span></a>
+                    <a href="#" class="js-cancel-new-team"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
                 </form>
             </li>
         <%
             }
         _.each(teams, function(team){
         %>
-            <li class="team js-droppable-team" id="js-nav-team-<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
+            <li class="sidebar-team js-droppable-team" id="js-nav-team-<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
                 <div class="team-display">
-                    <a href="#" class="js-team-name" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
+                    <a href="#" class="js-team-name sidebar-teamName" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
                         <%= team.team_name %>
                     </a>
-                <% if (is_admin) { %>
-    				<div class="team-buttons">
-    	                <a href="#" class="edit-team js-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
-    					<a href="#" class="delete-team js-delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
-                    </div>
-                <% } %>
+                    <% if (is_admin) { %>
+        				<div class="sidebar-teamButtons">
+        	                <a href="#" class="js-edit-team"   data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil sidebar-glyphicon sidebar-glyphicon-warning"></span></a>
+        					<a href="#" class="js-delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
+                        </div>
+                    <% } %>
                 </div>
                 <% if (is_admin) { %>
                     <form class="edit-team-form form-inline hide">
-                        <input type="text" class="edit-team-name form-control" value="<%= team.team_name %>"/>
-                        <a href="#" class="team-input-button js-save-edit-team save-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok"></span></a>
-                        <a href="#" class="team-input-button js-cancel-edit-team cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove"></span></a>
+                        <input type="text" class="edit-team-name form-control sidebar-input" value="<%= team.team_name %>"/>
+                        <a href="#" class="js-save-edit-team  " data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok sidebar-glyphicon sidebar-glyphicon-success"></span></a>
+                        <a href="#" class="js-cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
                     </form>
                 <% } %>
 
@@ -546,11 +545,11 @@
     <script id="template-admin-user" type="text/template">
 
         <div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" id="js-user-<%= user_id %>" data-user-id="<%= user_id %>">
-             <img class="drag-img js-drag-img hide" src=<%= properties.photo_thumb %>>
+             <img class="u-maxWidthStandard js-drag-img hide" src=<%= properties.photo_thumb %>>
              <div class="js-user user">
                  <div class="user-column text-center">
                     <div class="row">
-                        <h3>
+                        <h3 class="u-margin-0">
                         	<% if (properties.alive !="true") { %>
                         		<s>
 							<%} %>
@@ -565,17 +564,17 @@
                     </div>
 
                     <div class="row">
-                        <a class="thumbnail js-draggable-photo <% if (!teams_enabled) { %> default_cursor <%} %>">
-                            <div class="thumbnail-wrapper">
-                                <img class="img img-responsive full-width <% if (properties.alive !="true") { %> dead <%} %>" src=<%= properties.photo_thumb %>>
+                        <a class="user-thumbnail thumbnail js-draggable-photo <% if (!teams_enabled) { %> u-cursorDefault <%} %>">
+                            <div class="user-thumbnailWrapper">
+                                <img class="img img-responsive user-img full-width <% if (properties.alive !="true") { %> user-dead <%} %>" src=<%= properties.photo_thumb %>>
                             </div>
                         </a>
                     </div>
-                    <div class="user-data-text">
+                    <div>
                         <% if (teams_enabled) { %>
-                            <div class="row">
-                                <label>Team:<span class="team-saved" id="js-team-saved-<%= user_id %>" >Saved</span></label>
-                                <select class="js-user-team" data-user-id ="<%=user_id %>">
+                            <div class="user-row">
+                                <label class="user-label">Team:<span class="user-saved" id="js-team-saved-<%= user_id %>" >Saved</span></label>
+                                <select class="js-user-team user-select" data-user-id ="<%=user_id %>">
 
                                     <% if (properties.team == 'null') { %>
     	                                <option value ="">Select a Team</option>
@@ -586,9 +585,9 @@
                             </div>
                         <% } %>
                         <% if (is_admin) { %>
-                            <div class="row">
-                                <label>Role:<span class="role-saved" id="js-role-saved-<%= user_id %>" >Saved</span></label>
-                                <select class="js-user-role" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
+                            <div class="user-row">
+                                <label class="user-label">Role:<span class="user-saved" id="js-role-saved-<%= user_id %>" >Saved</span></label>
+                                <select class="js-user-role user-select" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
 
                                     <% _.each(roles, function(role, role_id) { %>
                                         <option value="<%=role_id%>" <%= role_id === properties.user_role ? 'selected' : ''%>><%= role.pretty_name %></option>
@@ -634,7 +633,7 @@
                 </div>
             </div>
         <% } %>
-        <div class="admin-users-body <% if (teams_enabled) { %>adjust-sidebar <% } %>">
+        <div class="admin-users-body <% if (teams_enabled) { %> sidebar-bodyAdjust <% } %>">
 
 
         </div>
