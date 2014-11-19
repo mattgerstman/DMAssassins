@@ -1,33 +1,16 @@
-.admin-users-body {
-    padding-left: 0;
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
-}
-
-.sidebar-wrapper {
-    z-index: 1000;
-    left: 0;
-    top:50px;
-    width: 0;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background: #f8f8f8;
-    border-top: none;
-    -webkit-transition: all 0.5s ease;
-    -moz-transition: all 0.5s ease;
-    -o-transition: all 0.5s ease;
-    transition: all 0.5s ease;
-}
-
-.admin-users-body.toggled .sidebar-wrapper {
-    width: 0px;
-}
+/*
+// assets/styles/sidebar.less
+*/
 
 
 /* Sidebar Styles */
+
+.sidebar-wrapper {
+    width: 0;
+    height:0;
+    position: fixed;
+    .m-transitionEase(0.5s)
+}
 
 .sidebar-nav {
     width: 250px;
@@ -35,43 +18,69 @@
     padding: 0;
     list-style: none;
     margin-bottom:49px;
+    cursor: default;
 }
 
-.sidebar-nav > li {    
+.sidebar-team {    
     line-height: 50px;
     border-bottom: 1px solid #e7e7e7;
     width:250px;
 }
 
-.sidebar-nav > li:first-child {
-    border-top:none;
+
+.form-control.sidebar-input {
+    width:175px;
+    margin:0 0 0 18px;       
 }
 
-.sidebar-nav > li.active {
-    background: #e7e7e7;
-}
-
-.sidebar-nav > li input {
-    height:30px;
-    width:187.5px;
-       
-}
-
-.sidebar-nav > li a {
+.sidebar-teamName {
+	width:173px;
+	display: inline-block;
     margin-left: 20px;
-    color:#777
+    color:#777    
 }
-
-.sidebar-nav > li a:hover {
+.sidebar-teamName:hover {
     color:#333;
     text-decoration:none;
 }
 
+.sidebar-teamButtons {
+	width:65px;
+	display:inline;
+}
+
+.sidebar-glyphicon {
+    margin-top:3px;
+    margin-left:6px;
+    display:inline;
+    cursor: pointer;
+    color:#777;
+    width:0;
+}
+
+.sidebar-glyphicon-success:hover {
+    color:green;
+}
+.sidebar-glyphicon-warning:hover {
+    color:orange;
+}
+
+.sidebar-glyphicon-danger:hover {
+    color:red;
+}
+
+
 @media(min-width:768px) {
     .sidebar-wrapper {
+        top:50px;
+        left: 0;
         width: 250px;
-        position: fixed;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: #f8f8f8;
         border: 1px solid #e7e7e7;
+        z-index: 1000;
     }
 
     .sidebar-nav {
@@ -79,12 +88,8 @@
         overflow-y: scroll;
     }
 
-    .adjust-sidebar {
+    .sidebar-bodyAdjust {
         padding-left: 250px;
-    }
-
-    .admin-users-body.toggled {
-        padding-left: 0;
     }
 
 }

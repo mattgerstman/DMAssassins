@@ -23,3 +23,5 @@ dmassassins_server/game.go
 webapp/npm-debug.log
 
 backup.sql
+
+.DS_Store
