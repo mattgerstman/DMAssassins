@@ -81,7 +81,7 @@ var app = app || {
                 return;
             }
 
-            if ($(elem).hasClass('dropdown_item')) {
+            if ($(elem).attr('dropdown')) {
                 var dropdown = $(elem).attr('dropdown');
                 var parent = '#js-dropdown-parent-'+ dropdown;
                 elem = parent;

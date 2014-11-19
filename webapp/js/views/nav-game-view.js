@@ -26,7 +26,7 @@ var app = app || {
         tagName: 'ul',
 
         events: {
-            'click li a.switch_game': 'select'
+            'click .js-switch-game': 'select'
         },
         // constructor, loads a user id so we can get their games from the model
         initialize: function() {
