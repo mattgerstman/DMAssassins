@@ -21,6 +21,7 @@ type KillTimer struct {
 	ExecuteTs int64
 }
 
+
 // reloads all timers in the database
 func LoadAllTimers() (appErr *ApplicationError) {
 	// Get all existing kill timers
@@ -31,8 +32,8 @@ func LoadAllTimers() (appErr *ApplicationError) {
 	// Loop through the kill timers
 	for rows.Next() {
 		var gameIdBuffer string
-		var executeTs int64
-		err := rows.Scan(&gameIdBuffer, &executeTs)
+		var executeTsBuffer time.Time
+		err := rows.Scan(&gameIdBuffer, &executeTsBuffer)
 		// We almost never have scanning errors, but if we do this
 		if err != nil {
 			msg := `Error loading timer`
@@ -48,6 +49,9 @@ func LoadAllTimers() (appErr *ApplicationError) {
 			LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.ERROR, nil)
 			continue
 		}
+
+		executeTs := executeTsBuffer.Unix()
+
 		// Load timer
 		game.LoadTimer(executeTs)
 	}
@@ -101,7 +105,7 @@ func (game *Game) NewKillTimerTransactional(tx *sql.Tx, hours int64) (timer *tim
 	executeTs := (hours * SecInHour) + now
 
 	// Insert into db
-	insertTimer, err := db.Prepare(`INSERT INTO dm_kill_timers (game_id, create_ts, execute_ts) VALUES ($1, $2, $3)`)
+	insertTimer, err := db.Prepare(`INSERT INTO dm_kill_timers (game_id, create_ts, execute_ts) VALUES ($1, to_timestamp($2), to_timestamp($3))`)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
