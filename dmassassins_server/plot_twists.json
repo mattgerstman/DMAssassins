@@ -32,7 +32,7 @@
         "kill_mode": "defend_weak",
         "kill_timer": 48,
         "require_teams": true,
-        "revive": "strong"
+        "revive": "revive_strongest"
     },
     "timer_24": {
         "assign_targets": "normal",

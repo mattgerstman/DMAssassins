@@ -91,7 +91,7 @@ var app = app || {
             {
                 if (!app.Running.FB) {
                     throw new Error ('Error loading Facebook SDK');
-                }                
+                }
             }
             catch (e)
             {
@@ -104,13 +104,13 @@ var app = app || {
                 if (response.status === 'connected') {
                     // Logged into your app and Facebook.
                     //console.log(response);
-                    
-                    try 
+
+                    try
                     {
                         if (!response.authResponse)
                             throw new Error('Error processing facebook login');
-                            
-                        parent.createSession(response);                        
+
+                        parent.createSession(response);
                     }
                     catch (e)
                     {
@@ -122,17 +122,17 @@ var app = app || {
 
                     // The person is logged into Facebook, but not your app.
                     app.Running.FB.login(function(response) {
-                        
+
                         if (response.authResponse)
                         {
-                            parent.createSession(response);    
+                            parent.createSession(response);
                         }
                         else
                         {
                             alert('You must authorize Facebook to play DMAssassins!');
                             location.reload();
                         }
-                        
+
 
                         // scope are the facebook permissions we're requesting
                     }, {
@@ -147,10 +147,10 @@ var app = app || {
                         return;
                     }
                     app.Running.FB.login(function(response) {
-                        
+
                         if (response.authResponse)
                         {
-                            parent.createSession(response);    
+                            parent.createSession(response);
                         }
                         else
                         {
@@ -171,18 +171,18 @@ var app = app || {
         },
         recoverSession: function(response) {
             if (response.status === 'connected') {
-                // Logged into your app and Facebook.                
-                try 
+                // Logged into your app and Facebook.
+                try
                 {
                     if (!response.authResponse)
                         throw new Error('Error processing facebook login');
-                        
+
                     return this.createSession(response);
                 }
                 catch (e)
                 {
                     Raven.captureException(e, {extra: response});
-                }                
+                }
             }
             this.clear();
             Backbone.history.navigate('', {
@@ -210,7 +210,7 @@ var app = app || {
                     user_id: user.user_id,
                     game_id: game.game_id
                 });
-                
+
                 if (!response.token) {
                     Raven.captureException(new Error("Server didn't return token"), {extra: user});
                     alert('An unexpected error occurred. Please try again');
@@ -265,7 +265,7 @@ var app = app || {
                 'facebook_token': response.authResponse.accessToken,
                 'game_id': game_id
             };
-            
+
             var that = this;
 
             // performs the ajax request to the server to get session data
@@ -276,22 +276,22 @@ var app = app || {
                 retryLimit:3,
                 type: 'POST',
                 success: that.handleResponse,
-                error: function(serverResponse, textStatus, errorThrown) {                                
+                error: function(serverResponse, textStatus, errorThrown) {
                     Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, try_count: this.tryCount, server_response: serverResponse, text_status: textStatus, error_thrown :errorThrown}});
                     that.clear();
 
-                    // retry logic for login                    
+                    // retry logic for login
                     this.tryCount++;
                     if (this.tryCount < this.retryLimit)
                     {
                         var loginCall = this;
                         setTimeout(function(){
                             $.ajax(loginCall);
-                        }, 100)
+                        }, 100);
                         return;
-                        
+
                     }
-    
+
                     alert('An error occurred. Please try again later.');
                     Backbone.history.navigate('', {
                         trigger: true
