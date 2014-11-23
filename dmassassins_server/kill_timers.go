@@ -65,12 +65,22 @@ func LoadAllTimers() (appErr *ApplicationError) {
 
 // Loads a single timer and calls it after the set amount of time
 func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		fmt.Println(err)
+	}
+	
 	nowTime := time.Now()
-	now := nowTime.Unix()
-	timeDiff := executeTs - now
-	duration := time.Duration(timeDiff) * time.Second
+	nowInLoc := nowTime.In(loc)
+	now := nowInLoc.Unix()
+	timeDiff := now - executeTs
+	duration := time.Duration(timeDiff) * time.Second	
+
+	fmt.Println(now)
+	fmt.Println(executeTs)
+	fmt.Println(timeDiff)
 	if timeDiff <= 0 {
-		duration = 10 * time.Second
+		duration = 10 * time.Minute
 	}
 	fmt.Println(`Loading timer for ` + game.GameId.String())
 	fmt.Print(`Executing in `)
