@@ -297,9 +297,6 @@ var app = app || {
                     });
                 }
             });
-
-
-
         },
         storeSession: function(data) {
             // store a boolean to determine if we're authenticated

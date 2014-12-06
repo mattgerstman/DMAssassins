@@ -53,6 +53,27 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },      
     },
+    lintspaces: {
+	    javascript: {
+	        src: [
+	          'js/config.js',
+	          'js/lib/*.js',
+	          'js/models/*.js',
+	          'js/collections/*.js',
+	          'js/views/*.js',
+	          'js/routers/*.js',
+	          'js/*.js'
+	        ],
+	        options: {
+	            newline: true,
+	            newlineMaximum: 2,
+	            trailingspaces: true,
+	            indentation: 'spaces',
+	            spaces: 4,
+	            ignores: ['js-comments']
+	        }
+	    }
+	},
     env : {
       options : {
           VERSION: '<%= pkg.version %>',          
@@ -114,7 +135,7 @@ module.exports = function(grunt) {
       },
       js: {
         files: 'js/*/*.js',
-        tasks: ['jshint']
+        tasks: ['lintspaces', 'jshint']
       },
       index: {
         files: 'index.html.template',
@@ -133,9 +154,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-preprocess');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-lintspaces');
 
   // Default task.
-  grunt.registerTask('dev', ['jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
+  grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
   grunt.registerTask('prod', ['concat', 'uglify', 'less:prod', 'env:prod', 'preprocess:prod']);
 
 };

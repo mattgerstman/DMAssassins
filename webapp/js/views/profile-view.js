@@ -60,8 +60,8 @@ var app = app || {
         },
         emailEnter: function(event) {
             if (event.which == 13) {
-              this.saveEmailSettings();
-            }  
+                this.saveEmailSettings();
+            }
         },
         saveEmailSettings: function(){
             var email = $('.js-email').val();
@@ -82,7 +82,7 @@ var app = app || {
 
         },
         destroyCallback: function() {
-            $('.js-profile-quit-modal').modal('hide');         
+            $('.js-profile-quit-modal').modal('hide');
         },
         render: function() {
             $('.modal-backdrop').remove();
@@ -90,11 +90,11 @@ var app = app || {
             data.teams_enabled = false;
             var game = app.Running.Games.getActiveGame();
             if (game) {
-                data.teams_enabled = game.areTeamsEnabled();    
+                data.teams_enabled = game.areTeamsEnabled();
             }
             data.allow_email = data.properties.allow_email == 'true';
-            
-            var role = app.Running.User.getProperty('user_role');  
+
+            var role = app.Running.User.getProperty('user_role');
             var allow_quit = !AuthUtils.requiresCaptain(role);
             data.allow_quit = allow_quit;
             this.$el.html(this.template(data));

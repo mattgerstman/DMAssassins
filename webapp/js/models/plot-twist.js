@@ -27,7 +27,7 @@ var app = app || {
             'plot_twist_name': '',
             'send_email': false
         },
-        url: function(){            
+        url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/plot_twist/';
         }

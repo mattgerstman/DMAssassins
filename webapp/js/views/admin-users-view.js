@@ -30,7 +30,7 @@ var app = app || {
 
             'click  .js-ban-user'           : 'banUserModal',
             'click  .js-ban-user-submit'    : 'banUser',
-            'click  .js-cancel-edit-team'   : 'cancelEditTeam',            
+            'click  .js-cancel-edit-team'   : 'cancelEditTeam',
             'click  .js-cancel-new-team'    : 'cancelNewTeam',
             'click  .js-create-new-team'    : 'createNewTeam',
             'click  .js-delete-team'        : 'deleteTeamModal',
@@ -73,52 +73,52 @@ var app = app || {
             var user_id = $(event.currentTarget).data('user-id');
             $('.js-kill-user-submit').data('user-id', user_id);
             $('.js-modal-kill-user .js-user-name').text(user_name);
-            $('.js-modal-kill-user').modal();  
+            $('.js-modal-kill-user').modal();
         },
         reviveUserModal: function(event) {
             var user_name = $(event.currentTarget).data('user-name');
             var user_id = $(event.currentTarget).data('user-id');
             $('.js-revive-user-submit').data('user-id', user_id);
             $('.js-modal-revive-user .js-user-name').text(user_name);
-            $('.js-modal-revive-user').modal();  
+            $('.js-modal-revive-user').modal();
         },
-          
+
         banUser: function(event) {
-        	var user_id = $(event.currentTarget).data('user-id');
-	      	var user = this.collection.get(user_id);
-	      	user.destroy({
-		      	url: user.url() + 'ban/',
-		      	success: function(){
-    		        var user_id = user.get('user_id');
-    		        $('#js-user-'+user_id).remove();
-    		        $('.js-modal-ban-user').modal('hide');      	
-		      	},
-		      	error: function(response){
+            var user_id = $(event.currentTarget).data('user-id');
+            var user = this.collection.get(user_id);
+            user.destroy({
+                url: user.url() + 'ban/',
+                success: function(){
+                    var user_id = user.get('user_id');
+                    $('#js-user-'+user_id).remove();
+                    $('.js-modal-ban-user').modal('hide');
+                },
+                error: function(response){
                     alert(response.responseText);
-		      	}
-	      	}); 
-		  	
+                }
+            });
+
         },
         killUser: function(event) {
-        	var user_id = $(event.currentTarget).data('user-id');
-	      	var user = this.collection.get(user_id);
+            var user_id = $(event.currentTarget).data('user-id');
+            var user = this.collection.get(user_id);
             var that = this;
-	      	user.kill();
-	      	$('.js-modal-kill-user').modal('hide');
+            user.kill();
+            $('.js-modal-kill-user').modal('hide');
         },
 
         reviveUser: function(event) {
-        	var user_id = $(event.currentTarget).data('user-id');
-	      	var user = this.collection.get(user_id);
-	      	user.revive();
-	      	$('.js-modal-revive-user').modal('hide');
+            var user_id = $(event.currentTarget).data('user-id');
+            var user = this.collection.get(user_id);
+            user.revive();
+            $('.js-modal-revive-user').modal('hide');
         },
         selectChangeTeam: function(event){
             var user_id = $(event.currentTarget).data('user-id');
             var team_id = $(event.currentTarget).find('option:selected').val();
             var team_name = $(event.currentTarget).find('option:selected').text();
             this.addUserToTeam(user_id, team_id, team_name);
-            
+
         },
         selectChangeRole: function(event){
             var user_id = $(event.currentTarget).data('user-id');
@@ -128,13 +128,13 @@ var app = app || {
         changeUserRole: function(event, user_id, role_id){
             // Sorry Taylor, a model for this one is overkill
             var game_id = app.Running.Games.getActiveGameId();
-            var url = config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/role/';            
+            var url = config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/role/';
             $.ajax({
                 type:"POST",
                 url: url,
                 data: {role: role_id},
                 success: function(){
-                    $('#js-role-saved-'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });    
+                    $('#js-role-saved-'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });
                 },
                 error: function(response){
                     var originalRole = app.Running.Users.get(user_id).getProperty('user_role');
@@ -155,7 +155,7 @@ var app = app || {
                         $('#js-user-'+user_id).remove();
                     }
                 }
-            });                         
+            });
         },
         makeDroppable: function() {
             var that = this;
@@ -180,51 +180,51 @@ var app = app || {
             this.$el.find('.admin-users-body').append(userView.render(extras).el);
         },
         sortByTeam: function(event) {
-            event.preventDefault();        
+            event.preventDefault();
             this.team = $(event.currentTarget).data('team-name');
             this.team_id = $(event.currentTarget).data('team-id');
             if (this.team_id == 'SHOW_ALL') {
                 this.team = undefined;
                 this.team_id = 'all';
             }
-                
-                
+
+
             if (this.team_id == 'NO_TEAM') {
                 this.team = "null";
                 this.team_id = 'null';
             }
-                
-            
-            this.render();            
+
+
+            this.render();
         },
-        showNewTeam: function(event) {            
+        showNewTeam: function(event) {
             event.preventDefault();
             this.$el.find('.js-new-team-open').addClass('hide');
             this.$el.find('.js-form-new-team').removeClass('hide');
             this.$el.find('.js-form-new-team input').focus();
         },
-        hideNewTeam: function() {             
+        hideNewTeam: function() {
             this.$el.find('.js-new-team-open').removeClass('hide');
             this.$el.find('.js-form-new-team').addClass('hide');
         },
         cancelNewTeam: function(event) {
-            if (event)           
+            if (event)
                 event.preventDefault();
             this.hideNewTeam();
         },
         blurTeamForm: function() {
             var team_name = this.$el.find('.new-team input').val();
-            if (!team_name) {                        
-                this.hideNewTeam();    
+            if (!team_name) {
+                this.hideNewTeam();
             }
-            
+
         },
         createNewTeam: function(event) {
-            if (event)           
+            if (event)
                 event.preventDefault();
-                
+
             var team_name = this.$el.find('.new-team input').val();
-            if (!team_name) {                        
+            if (!team_name) {
                 return;
             }
             var game_id = app.Running.Games.getActiveGameId();
@@ -239,15 +239,15 @@ var app = app || {
 
         },
         newTeamKeypress: function(event) {
-             if (event.keyCode == 27) {
+            if (event.keyCode == 27) {
                 event.preventDefault();
-                this.hideNewTeam();                 
-             }
-             if (event.keyCode == 13) {
+                this.hideNewTeam();
+            }
+            if (event.keyCode == 13) {
                 event.preventDefault();
-                this.createNewTeam(event); 
-             }
-             
+                this.createNewTeam(event);
+            }
+
         },
         showEditTeamForm: function(event) {
             event.preventDefault();
@@ -262,7 +262,7 @@ var app = app || {
             $('#js-nav-team-'+team_id).find('.edit-team-form').addClass('hide');
         },
         cancelEditTeam: function(event) {
-            if (event)           
+            if (event)
                 event.preventDefault();
             this.hideEditTeam(event);
         },
@@ -276,7 +276,7 @@ var app = app || {
                 this.hideEditTeam(event);
                 return;
             }
-                
+
             var that = this;
             team.set('team_name', name);
             team.save();
@@ -294,22 +294,22 @@ var app = app || {
         deleteTeam: function(event) {
             var team_id = $(event.currentTarget).data('team-id');
             var team_name = $(event.currentTarget).data('team-name');
-	      	var team = app.Running.Teams.get(team_id);
-	      	var that = this;
-	      	team.destroy({success:function(){
-	      	    if (that.team == team_name) {
-    	      	    that.team = 'null';
-    	      	    that.team_id = 'null';
-	      	    }
-    	      	app.Running.Users.each(function(user){
-        	      	if (user.getProperty('team') == team_name)
-        	      	{
-            	      	user.setProperty('team', 'null');
-   
-        	      	}
-    	      	});
-    	      	that.render();    	      	
-            }});           
+            var team = app.Running.Teams.get(team_id);
+            var that = this;
+            team.destroy({success:function(){
+                if (that.team == team_name) {
+                    that.team = 'null';
+                    that.team_id = 'null';
+                }
+                app.Running.Users.each(function(user){
+                    if (user.getProperty('team') == team_name)
+                    {
+                        user.setProperty('team', 'null');
+
+                    }
+                });
+                that.render();
+            }});
             $('.js-modal-delete-team').modal('hide');
         },
         selectActiveTeam: function() {
@@ -324,32 +324,32 @@ var app = app || {
             document.body.style.overflow='auto';
         },
         render: function() {
-            var that = this;    			
-			var data = {};
-			var game = app.Running.Games.getActiveGame();
-			var teams_enabled = false;
-			if (game)
-			{
-    			teams_enabled = game.areTeamsEnabled();
-			}
+            var that = this;
+            var data = {};
+            var game = app.Running.Games.getActiveGame();
+            var teams_enabled = false;
+            if (game)
+            {
+                teams_enabled = game.areTeamsEnabled();
+            }
             data.teams_enabled = teams_enabled;
-			
+
             this.$el.html(this.template(data));
-            
+
             this.teams_view.setElement(this.$('.js-team-list')).render();
-                    
+
             while (this.userViews.length)
-            {   
+            {
                 var view = this.userViews.pop();
                 view.remove();
             }
 
             data = this.collection.models;
             if (this.team !== undefined)
-            {            
+            {
                 data = _.filter(data, function(user){
                     return user.getProperty('team') == that.team;
-                });                            
+                });
             }
             this.selectActiveTeam();
 
@@ -357,7 +357,7 @@ var app = app || {
                 return user.getProperty('first_name');
             };
 
-            data = _.sortBy(data, userSort);        
+            data = _.sortBy(data, userSort);
 
             var myRole = app.Running.User.getProperty('user_role');
             var extras = {
@@ -365,8 +365,8 @@ var app = app || {
                 roles: AuthUtils.getRolesMapFor(myRole, teams_enabled),
                 is_admin: AuthUtils.requiresAdmin(myRole),
                 teams_enabled: teams_enabled
-            };    
-                         
+            };
+
             _.each(data, function(user){
                 that.addUser(user, extras);
             });
@@ -374,7 +374,7 @@ var app = app || {
             if (teams_enabled)
             {
 //                this.makeDraggable();
-                this.makeDroppable();                
+                this.makeDroppable();
             }
             this.trigger('render');
             return this;

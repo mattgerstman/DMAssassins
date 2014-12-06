@@ -39,7 +39,7 @@ var app = app || {
             var teams_enabled = data.teams_enabled;
             if (teams_enabled)
                 numCols = 3;
-                
+
             var options = {
                 paging: false,
                 searching: false,

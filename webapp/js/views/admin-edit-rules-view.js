@@ -44,20 +44,19 @@ var app = app || {
                         $('.js-saved').removeClass('hide');
                         that.model.save(null, {success: function(){
                             $('.js-saved').text('Saved.').fadeOut(2000, function(){
-                                $(this).text('Saving...');    
+                                $(this).text('Saving...');
                             });
-                            
+
                         }});
                     },
                 });
         },
         render: function() {
             var data = this.model.attributes;
-            this.$el.html(this.template(data));         
+            this.$el.html(this.template(data));
             this.loadEditor();
             return this;
         }
 
     });
-
 })(jQuery);

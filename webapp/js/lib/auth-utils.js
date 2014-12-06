@@ -2,7 +2,7 @@
 // All APIs should be equipped with the right set of permissions so this simply prevents users from stumbling onto a page they can't use
 
 var AuthUtils = {
-	// Returns a map of role data
+    // Returns a map of role data
     getRolesMap: function() {
         var rolesMap = {
             dm_user:        {value: 0, pretty_name: "User"},
@@ -21,7 +21,7 @@ var AuthUtils = {
         var rolesMap = this.getRolesMap();
         for (var key in rolesMap)  {
             if (teams_enabled === false) {
-            	// Strip out captains if teams arent enabled
+                // Strip out captains if teams arent enabled
                 if (rolesMap[key].value == 1)
                     continue;
             }
@@ -61,4 +61,3 @@ var AuthUtils = {
         return this.isRoleAllowed(userRole, 'dm_super_admin');
     }
 };
-

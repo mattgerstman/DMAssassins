@@ -43,19 +43,19 @@ var app = app || {
 
         // if we don't have a target hide that view
         render: function() {
-            var role = app.Running.User.getProperty('user_role');  
+            var role = app.Running.User.getProperty('user_role');
             var data = {};
             data.is_captain = AuthUtils.requiresCaptain(role);
             data.is_admin = AuthUtils.requiresAdmin(role);
             data.is_super_admin = AuthUtils.requiresSuperAdmin(role);
-            
+
             this.$el.html(this.template(data));
             this.handleTarget();
-            
-            
+
+
             var selectedElem = this.$el.find('#js-nav-' + Backbone.history.fragment.replace('_', '-'));
             this.highlight(selectedElem);
-            
+
             if (app.Running.NavGameView)
                 app.Running.NavGameView.setElement(this.$('#js-nav-games-dropdown')).render();
             return this;
@@ -68,7 +68,7 @@ var app = app || {
                 event.preventDefault();
                 return;
             }
-            
+
             $('.navbar-collapse.in').collapse('hide');
             console.log(target);
             this.highlight(target);
@@ -86,12 +86,12 @@ var app = app || {
                 var parent = '#js-dropdown-parent-'+ dropdown;
                 elem = parent;
             }
-            
+
             $('.active').removeClass('active');
             $(elem).addClass('active');
         },
         handleAdmin: function() {
-            var role = app.Running.User.getProperty('user_role');  
+            var role = app.Running.User.getProperty('user_role');
             var allowed = AuthUtils.requiresCaptain(role);
             if (allowed) {
                 $('#js-dropdown-parent-admin').removeClass('hide');
@@ -99,7 +99,7 @@ var app = app || {
             }
             $('#js-dropdown-parent-admin').addClass('hide');
             return;
-            
+
         },
         handleTarget: function() {
             var game = app.Running.Games.getActiveGame();
@@ -113,13 +113,13 @@ var app = app || {
                 this.disableTarget();
                 return;
             }
-            
+
             if (!app.Running.TargetModel.get('user_id'))
             {
                 this.disableTarget();
                 return;
             }
-            
+
             this.enableTarget();
             return;
         },
