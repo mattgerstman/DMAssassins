@@ -73,6 +73,28 @@ func (game *Game) GetTeamsMap() (teams map[string]*Team, appErr *ApplicationErro
 	return teams, nil
 }
 
+func (game *Game) GetTeamsWithRegularPlayersLeft() (teamsList []uuid.UUID, appErr *ApplicationError) {
+	rows, err := db.Query(`SELECT distinct(team_id) FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true AND user_role = 'dm_user'`, game.GameId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		var teamIdBuffer string
+		err = rows.Scan(&teamIdBuffer)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		teamId := uuid.Parse(teamIdBuffer)
+		teamsList = append(teamsList, teamId)
+	}
+	// Close the rows
+	err = rows.Close()
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return teamsList, nil
+}
+
 // Get a list of team ids with players currently in the game
 func (game *Game) GetActiveTeamIds() (teamsList []uuid.UUID, appErr *ApplicationError) {
 	rows, err := db.Query(`SELECT distinct(team_id) FROM dm_user_game_mapping WHERE game_id = $1 AND alive = true`, game.GameId.String())
