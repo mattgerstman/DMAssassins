@@ -315,12 +315,19 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Executre the statement to insert the game creator(admin) into the game
+	// Execute the statement to insert the game creator(admin) into the game
 	role := "dm_admin"
 	_, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role, secret)
 	if err != nil {
 		tx.Rollback()
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Set timezone
+	appErr = game.SetGamePropertyTransactional(tx, `timezone`, Config.DefaultTimeZone)
+	if appErr != nil {
+		tx.Rollback()
+		return nil, appErr
 	}
 
 	// Check transaction for errors

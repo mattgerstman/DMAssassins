@@ -1,5 +1,6 @@
 {
 	"api_domain": "",
+	"default_timezone" : "America/New_York",
 	"fb_app_id": "",
 	"fb_app_secret" :"",
 	"fb_access_token" : "",
