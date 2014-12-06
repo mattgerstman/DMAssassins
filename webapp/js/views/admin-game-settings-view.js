@@ -1,5 +1,5 @@
 //
-// js/views/admin-user-view.js
+// js/views/admin-game-settings-view.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
@@ -105,6 +105,14 @@ var app = app || {
             });
         },
         twistModalOptions: {
+            delete_targets: {
+                id:           '#plot-twist-body-delete-targets-template',
+                title:        'Delete Targets',
+                twist_name:   'delete_targets',
+                submit_class: 'btn-primary',
+                submit_text:  'Delete Targets',
+                checked:       true
+            },
             randomize_targets: {
                 id:           '#plot-twist-body-randomize-targets-template',
                 title:        'Randomize Targets',
