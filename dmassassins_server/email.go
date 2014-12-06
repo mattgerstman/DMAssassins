@@ -719,16 +719,21 @@ func (game *Game) SendTimerExpiredEmail(killedUsers []uuid.UUID) (appErr *Applic
 	// Seperate the killed from the living
 	aliveUsers, deadUsers := splitTheDead(users, killedUsers)
 
-	// Inform users they survived the countdown
-	_, appErr = game.sendSurvivedTimerEmail(aliveUsers)
-	if appErr != nil {
-		return appErr
+	if len(aliveUsers) > 0 {
+
+		// Inform users they survived the countdown
+		_, appErr = game.sendSurvivedTimerEmail(aliveUsers)
+		if appErr != nil {
+			return appErr
+		}
 	}
 
-	// Inform users they didn't survive the countdown
-	_, appErr = game.sendKilledByTimerEmail(deadUsers)
-	if appErr != nil {
-		return appErr
+	if len(deadUsers) > 0 {
+		// Inform users they didn't survive the countdown
+		_, appErr = game.sendKilledByTimerEmail(deadUsers)
+		if appErr != nil {
+			return appErr
+		}
 	}
 	return nil
 }

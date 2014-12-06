@@ -21,7 +21,6 @@ type KillTimer struct {
 	ExecuteTs int64
 }
 
-
 // reloads all timers in the database
 func LoadAllTimers() (appErr *ApplicationError) {
 	// Get all existing kill timers
@@ -65,12 +64,22 @@ func LoadAllTimers() (appErr *ApplicationError) {
 
 // Loads a single timer and calls it after the set amount of time
 func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
+	loc, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	nowTime := time.Now()
-	now := nowTime.Unix()
+	nowInLoc := nowTime.In(loc)
+	now := nowInLoc.Unix()
 	timeDiff := executeTs - now
 	duration := time.Duration(timeDiff) * time.Second
+
+	fmt.Println(now)
+	fmt.Println(executeTs)
+	fmt.Println(timeDiff)
 	if timeDiff <= 0 {
-		duration = 10 * time.Second
+		duration = 10 * time.Minute
 	}
 	fmt.Println(`Loading timer for ` + game.GameId.String())
 	fmt.Print(`Executing in `)
@@ -132,11 +141,13 @@ func (game *Game) KillTimerHandler() {
 
 // Gets the min kill time and executes the kill timer
 func (game *Game) ExecuteKillTimer() (appErr *ApplicationError) {
-	var minKillTime int64
-	err := db.QueryRow(`SELECT create_ts FROM dm_kill_timers where game_id = $1`, game.GameId.String()).Scan(&minKillTime)
+	var minKillTimeBuffer time.Time
+	err := db.QueryRow(`SELECT create_ts FROM dm_kill_timers where game_id = $1`, game.GameId.String()).Scan(&minKillTimeBuffer)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	minKillTime := minKillTimeBuffer.Unix()
 
 	// Kill users
 	killedUsers, appErr := game.KillPlayersWhoHaventKilledSince(minKillTime)
@@ -230,13 +241,6 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (killedUser
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Assign new targets
-	appErr = game.AssignTargetsByTransactional(tx, `normal`)
-	if appErr != nil {
-		tx.Rollback()
-		return nil, appErr
-	}
-
 	// Kill the users
 	removeTimer, err := tx.Prepare(`DELETE FROM dm_kill_timers WHERE game_id = $1`)
 	if err != nil {
@@ -254,6 +258,12 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (killedUser
 	err = tx.Commit()
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Assign new targets
+	appErr = game.AssignTargetsBy(`normal`)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	return toBeKilled, nil

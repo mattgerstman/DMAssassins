@@ -34,6 +34,15 @@ func (game *Game) AssignTargetsBy(assignmentType string) (appErr *ApplicationErr
 // Assigns targets using a methodology using a transaction
 func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string) (appErr *ApplicationError) {
 
+	anyLeft, appErr := game.checkAlive()
+	if appErr != nil {
+		return appErr
+	}
+
+	if !anyLeft {
+		return game.DeleteTargetsTransactional(tx)
+	}
+
 	// Reverse targets
 	if assignmentType == `reverse` {
 		fmt.Println(`reverse`)
@@ -70,6 +79,16 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 
 	// Fallback to plain random assignment
 	return game.assignTargets(tx, users, false)
+}
+
+func (game *Game) checkAlive() (anyLeft bool, appErr *ApplicationError) {
+	var numLeft int
+	err := db.QueryRow(`SELECT count(*) FROM dm_user_game_mapping WHERE user_role != 'dm_admin' AND user_role != 'dm_super_admin' AND alive = true AND game_id = $1`, game.GameId.String()).Scan(&numLeft)
+	if err != nil {
+		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	fmt.Println(numLeft)
+	return (numLeft > 0), nil
 }
 
 type targetPair struct {
@@ -324,7 +343,7 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx) (appErr *ApplicationError) {
 	}
 
 	// Get the list of team ids
-	teamsList, appErr := game.GetActiveTeamIds()
+	teamsList, appErr := game.GetTeamsWithRegularPlayersLeft()
 	if appErr != nil {
 		return appErr
 	}
