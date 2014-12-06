@@ -42,15 +42,18 @@ var app = app || {
         saveGame: function(event){
             event.preventDefault();
             // Get values from form
-            var game_name = $('#js-input-game-name').val();
-            var game_password = $('#js-input-game-password').val();
-                var game_teams_enabled = $('#js-input-teams-enabled').is(':checked') ? 'true' : 'false';
+            var game_name           = $('#js-input-game-name').val();
+            var game_password       = $('#js-input-game-password').val();
+            var game_teams_enabled  = $('#js-input-teams-enabled').is(':checked') ? 'true' : 'false';
+            var game_timezone       = $('#js-timezone').val();
 
             // Set values in model
             this.model.set({
-                game_name: game_name,
-                game_password: game_password,
-                game_teams_enabled: game_teams_enabled},
+                    game_name           : game_name,
+                    game_password       : game_password,
+                    game_teams_enabled  : game_teams_enabled,
+                    game_timezone       : game_timezone
+                },
                 {silent:true}
                 );
 
@@ -163,6 +166,7 @@ var app = app || {
             }
         },
         loadTwistModal: function(e){
+            console.log(e);
             e.preventDefault();
             var twist = $(e.currentTarget).attr('id');
             var data = this.twistModalOptions[twist];
@@ -207,6 +211,11 @@ var app = app || {
             var data = this.model.attributes;
             data.teams_enabled = data.game_properties.teams_enabled == 'true';
             this.$el.html(this.template(data));
+
+            var timezone = this.model.getProperty('timezone');
+            if (timezone) {
+                this.$el.find('#js-timezone').val(timezone);
+            }
             return this;
         }
     });

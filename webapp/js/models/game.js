@@ -37,6 +37,19 @@ var app = app || {
         areTeamsEnabled: function() {
             return this.getProperty('teams_enabled') == 'true';
         },
+        // set game property
+        setProperty: function(key,value, silent) {
+            var properties = this.get('properties');
+            if (!properties)
+                properties = {};
+            properties[key] = value;
+            this.set('properties', properties);
+            if ((silent === undefined) || (silent === false))
+            {
+                this.trigger('change');
+            }
+            return this.get('properties');
+        },
         getProperty: function(key) {
             var properties = this.get('game_properties');
             if (!properties)

@@ -13,6 +13,7 @@ type GameSettingsPut struct {
 	GameName     string `json:"game_name"`
 	GamePassword string `json:"game_password"`
 	EnableTeams  string `json:"game_teams_enabled"`
+	TimeZone     string `json:"game_timezone"`
 }
 
 // PUT - Changes game settings
@@ -54,6 +55,7 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 
 	//Set teams enabled
 	game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
+	game.SetGameProperty("timezone", gameSettingsPut.TimeZone)
 
 	return game, nil
 }

@@ -8,6 +8,7 @@ import (
 
 type Configuration struct {
 	APIDomain         string `json:"api_domain"`
+	DefaultTimeZone   string `json:"default_timezone"`
 	FBAppId           string `json:"fb_app_id"`
 	FBAppSecret       string `json:"fb_app_secret"`
 	FBAccessToken     string `json:"fb_access_token"`
