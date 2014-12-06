@@ -785,6 +785,7 @@
             </div>
             <div class="list-group col-sm-4 col-sm-offset-2">
                 <h1 class="text-center">Plot Twists</h1>
+                <a href="#" class="list-group-item js-open-plot-twist" id="delete_targets">Delete Targets (Pause Game)</a>
                 <a href="#" class="list-group-item js-open-plot-twist" id="randomize_targets">Randomize Targets</a>
                 <a href="#" class="list-group-item js-open-plot-twist" id="reverse_targets">Reverse Targets</a>
                 <a href="#" class="list-group-item js-open-plot-twist" id="successive_kills">Successive Kills Count Double</a>
@@ -796,27 +797,27 @@
             </div>
         </div>
         <div class="modal fade js-modal-start-game" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title">Start Game</h4>
-              </div>
-              <div class="modal-body">
-                <p>Are you sure you want to start the game <strong><span><%= game_name %></span></strong>? This will immediately assign targets and notify all users the game has begun. <br />
-                    If you're not ready to start the game, close this window.
-                </p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success hidden-xs js-start-game-submit">Start Game</button>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title">Start Game</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to start the game <strong><span><%= game_name %></span></strong>? This will immediately assign targets and notify all users the game has begun. <br />
+                            If you're not ready to start the game, close this window.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success hidden-xs js-start-game-submit">Start Game</button>
 
-                <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-block btn-success visible-xs js-start-game-submit">Start Game</button>
+                        <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-block btn-success visible-xs js-start-game-submit">Start Game</button>
 
-              </div>
-            </div><!-- /.modal-content -->
-          </div><!-- /.modal-dialog -->
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
           <div class="modal fade js-modal-end-game" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
@@ -833,7 +834,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger hidden-xs js-end-game-submit">End Game</button>
+                <button type="button" class="btn btn-danger  hidden-xs js-end-game-submit">End Game</button>
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-block btn-danger visible-xs js-end-game-submit">End Game</button>
@@ -877,6 +878,15 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
+    </script>
+
+    <script id="plot-twist-body-delete-targets-template" type="text/template">
+        The following will happen if you implement this plot twist:<br />
+        <ol>
+            <li>We will delete all targets.</li>
+            <li>The game will be effectively paused until another plot twist is launched.</li>
+            <li>Users will be emailed informing them of the plot twist.</li>
+        </ol>
     </script>
 
     <script id="plot-twist-body-randomize-targets-template" type="text/template">

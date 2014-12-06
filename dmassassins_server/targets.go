@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	//	"strconv"
 )
 
 // Assigns targets using a methodology, wrapps the inner function in a transaction
@@ -39,7 +38,7 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 		return appErr
 	}
 
-	if !anyLeft {
+	if !anyLeft || assignmentType == `delete` {
 		return game.DeleteTargetsTransactional(tx)
 	}
 

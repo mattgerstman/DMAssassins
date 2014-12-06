@@ -1,4 +1,11 @@
 {
+    "delete_targets": {
+        "assign_targets": "delete",
+        "kill_mode": "normal",
+        "kill_timer": 0,
+        "require_teams": false,
+        "revive": ""
+    },
     "randomize_targets": {
         "assign_targets": "normal",
         "kill_mode": "normal",
