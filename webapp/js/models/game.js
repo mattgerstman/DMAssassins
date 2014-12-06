@@ -29,7 +29,7 @@ var app = app || {
             member: true
         },
 
-		// sets game_id as the id attribute
+        // sets game_id as the id attribute
         idAttribute: 'game_id',
         // Sets the url root
         urlRoot: config.WEB_ROOT + 'user/',

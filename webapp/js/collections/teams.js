@@ -11,7 +11,7 @@ var app = app || {
 (function() {
     'use strict';
     app.Collections.Teams = Backbone.Collection.extend({
-		// Collection of teams
+        // Collection of teams
         model: app.Models.Team,
         // The api is going to return a mapping, parse to an array
         parse: function(response){
@@ -25,14 +25,14 @@ var app = app || {
             }
             // The active user's role in the current game
             var userRole = app.Running.User.getProperty('user_role');
-            
+
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
             if (isCaptain)
             {
                 this.fetch();
             }
-  
+
         },
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();

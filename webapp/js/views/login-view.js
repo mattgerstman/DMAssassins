@@ -19,7 +19,7 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.LoginView = Backbone.View.extend({
-    
+
         template: _.template($('#template-login').html()),
 
         events: {
@@ -34,7 +34,7 @@ var app = app || {
             var button = $(e.currentTarget);
             var width = button.width();
             button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
-            button.attr('disabled', true);              
+            button.attr('disabled', true);
             this.model.login();
         },
         // render the login page

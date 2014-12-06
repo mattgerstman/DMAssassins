@@ -60,20 +60,20 @@ var app = app || {
                 error: function(model, response){
                     if (status == 401)
                     {
-                        alert(response.responseText);    
-                    }                    
+                        alert(response.responseText);
+                    }
                 }
             });
         },
         secretKeyup: function(e){
-             if (e.keyCode == 13) {
+            if (e.keyCode == 13) {
                 e.preventDefault();
                 var secret = this.$el.find('.js-target-secret').val();
                 if (!secret) {
                     return;
-                }                 
+                }
                 this.kill();
-             }  
+            }
         },
         render: function() {
             var data = this.model.attributes;
@@ -82,5 +82,4 @@ var app = app || {
             return this;
         }
     });
-
 })(jQuery);

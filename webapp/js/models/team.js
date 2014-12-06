@@ -29,11 +29,11 @@ var app = app || {
             'team_name': ''
         },
         idAttribute : 'team_id',
-        url: function(){            
+        url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             var user_id = this.get('user_id');
             var team_id = this.get('team_id');
-           
+
             if (!!user_id) {
                 return config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/team/' + team_id + '/';
             }
