@@ -70,7 +70,6 @@ var app = app || {
             }
 
             $('.navbar-collapse.in').collapse('hide');
-            console.log(target);
             this.highlight(target);
 
         },

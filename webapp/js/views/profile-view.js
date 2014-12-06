@@ -27,15 +27,15 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-            'keyup .js-email'               : 'emailEnter',
-            'click .js-email-settings'      : 'showEmailModal',
-            'click .js-email-settings-save' : 'saveEmailSettings',
-            'click .js-profile-picture'     : 'showFullImage',
-            'click .js-quit-game'           : 'showQuitModal',
-            'click .js-quit-game-confirm'   : 'quitGame'
-
+            'keyup .js-email'                   : 'emailEnter',
+            'click .js-email-settings'          : 'showEmailModal',
+            'click .js-email-settings-save'     : 'saveEmailSettings',
+            'click .js-profile-picture'         : 'showFullImage',
+            'click .js-quit-game'               : 'showQuitModal',
+            'click .js-quit-game-confirm'       : 'quitGame',
+            'shown.bs.modal.js-email-settings'  : 'focusEmail',
+            'shown.bs.modal.js-quit-secret'     : 'focusSecret'
         },
-
         // load profile picture in modal window
         showFullImage: function() {
             $('.js-modal-profile-photo').modal();
@@ -50,10 +50,16 @@ var app = app || {
             $('.js-wrapper-quit-modal').html(html);
             $('.js-profile-quit-modal').modal();
         },
+        focusSecret: function(){
+            $('.js-quit-secret').focus();
+        },
         quitGame: function() {
             var secret = this.$el.find('#js-quit-secret').val();
             this.model.quit(secret);
 
+        },
+        focusEmail: function(){
+            $('.js-email').focus();
         },
         showEmailModal: function(){
             $('.js-modal-email-settings').modal();
