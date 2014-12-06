@@ -162,7 +162,7 @@
                 </div>
              </div>
         </div>
-        <div class="modal fade js-modal-target-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
+        <div class="modal fade js-modal-target-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <img class="img-responsive center-block" src=<%= properties.photo %> />
           </div>
@@ -216,7 +216,7 @@
         </div>
 
         <!-- Profile photo modal -->
-        <div class="modal fade js-modal-profile-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true">
+        <div class="modal fade js-modal-profile-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true" data-keyboard="true">
           	<div class="modal-dialog">
 		  		<img class="img-responsive center-block" src=<%= properties.photo %> />
           	</div>
@@ -227,8 +227,8 @@
 
         </div>
 
-        <!-- Profile photo modal -->
-        <div class="modal fade js-modal-email-settings" role="dialog">
+        <!-- Profile email settings modal -->
+        <div class="modal fade js-modal-email-settings" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           	<div class="modal-dialog">
             	<div class="modal-content">
 					<div class="modal-header">
@@ -268,10 +268,9 @@
     </script>
 	<!-- /Profile Template -->
 
-
+    <!-- Quit Modal Template -->
     <script id="quit-modal-template" type="text/template">
-
-        <div class="modal fade js-profile-quit-modal" role="dialog">
+        <div class="modal fade js-profile-quit-modal"  tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -293,8 +292,8 @@
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
-
     </script>
+    <!-- /Quit Modal Template -->
 
     <script id="select-game-team-option" type="text/template">
             <option value="" id="js-team-placeholder">Select a Team</option>
@@ -650,7 +649,7 @@
         </div>
 
 
-        <div class="modal fade js-modal-revive-user">
+        <div class="modal fade js-modal-revive-user" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -675,7 +674,7 @@
 
 
 
-        <div class="modal fade js-modal-kill-user">
+        <div class="modal fade js-modal-kill-user" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -701,7 +700,7 @@
 
 
 
-        <div class="modal fade js-modal-ban-user">
+        <div class="modal fade js-modal-ban-user" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -727,7 +726,7 @@
         </div><!-- /.modal -->
 
 
-        <div class="modal fade js-modal-delete-team">
+        <div class="modal fade js-modal-delete-team" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -796,7 +795,7 @@
                 <a href="#" class="list-group-item" id="timer_24">24 Hours To Kill</a>
             </div>
         </div>
-        <div class="modal fade js-modal-start-game">
+        <div class="modal fade js-modal-start-game" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -820,7 +819,7 @@
           </div><!-- /.modal-dialog -->
         </div><!-- /.modal -->
 
-          <div class="modal fade js-modal-end-game">
+          <div class="modal fade js-modal-end-game" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
@@ -848,7 +847,7 @@
     </script>
 
     <script id="template-modal-plot-twist" type="text/template">
-        <div class="modal fade js-modal-plot-twist">
+        <div class="modal fade js-modal-plot-twist" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
