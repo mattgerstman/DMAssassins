@@ -82,6 +82,7 @@ func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
 	if timeDiff <= 0 {
 		duration = 10 * time.Minute
 	}
+	duration = 10 * time.Second
 	fmt.Println(`Loading timer for ` + game.GameId.String())
 	fmt.Print(`Executing in `)
 	fmt.Println(duration)
@@ -142,11 +143,13 @@ func (game *Game) KillTimerHandler() {
 
 // Gets the min kill time and executes the kill timer
 func (game *Game) ExecuteKillTimer() (appErr *ApplicationError) {
-	var minKillTime int64
-	err := db.QueryRow(`SELECT create_ts FROM dm_kill_timers where game_id = $1`, game.GameId.String()).Scan(&minKillTime)
+	var minKillTimeBuffer time.Time
+	err := db.QueryRow(`SELECT create_ts FROM dm_kill_timers where game_id = $1`, game.GameId.String()).Scan(&minKillTimeBuffer)
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
+	minKillTime := minKillTimeBuffer.Unix()
 
 	// Kill users
 	killedUsers, appErr := game.KillPlayersWhoHaventKilledSince(minKillTime)
