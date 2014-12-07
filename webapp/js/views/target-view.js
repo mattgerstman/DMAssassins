@@ -41,6 +41,14 @@ var app = app || {
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'fetch', this.render);
             this.listenTo(this.model, 'set', this.render);
+            this.targetFriendsView = new app.Views.TargetFriendsView();
+
+            // if we have no friends find some
+            var friends = app.Running.TargetFriendsModel.get('friends');
+            if (!friends.length) {
+                app.Running.TargetFriendsModel.fetch();
+            }
+
         },
         // kills your target
         kill: function() {
@@ -79,6 +87,8 @@ var app = app || {
             var data = this.model.attributes;
             data.teams_enabled = app.Running.Games.getActiveGame().areTeamsEnabled();
             this.$el.html(this.template(data));
+            this.targetFriendsView.$el = this.$el.find('.js-target-friends');
+            this.targetFriendsView.render();
             return this;
         }
     });

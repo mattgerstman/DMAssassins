@@ -323,13 +323,6 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Set timezone
-	appErr = game.SetGamePropertyTransactional(tx, `timezone`, Config.DefaultTimeZone)
-	if appErr != nil {
-		tx.Rollback()
-		return nil, appErr
-	}
-
 	// Check transaction for errors
 	err = tx.Commit()
 	if err != nil {
@@ -341,6 +334,10 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	properties := make(map[string]string)
 
 	game = &Game{gameId, gameName, false, hasPassword, properties}
+
+	// Set timezone
+	_ = game.SetGameProperty(`timezone`, Config.DefaultTimeZone)
+
 	_, appErr = game.GetGameProperties()
 	if appErr != nil {
 		return nil, appErr
