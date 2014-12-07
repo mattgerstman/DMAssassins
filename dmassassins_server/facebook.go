@@ -192,7 +192,27 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 	}
 
 	return facebookId, nil
+}
 
+// get mutual friends for two users
+func (user *User) GetMutualFriends(targetFacebookId string) (friends []map[string]string, total int, appErr *ApplicationError) {
+	res, err := fb.Get("/"+targetFacebookId+"/friends/", fb.Params{"access_token": Config.FBAccessToken})
+	if err != nil {
+		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+	}
+
+	err = res.DecodeField(`data`, &friends)
+	if err != nil {
+		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+	}
+
+	var summary map[string]int
+	err = res.DecodeField(`summary`, &summary)
+	if err != nil {
+		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+	}
+
+	return friends, summary[`total_count`], nil
 }
 
 func PostKillTweet() (appErr *ApplicationError) {

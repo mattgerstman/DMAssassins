@@ -15,23 +15,24 @@ import (
 var db *sql.DB
 
 const (
-	gameIdPath          = "/game/{game_id}/"
-	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
-	gameUsersPath       = "/game/{game_id}/users/"
-	gameUsersEmailPath  = "/game/{game_id}/users/email/"
-	gamePlotTwistPath   = "/game/{game_id}/plot_twist/"
-	gameUserBanPath     = "/game/{game_id}/user/{user_id}/ban/"
-	gameUserKillPath    = "/game/{game_id}/user/{user_id}/kill/"
-	gameUserRevivePath  = "/game/{game_id}/user/{user_id}/revive/"
-	gameUserPath        = "/game/{game_id}/user/{user_id}/"
-	gameUserEmailPath   = "/game/{game_id}/user/{user_id}/email/"
-	gameUserRolePath    = "/game/{game_id}/user/{user_id}/role/"
-	gameUserTargetPath  = "/game/{game_id}/user/{user_id}/target/"
-	gameUserTeamPath    = "/game/{game_id}/user/{user_id}/team/{team_id}/"
-	gameTeamPath        = "/game/{game_id}/team/"
-	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
-	gameRulesPath       = "/game/{game_id}/rules/"
-	gameTargetsPath     = "/game/{game_id}/targets/"
+	gameIdPath                = "/game/{game_id}/"
+	gameLeaderboardPath       = "/game/{game_id}/leaderboard/"
+	gameUsersPath             = "/game/{game_id}/users/"
+	gameUsersEmailPath        = "/game/{game_id}/users/email/"
+	gamePlotTwistPath         = "/game/{game_id}/plot_twist/"
+	gameUserBanPath           = "/game/{game_id}/user/{user_id}/ban/"
+	gameUserKillPath          = "/game/{game_id}/user/{user_id}/kill/"
+	gameUserRevivePath        = "/game/{game_id}/user/{user_id}/revive/"
+	gameUserPath              = "/game/{game_id}/user/{user_id}/"
+	gameUserEmailPath         = "/game/{game_id}/user/{user_id}/email/"
+	gameUserRolePath          = "/game/{game_id}/user/{user_id}/role/"
+	gameUserTargetPath        = "/game/{game_id}/user/{user_id}/target/"
+	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
+	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
+	gameTeamPath              = "/game/{game_id}/team/"
+	gameTeamIdPath            = "/game/{game_id}/team/{team_id}/"
+	gameRulesPath             = "/game/{game_id}/rules/"
+	gameTargetsPath           = "/game/{game_id}/targets/"
 
 	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
@@ -168,6 +169,7 @@ func StartServer() {
 	r.HandleFunc(gameUsersPath, GameUsersHandler()).Methods("GET")
 	r.HandleFunc(gameUsersEmailPath, GameUsersEmailHandler()).Methods("GET")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
+	r.HandleFunc(gameUserTargetFriendsPath, TargetFriendsHandler()).Methods("GET")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
 	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
 

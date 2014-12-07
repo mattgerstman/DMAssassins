@@ -188,6 +188,7 @@ var app = app || {
                     // if there are no teams handle that appropraitely
                     if (!app.Running.Teams.length){
                         that.noTeams();
+                        return;
                     }
                     // if we have teams mark it as not disabled
                     teamField.attr('disabled', false);
