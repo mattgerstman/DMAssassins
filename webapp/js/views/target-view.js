@@ -29,7 +29,16 @@ var app = app || {
         events: {
             'click .js-kill-target'     : 'kill',
             'click .js-target-picture'  : 'showFullImage',
-            'keyup .js-target-secret'   : 'secretKeyup'
+            'keyup .js-target-secret'   : 'secretKeyup',
+            'click .js-get-friends'     : 'getFriends'
+        },
+        getFriends:function(){
+
+            app.Running.FB.login(function(response) {
+                app.Running.TargetFriendsModel.fetch();
+            }, {
+                scope: 'public_profile,email,user_friends'//,user_photos'
+            });
         },
         // loads picture in a modal window
         showFullImage: function() {

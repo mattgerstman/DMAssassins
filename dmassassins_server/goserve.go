@@ -28,6 +28,7 @@ const (
 	gameUserRolePath          = "/game/{game_id}/user/{user_id}/role/"
 	gameUserTargetPath        = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
+	gameUserTargetPhotosPath  = "/game/{game_id}/user/{user_id}/target/photos/"
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 	gameTeamPath              = "/game/{game_id}/team/"
 	gameTeamIdPath            = "/game/{game_id}/team/{team_id}/"
@@ -170,6 +171,8 @@ func StartServer() {
 	r.HandleFunc(gameUsersEmailPath, GameUsersEmailHandler()).Methods("GET")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTargetFriendsPath, TargetFriendsHandler()).Methods("GET")
+	// we'll see if i ever actually use this api
+	// r.HandleFunc(gameUserTargetPhotosPath, TargetPhotosHandler()).Methods("GET")
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
 	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
 
