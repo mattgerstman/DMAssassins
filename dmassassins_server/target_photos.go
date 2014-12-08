@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// GET function for /user/{user_id}/target/friends returns a user's information
-func getTargetFriends(r *http.Request) (friendData map[string]interface{}, appErr *ApplicationError) {
+// GET function for /user/{user_id}/target/photos returns a user's information
+func getTargetPhotos(r *http.Request) (photos []interface{}, appErr *ApplicationError) {
 	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
@@ -41,38 +41,11 @@ func getTargetFriends(r *http.Request) (friendData map[string]interface{}, appEr
 		return nil, appErr
 	}
 
-	friendData = make(map[string]interface{})
-
-	// query db for mutual friends
-	friends, count, appErr := user.GetMutualFriends(target.FacebookId)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	friendData[`friends`] = friends
-	friendData[`count`] = count
-
-	// if we have friends return them
-	if count != 0 {
-		return friendData, nil
-	}
-
-	// if we have no friends query facebook and try again
-
-	user.StoreUserFriends()
-	target.StoreUserFriends()
-
-	// query db for mutual friends
-	friendData[`friends`], friendData[`count`], appErr = user.GetMutualFriends(target.FacebookId)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return friendData, nil
+	return target.GetFacebookPhotos()
 }
 
 // Handler for /user/{user_id}/target
-func TargetFriendsHandler() http.HandlerFunc {
+func TargetPhotosHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var obj interface{}
@@ -80,7 +53,7 @@ func TargetFriendsHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "GET":
-			obj, err = getTargetFriends(r)
+			obj, err = getTargetPhotos(r)
 		default:
 			obj = nil
 			msg := "Not Found"

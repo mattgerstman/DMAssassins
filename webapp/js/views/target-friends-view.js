@@ -57,23 +57,7 @@ var app = app || {
             });
         },
         render: function() {
-            var data             = {};
-            var friends          = [];
-            var modelData        = this.model.attributes;
-            var user_facebook_id = app.Running.User.get('facebook_id');
-            var i = 0;
-            _.each(modelData.friends, function(friend) {
-                if (i > 5) {
-                    return;
-                }
-
-                if (friend.id != user_facebook_id) {
-                    friends.push(friend);
-                    i++;
-                }
-            });
-            data.friends = friends;
-            data.count   = modelData.count;
+            var data            = this.model.attributes;
             this.$el.html(this.template(data));
 
             return this;

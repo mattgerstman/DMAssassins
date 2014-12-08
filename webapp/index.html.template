@@ -223,10 +223,14 @@
     <!-- /Target Template -->
 
     <script id="template-target-friends" type="text/template">
-        <p> You have <strong> <%= count %> </strong> mutual friends.</%=></p>
-        <% _.each(friends, function(friend){ %>
-            <img src="https://graph.facebook.com/<%= friend.id %>/picture?width=50&height=50" title="<%= friend.name %>" class="target-friend" />
-        <% }) %>
+        <% if (count == 0) { %>
+            <button class="btn btn-primary js-friends btn-target-friends">Show Mutual Friends</button>
+        <% } else { %>
+            <p> You have <strong> <%= count %> </strong> mutual friends.</%=></p>
+            <% _.each(friends, function(friend){ %>
+                <img src="https://graph.facebook.com/<%= friend.facebook_id %>/picture?width=50&height=50" title="<%= friend.user_name %>" class="target-friend" />
+            <% }) %>
+        <% } %>
     </script>
 
     <!-- Profile Template -->

@@ -67,7 +67,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	}
 
 	// Username's are a concatination of first/last names
-	username := firstName + lastName
+	username := firstName + ` ` + lastName
 
 	// Set up user properties map, this will be inserted with the user
 	properties := make(map[string]string)
@@ -101,8 +101,106 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
 	}
 
+	go user.StoreUserFriends()
+
 	return user, nil
 
+}
+
+// wrapper for storeUserFreinds to log any errors
+func (user *User) StoreUserFriends() {
+	appErr := user.storeUserFriends()
+	if appErr != nil {
+		extra := make(map[string]interface{})
+		extra[`user`] = user
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.ERROR, extra)
+		fmt.Println(appErr)
+	}
+}
+
+// store a user's friends
+func (user *User) storeUserFriends() (appErr *ApplicationError) {
+	friends, appErr := user.GetFacebookFriends()
+	if appErr != nil {
+		return appErr
+	}
+
+	// begin transaction
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// prepare statement to delete friends already in the db
+	deleteFriends, err := tx.Prepare(`DELETE FROM dm_friends where facebook_id = $1 OR friend_id = $1`)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// execute statement to delete friends already in the db
+	_, err = tx.Stmt(deleteFriends).Exec(user.FacebookId)
+	if err != nil {
+		tx.Rollback()
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// insert all friend pairs
+	for _, friendData := range friends {
+		friendId := friendData[`id`]
+
+		// Prepare statement to insert friend
+		insertFriend, err := tx.Prepare(`INSERT INTO dm_friends (facebook_id, friend_id) VALUES ($1, $2), ($2, $1)`)
+		if err != nil {
+			tx.Rollback()
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+
+		// execute statement to insert friend
+		_, err = tx.Stmt(insertFriend).Exec(user.FacebookId, friendId)
+		if err != nil {
+			tx.Rollback()
+			return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return nil
+}
+
+// Get mutual friends for two users
+func (user *User) GetMutualFriends(targetId string) (friends []map[string]string, count int, appErr *ApplicationError) {
+	err := db.QueryRow(`select count(*) from (select friend_id from dm_friends where facebook_id = $1) user_friends, LATERAL (SELECT friend_id FROM dm_users where facebook_id = $2) target_friends`, user.FacebookId, targetId).Scan(&count)
+	if err != nil {
+		return nil, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// If there are no friends skip the second sectin
+	if count == 0 {
+		return nil, 0, nil
+	}
+
+	rows, err := db.Query(`select facebook_id, username FROM dm_users where facebook_id IN (select user_friends.friend_id from (select friend_id from dm_friends where facebook_id = $1) user_friends, LATERAL ( SELECT friend_id FROM dm_users where facebook_id = $2) target_friends LIMIT 5)`, targetId, user.FacebookId)
+	if err != nil {
+		return nil, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	for rows.Next() {
+		var friendId string
+		var friendName string
+		err := rows.Scan(&friendId, &friendName)
+		if err != nil {
+			return nil, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+		}
+		friend := make(map[string]string)
+		friend[`facebook_id`] = friendId
+		friend[`user_name`] = friendName
+		friends = append(friends, friend)
+	}
+
+	return friends, count, nil
 }
 
 func ExtendToken(facebookToken string) (longLivedToken string, appErr *ApplicationError) {
@@ -194,25 +292,39 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 	return facebookId, nil
 }
 
-// get mutual friends for two users
-func (user *User) GetMutualFriends(targetFacebookId string) (friends []map[string]string, total int, appErr *ApplicationError) {
-	res, err := fb.Get("/"+targetFacebookId+"/friends/", fb.Params{"access_token": Config.FBAccessToken})
+// get all of a user's friends playing assassins
+func (user *User) GetFacebookFriends() (friends []map[string]string, appErr *ApplicationError) {
+	res, err := fb.Get("/"+user.FacebookId+"/friends/", fb.Params{"access_token": Config.FBAccessToken})
 	if err != nil {
-		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+		return nil, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
 	}
 
 	err = res.DecodeField(`data`, &friends)
 	if err != nil {
-		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+		return nil, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
 	}
 
-	var summary map[string]int
-	err = res.DecodeField(`summary`, &summary)
+	return friends, nil
+}
+
+// get a user's facebook photos
+func (user *User) GetFacebookPhotos() (photos []interface{}, appErr *ApplicationError) {
+	token, appErr := user.GetToken()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	res, err := fb.Get("/"+user.FacebookId+"/photos/", fb.Params{"access_token": token})
 	if err != nil {
-		return nil, 0, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+		return nil, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
 	}
 
-	return friends, summary[`total_count`], nil
+	err = res.DecodeField(`data`, &photos)
+	if err != nil {
+		return nil, NewApplicationError("Error Contacting Facebook", err, ErrCodeInvalidFBToken)
+	}
+
+	return photos, nil
 }
 
 func PostKillTweet() (appErr *ApplicationError) {
