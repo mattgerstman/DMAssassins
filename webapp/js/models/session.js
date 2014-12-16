@@ -131,18 +131,16 @@ var app = app || {
                             alert('You must authorize Facebook to play DMAssassins!');
                             location.reload();
                         }
-
-
                         // scope are the facebook permissions we're requesting
                     }, {
-                        scope: 'public_profile,email,user_friends'//,user_photos'
+                        scope: config.ALL_PERMISSIONS
                     });
 
                 } else {
 
                     if( navigator.userAgent.match('CriOS') )
                     {
-                        window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ config.CLIENT_ROOT+'%23login&scope=email,user_friends,public_profile', '', null);
+                        window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ config.CLIENT_ROOT+'%23login&scope='+config.ALL_PERMISSIONS, '', null);
                         return;
                     }
                     app.Running.FB.login(function(response) {
@@ -159,7 +157,7 @@ var app = app || {
 
                         // scope are the facebook permissions we're requesting
                     }, {
-                        scope: 'public_profile,email,user_friends'//,user_photos'
+                        scope: config.ALL_PERMISSIONS
                     });
 
                     // The person is not logged into Facebook, so we're not sure if
@@ -189,6 +187,9 @@ var app = app || {
             });
         },
         handleResponse: function(response) {
+
+                // Get permissions from facebook asynchronously
+                app.Running.Permissions.fetch();
 
                 // store all reponse data in the new session immediately
                 var parsedGames    = app.Running.Games.parse(response.games);

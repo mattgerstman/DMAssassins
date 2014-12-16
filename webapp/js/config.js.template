@@ -3,5 +3,6 @@ var config = {
 	LOCAL_ROOT : '/Users/Matthew/Dropbox/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/',
     CLIENT_ROOT : 'http://assassins.com/',
 	WEB_ROOT : 'http://localhost:8000/',
-	APP_ID : null	
+	APP_ID : null	,
+	ALL_PERMISSIONS : 'public_profile,email,user_friends,user_photos'
 };

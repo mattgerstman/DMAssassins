@@ -27,6 +27,7 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
+            'click .js-change-photo'            : 'changePhotoModal',
             'keyup .js-email'                   : 'emailEnter',
             'click .js-email-settings'          : 'showEmailModal',
             'click .js-email-settings-save'     : 'saveEmailSettings',
@@ -35,6 +36,14 @@ var app = app || {
             'click .js-quit-game-confirm'       : 'quitGame',
             'shown.bs.modal.js-email-settings'  : 'focusEmail',
             'shown.bs.modal.js-quit-secret'     : 'focusSecret'
+        },
+        changePhotoModal: function() {
+            var that = this;
+            this.photosView = new app.Views.ProfilePhotosView();
+            this.photosView.model.set('facebook_id', this.model.get('facebook_id'));
+            this.photosView.model.fetch();
+            this.photosView.render();
+            $('.js-modal-profile-change-photo').modal();
         },
         // load profile picture in modal window
         showFullImage: function() {
@@ -45,7 +54,7 @@ var app = app || {
             var templateVars = {
                 quit_game_name: app.Running.Games.getActiveGame().get('game_name')
             };
-            var template = _.template($('#quit-modal-template').html());
+            var template = _.template($('#template-modal-quit').html());
             var html = template(templateVars);
             $('.js-wrapper-quit-modal').html(html);
             $('.js-profile-quit-modal').modal();
