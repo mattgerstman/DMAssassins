@@ -30,7 +30,9 @@ var app = app || {
             this.model = app.Running.TargetFriendsModel;
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'fetch', this.render);
+            this.listenTo(this.model, 'reset', this.render);
             this.listenTo(this.model, 'set', this.render);
+            this.listenTo(app.Running.Permissions, 'change', this.render);
         },
         loadMutualFriends: function() {
             var that = this;
@@ -57,9 +59,10 @@ var app = app || {
             });
         },
         render: function() {
-            var data            = this.model.attributes;
+            console.log('targetFriends render');
+            var data = this.model.attributes;
+            data.user_friends = app.Running.Permissions.get('user_friends');
             this.$el.html(this.template(data));
-
             return this;
         }
     });

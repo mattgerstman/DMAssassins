@@ -32,12 +32,29 @@ var app = app || {
             'keyup .js-target-secret'   : 'secretKeyup',
             'click .js-get-friends'     : 'getFriends'
         },
-        getFriends:function(){
+        needFriends: function() {
+            alert('You must grant access to your friends to use this feature');
+            return;
 
+        },
+        getFriends:function() {
+            var that = this;
             app.Running.FB.login(function(response) {
-                app.Running.TargetFriendsModel.fetch();
+                if (!response || response.error)
+                {
+                    return that.needFriends();
+                }
+                var user_friends = response.authResponse.grantedScopes.search('user_friends');
+                if (user_friends == -1)
+                {
+                    return that.needFriends();
+                }
+                app.Running.Permissions.set('user_friends', true);
+                app.Running.TargetFriendsModel.fetch({reset: true});
             }, {
-                scope: 'public_profile,email,user_friends'//,user_photos'
+                scope: 'user_friends',
+                auth_type: 'rerequest',
+                return_scopes: true
             });
         },
         // loads picture in a modal window
