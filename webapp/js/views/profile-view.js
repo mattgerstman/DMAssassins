@@ -35,7 +35,8 @@ var app = app || {
             'click .js-quit-game'               : 'showQuitModal',
             'click .js-quit-game-confirm'       : 'quitGame',
             'shown.bs.modal.js-email-settings'  : 'focusEmail',
-            'shown.bs.modal.js-quit-secret'     : 'focusSecret'
+            'shown.bs.modal.js-quit-secret'     : 'focusSecret',
+            'hidden.bs.modal'                   : 'render'
         },
         changePhotoModal: function() {
             var that = this;
@@ -44,6 +45,10 @@ var app = app || {
             this.photosView.model.fetch();
             this.photosView.render();
             $('.js-modal-profile-change-photo').modal();
+        },
+        closePhotoModal: function() {
+            $('.js-modal-profile-change-photo').modal('hide');
+            // this.render();
         },
         // load profile picture in modal window
         showFullImage: function() {
@@ -91,6 +96,7 @@ var app = app || {
             this.listenTo(this.model, 'fetch', this.render);
             this.listenTo(this.model, 'destroy', this.destroyCallback);
             this.listenTo(this.model, 'set', this.render);
+            this.listenTo(this.model, 'new_photo', this.closePhotoModal);
             this.listenTo(app.Running.Games, 'game-change', this.render);
             this.listenTo(app.Running.Games, 'change', this.render);
             this.listenTo(app.Running.Games, 'join-game', this.render);

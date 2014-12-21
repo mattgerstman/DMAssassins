@@ -25,6 +25,34 @@ var app = app || {
         template: _.template($('#template-modal-change-photo').html()),
         tagName: 'div',
         el: '.js-profile-select',
+        events: {
+            'click .js-profile-select-photo' : 'selectPhoto',
+            'click .js-photo-previous'       : 'previousPhoto',
+            'click .js-photo-next'           : 'nextPhoto'
+        },
+        nextPhoto: function() {
+            this.model.next();
+        },
+        previousPhoto: function() {
+            this.model.previous();
+        },
+        selectPhoto: function(e) {
+            var photo = $(e.currentTarget);
+            var index = photo.data('index');
+            if (index == 'profile')
+            {
+                return this.setProfilePicture();
+            }
+            return this.model.setPhoto(index);
+        },
+        setProfilePicture: function() {
+            var wantProfile = confirm('Heads Up! If you pick your profile picture, your assassins photo will always match your current profile picture. If this is what you want click OK.');
+            if (!wantProfile)
+            {
+                return;
+            }
+            this.model.setProfilePhoto();
+        },
         // constructor
         initialize: function() {
             this.model = new app.Models.Photos();
@@ -36,7 +64,6 @@ var app = app || {
         render: function() {
             var data = this.model.attributes;
             this.$el.html(this.template(data));
-
             return this;
         }
     });

@@ -41,7 +41,6 @@ var app = app || {
                 return;
             }
             FB.api('/'+facebook_id+'/friends', {}, function(response) {
-                console.log(response);
                 if (response.error) {
                     return;
                 }
