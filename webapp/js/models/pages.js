@@ -1,5 +1,5 @@
 //
-// js/models/photos.js
+// js/models/pages.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
@@ -18,35 +18,35 @@ var app = app || {
 
 (function() {
     'use strict';
-    app.Models.Photos = Backbone.Model.extend({
+    app.Models.Pages = Backbone.Model.extend({
         defaults: {
-            photos: [],
+            pages: [],
             next: null,
             previous: null
         },
-        needPhotos: function() {
-            alert('You must grant access to your photos to use this feature');
+        needPages: function() {
+            alert('You must grant access to your pages to use this feature');
             return;
         },
         getPermission: function() {
             var that = this;
             app.Running.FB.login(function(response) {
-                var fb_user_photos = response.authResponse.grantedScopes.search('user_photos');
-                if (fb_user_photos == -1)
+                var fb_manage_pages = response.authResponse.grantedScopes.search('manage_pages');
+                if (fb_manage_pages == -1)
                 {
-                    return that.needPhotos();
+                    return that.needPages();
                 }
-                app.Running.Permissions.set('user_photos', true);
+                app.Running.Permissions.set('manage_pages', true);
                 callback();
             }, {
-                scope: 'user_photos',
+                scope: 'manage_pages',
                 auth_type: 'rerequest',
                 return_scopes: true
             });
         },
         checkPermission: function(callback) {
-            var user_photos = app.Running.Permissions.get('user_photos');
-            if (user_photos)
+            var manage_pages = app.Running.Permissions.get('manage_pages');
+            if (manage_pages)
             {
                 return callback();
             }
@@ -61,12 +61,13 @@ var app = app || {
         doFetch: function(options) {
             var that = this;
             options = options || {};
-            var url = options.url || '/me/photos/?limit=8';
+            var url = options.url || '/me/accounts';
             if (that === undefined)
             {
                 that = this;
             }
             FB.api(url, function(response) {
+                console.log(response);
                 if (!response || response.error)
                 {
                     if (options.error)
@@ -75,7 +76,7 @@ var app = app || {
                     }
                 }
 
-                that.set('photos', response.data);
+                that.set('pages', response.data);
 
                 var next = null;
                 var previous = null;
@@ -94,13 +95,13 @@ var app = app || {
                 return true;
             });
         },
-        getPhoto: function(i) {
-            var photos = this.get('photos');
-            if (!photos)
+        getPage: function(i) {
+            var pages = this.get('pages');
+            if (!pages)
             {
                 return false;
             }
-            return photos[i];
+            return pages[i];
         },
         next: function(options) {
             var next = this.get('next');
@@ -119,59 +120,6 @@ var app = app || {
             options = options || {};
             options.url = previous;
             return this.fetch(options);
-        },
-        getBestPhoto: function(i) {
-            var photos = this.get('photos');
-            if (!photos[i]) {
-                return false;
-            }
-            var photo = photos[i];
-            var images = photo.images;
-            var best = null;
-            var bestDiff = Math.pow(2, 32);
-            _.each(images, function(image) {
-                var diff = image.width - 300;
-                if (diff < 0) {
-                    return;
-                }
-                if (diff < bestDiff)
-                {
-                    best = image.source;
-                }
-            });
-            if (best)
-            {
-                return best;
-            }
-            return photo.source;
-        },
-        setPhoto: function(i) {
-            var photo = this.getPhoto(i);
-            if (!photo)
-            {
-                return false;
-            }
-            var photo_thumb = this.getBestPhoto(i);
-
-            return this.savePhoto(photo.source, photo_thumb);
-        },
-        setProfilePhoto: function() {
-            var facebook_id = app.Running.User.get('facebook_id');
-            var photo       = 'https://graph.facebook.com/'+facebook_id+'/picture?width=1000';
-            var photo_thumb = 'https://graph.facebook.com/'+facebook_id+'/picture?width=300';
-            return this.savePhoto(photo, photo_thumb);
-        },
-        savePhoto: function(photo, photo_thumb) {
-            app.Running.User.setProperty('photo', photo, true);
-            app.Running.User.setProperty('photo_thumb', photo_thumb, true);
-
-            app.Running.User.save(null, {
-                success:function(model, response) {
-                    model.trigger('new_photo');
-                }
-            });
-            return true;
-
         }
     });
 })();

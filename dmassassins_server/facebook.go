@@ -284,7 +284,6 @@ func GetFacebookIdFromToken(token string) (facebookId string, appErr *Applicatio
 	// Query facebook session to make sure token is valid
 	session := getFacebookSession(token)
 	facebookId, err := session.User()
-	fmt.Println(facebookId)
 	if err != nil {
 		return "", NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
@@ -333,7 +332,6 @@ func PostKillTweet() (appErr *ApplicationError) {
 
 	// pageId := `1697108740514966`
 	res, err := fb.Get("/10152622020481913", fb.Params{"fields": "access_token", "access_token": Config.FBAccessToken})
-	fmt.Println(res)
 	if err != nil {
 		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}

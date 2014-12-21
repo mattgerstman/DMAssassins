@@ -4,18 +4,42 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-type UserPropertyPost struct {
+type UserPost struct {
 	Properties map[string]string `json:properties`
+}
+
+// Makes sure we only allow the user to set properties that are explicitly allowed
+func filterProperties(properties map[string]string) (filteredProperties map[string]string) {
+	filteredProperties = make(map[string]string)
+
+	_, havePhoto := properties[`photo`]
+	_, havePhotoThumb := properties[`photo_thumb`]
+
+	// only allow a photo if we also have a photo_thumb
+	if havePhoto != havePhotoThumb {
+		delete(properties, `photo`)
+		delete(properties, `photo_thumb`)
+	}
+
+	// loop through allowed properties
+	allowedProperties := []string{"photo", "photo_thumb"}
+	for _, key := range allowedProperties {
+		if _, ok := properties[key]; ok {
+			filteredProperties[key] = properties[key]
+		}
+	}
+	return filteredProperties
 }
 
 // PUT - Wrapper for UserProperties::SetUserProperty
 func putGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
-	_, appErr = RequiresCaptain(r)
+	_, appErr = RequiresUser(r)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -35,8 +59,8 @@ func putGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var newProperties UserPropertyPost
-	err := decoder.Decode(&newProperties)
+	var userPost UserPost
+	err := decoder.Decode(&userPost)
 	if err != nil {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
@@ -46,21 +70,8 @@ func putGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
-	allowedProperties := make(map[string]string)
-	if _, ok := newProperties.Properties[`photo`]; !ok {
-		return user, nil
-	}
-
-	newPhoto := newProperties.Properties[`photo`]
-
-	oldPhoto, appErr := user.GetUserProperty(`photo`)
-	if newPhoto == oldPhoto {
-		return nil, nil
-	}
-
-	allowedProperties[`photo`] = newPhoto
-	allowedProperties[`photo_thumb`] = newPhoto
-	appErr = user.SetUserProperties(allowedProperties)
+	filteredProperties := filterProperties(userPost.Properties)
+	appErr = user.SetUserProperties(filteredProperties)
 	if appErr != nil {
 		return nil, appErr
 	}

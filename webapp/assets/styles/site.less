@@ -31,6 +31,7 @@ a:hover {
     max-height:@height-standard;
     margin:0 auto;
     cursor: pointer;
+//    overflow:hidden;
 }
 
 .logo {
@@ -66,6 +67,10 @@ a:hover {
     margin-bottom:10px;
 }
 
+.profile-thumbnail-container {
+    max-height:290px;
+    overflow:hidden;
+}
 .profile-buttons {
     margin-bottom:10px;
 }
@@ -75,6 +80,10 @@ a:hover {
 }
 .btn-target-friends {
     margin:0 0 10px 0;
+}
+
+.container-profile-select {
+    height:450px;
 }
 
 .container-profile-select-photo {
@@ -94,4 +103,14 @@ a:hover {
 
 .profile-select-photo:hover {
     border:3px solid #2b4b90;
+}
+
+.photo-arrow-inactive {
+    cursor:default;
+    color:grey;
+}
+
+.photo-arrow-active {
+    cursor:pointer;
+    color:black;
 }

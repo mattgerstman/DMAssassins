@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// POST - Kills a user for their assassin
+// POST - Update email settings
 func postGameUserEmail(r *http.Request) (appErr *ApplicationError) {
 	_, appErr = RequiresUser(r)
 	if appErr != nil {
