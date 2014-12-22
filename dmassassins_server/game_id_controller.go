@@ -10,10 +10,12 @@ import (
 )
 
 type GameSettingsPut struct {
-	GameName     string `json:"game_name"`
-	GamePassword string `json:"game_password"`
-	EnableTeams  string `json:"game_teams_enabled"`
-	TimeZone     string `json:"game_timezone"`
+	GameName        string `json:"game_name"`
+	GamePassword    string `json:"game_password"`
+	EnableTeams     string `json:"game_teams_enabled"`
+	TimeZone        string `json:"game_timezone"`
+	PageId          string `json:"game_page_id"`
+	PageAccessToken string `json:"game_page_access_token"`
 }
 
 // PUT - Changes game settings
