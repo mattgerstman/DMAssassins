@@ -86,12 +86,12 @@ a:hover {
     height:450px;
 }
 
-.container-profile-select-photo {
+.container-profile-select-photo, .container-select-page {
     text-align: center;
     height:150px;
 }
 
-.profile-select-photo {
+.profile-select-photo, .select-page {
     cursor: pointer;
     max-width:150px;
     border-radius:5px;
@@ -101,16 +101,25 @@ a:hover {
 	transform: translateY(-50%);
 }
 
-.profile-select-photo:hover {
+.profile-select-photo:hover, .select-page:hover {
     border:3px solid #2b4b90;
 }
 
-.photo-arrow-inactive {
+.arrow-inactive {
     cursor:default;
     color:grey;
 }
 
-.photo-arrow-active {
+.arrow-active {
     cursor:pointer;
     color:black;
+}
+
+.page-title {
+    margin:0 0 10px 0;
+    cursor:pointer;
+}
+
+.page-title:hover {
+    color: #2b4b90;
 }

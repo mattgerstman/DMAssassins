@@ -199,12 +199,10 @@ var app = app || {
 
         },
         facebookPageSetup: function(e){
-            app.Running.FB.login(function(response){
-                console.log(response);
-                FB.api('/me/pages/', 'get', {}, function(fbResponse){
-                    console.log(fbResponse);
-                });
-            }, { scope: 'manage_pages' });
+            this.pageView = new app.Views.AdminPagesView();
+            this.pageView.model.fetch();
+            this.pageView.render();
+            $('.js-modal-pages').modal();
         },
         render: function(){
             $('.modal-backdrop').remove();

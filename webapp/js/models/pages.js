@@ -61,7 +61,7 @@ var app = app || {
         doFetch: function(options) {
             var that = this;
             options = options || {};
-            var url = options.url || '/me/accounts';
+            var url = options.url || '/me/accounts?limit=9';
             if (that === undefined)
             {
                 that = this;

@@ -1,5 +1,5 @@
 //
-// js/views/target-view.js
+// js/views/profile-photos-view.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
