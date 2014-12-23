@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -46,6 +47,8 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
 
+	fmt.Println(gameSettingsPut)
+
 	// Rename Game
 	gameName := gameSettingsPut.GameName
 	if gameName != "" {
@@ -53,12 +56,23 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 
 	// Change password
-	game.ChangePassword(gameSettingsPut.GamePassword)
+	if gameSettingsPut.GamePassword != "" {
+		game.ChangePassword(gameSettingsPut.GamePassword)
+	}
 
 	//Set teams enabled
-	game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
-	game.SetGameProperty("timezone", gameSettingsPut.TimeZone)
-
+	if gameSettingsPut.EnableTeams != "" {
+		game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
+	}
+	if gameSettingsPut.TimeZone != "" {
+		game.SetGameProperty("timezone", gameSettingsPut.TimeZone)
+	}
+	if gameSettingsPut.PageId != "" {
+		game.SetGameProperty("game_page_id", gameSettingsPut.PageId)
+	}
+	if gameSettingsPut.PageAccessToken != "" {
+		game.SetGameProperty("game_page_access_token", gameSettingsPut.PageAccessToken)
+	}
 	return game, nil
 }
 

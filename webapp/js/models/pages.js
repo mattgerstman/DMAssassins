@@ -67,7 +67,6 @@ var app = app || {
                 that = this;
             }
             FB.api(url, function(response) {
-                console.log(response);
                 if (!response || response.error)
                 {
                     if (options.error)
@@ -120,6 +119,41 @@ var app = app || {
             options = options || {};
             options.url = previous;
             return this.fetch(options);
+        },
+        setPage: function(i) {
+            var page = this.getPage(i);
+            if (!page) {
+                return false;
+            }
+            var pageId = page.id;
+            var pageAccessToken = page.access_token;
+            if (!pageId || !pageAccessToken) {
+                return false;
+            }
+            var game = app.Running.Games.getActiveGame();
+            game.set('game_page_id', pageId);
+            game.set('game_page_access_token', pageAccessToken);
+            var url = game.gameUrl();
+
+            app.Running.FB.login(function(response) {
+                var fb_publish_actions = response.authResponse.grantedScopes.search('publish_actions');
+                if (fb_publish_actions == -1)
+                {
+                    return that.needPages();
+                }
+                app.Running.Permissions.set('publish_actions', true);
+                game.save(null, {
+                    url: url,
+                    success: function(model, response) {
+
+                    }
+                });
+            }, {
+                scope: 'publish_actions',
+                auth_type: 'rerequest',
+                return_scopes: true
+            });
+
         }
     });
 })();

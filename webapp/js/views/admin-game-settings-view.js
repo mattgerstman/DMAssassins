@@ -166,7 +166,6 @@ var app = app || {
             }
         },
         loadTwistModal: function(e){
-            console.log(e);
             e.preventDefault();
             var twist = $(e.currentTarget).attr('id');
             var data = this.twistModalOptions[twist];
