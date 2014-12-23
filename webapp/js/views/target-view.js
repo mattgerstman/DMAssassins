@@ -27,7 +27,7 @@ var app = app || {
 
         // The DOM events specific to an item.
         events: {
-            'click .js-kill-target'     : 'kill',
+            'click .js-target-kill'     : 'kill',
             'click .js-target-picture'  : 'showFullImage',
             'keyup .js-target-secret'   : 'secretKeyup',
             'click .js-get-friends'     : 'getFriends'

@@ -51,7 +51,6 @@ var app = app || {
             this.listenTo(this.model, 'set', this.render);
         },
         render: function() {
-            console.log('render yo');
             var data = this.model.attributes;
             this.$el.html(this.template(data));
             return this;

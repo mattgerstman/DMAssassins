@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"

@@ -80,6 +80,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	properties["first_name"] = firstName
 	properties["last_name"] = lastName
 	properties["allow_email"] = "true"
+	properties["allow_posts"] = "true"
 
 	// Create user
 	user, appErr = NewUser(username, email, facebookId, properties)
@@ -326,30 +327,25 @@ func (user *User) GetFacebookPhotos() (photos []interface{}, appErr *Application
 	return photos, nil
 }
 
-func PostKillTweet() (appErr *ApplicationError) {
+func (game *Game) FacebookPost(message string) (appErr *ApplicationError) {
 
-	// token := `CAAJJWeRefcEBAEqXaly1QCWEYCPo4g0wQwAUeATgKwZAwHUP0wuYXW0JgZCntYas2N7pG2lGdGZA8jVjwpGc5gp9wlK6hAwcby7qz6K27wYZCDcZAG2LRRxyR9g5GIlT9bDAd7mMarCOMpD7ZB6DGBLtcnwoKoIQyZABCFn03ExyKocxDoANZB9aOh1FhvJO9huyQiJdCD5GHqKocgWe4G6O10SCYhgT9a8ZD`
+	pageId, appErr := game.GetGameProperty(`game_page_id`)
+	if appErr != nil {
+		return appErr
+	}
 
-	// pageId := `1697108740514966`
-	res, err := fb.Get("/10152622020481913", fb.Params{"fields": "access_token", "access_token": Config.FBAccessToken})
+	accessToken, appErr := game.GetGameProperty(`game_page_access_token`)
+	if appErr != nil {
+		return appErr
+	}
+
+	session := getFacebookSession(accessToken)
+	res, err := session.Post(`/`+pageId+`/feed`, fb.Params{"message": message, "access_token": accessToken})
+	fmt.Println(res)
+	fmt.Println(err)
 	if err != nil {
 		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
-
-	var accessToken string
-	err = res.DecodeField("access_token", &accessToken)
-	if err != nil {
-		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
-	}
-
-	// //session = getFacebookSession(accessToken)
-	// res, err = session.Post(`/1697108740514966/feed`, fb.Params{"message": `tswift`, "access_token": accessToken})
-	// fmt.Println(res)
-	// fmt.Println(err)
-	// if err != nil {
-	// 	return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
-	// }
-	// fmt.Println(res)
 
 	return nil
 }
