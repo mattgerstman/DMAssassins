@@ -13,6 +13,33 @@ type KillPost struct {
 	Target   bool      `json:"target"`
 }
 
+// Marks a kill post as used for a game
+func (game *Game) MarkPostUsed(post *KillPost) (appErr *ApplicationError) {
+	res, err := db.Exec(`UPDATE dm_post_game_mapping SET used = true WHERE post_id = $1 AND game_id = $2`, post.PostId.String(), game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Check how many rows were affected by the update
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// If the update succeeded no need to continue
+	if rowsAffected != 0 {
+		return nil
+	}
+
+	// If the update failed insert the post for the game
+	res, err = db.Exec(`INSERT INTO dm_post_game_mapping (post_id, game_id, used) VALUES ($1, $2, true)`, post.PostId.String(), game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return nil
+
+}
+
 // Get a random facebook post for a kill post
 func (game *Game) GetRandomKillPost(assassin, target bool) (post *KillPost, appErr *ApplicationError) {
 	var postIdBuffer, message string
@@ -35,8 +62,6 @@ func (game *Game) PostKill(assassin, target *User) (appErr *ApplicationError) {
 	if appErr != nil {
 		return appErr
 	}
-	_ = allowAssassin
-	_ = allowTarget
 
 	post, appErr := game.GetRandomKillPost(true, true)
 	if appErr != nil {
@@ -48,7 +73,12 @@ func (game *Game) PostKill(assassin, target *User) (appErr *ApplicationError) {
 	message = strings.Replace(message, `ASSASSIN`, assassin.Username, -1)
 	message = strings.Replace(message, `TARGET`, target.Username, -1)
 
-	return game.FacebookPost(message)
+	appErr = game.FacebookPost(message)
+	if appErr != nil {
+		return appErr
+	}
+
+	return game.MarkPostUsed(post)
 }
 
 // Handles a kill post and gets the assassin/target/game structs to pass to it
