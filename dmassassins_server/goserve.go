@@ -24,7 +24,6 @@ const (
 	gameUserKillPath          = "/game/{game_id}/user/{user_id}/kill/"
 	gameUserRevivePath        = "/game/{game_id}/user/{user_id}/revive/"
 	gameUserPath              = "/game/{game_id}/user/{user_id}/"
-	gameUserEmailPath         = "/game/{game_id}/user/{user_id}/email/"
 	gameUserRolePath          = "/game/{game_id}/user/{user_id}/role/"
 	gameUserTargetPath        = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
@@ -182,7 +181,6 @@ func StartServer() {
 	r.HandleFunc(gameUserRevivePath, GameUserReviveHandler()).Methods("POST")
 
 	// User Email Actions
-	r.HandleFunc(gameUserEmailPath, GameUserEmailHandler()).Methods("POST")
 	r.HandleFunc(unsubscribePath, UnsubscribeHandler()).Methods("GET")
 
 	// Game then Team

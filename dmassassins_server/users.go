@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -353,6 +354,8 @@ func (user *User) KillTargetTransactional(tx *sql.Tx, gameId uuid.UUID, secret s
 	}
 
 	appErr = user.HandleKillPost(gameId, oldTargetId)
+	fmt.Println(`Kill Post`)
+	fmt.Println(appErr)
 	// DROIDS LOG THIS ERROR
 
 	return newTargetId, oldTargetId, nil
