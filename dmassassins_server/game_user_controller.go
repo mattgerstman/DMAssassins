@@ -10,6 +10,7 @@ import (
 )
 
 type UserPost struct {
+	Email      string            `json:"email"`
 	Properties map[string]string `json:properties`
 }
 
@@ -27,7 +28,7 @@ func filterProperties(properties map[string]string) (filteredProperties map[stri
 	}
 
 	// loop through allowed properties
-	allowedProperties := []string{"photo", "photo_thumb"}
+	allowedProperties := []string{"photo", "photo_thumb", "allow_email", "allow_post"}
 	for _, key := range allowedProperties {
 		if _, ok := properties[key]; ok {
 			filteredProperties[key] = properties[key]
@@ -71,6 +72,18 @@ func putGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 
 	filteredProperties := filterProperties(userPost.Properties)
 	appErr = user.SetUserProperties(filteredProperties)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	// Check if we have an email to change
+	email := userPost.Email
+	if email == "" {
+		return nil, nil
+	}
+
+	// Change the user's email
+	appErr = user.ChangeEmail(email)
 	if appErr != nil {
 		return nil, appErr
 	}

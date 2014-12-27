@@ -269,7 +269,7 @@
 
             <div class="user-column btn-group btn-group-justified profile-buttons">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-primary js-email-settings">Email Settings</button>
+                    <button type="button" class="btn btn-primary js-account-settings">Account Settings</button>
                 </div>
 
                 <div class="btn-group">
@@ -296,14 +296,14 @@
         </div>
 
         <!-- Profile email settings modal -->
-        <div class="modal fade js-modal-email-settings" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+            <div class="modal fade js-modal-account-settings" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
           	<div class="modal-dialog">
             	<div class="modal-content">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 						<h4 class="modal-title">Email Settings</h4>
 					</div>
-					<form role="form" id="email_settings_form">
+					<form role="form">
                   		<div class="modal-body">
                         	<div class="form-group">
                             	<label class="control-label" for=email>Email Address:</label>
@@ -311,6 +311,14 @@
                                 	<input class="form-control js-email" value="<%=email%>"/>
 									</div>
 								</div>
+								<% if (has_page) { %>
+    								<div class="checkbox">
+    									<label>
+    										<input type="checkbox" class="js-allow-post" <% if (allow_post) { %>checked<% } %>> Is it ok for us to post your name on the <a href="http://fb.com/<%= page_id %>/"><%= page_name %></a> page when you're involved in a kill? It's ok we know you want to brag.
+    									</label>
+                                    </div>
+                                <% } %>
+
 								<div class="checkbox">
 									<label>
 										<input type="checkbox" class="js-allow-email" <% if (allow_email){ %>checked<% } %>> Is it ok for us to send you emails?
@@ -321,11 +329,11 @@
 				  			<div class="modal-footer">
 			                    <div class="hidden-xs">
 			                        <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
-			                        <button class="btn btn-primary btn-medium js-email-settings-save">Save</button>
+			                        <button class="btn btn-primary btn-medium js-account-settings-save">Save</button>
 			                    </div>
 			                    <div class="visible-xs-block">
 			                        <button class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-			                        <button class="btn btn-primary btn-block js-email-settings-save">Save</button>
+			                        <button class="btn btn-primary btn-block js-account-settings-save">Save</button>
 			                    </div>
 							</div>
 						</div>

@@ -29,12 +29,12 @@ var app = app || {
         events: {
             'click .js-change-photo'            : 'changePhotoModal',
             'keyup .js-email'                   : 'emailEnter',
-            'click .js-email-settings'          : 'showEmailModal',
-            'click .js-email-settings-save'     : 'saveEmailSettings',
+            'click .js-account-settings'          : 'showEmailModal',
+            'click .js-account-settings-save'     : 'saveEmailSettings',
             'click .js-profile-picture'         : 'showFullImage',
             'click .js-quit-game'               : 'showQuitModal',
             'click .js-quit-game-confirm'       : 'quitGame',
-            'shown.bs.modal.js-email-settings'  : 'focusEmail',
+            'shown.bs.modal.js-account-settings'  : 'focusEmail',
             'shown.bs.modal.js-quit-secret'     : 'focusSecret',
             'hidden.bs.modal'                   : 'render'
         },
@@ -76,7 +76,7 @@ var app = app || {
             $('.js-email').focus();
         },
         showEmailModal: function(){
-            $('.js-modal-email-settings').modal();
+            $('.js-modal-account-settings').modal();
         },
         emailEnter: function(event) {
             if (event.which == 13) {
@@ -86,8 +86,12 @@ var app = app || {
         saveEmailSettings: function(){
             var email = $('.js-email').val();
             var allow_email = $('.js-allow-email').is(':checked') ? 'true' : 'false';
-            this.model.saveEmailSettings(email, allow_email);
-            $('.js-modal-email-settings').modal('hide');
+            var allow_post = $('.js-allow-post').is(':checked') ? 'true' : 'false';
+            this.model.set('email', email);
+            this.model.setProperty('allow_email', allow_email);
+            this.model.setProperty('allow_post', allow_post);
+            $('.js-modal-account-settings').modal('hide');
+            this.model.save();
         },
         // constructor
         initialize: function(params) {
@@ -118,6 +122,19 @@ var app = app || {
             var role = app.Running.User.getProperty('user_role');
             var allow_quit = !AuthUtils.requiresCaptain(role);
             data.allow_quit = allow_quit;
+
+            data.allow_post = data.properties.allow_post == 'true';
+            data.has_page = false;
+            if (game)
+            {
+                if (game.getProperty('game_page_id'))
+                {
+                    data.has_page = true;
+                    data.page_id = game.getProperty('game_page_id');
+                    data.page_name = game.getProperty('game_page_name');
+                }
+            }
+
             this.$el.html(this.template(data));
             return this;
         }

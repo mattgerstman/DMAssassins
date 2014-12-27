@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"fmt"
 	"strings"
 )
 
@@ -44,7 +45,7 @@ func (game *Game) MarkPostUsed(post *KillPost) (appErr *ApplicationError) {
 func (game *Game) GetRandomKillPost(assassin, target bool) (post *KillPost, appErr *ApplicationError) {
 	var postIdBuffer, message string
 	var official bool
-	err := db.QueryRow(`SELECT post_id, message, official FROM dm_posts WHERE assassin = $1 AND target = $2 AND post_id NOT IN (SELECT post_id FROM dm_post_game_mapping WHERE game_id = $3 AND used = false AND allowed = true) ORDER BY RANDOM() LIMIT 1`, assassin, target, game.GameId.String()).Scan(&postIdBuffer, &message, &official)
+	err := db.QueryRow(`SELECT post_id, message, official FROM dm_posts WHERE assassin = $1 AND target = $2 AND post_id NOT IN (SELECT post_id FROM dm_post_game_mapping WHERE game_id = $3 AND used = true OR allowed = false) ORDER BY RANDOM() LIMIT 1`, assassin, target, game.GameId.String()).Scan(&postIdBuffer, &message, &official)
 	if err != nil {
 		return nil, NewApplicationError(`Internal Error`, err, ErrCodeDatabase)
 	}
@@ -63,7 +64,12 @@ func (game *Game) PostKill(assassin, target *User) (appErr *ApplicationError) {
 		return appErr
 	}
 
-	post, appErr := game.GetRandomKillPost(true, true)
+	// If neither allows the post don't bother with any more queries
+	if !allowAssassin && !allowTarget {
+		return nil
+	}
+
+	post, appErr := game.GetRandomKillPost(allowAssassin, allowTarget)
 	if appErr != nil {
 		return appErr
 	}

@@ -4,7 +4,6 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -17,6 +16,7 @@ type GameSettingsPut struct {
 	TimeZone        string `json:"game_timezone"`
 	PageId          string `json:"game_page_id"`
 	PageAccessToken string `json:"game_page_access_token"`
+	PageName        string `json:"game_page_name"`
 }
 
 // PUT - Changes game settings
@@ -47,8 +47,6 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
 
-	fmt.Println(gameSettingsPut)
-
 	// Rename Game
 	gameName := gameSettingsPut.GameName
 	if gameName != "" {
@@ -72,6 +70,9 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 	if gameSettingsPut.PageAccessToken != "" {
 		game.SetGameProperty("game_page_access_token", gameSettingsPut.PageAccessToken)
+	}
+	if gameSettingsPut.PageName != "" {
+		game.SetGameProperty("game_page_name", gameSettingsPut.PageName)
 	}
 	return game, nil
 }

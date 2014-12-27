@@ -127,13 +127,26 @@ var app = app || {
             }
             var pageId = page.id;
             var pageAccessToken = page.access_token;
-            if (!pageId || !pageAccessToken) {
+            var pageName = page.name;
+            if (!pageId || !pageAccessToken || !pageName) {
                 return false;
             }
             var game = app.Running.Games.getActiveGame();
             game.set('game_page_id', pageId);
             game.set('game_page_access_token', pageAccessToken);
+            game.set('game_page_name', pageName);
             var url = game.gameUrl();
+
+            if (app.Running.Permissions.get('publish_actions'))
+            {
+                game.save(null, {
+                    url: url,
+                    success: function(model, response) {
+
+                    }
+                });
+                return;
+            }
 
             app.Running.FB.login(function(response) {
                 var fb_publish_actions = response.authResponse.grantedScopes.search('publish_actions');

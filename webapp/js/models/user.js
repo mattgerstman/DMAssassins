@@ -102,17 +102,6 @@ var app = app || {
                 that.setProperty('alive', 'true');
             });
         },
-        saveEmailSettings: function(email, allow_email) {
-            var data = {
-                email: email,
-                allow_email: allow_email
-            };
-            var that = this;
-            var url = this.url() + 'email/';
-            $.post(url, data, function(response){
-                that.set('email', email);
-            });
-        },
         quit: function(secret) {
             var that = this;
             this.destroy({
