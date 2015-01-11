@@ -3,7 +3,7 @@ DMAssassins
 
 [Assassins](http://en.wikipedia.org/wiki/Assassin_(game)) is Live Action Game where players are assigned a target to "kill" by shooting them with Silly String™. The game runs in a giant loop (picture a circular linked list), and players continue to "kill" their targets until only one player is left.
 
-DMAssassins is a webapp designed to manage large scale games of assassins where palyers may or may not know each other. They are given a reasonable amount of information about their target to help track them down.
+DMAssassins is a webapp designed to manage large scale games of assassins where palyers may or may not know each other. They are given a reasonable amount of information about their target to help track them down. It also features "plot twists" which cleverly rearrange targets and give the players new constraints to keep the game interesting.
 
 This repo is my third version of assassins and was written with the goal of learning both Golang and BackboneJs. A fully fledged version is running at [dmassassins.com](http://dmassassins.com)
 
