@@ -260,9 +260,9 @@
             </div>
 
             <div class="row">
-                <a class="thumbnail profile-thumbnail js-profile-picture">
+                <a class="thumbnail js-profile-picture">
                     <div class="profile-thumbnail-container">
-                        <img src=<%= properties.photo_thumb %>>
+                        <img class="profile-thumbnail" src=<%= properties.photo_thumb %>>
                     </div>
                 </a>
             </div>
@@ -1147,7 +1147,7 @@
                         <button class="btn btn-block btn-primary js-save-game">Save</button>
                     </div>
                 </form>
-                <button class="btn btn-block btn-primary js-facebook-page">Setup DMAssassins Page</button>
+                <!--button class="btn btn-block btn-primary js-facebook-page">Setup DMAssassins Page</button-->
                 <% if (!game_started) { %>
                     <button class="btn btn-block btn-success js-start-game">Start Game</button>
                 <% } else { %>
