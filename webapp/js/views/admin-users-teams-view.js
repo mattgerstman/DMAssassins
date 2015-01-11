@@ -20,8 +20,8 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.AdminUsersTeamsView = Backbone.View.extend({
-    
-        template: _.template($('#admin-users-teams-template').html()),
+
+        template: _.template($('#template-admin-users-teams').html()),
         tagName: 'ul',
         initialize: function() {
             this.collection = app.Running.Teams;
@@ -35,9 +35,9 @@ var app = app || {
             var teamSort = function(team){
                 return team.team_name;
             };
-            
+
             var data = { teams: _.sortBy(this.collection.toJSON(), teamSort) };
-                        
+
             var myRole = app.Running.User.getProperty('user_role');
             data.is_admin = AuthUtils.requiresAdmin(myRole);
             this.$el.html(this.template(data));

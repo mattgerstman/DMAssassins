@@ -1,0 +1,89 @@
+/*
+// assets/styles/admin-users.less
+// styles for the manage users page
+*/
+
+
+.admin-users-body {
+    padding:0;
+    .m-transitionEase(0.5s);
+}
+.subtext {
+    font-size:80%;
+}
+.user-row {
+    height:25px;
+    width:100%;
+}
+.user-label {
+    width:75px;
+    float:left;
+    font-size:90%;
+    text-align: left;
+    margin-left:5px;
+}
+.user-select {
+    width:120px;
+    direction: rtl;
+    float:right;
+    text-align: right;
+    margin-right:5px;
+}
+.user-saved {
+    float:right;
+    text-align: right;
+    margin:4px 0px 0 0;
+    font-size:75%;
+    color: green;
+    display: none;
+}
+
+.user-dead {
+    .m-grayScale(100%);
+}
+.user-buttons {
+    margin:5px 0 40px 0;
+    padding-bottom:15px;
+    border-bottom: 1px solid #ddd;
+}
+.thumbnail.user-thumbnail {
+    display:none;
+}
+
+
+@media(min-width:768px) {
+
+    .user-thumbnailWrapper {
+        padding-bottom:100%;
+        position:relative;
+        overflow:hidden;
+
+    }
+
+    .thumbnail.user-thumbnail {
+        display:block;
+        max-height:@height-standard;
+        margin:5px auto 10px auto;
+
+    }
+    .user-img {
+        position:absolute;
+    }
+}
+
+@media(max-width:1550px) {
+
+    .user-grid {
+        border-bottom: 1px solid #ddd;
+        margin-bottom:40px;
+    }
+    .user-buttons {
+        margin-top:5px;
+        margin-bottom:0;
+        border:none;
+    }
+
+    .thumbnail.user-thumbnail {
+        margin:5px 10px 10px 10px;
+    }
+}

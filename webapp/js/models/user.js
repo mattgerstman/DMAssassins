@@ -40,10 +40,10 @@ var app = app || {
         idAttribute : 'user_id',
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';           
-        },       
+            return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';
+        },
         joinGame: function(game_id, game_password, team_id) {
-            var that = this;            
+            var that = this;
             var last_game_id = app.Running.Games.getActiveGameId();
             this.save(null, {
                 url: config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/',
@@ -53,7 +53,7 @@ var app = app || {
                     'X-DMAssassins-Team-Id': team_id
                 },
                 success: function() {
-                    app.Running.Games.setActiveGame(game_id).set('member', true);                    
+                    app.Running.Games.setActiveGame(game_id).set('member', true);
                     that.trigger('join-game');
                 },
                 error: function(that, response, options) {
@@ -62,8 +62,8 @@ var app = app || {
                         app.Running.Games.get(game_id).set('member', false);
                         if (!!last_game_id)
                         {
-                            app.Running.Games.setActiveGame(last_game_id, true).set('member', true);    
-                        }                        
+                            app.Running.Games.setActiveGame(last_game_id, true).set('member', true);
+                        }
                     }
                 }
             });
@@ -77,7 +77,7 @@ var app = app || {
             if ((silent === undefined) || (silent === false))
             {
                 this.trigger('change');
-            }            
+            }
             return this.get('properties');
         },
         getProperty: function(key){
@@ -89,28 +89,17 @@ var app = app || {
             return properties[key];
         },
         kill: function(){
-        	var that = this;
-        	var url = this.url() + 'kill/';
-	      	$.post(url, function(response){
-	      		that.setProperty('alive', 'false');
-	      	});
+            var that = this;
+            var url = this.url() + 'kill/';
+            $.post(url, function(response){
+                that.setProperty('alive', 'false');
+            });
         },
         revive: function(){
-        	var that = this;
-        	var url = this.url() + 'revive/';
-	      	$.post(url, function(response){
-	      		that.setProperty('alive', 'true');
-	      	});
-        },
-        saveEmailSettings: function(email, allow_email) {
-            var data = {
-                email: email,
-                allow_email: allow_email
-            };
             var that = this;
-            var url = this.url() + 'email/';
-            $.post(url, data, function(response){
-                that.set('email', email);
+            var url = this.url() + 'revive/';
+            $.post(url, function(response){
+                that.setProperty('alive', 'true');
             });
         },
         quit: function(secret) {

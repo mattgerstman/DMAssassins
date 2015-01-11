@@ -31,9 +31,11 @@ $(function() {
 
     app.Running.Games = new app.Collections.Games();
     app.Running.User = new app.Models.User();
+    app.Running.Permissions = new app.Models.Permissions();
     app.Running.TargetModel = new app.Models.Target();
     app.Running.LeaderboardModel = new app.Models.Leaderboard();
     app.Running.RulesModel = new app.Models.Rules();
+    app.Running.TargetFriendsModel = new app.Models.TargetFriends();
 
     app.Running.Users = new app.Collections.Users();
     app.Running.Teams = new app.Collections.Teams();
@@ -43,6 +45,7 @@ $(function() {
     app.Running.LeaderboardModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
     app.Running.RulesModel.listenTo(app.Running.Games, 'game-change', app.Running.RulesModel.fetch);
     app.Running.Teams.listenTo(app.Running.User, 'change:properties', app.Running.Teams.tryFetch);
+    app.Running.TargetFriendsModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
 
     app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.checkAccess);
     app.Running.User.listenTo(app.Running.User, 'change', app.Running.User.checkAccess);

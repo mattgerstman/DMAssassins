@@ -52,13 +52,13 @@ var app = app || {
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['#users'],
-        
+
         // routes that require is at least a game admin
-        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],        
+        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],
 
         // routes that require is a super admin
         requiresSuperAdmin: ['#targets'],
-        
+
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
 
@@ -104,13 +104,13 @@ var app = app || {
 
             // do we need to be an admin
             var needAdmin = _.contains(this.requiresAdmin, path);
-            
+
             // do we need to be an admin
             var needSuperAdmin = _.contains(this.requiresSuperAdmin, path);
-            
+
             // The active user's role in the current game
             var userRole = app.Running.User.getProperty('user_role');
-            
+
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
 
@@ -119,9 +119,6 @@ var app = app || {
 
             // is the user a super admin
             var isSuperAdmin = AuthUtils.requiresSuperAdmin(userRole);
-
-
-
 
             /*
 			Variables I use when shit's not routing properly */
@@ -137,8 +134,7 @@ var app = app || {
             console.log('isCaptain: ', isCaptain);
             console.log('needAdmin: ', needAdmin);
             console.log('isAdmin: ', isAdmin);
-
-/**/
+            /**/
 
             // Do we need authentication
             if ((needAuth || needGameAndAuth) && !isAuth) {
@@ -176,7 +172,7 @@ var app = app || {
                 Backbone.history.navigate('', {
                     trigger: true
                 });
-            // nothing is wrong! let them pass.	
+            // nothing is wrong! let them pass.
             } else if (needSuperAdmin && !isSuperAdmin) {
                 Backbone.history.navigate('', {
                     trigger: true
@@ -257,40 +253,40 @@ var app = app || {
             app.Running.AppView.setCurrentView(view);
             this.render();
         },
-        users: function() {            
-            app.Running.Teams.fetch();  
+        users: function() {
+            app.Running.Teams.fetch();
             var view = new app.Views.AdminUsersView();
-            app.Running.AppView.setCurrentView(view);            
-            app.Running.currentView.collection.fetch({reset: true});           
+            app.Running.AppView.setCurrentView(view);
+            app.Running.currentView.collection.fetch({reset: true});
             this.render();
         },
         edit_rules: function() {
             var view = new app.Views.AdminEditRulesView();
             app.Running.AppView.setCurrentView(view);
             app.Running.currentView.model.fetch();
-            this.render(); 
+            this.render();
         },
         game_settings: function() {
             var view = new app.Views.AdminGameSettingsView();
             app.Running.AppView.setCurrentView(view);
-            this.render();             
+            this.render();
         },
         email_users: function() {
             var view = new app.Views.AdminEmailUsersView();
             app.Running.UserEmails.fetch();
             app.Running.AppView.setCurrentView(view);
-            this.render();                                     
+            this.render();
         },
-        targets: function() {        
+        targets: function() {
             var view = new app.Views.SuperAdminTargetsView();
             app.Running.AppView.setCurrentView(view);
-            this.render();                 
+            this.render();
             app.Running.currentView.model.fetch({reset: true});
         },
         preventSwitchGameBack: ['join_game', 'create_game'],
         switch_game: function() {
             var lastFragment = this.history[this.history.length - 1];
-            if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {             
+            if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
                 Backbone.history.navigate('my_profile', {
                     trigger: true
                 });
@@ -322,7 +318,8 @@ var app = app || {
                 if (fragment === '')
                     fragment = 'my_profile';
 
-                app.Running.NavView.highlight('#nav_' + fragment);
+                fragment = fragment.replace('_', '-');
+                app.Running.NavView.highlight('#js-nav-' + fragment);
                 app.Running.NavView.handleTarget();
                 app.Running.NavGameView.updateText();
             }
@@ -331,5 +328,4 @@ var app = app || {
             app.Running.AppView.renderPage(app.Running.currentView);
         }
     });
-
 })();

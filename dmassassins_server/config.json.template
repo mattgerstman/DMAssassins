@@ -1,14 +1,15 @@
 {
-	"APIDomain": "",
-	"FBAppId": "",
-	"FBAppSecret" :"",
-	"FBAccessToken" : "",
-	"DatabaseURL": "postgres://localhost?dbname=dmassassins&sslmode=disable",
-	"SentryDSN" : "",
-	"SupportEmail": "",
-	"MailGunPublicKey": "",
-	"MailGunPrivateKey": "",
-	"MailGunDomain": "",
-	"MailGunSender": "",
-	"MailGunReplyTo": ""
+	"api_domain": "",
+	"default_timezone" : "America/New_York",
+	"fb_app_id": "",
+	"fb_app_secret" :"",
+	"fb_access_token" : "",
+	"database_url": "postgres://localhost?dbname=dmassassins&sslmode=disable",
+	"sentry_dsn" : "",
+	"support_email": "",
+	"mailgun_public_key": "",
+	"mailgun_private_key": "",
+	"mailgun_domain": "",
+	"mailgun_sender": "",
+	"mailgun_replyto": ""
 }

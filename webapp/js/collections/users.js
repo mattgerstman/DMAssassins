@@ -11,7 +11,7 @@ var app = app || {
 (function() {
     'use strict';
     app.Collections.Users = Backbone.Collection.extend({
-		// Collection of Users
+        // Collection of Users
         model: app.Models.User,
         // The api is going to return a mapping, parse to an array
         parse: function(response){

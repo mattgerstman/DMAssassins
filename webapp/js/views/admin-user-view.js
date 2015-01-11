@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.AdminUserView = Backbone.View.extend({
 
-        template: _.template($('#admin-user-template').html()),
+        template: _.template($('#template-admin-user').html()),
         tagName:'div',
         initialize: function(model){
             this.model = model;
@@ -30,24 +30,24 @@ var app = app || {
             this.listenTo(this.model, 'save', this.render);
         },
         makeDraggable: function(selector) {
-            var that = this;            
+            var that = this;
             var startFunc = function(e, ui) {
-                ui.helper.find('.user').remove();
+                ui.helper.find('.js-user').remove();
                 ui.helper.removeClass('user-grid');
-                ui.helper.find('.drag-img').removeClass('hide');
-                ui.helper.find('.drag-img').animate({
+                ui.helper.find('.js-drag-img').removeClass('hide');
+                ui.helper.find('.js-drag-img').animate({
                     width: 50,
-                    height: 50             
+                    height: 50
                 }, 100);
             };
-            
+
             if (selector === undefined) {
                 selector = '.user-grid';
             }
-            
+
             this.$el.find(selector).draggable({
-                handle: '.thumbnail',
-                connectWith: '#team_list li',
+                handle: '.js-draggable-photo',
+                connectWith: '.js-droppable-team',
                 tolerance: "pointer",
                 helper: 'clone',
                 forceHelperSize: true,
@@ -63,20 +63,19 @@ var app = app || {
             }
             this.$el.html(this.template(data));
 
-			var game = app.Running.Games.getActiveGame();
-			var teams_enabled = false;
-			if (game)
-			{
-    			teams_enabled = game.areTeamsEnabled();
-			}
-            
+            var game = app.Running.Games.getActiveGame();
+            var teams_enabled = false;
+            if (game)
+            {
+                teams_enabled = game.areTeamsEnabled();
+            }
+
             if (teams_enabled)
             {
                 var user_id = this.model.get('user_id');
-                this.makeDraggable('#user_'+user_id);
+                this.makeDraggable('#js-user-'+user_id);
             }
             return this;
-        }    
+        }
     });
 })(jQuery);
-    

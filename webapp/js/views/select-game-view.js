@@ -25,17 +25,14 @@ var app = app || {
         template: _.template($('#select-game-template').html()),
         tagName: 'div',
         events: {
-            'click .show-create-game': 'showCreateGame',
-            'click .show-join-game': 'showJoinGame',
-            'click .create-game-submit': 'createGame',
-            'click .join-game-submit': 'joinGame',
-            'click .create-or-join-back': 'goBack',
-            'click #create_game_need_password': 'togglePassword',
-            'change #games': 'checkFields'
-
+            'click  .js-create-game-submit'          : 'createGame',
+            'click  #js-create-game-need-password'   : 'togglePassword',
+            'click  .js-create-or-join-back'         : 'goBack',
+            'click  .js-join-game-submit'            : 'joinGame',
+            'change #js-select-game'                 : 'checkFields',
+            'click  .js-show-create-game'            : 'showCreateGame',
+            'click  .js-show-join-game'              : 'showJoinGame'
         },
-        // previous page, may depricate
-        loaded_from: 'login',
         // constructor
         initialize: function() {
             this.collection = app.Running.Games;
@@ -47,17 +44,17 @@ var app = app || {
         },
         // shows the create game subview
         showCreateGame: function() {
-            $('.logo').addClass('hide');
-            $('#create-or-join').addClass('hide');
-            $('#create-game').addClass('select-game-active');
-            $('#create-game').removeClass('hide');
+            $('.js-logo').addClass('hide');
+            $('.js-create-or-join').addClass('hide');
+            $('.js-create-game').addClass('js-select-game-active');
+            $('.js-create-game').removeClass('hide');
         },
         // shows the join game subview
         showJoinGame: function() {
-            $('.logo').addClass('hide');
-            $('#create-or-join').addClass('hide');
-            $('#join-game').addClass('select-game-active');
-            $('#join-game').removeClass('hide');
+            $('.js-logo').addClass('hide');
+            $('.js-create-or-join').addClass('hide');
+            $('.js-join-game').addClass('js-select-game-active');
+            $('.js-join-game').removeClass('hide');
         },
         // cancels the game creation/selection
         goBack: function() {
@@ -65,17 +62,17 @@ var app = app || {
                 app.Running.Router.back();
                 return;
             }
-            $('.select-game-active').addClass('hide').removeClass('select-game-active');
-            $('#create-or-join').removeClass('hide');
-            $('.logo').removeClass('hide');
+            $('.js-select-game-active').addClass('hide').removeClass('js-select-game-active');
+            $('.js-create-or-join').removeClass('hide');
+            $('.js-logo').removeClass('hide');
         },
         // show the create game s ubview
         createGame: function(event) {
             event.preventDefault();
             var name = $('#create_game_name').val();
             var password = null;
-            if ($('#create_game_need_password').is(':checked')) {
-                password = $('#create_game_password').val();
+            if ($('#js-create-game-need-password').is(':checked')) {
+                password = $('#js-create-game-password').val();
 
             }
             var that = this;
@@ -101,15 +98,15 @@ var app = app || {
         },
         // posts to the join game model
         joinGame: function(event) {
-            event.preventDefault();            
-            var selected = this.$el.find('#games option:selected');
+            event.preventDefault();
+            var selected = this.$el.find('#js-select-game option:selected');
             var game_id = selected.val();
-            var need_password = selected.attr('game_has_password') == 'true';
-            var password = need_password ? $('#join_game_password').val() : '';
-            
-            var teams_enabled = this.$el.find('#join_game_team').attr('disabled') != 'disabled';
-            var team_id = this.$el.find('#join_game_team option:selected').val();
-            
+            var need_password = selected.data('game-has-password');
+            var password = need_password ? $('#js-join-game-password').val() : '';
+
+            var teams_enabled = this.$el.find('#js-join-game-team').attr('disabled') != 'disabled';
+            var team_id = this.$el.find('#js-join-game-team option:selected').val();
+
             if (teams_enabled && !team_id) {
                 this.badTeam();
                 return;
@@ -119,17 +116,17 @@ var app = app || {
         },
         badPassword: function(){
             $('#join_password_block').addClass('has-error');
-            $('label[for=join_game_password]').text('Invalid Password:');
-            $('.join-game-submit').removeClass('disabled').text('Join');
+            $('label[for=js-join-game-password]').text('Invalid Password:');
+            $('.js-join-game-submit').removeClass('disabled').text('Join');
         },
         badTeam: function(){
             $('#join_team_block').addClass('has-error');
-            $('label[for=join_game_team]').text('Must Select A Team:');
+            $('label[for=js-join-game-team]').text('Must Select A Team:');
         },
         fixFields: function(){
-          this.$el.find('.has-error').removeClass('has-error');
-          this.$el.find('label[for=join_game_password]').text('Password:');
-          this.$el.find('label[for=join_game_team]').text('Team:');
+            this.$el.find('.has-error').removeClass('has-error');
+            this.$el.find('label[for=js-join-game-password]').text('Password:');
+            this.$el.find('label[for=js-join-game-team]').text('Team:');
         },
         // finish up and navigate to your profile
         finish: function(game) {
@@ -141,55 +138,69 @@ var app = app || {
         finishJoin: function(){
             Backbone.history.navigate('my_profile', {
                 trigger: true
-            });            
+            });
         },
         // toggles the password entry field on create game
         togglePassword: function(e) {
-            $('#create_game_password').attr('disabled', !e.target.checked);
+            $('#js-create-game-password').attr('disabled', !e.target.checked);
         },
         noTeams: function(){
-            var teamField = this.$el.find('#join_game_team');
-            teamField.attr('disabled', true);            
-            teamField.find('#team_placeholder').text('No Teams');
+            var teamField = this.$el.find('#js-join-game-team');
+            teamField.attr('disabled', true);
+            teamField.find('#js-team-placeholder').text('No Teams');
         },
-        // toggles the password entry field and team entry fieldon join game
+        // toggles the password entry field and team entry field on join game
         checkFields: function() {
             // Password field setup
             this.fixFields();
-            var selected = this.$el.find('#games option:selected');
-            var need_password = selected.attr('game_has_password') == 'true';
-            var passwordField = this.$el.find('#join_game_password');
+            // get selected game
+            var selected = this.$el.find('#js-select-game option:selected');
+            // check if it needs a password
+            var need_password = selected.data('game-has-password');
+
+            // grab the password field
+            var passwordField = this.$el.find('#js-join-game-password');
+
+            // Set it to no password if we don't have one
             var passwordPlaceholder = need_password ? '' : 'No Password';
+
+            // If we do have one mark it as not disabled
             passwordField.attr('disabled', !need_password);
             passwordField.val(passwordPlaceholder);
-            
+
+            // Get game model
             var game_id = selected.val();
             var game = app.Running.Games.get(game_id);
             if (!game) {
                 return;
             }
 
-            var teamField = this.$el.find('#join_game_team');
-            teamField.find('#team_placeholder').text('Loading..');
+            // Set teams to loading if the game has teams
+            var teamField = this.$el.find('#js-join-game-team');
+            teamField.find('#js-team-placeholder').text('Loading..');
 
+            // Set the teams
             var that = this;
             var url = config.WEB_ROOT + 'game/' + game_id + '/team/';
             app.Running.Teams.fetch({
                 url:url,
-                success:function(teams){        
+                success:function(teams){
+                    // if there are no teams handle that appropraitely
+                    if (!app.Running.Teams.length){
+                        that.noTeams();
+                        return;
+                    }
+                    // if we have teams mark it as not disabled
                     teamField.attr('disabled', false);
+                    // render team select
                     var teamOptionsTemplate = _.template($('#select-game-team-option').html());
                     var teamOptionsHTML = teamOptionsTemplate({teams: app.Running.Teams.toJSON()});
                     teamField.html(teamOptionsHTML);
-                    if (!app.Running.Teams.length){
-                        that.noTeams();
-                    }
                 },
                 error:function(){
-                   that.noTeams();
+                    that.noTeams();
                 }
             });
-            
         },
         render: function() {
             this.$el.html(this.template({
@@ -202,5 +213,4 @@ var app = app || {
         }
 
     });
-
 })(jQuery);

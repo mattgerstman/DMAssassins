@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	//	"strconv"
 )
 
 // Assigns targets using a methodology, wrapps the inner function in a transaction
@@ -39,7 +38,7 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 		return appErr
 	}
 
-	if !anyLeft {
+	if !anyLeft || assignmentType == `delete` {
 		return game.DeleteTargetsTransactional(tx)
 	}
 
@@ -67,21 +66,8 @@ func (game *Game) AssignTargetsByTransactional(tx *sql.Tx, assignmentType string
 
 	// If teams are enabled assigned by team
 	if teamsEnabled == `true` {
-		var canAssign bool
-		canAssign = true
-		//canAssign, appErr := game.CanAssignByTeams()
-		if appErr != nil {
-			return appErr
-		}
-		if canAssign {
-			// Get all players in the game
-			rows, appErr := game.getAllActivePlayersAsRows()
-			if appErr != nil {
-				return appErr
-			}
-			fmt.Println(`teams`)
-			return game.assignTargetsByTeams(tx, rows)
-		}
+		fmt.Println(`teams`)
+		return game.assignTargetsByTeams(tx)
 	}
 	fmt.Println(`regular`)
 	// Get players to assign targets with
@@ -348,7 +334,12 @@ func (game *Game) getAllActivePlayersAsRows() (rows *sql.Rows, appErr *Applicati
 }
 
 // Assign targets and space them out by team
-func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *ApplicationError) {
+func (game *Game) assignTargetsByTeams(tx *sql.Tx) (appErr *ApplicationError) {
+	// Get active players
+	rows, appErr := game.getAllActivePlayersAsRows()
+	if appErr != nil {
+		return appErr
+	}
 
 	// Get the list of team ids
 	teamsList, appErr := game.GetTeamsWithRegularPlayersLeft()
@@ -590,7 +581,7 @@ func (game *Game) assignTargetsByTeams(tx *sql.Tx, rows *sql.Rows) (appErr *Appl
 			// Add a pair for the target
 			captainPair := &targetPair{userId, teamId, `dm_user`, targetId, targetTeamId, targetUserRole}
 			targetList = append(targetList, captainPair)
-
+			i += 3
 		}
 	}
 

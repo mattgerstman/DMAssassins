@@ -349,6 +349,7 @@ func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) 
 	var numUsers, numCaptains int
 	var teamIdBuffer string
 
+	// Check how many players we have per team
 	rows1, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
@@ -369,6 +370,7 @@ func (game *Game) CanAssignByTeams() (canAssign bool, appErr *ApplicationError) 
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
+	// Check that we have one captain on each team
 	rows2, err := db.Query(`SELECT count(user_id), team_id from dm_user_game_mapping WHERE alive = true AND user_role = 'dm_captain' AND game_id = $1 GROUP BY team_id`, game.GameId.String())
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)

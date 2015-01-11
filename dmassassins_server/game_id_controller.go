@@ -10,9 +10,13 @@ import (
 )
 
 type GameSettingsPut struct {
-	GameName     string `json:"game_name"`
-	GamePassword string `json:"game_password"`
-	EnableTeams  string `json:"game_teams_enabled"`
+	GameName        string `json:"game_name"`
+	GamePassword    string `json:"game_password"`
+	EnableTeams     string `json:"game_teams_enabled"`
+	TimeZone        string `json:"game_timezone"`
+	PageId          string `json:"game_page_id"`
+	PageAccessToken string `json:"game_page_access_token"`
+	PageName        string `json:"game_page_name"`
 }
 
 // PUT - Changes game settings
@@ -50,11 +54,26 @@ func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 
 	// Change password
-	game.ChangePassword(gameSettingsPut.GamePassword)
+	if gameSettingsPut.GamePassword != "" {
+		game.ChangePassword(gameSettingsPut.GamePassword)
+	}
 
 	//Set teams enabled
-	game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
-
+	if gameSettingsPut.EnableTeams != "" {
+		game.SetGameProperty("teams_enabled", gameSettingsPut.EnableTeams)
+	}
+	if gameSettingsPut.TimeZone != "" {
+		game.SetGameProperty("timezone", gameSettingsPut.TimeZone)
+	}
+	if gameSettingsPut.PageId != "" {
+		game.SetGameProperty("game_page_id", gameSettingsPut.PageId)
+	}
+	if gameSettingsPut.PageAccessToken != "" {
+		game.SetGameProperty("game_page_access_token", gameSettingsPut.PageAccessToken)
+	}
+	if gameSettingsPut.PageName != "" {
+		game.SetGameProperty("game_page_name", gameSettingsPut.PageName)
+	}
 	return game, nil
 }
 
