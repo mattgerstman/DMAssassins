@@ -315,7 +315,7 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
-	// Executre the statement to insert the game creator(admin) into the game
+	// Execute the statement to insert the game creator(admin) into the game
 	role := "dm_admin"
 	_, err = tx.Stmt(firstMapping).Exec(gameId.String(), userId.String(), role, secret)
 	if err != nil {
@@ -334,6 +334,10 @@ func NewGame(gameName string, userId uuid.UUID, gamePassword string) (game *Game
 	properties := make(map[string]string)
 
 	game = &Game{gameId, gameName, false, hasPassword, properties}
+
+	// Set timezone
+	_ = game.SetGameProperty(`timezone`, Config.DefaultTimeZone)
+
 	_, appErr = game.GetGameProperties()
 	if appErr != nil {
 		return nil, appErr

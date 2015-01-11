@@ -22,6 +22,7 @@ var app = app || {
         defaults: {
             'game_id': null,
             'assassin_id': '',
+            'facebook_id': '',
             'username': '',
             'user_id': '',
             'properties': {

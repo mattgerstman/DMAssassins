@@ -1,0 +1,8 @@
+Hey %recipient.first_name%,
+
+The game has been paused and you do not currently have a target. You will be notified when the game resumes.
+
+Good Luck!
+The DMAssassins Team
+
+To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

@@ -12,10 +12,10 @@ var app = app || {
     'use strict';
     app.Collections.Games = Backbone.Collection.extend({
 
-		// Collection of type Model
+        // Collection of type Model
         model: app.Models.Game,
 
-		// Sort games into those the user is a member of and those they can join
+        // Sort games into those the user is a member of and those they can join
         parse: function(response) {
             if (!response) {
                 return null;
@@ -71,7 +71,7 @@ var app = app || {
         },
         // Sets the active game id
         setActiveGame: function(game_id, silent) {
-        	// validate the game_Id
+            // validate the game_Id
             var game = this.get(game_id);
             if (!game) {
                 return null;
@@ -82,7 +82,7 @@ var app = app || {
             app.Session.set('game_id', game_id);
             app.Session.set('has_game', true);
 
-			// trigger a game change if necessary
+            // trigger a game change if necessary
             if (silent === undefined || !silent)
             {
                 this.trigger('game-change');
@@ -108,8 +108,5 @@ var app = app || {
             }
             return game.get('game_id');
         }
-
-
-
     });
 })();

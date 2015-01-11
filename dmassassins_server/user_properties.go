@@ -98,6 +98,12 @@ func (user *User) SetUserProperties(newProperties map[string]string) (appErr *Ap
 	return nil
 }
 
+// Get a user property and cast it as a boolean
+func (user *User) GetUserPropertyBool(key string) (property bool, appErr *ApplicationError) {
+	stringProperty, appErr := user.GetUserProperty(key)
+	return stringProperty == `true`, appErr
+}
+
 // Get a single User Property from the db
 func (user *User) GetUserProperty(key string) (property string, appErr *ApplicationError) {
 

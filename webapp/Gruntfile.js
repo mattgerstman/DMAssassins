@@ -5,11 +5,11 @@ module.exports = function(grunt) {
   grunt.initConfig({
     // Metadata.
     pkg: grunt.file.readJSON('package.json'),
-    banner: '/*\n * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= pkg.code_name %> - ' +
+    banner: '/*!\n * <%= pkg.title || pkg.name %> - v<%= pkg.version %> - <%= pkg.code_name %> - ' +
       '<%= grunt.template.today("yyyy-mm-dd") %>\n' +
       '<%= pkg.homepage ? " * " + pkg.homepage + "\\n" : "" %>' +
       ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;\n' +
-      ' */\n',
+      ' */',
     // Task configuration.
     concat: {
       options: {
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
           'js/routers/*.js',
           'js/*.js'
           ],
-        dest: 'dist/<%= pkg.name %>.js'
+        dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.js'
       }
     },
     uglify: {
@@ -53,6 +53,27 @@ module.exports = function(grunt) {
         src: 'Gruntfile.js'
       },      
     },
+    lintspaces: {
+	    javascript: {
+	        src: [
+	          'js/config.js',
+	          'js/lib/*.js',
+	          'js/models/*.js',
+	          'js/collections/*.js',
+	          'js/views/*.js',
+	          'js/routers/*.js',
+	          'js/*.js'
+	        ],
+	        options: {
+	            newline: true,
+	            newlineMaximum: 2,
+	            trailingspaces: true,
+	            indentation: 'spaces',
+	            spaces: 4,
+	            ignores: ['js-comments']
+	        }
+	    }
+	},
     env : {
       options : {
           VERSION: '<%= pkg.version %>',          
@@ -78,28 +99,65 @@ module.exports = function(grunt) {
           dest : 'index.html'
       }
     },
-    cssmin: {
-      add_banner: {
+    less: {
+      dev: {
         options: {
-          banner: '<%= banner %>'
+          banner: '<%= banner %>',          
+          strictMath: true,
+          sourceMap: true,
+          outputSourceFiles: true,
+          sourceMapURL: 'DMAssassins.css.map',
+          sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map'
         },
         files: {
-            'dist/<%= pkg.version %>/DMAssassins.min.css': ['assets/styles/*.css']
+          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/DMAssassins.less'          
+        }
+      },
+      prod: {
+        options: {
+          banner: '<%= banner %>',
+          strictMath: true,
+          sourceMap: true,
+          outputSourceFiles: true,
+          sourceMapURL: 'DMAssassins.css.map',
+          sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map',
+          cleancss: true
+        },
+        files: {          
+          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/DMAssassins.less'          
         }
       }
+    },
+    watch : {
+      css: {
+        files: 'assets/styles/*.less',
+        tasks: ['less:dev']
+      },
+      js: {
+        files: 'js/*/*.js',
+        tasks: ['lintspaces', 'jshint']
+      },
+      index: {
+        files: 'index.html.template',
+        tasks: ['env:dev', 'preprocess:dev']
+      }
+      
     }
   });
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  
+  grunt.loadNpmTasks('grunt-contrib-concat');  
+  grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-preprocess');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-env');
-  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-preprocess');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-lintspaces');
 
   // Default task.
-  grunt.registerTask('dev', ['jshint', 'env:dev', 'preprocess:dev']);
-  grunt.registerTask('prod', ['concat', 'uglify', 'cssmin', 'env:prod', 'preprocess:prod']);
+  grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
+  grunt.registerTask('prod', ['concat', 'uglify', 'less:prod', 'env:prod', 'preprocess:prod']);
 
 };

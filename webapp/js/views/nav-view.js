@@ -22,13 +22,13 @@ var app = app || {
     app.Views.NavView = Backbone.View.extend({
 
 
-        template: _.template($('#nav-template').html()),
-        el: '#nav_body',
+        template: _.template($('#template-nav').html()),
+        el: '#js-wrapper-nav',
 
         tagName: 'nav',
 
         events: {
-            'click li a': 'select'
+            'click .js-nav-link': 'select'
         },
 
         // constructor
@@ -43,20 +43,21 @@ var app = app || {
 
         // if we don't have a target hide that view
         render: function() {
-            var role = app.Running.User.getProperty('user_role');  
+            var role = app.Running.User.getProperty('user_role');
             var data = {};
             data.is_captain = AuthUtils.requiresCaptain(role);
             data.is_admin = AuthUtils.requiresAdmin(role);
             data.is_super_admin = AuthUtils.requiresSuperAdmin(role);
-            
+
             this.$el.html(this.template(data));
             this.handleTarget();
-            
-            var selectedElem = this.$el.find('#nav_' + Backbone.history.fragment);
+
+
+            var selectedElem = this.$el.find('#js-nav-' + Backbone.history.fragment.replace('_', '-'));
             this.highlight(selectedElem);
-            
+
             if (app.Running.NavGameView)
-                app.Running.NavGameView.setElement(this.$('#games_dropdown')).render();
+                app.Running.NavGameView.setElement(this.$('#js-nav-games-dropdown')).render();
             return this;
         },
 
@@ -67,6 +68,7 @@ var app = app || {
                 event.preventDefault();
                 return;
             }
+
             $('.navbar-collapse.in').collapse('hide');
             this.highlight(target);
 
@@ -74,28 +76,29 @@ var app = app || {
 
         // highlight an item on the nav bar and unhighlight the rest of them
         highlight: function(elem) {
-            if ($(elem).hasClass('dropdown_parent')) {
+            if ($(elem).hasClass('js-dropdown-parent')) {
                 return;
             }
 
-            if ($(elem).hasClass('dropdown_item')) {
+            if ($(elem).attr('dropdown')) {
                 var dropdown = $(elem).attr('dropdown');
-                var parent = '#' + dropdown + '_parent';
+                var parent = '#js-dropdown-parent-'+ dropdown;
                 elem = parent;
             }
+
             $('.active').removeClass('active');
             $(elem).addClass('active');
         },
         handleAdmin: function() {
-            var role = app.Running.User.getProperty('user_role');  
+            var role = app.Running.User.getProperty('user_role');
             var allowed = AuthUtils.requiresCaptain(role);
             if (allowed) {
-                $('#admin_parent').removeClass('hide');
+                $('#js-dropdown-parent-admin').removeClass('hide');
                 return;
             }
-            $('#admin_parent').addClass('hide');
+            $('#js-dropdown-parent-admin').addClass('hide');
             return;
-            
+
         },
         handleTarget: function() {
             var game = app.Running.Games.getActiveGame();
@@ -109,27 +112,27 @@ var app = app || {
                 this.disableTarget();
                 return;
             }
-            
+
             if (!app.Running.TargetModel.get('user_id'))
             {
                 this.disableTarget();
                 return;
             }
-            
+
             this.enableTarget();
             return;
         },
 
         // hides the target nav item
         enableTarget: function() {
-            this.$el.find('#nav_target').removeClass('disabled');
-            this.$el.find('#nav_target a').removeClass('disabled');
+            this.$el.find('#js-nav-target').removeClass('disabled');
+            this.$el.find('#js-nav-target a').removeClass('disabled');
         },
 
         // shows the target nav item
         disableTarget: function() {
-            this.$el.find('#nav_target').addClass('disabled');
-            this.$el.find('#nav_target a').addClass('disabled');
+            this.$el.find('#js-nav-target').addClass('disabled');
+            this.$el.find('#js-nav-target a').addClass('disabled');
         }
 
     });

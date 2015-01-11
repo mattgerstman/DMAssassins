@@ -24,6 +24,11 @@ webapp/npm-debug.log
 
 backup.sql
 
+<<<<<<< HEAD
+.DS_Store
+
+=======
+>>>>>>> master
 dmassassins_server/config_new.json
 
 dmassassins_server/config_old.json

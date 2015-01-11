@@ -20,22 +20,19 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.SuperAdminTargetsView = Backbone.View.extend({
-        template: _.template($('#super-admin-targets-template').html()),
+        template: _.template($('#template-super-admin-targets').html()),
         tagName:'div',
-        events: {
- 
-        },
         initialize: function(){
             this.model = new app.Models.Targets();
             this.listenTo(this.model, 'fetch', this.render);
             this.listenTo(this.model, 'reset', this.render);
-            this.listenTo(this.model, 'change', this.render);            
-        },             
+            this.listenTo(this.model, 'change', this.render);
+        },
         render: function(){
             var data = this.model.attributes;
             this.$el.html(this.template(data));
-            
-                            
+
+
             var options = {
                 paging: false,
                 searching: false,
@@ -45,17 +42,16 @@ var app = app || {
                     null,
                     null,
                     null,
-                    null,                                        
+                    null,
                     null,
                     null,
                     null,
                     null
                 ]
             };
-            
+
             this.$el.find('.js-targets-table').dataTable(options);
             return this;
-        }    
+        }
     });
 })(jQuery);
-    

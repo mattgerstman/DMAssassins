@@ -31,9 +31,9 @@ var app = app || {
         },
         // The api is going to return a mapping, parse to an array
         parse: function(response) {
-            var targets = response;            
+            var targets = response;
             var data = {loops:[]};
-            
+
             // don't stop until we've hit every user
             while (!_.isEmpty(targets)) {
                 // Create a loop
@@ -41,14 +41,14 @@ var app = app || {
                 var targetIds = _.keys(targets);
                 var firstId = targetIds[0];
                 var nextId = null;
-                
+
                 // push the first target into the loop
                 loop.push(targets[firstId]);
                 nextId = targets[firstId].target_id;
-                
+
                 // remove the first target from the loop
                 delete targets[firstId];
-                
+
                 // inner loop until we get back to the first target
                 while (nextId != firstId) {
                     var currentTarget = targets[nextId];

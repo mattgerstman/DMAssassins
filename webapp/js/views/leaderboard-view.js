@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.LeaderboardView = Backbone.View.extend({
 
-        template: _.template($('#leaderboard-template').html()),
+        template: _.template($('#template-leaderboard').html()),
         tagName: 'div',
 
         // constructor
@@ -39,7 +39,7 @@ var app = app || {
             var teams_enabled = data.teams_enabled;
             if (teams_enabled)
                 numCols = 3;
-                
+
             var options = {
                 paging: false,
                 searching: false,
@@ -50,13 +50,13 @@ var app = app || {
                 ]
             };
 
-            this.$el.find('#user_leaderboard_table').dataTable(options);
+            this.$el.find('.js-table-leaderboard-users').dataTable(options);
 
             if (teams_enabled) {
                 options.order = [
                     [4, 'desc']
                 ];
-                this.$el.find('#team_leaderboard_table').dataTable(options);
+                this.$el.find('.js-table-leaderboard-teams').dataTable(options);
             }
             return this;
         }

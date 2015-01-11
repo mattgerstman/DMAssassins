@@ -35,13 +35,12 @@ func getTarget(r *http.Request) (user *User, appErr *ApplicationError) {
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	user, appErr = user.GetTarget(gameId)
+	target, appErr := user.GetTarget(gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
-	user.GetTeamByGameId(gameId)
-
-	return user, nil
+	target.GetTeamByGameId(gameId)
+	return target, nil
 }
 
 // DELETE - Kill a target, delete User may eventually be used by an admin

@@ -1,0 +1,95 @@
+/*
+// assets/styles/sidebar.less
+*/
+
+
+/* Sidebar Styles */
+
+.sidebar-wrapper {
+    width: 0;
+    height:0;
+    position: fixed;
+    .m-transitionEase(0.5s)
+}
+
+.sidebar-nav {
+    width: 250px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    margin-bottom:49px;
+    cursor: default;
+}
+
+.sidebar-team {
+    line-height: 50px;
+    border-bottom: 1px solid #e7e7e7;
+    width:250px;
+}
+
+
+.form-control.sidebar-input {
+    width:175px;
+    margin:0 0 0 18px;
+}
+
+.sidebar-teamName {
+	width:173px;
+	display: inline-block;
+    margin-left: 20px;
+    color:#777
+}
+.sidebar-teamName:hover {
+    color:#333;
+    text-decoration:none;
+}
+
+.sidebar-teamButtons {
+	width:65px;
+	display:inline;
+}
+
+.sidebar-glyphicon {
+    margin-top:3px;
+    margin-left:6px;
+    display:inline;
+    cursor: pointer;
+    color:#777;
+    width:0;
+}
+
+.sidebar-glyphicon-success:hover {
+    color:green;
+}
+.sidebar-glyphicon-warning:hover {
+    color:orange;
+}
+
+.sidebar-glyphicon-danger:hover {
+    color:red;
+}
+
+
+@media(min-width:768px) {
+    .sidebar-wrapper {
+        top:50px;
+        left: 0;
+        width: 250px;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        background: #f8f8f8;
+        border: 1px solid #e7e7e7;
+        z-index: 1000;
+    }
+
+    .sidebar-nav {
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+
+    .sidebar-bodyAdjust {
+        padding-left: 250px;
+    }
+
+}
