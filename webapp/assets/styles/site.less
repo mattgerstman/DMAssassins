@@ -9,6 +9,7 @@
 
 body {
     padding-top: 70px;
+    badding-bottom: 40px;
     font-family: "Helvetica Neue", Helvetica, sans-serif
 }
 
@@ -32,6 +33,33 @@ a:hover {
     margin:0 auto;
     cursor: pointer;
 //    overflow:hidden;
+}
+
+.footer {
+    background-color:#f8f8f8;
+    height:40px;
+}
+
+.footer-fixed-bottom {
+    bottom: 0;
+    border-top: 1px solid #e7e7e7;
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.footer-text {
+    color:#777;
+    margin-top:09px;
+}
+
+.footer-text a, .footer-text a:visited {
+    color:#777;
+}
+
+.footer-text a:hover {
+    color:black;
 }
 
 .logo {
