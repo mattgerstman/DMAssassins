@@ -36,6 +36,7 @@ const (
 
 	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
+	supportPath     = "/support/"
 	sessionPath     = "/session/"
 	homePath        = "/"
 
@@ -90,13 +91,12 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 
 	httpCode := HttpReponseCodeOk
 
-	if obj == nil {
-		httpCode = HttpReponseCodeNoContent
-		w.Write(nil)
+	if r.Method == "POST" {
+		httpCode = HttpResponseCodeCreated
 	}
 
-	if (r.Method == "PUT") || (r.Method == "POST") {
-		httpCode = HttpResponseCodeCreated
+	if obj == nil {
+		httpCode = HttpReponseCodeNoContent
 	}
 
 	data, err := json.Marshal(obj)
@@ -106,6 +106,7 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		LogWithSentry(appErr, nil, raven.ERROR, extra)
 		return
 	}
+
 	w.WriteHeader(httpCode)
 	_, err = w.Write(data)
 	if err != nil {
@@ -189,6 +190,9 @@ func StartServer() {
 
 	// User then Game
 	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")
+
+	// Just Support
+	r.HandleFunc(supportPath, SupportHandler()).Methods("POST")
 
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")

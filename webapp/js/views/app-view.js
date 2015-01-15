@@ -21,8 +21,17 @@ var app = app || {
     app.Views.AppView = Backbone.View.extend({
         el: '#app',
         // constructor
+        events: {
+            'click .js-support' : 'support'
+        },
         initialize: function() {
             this.$body = $('#js-wrapper-app');
+        },
+        support: function(e) {
+            console.log(e);
+            e.preventDefault();
+            var supportView = new app.Views.SupportView();
+            supportView.render();
         },
         // renders a page within the body of the app
         renderPage: function(page) {

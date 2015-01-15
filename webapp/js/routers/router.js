@@ -38,7 +38,8 @@ var app = app || {
             'edit_rules': 'edit_rules',
             'switch_game': 'switch_game',
             'game_settings': 'game_settings',
-            'targets': 'targets'
+            'targets': 'targets',
+            'support': 'support'
 
         },
         // routes that require we have a game that has been started
@@ -294,6 +295,10 @@ var app = app || {
             }
 
             this.back();
+        },
+        support: function() {
+            this.navigate('', true);
+            $('.js-support').click();
         },
         // render function, also determines weather or not to render the nav
         render: function() {

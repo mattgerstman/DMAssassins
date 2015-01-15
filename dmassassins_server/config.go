@@ -12,6 +12,8 @@ type Configuration struct {
 	FBAppId           string `json:"fb_app_id"`
 	FBAppSecret       string `json:"fb_app_secret"`
 	FBAccessToken     string `json:"fb_access_token"`
+	GithubRepo        string `json:"github_repo"`
+	GithubApiKey      string `json:"github_api_key"`
 	DatabaseURL       string `json:"database_url"`
 	SentryDSN         string `json:"sentry_dsn"`
 	SupportEmail      string `json:"support_email"`
