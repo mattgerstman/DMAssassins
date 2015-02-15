@@ -21,8 +21,52 @@ type KillTimer struct {
 	ExecuteTs int64
 }
 
+var activeTimers map[string]*time.Timer
+
+func getActiveTimers() map[string]*time.Timer {
+	if activeTimers == nil {
+		activeTimers = make(map[string]*time.Timer)
+	}
+	return activeTimers
+}
+
+func addActiveTimer(gameId uuid.UUID, timer *time.Timer) {
+	if activeTimers == nil {
+		activeTimers = make(map[string]*time.Timer)
+	}
+	activeTimers[gameId.String()] = timer
+}
+
+func getActiveTimer(gameId uuid.UUID) (timer *time.Timer) {
+	if activeTimers == nil {
+		return nil
+	}
+	return activeTimers[gameId.String()]
+}
+
+func stopTimer(gameId uuid.UUID) {
+	if activeTimers == nil {
+		return
+	}
+	timer := activeTimers[gameId.String()]
+	if timer == nil {
+		return
+	}
+
+	stopped := timer.Stop()
+	if stopped {
+		fmt.Println("Timer stopped for " + gameId.String())
+	} else {
+		fmt.Println("Failed to stop timer for " + gameId.String())
+	}
+
+	delete(activeTimers, gameId.String())
+	return
+}
+
 // reloads all timers in the database
 func LoadAllTimers() (appErr *ApplicationError) {
+
 	// Get all existing kill timers
 	rows, err := db.Query(`SELECT game_id, execute_ts FROM dm_kill_timers`)
 	if err != nil {
@@ -51,19 +95,21 @@ func LoadAllTimers() (appErr *ApplicationError) {
 
 		executeTs := executeTsBuffer.Unix()
 
-		// Load timer
 		game.LoadTimer(executeTs)
+
 	}
 	// Close the rows
 	err = rows.Close()
 	if err != nil {
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
+
 	return nil
 }
 
 // Loads a single timer and calls it after the set amount of time
 func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
+
 	timezone, appErr := game.GetGameProperty(`timezone`)
 	if appErr != nil {
 		timezone = Config.DefaultTimeZone
@@ -80,16 +126,16 @@ func (game *Game) LoadTimer(executeTs int64) (timer *time.Timer) {
 	timeDiff := executeTs - now
 	duration := time.Duration(timeDiff) * time.Second
 
-	fmt.Println(now)
-	fmt.Println(executeTs)
-	fmt.Println(timeDiff)
 	if timeDiff <= 0 {
 		duration = 10 * time.Minute
 	}
 	fmt.Println(`Loading timer for ` + game.GameId.String())
 	fmt.Print(`Executing in `)
 	fmt.Println(duration)
-	return time.AfterFunc(duration, game.KillTimerHandler)
+	timer = time.AfterFunc(duration, game.KillTimerHandler)
+	addActiveTimer(game.GameId, timer)
+
+	return timer
 }
 
 func (game *Game) NewKillTimer(hours int64) (timer *time.Timer, appErr *ApplicationError) {
@@ -272,4 +318,42 @@ func (game *Game) KillPlayersWhoHaventKilledSince(minKillTime int64) (killedUser
 	}
 
 	return toBeKilled, nil
+}
+
+func (game *Game) DeleteKillTimer() (appErr *ApplicationError) {
+	tx, err := db.Begin()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = game.DeleteKillTimerTransactional(tx)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
+	}
+
+	// Check transaction for errors
+	err = tx.Commit()
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return nil
+
+}
+
+func (game *Game) DeleteKillTimerTransactional(tx *sql.Tx) (appErr *ApplicationError) {
+	stopTimer(game.GameId)
+	// prepare the statement to delete related kill timers
+	deleteTimer, err := db.Prepare("DELETE FROM dm_kill_timers WHERE game_id = $1")
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	// Execute the statement to delete related kill timers
+	_, err = tx.Stmt(deleteTimer).Exec(game.GameId.String())
+	if err != nil {
+		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+	return nil
 }

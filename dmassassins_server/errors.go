@@ -21,6 +21,7 @@ const (
 	ErrCodePlayerMissingTeam = 40008
 	ErrCodeInvalidPlotTwist  = 40009
 	ErrCodeCaptainExists     = 40010
+	ErrCodeGameNotStarted    = 40011
 
 	// 401 - Unauthorized
 	ErrCodeUnauthorizedWTF     = 40100

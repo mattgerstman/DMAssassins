@@ -193,7 +193,19 @@ var app = app || {
 
 
             var plotTwist = new app.Models.PlotTwist(data);
-            plotTwist.save();
+            plotTwist.save(null, {
+                success: function() {
+                    alert('The plot twist was launched sucessfully!');
+                },
+                error: function(model, response) {
+                    if (response.responseText === undefined) {
+                        alert('There was an error launching the plot twist. Please contact support.');
+                        return;
+                    }
+                    alert(response.responseText);
+
+                }
+            });
             $('.js-modal-plot-twist').modal('hide');
 
         },

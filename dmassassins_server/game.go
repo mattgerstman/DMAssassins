@@ -95,13 +95,21 @@ func (game *Game) End() (appErr *ApplicationError) {
 	// prepare the statement to set game_started to false
 	endGame, err := db.Prepare("UPDATE dm_games SET game_started = false WHERE game_id = $1")
 	if err != nil {
+		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
 
 	// Execute the statement to set game_started to false
 	_, err = tx.Stmt(endGame).Exec(game.GameId.String())
 	if err != nil {
+		tx.Rollback()
 		return NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	appErr = game.DeleteKillTimerTransactional(tx)
+	if appErr != nil {
+		tx.Rollback()
+		return appErr
 	}
 
 	appErr = game.DeleteTargetsTransactional(tx)
@@ -109,6 +117,7 @@ func (game *Game) End() (appErr *ApplicationError) {
 		tx.Rollback()
 		return appErr
 	}
+
 	// Check transaction for errors
 	err = tx.Commit()
 	if err != nil {
