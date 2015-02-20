@@ -64,6 +64,17 @@ func stopTimer(gameId uuid.UUID) {
 	return
 }
 
+// Gets the execute and min kill ts for a game
+func (game *Game) GetTimesForGame() (executeTs, minKillTs int64, appErr *ApplicationError) {
+	var executeTsBuffer, createTsBuffer time.Time
+	err := db.QueryRow("SELECT execute_ts, create_ts FROM dm_kill_timers WHERE game_id = $1", game.GameId.String()).Scan(&executeTsBuffer, &createTsBuffer)
+	if err != nil {
+		return 0, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	return executeTsBuffer.Unix(), createTsBuffer.Unix(), nil
+}
+
 // reloads all timers in the database
 func LoadAllTimers() (appErr *ApplicationError) {
 

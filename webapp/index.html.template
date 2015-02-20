@@ -63,7 +63,8 @@
 
     <!-- @if NODE_ENV='PRODUCTION' -->
     <title>DMAssassins</title>
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/assets/styles/bootswatch.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.2.1/bootstrap-social.min.css" rel="stylesheet" type="text/css">
     <link href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
@@ -772,6 +773,13 @@
               <div class="modal-body">
                 <p>Are you sure you want to revive <strong><span class="js-user-name"></span></strong>? This will revive them and randomly place them in the middle of another assassin/target pair.
                 </p>
+                <form>
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" class="js-notify-revive-user" checked /> Notify User By Email
+                      </label>
+                    </div>
+                </form>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
@@ -798,6 +806,13 @@
                 <p>Are you sure you want to kill <strong><span class="js-user-name"></span></strong>? This will kill them as though their assassin has killed them.<br />
                     <strong>If you want to ban the user completely close this window and click "Ban User."</strong>
                 </p>
+                <form>
+                    <div class="checkbox">
+                      <label>
+                        <input type="checkbox" class="js-notify-kill-user" checked /> Notify User By Email
+                      </label>
+                    </div>
+                </form>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
@@ -805,7 +820,6 @@
 
                 <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-block btn-danger visible-xs js-kill-user-submit">Kill User</button>
-
               </div>
             </div><!-- /.modal-content -->
           </div><!-- /.modal-dialog -->
@@ -825,6 +839,13 @@
                     <strong>This action cannot be undone.</strong><br />
                     If you just want to kill them close this window and click "Kill User."
                 </p>
+                <form>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" class="js-notify-ban-user" checked /> Notify User By Email
+                    </label>
+                  </div>
+                </form>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
@@ -1156,10 +1177,18 @@
                 <% } %>
 
             </div>
+
+
+            <div class="modal fade js-kill-timer-info" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+              <div class="modal-dialog js-wrapper-kill-timer">
+
+              </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
             <div class="list-group col-sm-4 col-sm-offset-2">
                 <h1 class="text-center">Plot Twists</h1>
                 <a href="#" class="list-group-item js-open-plot-twist" id="delete_targets">Delete Targets (Pause Game)</a>
-                <a href="#" class="list-group-item js-open-plot-twist" id="randomize_targets">Randomize Targets</a>
+                <a href="#" class="list-group-item js-open-plot-twist" id="randomize_targets">Randomize Targets (Unpause Game)</a>
                 <a href="#" class="list-group-item js-open-plot-twist" id="reverse_targets">Reverse Targets</a>
                 <a href="#" class="list-group-item js-open-plot-twist" id="successive_kills">Successive Kills Count Double</a>
                 <% if (teams_enabled) { %>
@@ -1167,8 +1196,12 @@
                     <a href="#" class="list-group-item js-open-plot-twist" id="strong_closed">Put Strongest In A Closed Loop</a>
                 <% } %>
                 <a href="#" class="list-group-item js-open-plot-twist" id="timer_24">24 Hours To Kill</a>
+                <% if (has_kill_timer) { %>
+                    <a href="#" class="list-group-item js-timer-info" id="active_timer"><strong>A kill timer is active, click here for more info</strong></a>
+                <% } %>
             </div>
         </div>
+
         <div class="modal fade js-modal-start-game" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -1180,6 +1213,13 @@
                         <p>Are you sure you want to start the game <strong><span><%= game_name %></span></strong>? This will immediately assign targets and notify all users the game has begun. <br />
                             If you're not ready to start the game, close this window.
                         </p>
+                        <form>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="js-notify-game-start" checked /> Notify Users By Email
+                                </label>
+                            </div>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
@@ -1204,6 +1244,13 @@
                 <p>Are you sure you want to end the game <strong><span><%= game_name %></span></strong>? This will immediately delete the game from dmassassins.com<br />
                     If you're not ready to end the game, close this window.
                 </p>
+              <form>
+                  <div class="checkbox">
+                      <label>
+                          <input type="checkbox" class="js-notify-game-end" checked /> Notify Users By Email
+                      </label>
+                  </div>
+              </form>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
@@ -1232,7 +1279,27 @@
 
     </script>
 
+    <script id="template-modal-kill-timer" type="text/template">
+      <div class="modal-content">
+          <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title">Kill Timer Info</h4>
+          </div>
+          <div class="modal-body">
+              <p>
+                  At <strong><%= execute_ts_string %></strong> we will automatically kill all users who haven't killed since <strong><%= min_kill_ts_string %></strong>. If you would like to cancel that cancel timer below:
+              </p>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger hidden-xs js-cancel-timer">Cancel Timer</button>
 
+              <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-block btn-danger visible-xs js-cancel-timer">Cancel Timer</button>
+
+          </div>
+      </div><!-- /.modal-content -->
+    </script>
     <!-- Plot Twist Template -->
     <script id="template-modal-plot-twist" type="text/template">
         <div class="modal fade js-modal-plot-twist" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
@@ -1245,13 +1312,13 @@
               <form role="form" id="plot_twist_form">
                 <div class="modal-body">
                     <div class="twist-details"><%= details %></div>
-                    <!-- @if BETA == "FALSE" -->
-                    <div class="checkbox">
-                        <label>
-                          <input type="checkbox" class="js-input-send-twist-email" <% if (checked) { %> checked <% } %>> Should we email users about this plot twist?<br />
-                          <i>Note: If you plan to pair this plot twist with any others, we recommend you craft your own email to avoid spamming your users</i>
-                        </label>
-                    </div>
+                    <form>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="js-notify-plot-twist" checked /> Notify Users By Email
+                            </label>
+                        </div>
+                    </form>
                      <!-- @endif -->
                 </div>
                 <div class="modal-footer">
@@ -1537,6 +1604,7 @@
     <script src="js/models/targets.js" type="text/javascript"></script>
     <script src="js/models/permissions.js" type="text/javascript"></script>
     <script src="js/models/support.js" type="text/javascript"></script>
+    <script src="js/models/kill-timer.js" type="text/javascript"></script>
 
     <script src="js/collections/games.js" type="text/javascript"></script>
     <script src="js/collections/users.js" type="text/javascript"></script>
@@ -1556,6 +1624,7 @@
     <script src="js/views/admin-users-view.js" type="text/javascript"></script>
     <script src="js/views/admin-edit-rules-view.js" type="text/javascript"></script>
     <script src="js/views/admin-game-settings-view.js" type="text/javascript"></script>
+    <script src="js/views/admin-kill-timer-view.js" type="text/javascript"></script>
 
     <script src="js/views/super-admin-targets-view.js" type="text/javascript"></script>
 

@@ -5,6 +5,7 @@ import (
 	"code.google.com/p/go.crypto/bcrypt"
 	"database/sql"
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -81,6 +82,11 @@ func GetGameById(gameId uuid.UUID) (game *Game, appErr *ApplicationError) {
 	if appErr != nil {
 		return nil, appErr
 	}
+
+	hasTimer := getActiveTimer(gameId) != nil
+	// Check if we have a kill timer
+	game.Properties["has_kill_timer"] = strconv.FormatBool(hasTimer)
+
 	return game, nil
 }
 

@@ -8,6 +8,10 @@ import (
 	"net/http"
 )
 
+type AdminBanUserPost struct {
+	SendEmail bool `json:"send_email"`
+}
+
 // DELETE - Bans a user from a game
 func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
@@ -40,15 +44,27 @@ func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	// Check if the user wants to send an email, if not just return
+	sendEmail := r.Header.Get("X-DMAssassins-Send-Email")
+	if sendEmail == "" {
+		msg := "Missing Header: X-DMAssassins-Send-Email."
+		err := errors.New(msg)
+		return NewApplicationError(msg, err, ErrCodeMissingHeader)
+	}
 
+	if sendEmail == "false" {
+		return nil
+	}
+
+	// Get game name and send the banhammer email
+	extra := GetExtraDataFromRequest(r)
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
 		return nil
 
 	}
-	game, appErr := GetGameById(userId)
+	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
 		return nil

@@ -15,11 +15,17 @@ import (
 var db *sql.DB
 
 const (
-	gameIdPath                = "/game/{game_id}/"
-	gameLeaderboardPath       = "/game/{game_id}/leaderboard/"
+	gameIdPath          = "/game/{game_id}/"
+	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
+	gameKillTimerPath   = "/game/{game_id}/kill_timer/"
+	gamePlotTwistPath   = "/game/{game_id}/plot_twist/"
+	gameRulesPath       = "/game/{game_id}/rules/"
+	gameTargetsPath     = "/game/{game_id}/targets/"
+	gameTeamPath        = "/game/{game_id}/team/"
+	gameTeamIdPath      = "/game/{game_id}/team/{team_id}/"
+
 	gameUsersPath             = "/game/{game_id}/users/"
 	gameUsersEmailPath        = "/game/{game_id}/users/email/"
-	gamePlotTwistPath         = "/game/{game_id}/plot_twist/"
 	gameUserBanPath           = "/game/{game_id}/user/{user_id}/ban/"
 	gameUserKillPath          = "/game/{game_id}/user/{user_id}/kill/"
 	gameUserRevivePath        = "/game/{game_id}/user/{user_id}/revive/"
@@ -27,12 +33,7 @@ const (
 	gameUserRolePath          = "/game/{game_id}/user/{user_id}/role/"
 	gameUserTargetPath        = "/game/{game_id}/user/{user_id}/target/"
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
-	gameUserTargetPhotosPath  = "/game/{game_id}/user/{user_id}/target/photos/"
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
-	gameTeamPath              = "/game/{game_id}/team/"
-	gameTeamIdPath            = "/game/{game_id}/team/{team_id}/"
-	gameRulesPath             = "/game/{game_id}/rules/"
-	gameTargetsPath           = "/game/{game_id}/targets/"
 
 	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
@@ -43,11 +44,13 @@ const (
 	HttpReponseCodeOk        = 200
 	HttpResponseCodeCreated  = 201
 	HttpReponseCodeNoContent = 204
+
+	ApplicationErrorToHttpConversion = 100
 )
 
 // This function logs an error to the HTTP response and then returns an application error to be used as necessary
 func HttpErrorLogger(w http.ResponseWriter, msg string, code int) {
-	httpCode := code / 100
+	httpCode := code / ApplicationErrorToHttpConversion
 	http.Error(w, msg, httpCode)
 }
 
@@ -97,6 +100,8 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 
 	if obj == nil {
 		httpCode = HttpReponseCodeNoContent
+		w.WriteHeader(httpCode)
+		return
 	}
 
 	data, err := json.Marshal(obj)
@@ -104,10 +109,13 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
 		extra := GetExtraDataFromRequest(r)
 		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		httpCode = ErrCodeInternalServerWTF / ApplicationErrorToHttpConversion
+		w.WriteHeader(httpCode)
 		return
 	}
 
 	w.WriteHeader(httpCode)
+
 	_, err = w.Write(data)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
@@ -130,7 +138,7 @@ func corsHandler(h http.Handler) http.HandlerFunc {
 		if r.Method == "OPTIONS" {
 			w.Header().Set("Access-Control-Request-Headers", "X-Requested-With, accept, content-type")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, X-DMAssassins-Secret, X-DMAssassins-Game-Password, X-DMAssassins-Team-Id, Authorization")
+			w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-DMAssassins-Game-Password, X-DMAssassins-Secret, X-DMAssassins-Send-Email, X-DMAssassins-Team-Id")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		} else {
 			h.ServeHTTP(w, r)
@@ -162,6 +170,7 @@ func StartServer() {
 	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "PUT", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
 	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameKillTimerPath, GameKillTimerHandler()).Methods("GET", "DELETE")
 	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
 	r.HandleFunc(gameTargetsPath, GameTargetsHandler()).Methods("GET")
 
@@ -171,8 +180,7 @@ func StartServer() {
 	r.HandleFunc(gameUsersEmailPath, GameUsersEmailHandler()).Methods("GET")
 	r.HandleFunc(gameUserTargetPath, TargetHandler()).Methods("GET", "POST", "DELETE")
 	r.HandleFunc(gameUserTargetFriendsPath, TargetFriendsHandler()).Methods("GET")
-	// we'll see if i ever actually use this api
-	// r.HandleFunc(gameUserTargetPhotosPath, TargetPhotosHandler()).Methods("GET")
+
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
 	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
 

@@ -19,6 +19,10 @@ type GameSettingsPut struct {
 	PageName        string `json:"game_page_name"`
 }
 
+type GameSettingsPost struct {
+	SendEmail bool `json:"send_email"`
+}
+
 // PUT - Changes game settings
 func putGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
@@ -102,6 +106,17 @@ func postGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
+	decoder := json.NewDecoder(r.Body)
+	var gameSettingsPost GameSettingsPost
+	err := decoder.Decode(&gameSettingsPost)
+	if err != nil {
+		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
+
+	if !gameSettingsPost.SendEmail {
+		return game, nil
+	}
+
 	_, appErr = game.sendStartGameEmail()
 	if appErr != nil {
 		return nil, appErr
@@ -126,7 +141,6 @@ func getGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 
 	game, appErr = GetGameById(gameId)
-
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -170,6 +184,12 @@ func deleteGameId(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = game.End()
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	// Check if the user wants to send an email, if not just return
+	sendEmail := r.Header.Get("X-DMAssassins-Send-Email")
+	if sendEmail == "false" {
+		return game, nil
 	}
 
 	// Inform users the game has ended

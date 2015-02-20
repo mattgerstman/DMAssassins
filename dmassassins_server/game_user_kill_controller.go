@@ -2,11 +2,16 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"encoding/json"
 	"errors"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type AdminKillUserPost struct {
+	SendEmail bool `json:"send_email"`
+}
 
 // POST - Kills a user for their assassin
 func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
@@ -45,14 +50,25 @@ func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
 	}
 
 	secret := gameMapping.Secret
-
 	_, oldTargetId, appErr := assassin.KillTarget(gameMapping.GameId, secret, true)
 	if appErr != nil {
 		return appErr
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	// Check if the user wants to send an email, if not just return
+	decoder := json.NewDecoder(r.Body)
+	var adminKillUserPost AdminKillUserPost
+	err := decoder.Decode(&adminKillUserPost)
+	if err != nil {
+		return NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
 
+	if !adminKillUserPost.SendEmail {
+		return nil
+	}
+
+	// Get game name and send the banhammer email
+	extra := GetExtraDataFromRequest(r)
 	oldTarget, appErr := GetUserById(oldTargetId)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)

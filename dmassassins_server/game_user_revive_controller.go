@@ -2,11 +2,16 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"encoding/json"
 	"errors"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type AdminReviveUserPost struct {
+	SendEmail bool `json:"send_email"`
+}
 
 // POST - Revives a user and places them in between an assassin target apir
 func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
@@ -39,8 +44,15 @@ func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	// Check if the user wants to send an email, if not just return
+	decoder := json.NewDecoder(r.Body)
+	var adminReviveUserPost AdminReviveUserPost
+	err := decoder.Decode(&adminReviveUserPost)
+	if err != nil {
+		return NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
 
+	extra := GetExtraDataFromRequest(r)
 	assassin, appErr := GetUserById(assassinId)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
@@ -55,6 +67,10 @@ func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
 	_, appErr = assassin.SendNewTargetEmail(game.GameName)
 	if appErr != nil {
 		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+	}
+
+	if !adminReviveUserPost.SendEmail {
+		return nil
 	}
 
 	user, appErr := GetUserById(userId)

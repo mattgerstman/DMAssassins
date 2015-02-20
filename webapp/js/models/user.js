@@ -88,18 +88,46 @@ var app = app || {
                 return null;
             return properties[key];
         },
-        kill: function(){
+        kill: function(data, successCallback, errorCallback) {
             var that = this;
             var url = this.url() + 'kill/';
-            $.post(url, function(response){
-                that.setProperty('alive', 'false');
+            $.ajax({
+                url:          url,
+                type:         'POST',
+                contentType:  'application/json',
+                data:         JSON.stringify(data),
+                success: function(response) {
+                    that.setProperty('alive', 'false');
+                    if (typeof successCallback === 'function') {
+                        successCallback(response);
+                    }
+                },
+                error: function(response) {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(response);
+                    }
+                }
             });
         },
-        revive: function(){
+        revive: function(data, successCallback, errorCallback) {
             var that = this;
             var url = this.url() + 'revive/';
-            $.post(url, function(response){
-                that.setProperty('alive', 'true');
+            $.ajax({
+                url:          url,
+                type:         'POST',
+                contentType:  'application/json',
+                data:         JSON.stringify(data),
+                success: function(response) {
+                    that.setProperty('alive', 'true');
+                    if (typeof successCallback === 'function') {
+                        successCallback(response);
+                    }
+                },
+                error: function(response) {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(response);
+                    }
+                }
             });
         },
         quit: function(secret) {

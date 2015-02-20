@@ -37,6 +37,27 @@ var app = app || {
         areTeamsEnabled: function() {
             return this.getProperty('teams_enabled') == 'true';
         },
+        start: function(data, successCallback, errorCallback) {
+            var url = this.gameUrl();
+            var that = this;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (typeof successCallback == 'function') {
+                        successCallback(that, response);
+                    }
+                },
+                error: function(response) {
+                    if (typeof errorCallback === 'function') {
+                        errorCallback(that, response);
+                    }
+                }
+            });
+
+        },
         // set game property
         setProperty: function(key,value, silent) {
             var properties = this.get('properties');

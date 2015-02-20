@@ -121,7 +121,7 @@ func (game *Game) RevivePlayers(revive string) (appErr *ApplicationError) {
 // Activates a plot twist
 func (game *Game) ActivatePlotTwist(twistName string) (appErr *ApplicationError) {
 	if !game.Started {
-		msg := "The game must be stated to execute a plot twist!"
+		msg := "The game must be started to execute a plot twist!"
 		err := errors.New("User tried to start a plot twist for an unstarted game")
 		return NewApplicationError(msg, err, ErrCodeGameNotStarted)
 	}

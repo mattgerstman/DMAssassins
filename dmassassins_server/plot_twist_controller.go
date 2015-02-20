@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -56,6 +57,11 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = game.ActivatePlotTwist(plotTwistName)
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	fmt.Println(plotTwistPut)
+	if !plotTwistPut.SendEmail {
+		return game, nil
 	}
 
 	extra := GetExtraDataFromRequest(r)

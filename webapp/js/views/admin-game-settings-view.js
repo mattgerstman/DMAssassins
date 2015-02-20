@@ -31,7 +31,8 @@ var app = app || {
             'click .js-save-game'           : 'saveGame',
             'click .js-start-game'          : 'startGameModal',
             'click .js-start-game-submit'   : 'startGame',
-            'click .js-submit-twist'        : 'savePlotTwist'
+            'click .js-submit-twist'        : 'savePlotTwist',
+            'click .js-timer-info'          : 'loadKillTimerModal'
         },
         initialize: function(){
             this.model = app.Running.Games.getActiveGame();
@@ -76,12 +77,18 @@ var app = app || {
         startGame: function(event) {
             $('.js-modal-start-game').modal('hide');
             var that = this;
-            var url = this.model.gameUrl();
-            $.post(url, function(){
-                that.model.set('game_started', true);
-            }).error(function(response){
-                alert(response.responseText);
-            });
+            var sendEmail = $('.js-notify-game-start').is(':checked');
+            var data = { send_email: sendEmail };
+            this.model.start(data,
+                function(model, response) {
+                    model.set('game_started', true);
+                },
+                function(model, response) {
+                    if (response.responseText) {
+                        alert(response.responseText);
+                    }
+                }
+            );
         },
         endGameModal: function(event) {
             $('.js-modal-end-game').modal();
@@ -90,10 +97,14 @@ var app = app || {
             $('.js-modal-end-game').modal('hide');
             var that = this;
             var url = this.model.gameUrl();
+            var sendEmail = $('.js-notify-game-end').is(':checked');
 
             this.model.destroy({
                 url: url,
-                success: function() {
+                headers: {
+                    'X-DMAssassins-Send-Email': sendEmail
+                },
+                success: function(model, response) {
                     alert("The game has successfully ended!\n Thanks for being an admin!");
                     if (!app.Running.Games.setArbitraryActiveGame()) {
                         Backbone.history.navigate('#logout', {
@@ -104,6 +115,9 @@ var app = app || {
                     Backbone.history.navigate('#my_profile', {
                             trigger: true
                         });
+                },
+                error: function(model, response) {
+                    console.log(response);
                 }
             });
         },
@@ -189,12 +203,13 @@ var app = app || {
             var button = $(e.currentTarget);
             var data = {};
             data.plot_twist_name  = button.data('twist-name');
-            data.send_email       = $('.js-input-send-twist-email').is(':checked');
-
+            data.send_email       = $('.js-notify-plot-twist').is(':checked');
+            var that = this;
 
             var plotTwist = new app.Models.PlotTwist(data);
             plotTwist.save(null, {
                 success: function() {
+                    that.model.fetchProperties();
                     alert('The plot twist was launched sucessfully!');
                 },
                 error: function(model, response) {
@@ -215,10 +230,19 @@ var app = app || {
             this.pageView.render();
             $('.js-modal-pages').modal();
         },
+        loadKillTimerModal: function(e) {
+            e.preventDefault();
+            $('.js-kill-timer-info').modal();
+            var killTimerView = new app.Views.AdminKillTimerView();
+            killTimerView.render();
+
+        },
         render: function(){
             $('.modal-backdrop').remove();
             var data = this.model.attributes;
-            data.teams_enabled = data.game_properties.teams_enabled == 'true';
+            data.teams_enabled = this.model.getProperty('teams_enabled') === 'true';
+            data.has_kill_timer = this.model.getProperty('has_kill_timer') === 'true';
+
             this.$el.html(this.template(data));
 
             var timezone = this.model.getProperty('timezone');

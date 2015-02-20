@@ -86,31 +86,45 @@ var app = app || {
         banUser: function(event) {
             var user_id = $(event.currentTarget).data('user-id');
             var user = this.collection.get(user_id);
+            var sendEmail = $('.js-notify-ban-user').is(':checked');
             user.destroy({
+                headers: {
+                    'X-DMAssassins-Send-Email': sendEmail
+                },
                 url: user.url() + 'ban/',
                 success: function(){
                     var user_id = user.get('user_id');
                     $('#js-user-'+user_id).remove();
-                    $('.js-modal-ban-user').modal('hide');
                 },
-                error: function(response){
+                error: function(model, response){
                     alert(response.responseText);
                 }
             });
-
+            $('.js-modal-ban-user').modal('hide');
         },
         killUser: function(event) {
             var user_id = $(event.currentTarget).data('user-id');
             var user = this.collection.get(user_id);
             var that = this;
-            user.kill();
+            var sendEmail = $('.js-notify-kill-user').is(':checked');
+            var data = { send_email: sendEmail };
+            user.kill(data, null, function(response) {
+                if (response.responseText) {
+                    alert(response.responseText);
+                }
+            });
             $('.js-modal-kill-user').modal('hide');
         },
-
         reviveUser: function(event) {
             var user_id = $(event.currentTarget).data('user-id');
             var user = this.collection.get(user_id);
-            user.revive();
+            var sendEmail = $('.js-notify-revive-user').is(':checked');
+            var data = { send_email: sendEmail };
+            user.revive(data, null, function(response) {
+                if (response.responseText) {
+                    alert(response.responseText);
+                }
+            });
             $('.js-modal-revive-user').modal('hide');
         },
         selectChangeTeam: function(event){
@@ -188,12 +202,10 @@ var app = app || {
                 this.team_id = 'all';
             }
 
-
             if (this.team_id == 'NO_TEAM') {
                 this.team = "null";
                 this.team_id = 'null';
             }
-
 
             this.render();
         },

@@ -86,7 +86,6 @@ func (game *Game) checkAlive() (anyLeft bool, appErr *ApplicationError) {
 	if err != nil {
 		return false, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
-	fmt.Println(numLeft)
 	return (numLeft > 0), nil
 }
 
@@ -140,15 +139,12 @@ func (game *Game) assignClosedStrongLoop(tx *sql.Tx) (appErr *ApplicationError) 
 	// Converts strong players to an interface
 	strongInterface := ConvertUUIDSliceToInterface(strong)
 
-	fmt.Println(strong)
-
 	// Gets players not in the strong slice
 	regularPlayers, appErr := game.getPlayersNotInSlice(strongInterface)
 	if appErr != nil {
 		return appErr
 	}
 
-	fmt.Println(regularPlayers)
 	// Converts the rows from get players not in slice to a slice
 	users, appErr := ConvertUserIdRowsToSlice(regularPlayers)
 	if appErr != nil {

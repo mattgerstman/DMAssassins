@@ -399,7 +399,8 @@ func (gameMapping *GameMapping) Revive() (assassinId, targetId uuid.UUID, appErr
 	}
 
 	gameMapping.Alive = true
-
+	assassinId = uuid.Parse(assassinIdBuffer)
+	targetId = uuid.Parse(targetIdBuffer)
 	return assassinId, targetId, nil
 
 }

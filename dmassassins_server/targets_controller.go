@@ -58,7 +58,6 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	r.ParseForm()
 	secret := r.Header.Get("X-DMAssassins-Secret")
 	if secret == "" {
 		msg := "Missing Header: X-DMAssassins-Secret."
