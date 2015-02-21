@@ -61,8 +61,8 @@ func WriteStringToPayload(w http.ResponseWriter, r *http.Request, msg string, ap
 	w.Header().Set("Content-Type", "application/json")
 	if appErr != nil {
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
-		extra := GetExtraDataFromRequest(r)
-		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		request := raven.NewHttp(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
 		return
 	}
 	httpCode := HttpReponseCodeOk
@@ -71,8 +71,8 @@ func WriteStringToPayload(w http.ResponseWriter, r *http.Request, msg string, ap
 	_, err := w.Write(byteMsg)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		extra := GetExtraDataFromRequest(r)
-		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		request := raven.NewHttp(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
 		return
 	}
@@ -87,8 +87,8 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	w.Header().Set("Content-Type", "application/json")
 	if appErr != nil {
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
-		extra := GetExtraDataFromRequest(r)
-		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		request := raven.NewHttp(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
 		return
 	}
 
@@ -107,8 +107,8 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	data, err := json.Marshal(obj)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		extra := GetExtraDataFromRequest(r)
-		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		request := raven.NewHttp(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
 		httpCode = ErrCodeInternalServerWTF / ApplicationErrorToHttpConversion
 		w.WriteHeader(httpCode)
 		return
@@ -119,8 +119,8 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	_, err = w.Write(data)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		extra := GetExtraDataFromRequest(r)
-		LogWithSentry(appErr, nil, raven.ERROR, extra)
+		request := raven.NewHttp(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
 		return
 	}
 }
@@ -152,14 +152,14 @@ func StartServer() {
 	db, err = connect()
 	if err != nil {
 		appErr := NewApplicationError("Could not connect to database", err, ErrCodeDatabase)
-		LogWithSentry(appErr, nil, raven.ERROR, nil)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, nil)
 		log.Fatal("Could not connect to database")
 	}
 
 	appErr := LoadAllTimers()
 	if appErr != nil {
 		fmt.Println(appErr)
-		LogWithSentry(appErr, nil, raven.ERROR, nil)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, nil)
 	}
 
 	defer db.Close()

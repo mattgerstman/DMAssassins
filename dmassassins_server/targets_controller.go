@@ -75,21 +75,23 @@ func deleteTarget(r *http.Request) (targetId uuid.UUID, appErr *ApplicationError
 		return nil, appErr
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	extra := map[string]interface{}{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}
+	sentryRequest := raven.NewHttp(r)
+	sentryUser := NewSentryUser(user)
 
 	oldTarget, appErr := GetUserById(oldTargetId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest, sentryUser)
 		return targetId, nil
 	}
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest, sentryUser)
 		return targetId, nil
 	}
 	_, appErr = oldTarget.SendDeadEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest, sentryUser)
 	}
 
 	return targetId, nil

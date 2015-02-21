@@ -247,28 +247,29 @@ func killNextWeakestPlayerForTeam(tx *sql.Tx, gameId, teamId, userId uuid.UUID) 
 	}
 
 	gameName := ``
+	extra := map[string]interface{}{"assassin_id": assassinId, "game_id": gameId.String(), "old_target_id": oldTargetId.String()}
 
 	game, appErr := GetGameById(gameId)
 	if appErr == nil {
 		gameName = game.GameName
 	} else {
-		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
+		LogWithSentry(appErr, nil, raven.WARNING, extra)
 	}
 
 	// Inform the assassin they have a new target
 	_, appErr = assassin.SendDefendWeakNewTargetEmail(gameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"assassin_id": assassin.UserId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
+		LogWithSentry(appErr, nil, raven.WARNING, extra)
 	}
 
 	oldTarget, appErr := GetUserById(oldTargetId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
+		LogWithSentry(appErr, nil, raven.WARNING, extra)
 		return nil
 	}
 	_, appErr = oldTarget.SendDefendWeakKilledEmail(gameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, nil)
+		LogWithSentry(appErr, nil, raven.WARNING, extra)
 	}
 
 	return nil

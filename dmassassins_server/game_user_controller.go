@@ -130,16 +130,18 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 		return gameMapping, nil
 	}
 
-	extra := GetExtraDataFromRequest(r)
-
+	// if there was an error joining a team, fail silently
+	sentryRequest := raven.NewHttp(r)
 	user, appErr = GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, map[string]interface{}{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, sentryRequest)
 		return gameMapping, nil
 	}
+
+	sentryUser := NewSentryUser(user)
 	gameMapping, appErr = user.JoinTeam(teamId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String(), "team_id": teamId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, map[string]interface{}{"game_id": gameId.String(), "team_id": teamId.String()}, sentryUser, sentryRequest)
 	}
 
 	return gameMapping, nil

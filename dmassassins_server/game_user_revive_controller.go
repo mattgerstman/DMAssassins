@@ -52,21 +52,23 @@ func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
 		return NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	extra := map[string]interface{}{"user_id": userId.String(), "game_id": gameId.String()}
+	sentryRequest := raven.NewHttp(r)
+
 	assassin, appErr := GetUserById(assassinId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 	}
 
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 	}
 	_, appErr = assassin.SendNewTargetEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 	}
 
 	if !adminReviveUserPost.SendEmail {
@@ -75,13 +77,13 @@ func postGameUserRevive(r *http.Request) (appErr *ApplicationError) {
 
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 	}
 
 	_, appErr = user.SendReviveEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 	}
 
 	return nil

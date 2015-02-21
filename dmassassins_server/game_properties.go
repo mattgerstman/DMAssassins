@@ -3,8 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"github.com/getsentry/raven-go"
-	"strings"
 )
 
 // Wrapper for SetGamePropertyTransactional that opens up and commits a transaction
@@ -112,14 +110,10 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 		var value string
 
 		err := rows.Scan(&key, &value)
-		if err == nil {
-			key = strings.ToLower(key)
-			properties[key] = value
-		} else {
-			// Fail silently if a single property spazzes out (should never happen but who knows)
-			appErr := NewApplicationError("Error getting game properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"game_id": game.GameId.String()}, raven.WARNING, nil)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
 	}
 	// Close the rows
 	err = rows.Close()

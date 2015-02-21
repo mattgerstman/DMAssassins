@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"github.com/getsentry/raven-go"
 	"strings"
 )
 
@@ -140,14 +139,13 @@ func (user *User) GetUserProperties() (properties map[string]string, appErr *App
 		var key, value string
 
 		err := rows.Scan(&key, &value)
-		if err == nil {
-			key = strings.ToLower(key)
-			properties[key] = value
-		} else {
-			// Fail silently if a single property spazzes out (should never happen but who knows)
-			appErr := NewApplicationError("Error getting user properties", err, ErrCodeDatabase)
-			LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil)
+		if err != nil {
+			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
+
+		key = strings.ToLower(key)
+		properties[key] = value
+
 	}
 	// Close the rows
 	err = rows.Close()

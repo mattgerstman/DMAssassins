@@ -117,7 +117,9 @@ var app = app || {
                         });
                 },
                 error: function(model, response) {
-                    console.log(response);
+                    if (response.responseText) {
+                        alert(response.responseText);
+                    }
                 }
             });
         },

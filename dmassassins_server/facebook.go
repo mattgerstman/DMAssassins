@@ -53,7 +53,8 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 		extra := make(map[string]interface{})
 		extra[`facebook`] = res
 		extra[`facebook_id`] = facebookId
-		LogWithSentry(appErr, nil, raven.WARNING, extra)
+		sentryUser := NewSentryUser(user)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra, sentryUser)
 	}
 
 	err = res.DecodeField("link", &facebook)
@@ -90,16 +91,14 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	appErr = user.UpdateToken(facebookToken)
 	if appErr != nil {
-		extra := make(map[string]interface{})
-		extra[`user`] = user
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
+		sentryUser := NewSentryUser(user)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil, sentryUser)
 	}
 
 	_, appErr = user.SendUserWelcomeEmail()
 	if appErr != nil {
-		extra := make(map[string]interface{})
-		extra[`user`] = user
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra)
+		sentryUser := NewSentryUser(user)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil, sentryUser)
 	}
 
 	go user.StoreUserFriends()
@@ -112,10 +111,8 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 func (user *User) StoreUserFriends() {
 	appErr := user.storeUserFriends()
 	if appErr != nil {
-		extra := make(map[string]interface{})
-		extra[`user`] = user
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.ERROR, extra)
-		fmt.Println(appErr)
+		sentryUser := NewSentryUser(user)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, nil, sentryUser)
 	}
 }
 

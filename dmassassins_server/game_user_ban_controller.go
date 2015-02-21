@@ -57,21 +57,24 @@ func deleteGameUserBan(r *http.Request) (appErr *ApplicationError) {
 	}
 
 	// Get game name and send the banhammer email
-	extra := GetExtraDataFromRequest(r)
+	sentryRequest := raven.NewHttp(r)
+
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String()}, raven.WARNING, extra)
+		extra := map[string]interface{}{"user_id": userId.String()}
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 
 	}
+	sentryUser := NewSentryUser(user)
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, nil, sentryRequest, sentryUser)
 		return nil
 	}
 	_, appErr = user.SendBanhammerEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"user_id": userId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, nil, sentryRequest, sentryUser)
 		return nil
 	}
 

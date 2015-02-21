@@ -64,10 +64,11 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return game, nil
 	}
 
-	extra := GetExtraDataFromRequest(r)
+	sentryRequest := raven.NewHttp(r)
+	extra := map[string]interface{}{"plot_twist_name": plotTwistName, "game_id": gameId.String()}
 	_, appErr = game.SendPlotTwistEmail(plotTwistName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"plot_twist_name": plotTwistName, "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 	}
 
 	return game, nil

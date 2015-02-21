@@ -99,14 +99,19 @@ func GetExtraDataFromRequest(r *http.Request) (extra map[string]interface{}) {
 	return extra
 }
 
+func NewSentryUser(user *User) (sentryUser *raven.User) {
+	return &raven.User{user.UserId.String(), user.Username, user.Email}
+}
+
 // LogWithSentry sends error report to sentry and records event id and error name to the logs
-func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, extra map[string]interface{}) {
+func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven.Severity, extra map[string]interface{}, interfaces ...raven.Interface) {
+
 	client, _ := raven.NewClient(Config.SentryDSN, nil)
 
-	packet := raven.NewPacket(appErr.Error(), appErr.Exception)
+	interfaces = append(interfaces, appErr.Exception)
+	packet := raven.NewPacket(appErr.Error(), interfaces...)
 	packet.Level = level
 	packet.AddTags(tags)
-	packet.Extra = extra
 	eventID, err := client.Capture(packet, tags)
 
 	if err == nil {
@@ -115,4 +120,5 @@ func LogWithSentry(appErr *ApplicationError, tags map[string]string, level raven
 	}
 	message := fmt.Sprintf("Error event with id \"%s\" - %s", eventID, appErr.Error())
 	log.Println(message)
+
 }

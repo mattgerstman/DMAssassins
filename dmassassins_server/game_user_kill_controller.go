@@ -68,20 +68,23 @@ func postGameUserKill(r *http.Request) (appErr *ApplicationError) {
 	}
 
 	// Get game name and send the banhammer email
-	extra := GetExtraDataFromRequest(r)
+
+	sentryRequest := raven.NewHttp(r)
+	extra := map[string]interface{}{"assassin_id": assassin.UserId.String(), "old_target_id": oldTargetId.String(), "game_id": gameId.String()}
+
 	oldTarget, appErr := GetUserById(oldTargetId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 	}
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 		return nil
 	}
 	_, appErr = oldTarget.SendDeadEmail(game.GameName)
 	if appErr != nil {
-		LogWithSentry(appErr, map[string]string{"old_target_id": oldTargetId.String(), "game_id": gameId.String()}, raven.WARNING, extra)
+		LogWithSentry(appErr, nil, raven.WARNING, extra, sentryRequest)
 	}
 
 	return nil
