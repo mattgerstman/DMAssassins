@@ -54,11 +54,12 @@ func getTargetFriends(r *http.Request) (friendData map[string]interface{}, appEr
 
 	// if we have friends return them
 	if count != 0 {
+		// query facebook for friends for future requests
+		go user.StoreUserFriends()
 		return friendData, nil
 	}
 
 	// if we have no friends query facebook and try again
-
 	user.StoreUserFriends()
 	target.StoreUserFriends()
 

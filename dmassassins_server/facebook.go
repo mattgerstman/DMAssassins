@@ -171,7 +171,7 @@ func (user *User) storeUserFriends() (appErr *ApplicationError) {
 
 // Get mutual friends for two users
 func (user *User) GetMutualFriends(targetId string) (friends []map[string]string, count int, appErr *ApplicationError) {
-	err := db.QueryRow(`select count(*) from (select friend_id from dm_friends where facebook_id = $1) user_friends, LATERAL (SELECT friend_id FROM dm_users where facebook_id = $2) target_friends`, user.FacebookId, targetId).Scan(&count)
+	err := db.QueryRow(`SELECT count(*) FROM dm_users where facebook_id IN (SELECT user_friends.friend_id from (SELECT friend_id FROM dm_friends WHERE facebook_id = $1) user_friends, LATERAL ( SELECT friend_id FROM dm_friends WHERE facebook_id = $2) target_friends)`, user.FacebookId, targetId).Scan(&count)
 	if err != nil {
 		return nil, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -181,7 +181,7 @@ func (user *User) GetMutualFriends(targetId string) (friends []map[string]string
 		return nil, 0, nil
 	}
 
-	rows, err := db.Query(`select facebook_id, username FROM dm_users where facebook_id IN (select user_friends.friend_id from (select friend_id from dm_friends where facebook_id = $1) user_friends, LATERAL ( SELECT friend_id FROM dm_users where facebook_id = $2) target_friends LIMIT 5)`, targetId, user.FacebookId)
+	rows, err := db.Query(`SELECT facebook_id, username FROM dm_users where facebook_id IN (SELECT user_friends.friend_id from (SELECT friend_id FROM dm_friends WHERE facebook_id = $1) user_friends, LATERAL ( SELECT friend_id FROM dm_friends WHERE facebook_id = $2) target_friends) LIMIT 5`, targetId, user.FacebookId)
 	if err != nil {
 		return nil, 0, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}

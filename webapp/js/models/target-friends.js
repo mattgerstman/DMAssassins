@@ -23,6 +23,10 @@ var app = app || {
             'count': 0,
             'friends': []
         },
+        parse: function(response) {
+            response.friends = response.friends || [];
+            return response;
+        },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
             var user_id = app.Running.User.get('user_id');
