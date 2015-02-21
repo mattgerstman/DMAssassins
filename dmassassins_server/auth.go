@@ -80,6 +80,9 @@ func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 		return appErr
 	}
 
+	// Set the user as context for this request
+	SetUserForRequest(r, user)
+
 	// Get the user's db token
 	dbToken, appErr := user.GetToken()
 	if appErr != nil {
@@ -247,6 +250,7 @@ func validateFacebookToken(facebookToken, token, facebookId string) *Application
 }
 
 // Gets the userRole, teamId, and userId from the request to be validated upstream
+// We also use this to set up the user context for the request itself
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {
 	userId, token, appErr := GetBasicAuth(r)
 	if appErr != nil {
@@ -256,8 +260,8 @@ func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, use
 	gameId := uuid.Parse(vars["game_id"])
 
 	var facebookId string
-	var teamIdBuffer, facebookToken sql.NullString
-	err := db.QueryRow(`SELECT dm_users.facebook_id, dm_users.facebook_token, game.user_role, game.team_id FROM dm_users, dm_user_game_mapping AS game WHERE dm_users.user_id = game.user_id AND game.user_id = $1 AND (game.game_id = $2 OR game.user_role = 'dm_super_admin')`, userId.String(), gameId.String()).Scan(&facebookId, &facebookToken, &userRole, &teamIdBuffer)
+	var teamIdBuffer, facebookToken, email, username sql.NullString
+	err := db.QueryRow(`SELECT dm_users.facebook_id, dm_users.facebook_token, dm_users.email, dm_users.username, game.user_role, game.team_id FROM dm_users, dm_user_game_mapping AS game WHERE dm_users.user_id = game.user_id AND game.user_id = $1 AND (game.game_id = $2 OR game.user_role = 'dm_super_admin')`, userId.String(), gameId.String()).Scan(&facebookId, &facebookToken, &email, &username, &userRole, &teamIdBuffer)
 	if err != nil {
 		return "", nil, nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -266,6 +270,10 @@ func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, use
 	if appErr != nil {
 		return "", nil, nil, appErr
 	}
+
+	// Create a user stuct and set it as the user for this request
+	user := &User{userId, username.String, email.String, facebookId, nil}
+	SetUserForRequest(r, user)
 
 	return userRole, teamId, userId, nil
 }

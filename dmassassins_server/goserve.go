@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/getsentry/raven-go"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"log"
@@ -71,8 +72,9 @@ func WriteStringToPayload(w http.ResponseWriter, r *http.Request, msg string, ap
 	_, err := w.Write(byteMsg)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		request := raven.NewHttp(r)
-		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
+		sentryRequest := raven.NewHttp(r)
+		sentryUser := GetSentryUserForRequest(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, sentryRequest, sentryUser)
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
 		return
 	}
@@ -87,8 +89,9 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	w.Header().Set("Content-Type", "application/json")
 	if appErr != nil {
 		HttpErrorLogger(w, appErr.Msg, appErr.Code)
-		request := raven.NewHttp(r)
-		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
+		sentryRequest := raven.NewHttp(r)
+		sentryUser := GetSentryUserForRequest(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, sentryRequest, sentryUser)
 		return
 	}
 
@@ -107,8 +110,9 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	data, err := json.Marshal(obj)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		request := raven.NewHttp(r)
-		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
+		sentryRequest := raven.NewHttp(r)
+		sentryUser := GetSentryUserForRequest(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, sentryRequest, sentryUser)
 		httpCode = ErrCodeInternalServerWTF / ApplicationErrorToHttpConversion
 		w.WriteHeader(httpCode)
 		return
@@ -119,8 +123,9 @@ func WriteObjToPayload(w http.ResponseWriter, r *http.Request, obj interface{}, 
 	_, err = w.Write(data)
 	if err != nil {
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInternalServerWTF)
-		request := raven.NewHttp(r)
-		LogWithSentry(appErr, nil, raven.ERROR, nil, request)
+		sentryRequest := raven.NewHttp(r)
+		sentryUser := GetSentryUserForRequest(r)
+		LogWithSentry(appErr, nil, raven.ERROR, nil, sentryRequest, sentryUser)
 		return
 	}
 }
@@ -205,6 +210,11 @@ func StartServer() {
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
-	http.Handle("/", corsHandler(http.TimeoutHandler(r, time.Second*20, `Timeout Occurred!`)))
+	timeoutHandler := http.TimeoutHandler(r, time.Second*20, `Timeout Occurred!`)
+	corsHandler := corsHandler(timeoutHandler)
+	clearHandler := context.ClearHandler(corsHandler)
+
+	handler := clearHandler
+	http.Handle("/", handler)
 	http.ListenAndServe(":8000", nil)
 }
