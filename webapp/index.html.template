@@ -1289,6 +1289,13 @@
               <p>
                   At <strong><%= execute_ts_string %></strong> we will automatically kill all users who haven't killed since <strong><%= min_kill_ts_string %></strong>. If you would like to cancel that cancel timer below:
               </p>
+              <form>
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" class="js-notify-cancel-timer" checked /> Notify Users By Email
+                    </label>
+                  </div>
+              </form>
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>

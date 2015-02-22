@@ -43,10 +43,15 @@ var app = app || {
             if (!check) {
                 return;
             }
+            var sendEmail = $('js-notify-cancel-timer').is(':checked');
+            $('.js-kill-timer-info').modal('hide');
             this.model.destroy({
+                headers: {
+                    'X-DMAssassins-Send-Email': sendEmail
+                },
                 success: function(model, response) {
-                    $('.js-kill-timer-info').modal('hide');
                     app.Running.Games.getActiveGame().fetchProperties();
+                    alert("Kill timer disabled!");
                 },
                 error: function(model, response) {
                     if (response.responseText === undefined) {

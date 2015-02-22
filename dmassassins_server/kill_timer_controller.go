@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"errors"
+	"github.com/getsentry/raven-go"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -65,6 +66,20 @@ func deleteKillTimer(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = game.DeleteKillTimer()
 	if appErr != nil {
 		return nil, appErr
+	}
+
+	// Check if the user wants to send an email, if not just return
+	sendEmail := r.Header.Get("X-DMAssassins-Send-Email")
+	if sendEmail == "false" {
+		return game, nil
+	}
+
+	// Inform users the game has ended
+	_, appErr = game.SendTimerDisabledEmail()
+	if appErr != nil {
+		extra := make(map[string]interface{})
+		extra[`game_id`] = gameId
+		LogWithSentry(appErr, map[string]string{"game_id": gameId.String()}, raven.WARNING, extra)
 	}
 
 	return game, nil

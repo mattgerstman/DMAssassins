@@ -708,6 +708,45 @@ func (game *Game) sendKilledByTimerEmail(users []*User) (id string, appErr *Appl
 	return sendEmail(subject, body, htmlBody, tag, users)
 }
 
+func (game *Game) SendTimerDisabledEmail() (id string, appErr *ApplicationError) {
+	// Get all users for the game that we're allowed to email
+	users, appErr := game.getEmailableUsersForGame(true)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	var bodyBuffer bytes.Buffer
+	emailData := map[string]interface{}{
+		"GameName":  game.GameName,
+		"APIDomain": Config.APIDomain,
+	}
+
+	// Compile the plain email template
+	t, err := template.ParseFiles("templates/plot_twists/timer_disabled.txt")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	t.Execute(&bodyBuffer, emailData)
+
+	// Compile the HTML email template
+	var htmlBodyBuffer bytes.Buffer
+	htmlT, err := template.ParseFiles("templates/plot_twists/timer_disabled.html")
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeBadTemplate)
+	}
+	htmlT.Execute(&htmlBodyBuffer, emailData)
+
+	// Set up the subject and contents of the email
+	subject := game.GameName + ` DMAssassins Cancelled Countdown`
+	tag := `TimerDisabled`
+	body := bodyBuffer.String()
+	htmlBody := htmlBodyBuffer.String()
+
+	// Send the email
+	return sendEmail(subject, body, htmlBody, tag, users)
+
+}
+
 // Send an email for an expired timer
 func (game *Game) SendTimerExpiredEmail(killedUsers []uuid.UUID) (appErr *ApplicationError) {
 	// Get all users for the game
