@@ -61,7 +61,8 @@ var app = app || {
         doFetch: function(options) {
             var that = this;
             options = options || {};
-            var url = options.url || '/me/photos/?limit=8';
+            var limit = screen.width > 768 ? 8 : 2;
+            var url = options.url || '/me/photos/?limit='+limit;
             if (that === undefined)
             {
                 that = this;
