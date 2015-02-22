@@ -792,7 +792,9 @@ func sendEmail(subject, body, htmlBody, tag string, users []*User) (id string, a
 	// Add data about the message and set the HTML body
 	m.AddTag(tag)
 	m.SetTracking(true)
-	m.SetHtml(htmlBody)
+	if htmlBody != "" {
+		m.SetHtml(htmlBody)
+	}
 
 	// Add all of the users as receipients with their name/user_id as variables
 	for _, user := range users {

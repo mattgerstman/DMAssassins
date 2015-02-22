@@ -7,6 +7,5 @@ With that, {{.GameName}} DMAssassins has come to an end. We hope you've enjoyed 
 Sincerely,
 The DMAssassins Team
 
-P.S. We're running a limited beta right now. If you're interested in starting your own game email matt@dmassassins.com for beta pricing!
 
 To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
