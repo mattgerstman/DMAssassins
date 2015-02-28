@@ -114,6 +114,8 @@ func (game *Game) GetGameProperties() (properties map[string]string, appErr *App
 			return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 		}
 
+		properties[key] = value
+
 	}
 	// Close the rows
 	err = rows.Close()
