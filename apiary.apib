@@ -1,0 +1,97 @@
+FORMAT: 1A
+HOST: http://www.dmassassins.com
+
+# DMAssassins
+Games API is allows game creation/access.
+
+# Group Games
+Games resource in the context of a user
+
+## Notes Collection [/user/<user_id>/game]
+### List all Games a user is in or can join [GET]
++ Response 200 (application/json)
+
+        {
+           "available":null,
+           "member":[
+              {
+                 "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+                 "game_name":"DMatUF",
+                 "game_started":false,
+                 "game_has_password":true,
+                 "game_properties":{
+        
+                 }
+              },
+              {
+                 "game_id":"28a181c9-860a-4843-980f-a1d30e354721",
+                 "game_name":"Facebook Test",
+                 "game_started":true,
+                 "game_has_password":false,
+                 "game_properties":{
+        
+                 }
+              },
+              {
+                 "game_id":"ddca9671-a814-44f0-8773-7e0048e8d386",
+                 "game_name":"Sigma Kappa",
+                 "game_started":false,
+                 "game_has_password":false,
+                 "game_properties":{
+        
+                 }
+              },
+              {
+                 "game_id":"8989a106-8116-43da-93f6-1c5618139551",
+                 "game_name":"Silicon Valley Test Game",
+                 "game_started":false,
+                 "game_has_password":false,
+                 "game_properties":{
+        
+                 }
+              },
+              {
+                 "game_id":"3a2a5520-4bf1-43a3-b88c-52f99373359e",
+                 "game_name":"Tau Kappa Epsilon Brotherhood Event",
+                 "game_started":true,
+                 "game_has_password":true,
+                 "game_properties":{
+        
+                 }
+              },
+              {
+                 "game_id":"e288edc7-cc4e-4885-a3b5-e328f154c3ad",
+                 "game_name":"YCombinator",
+                 "game_started":false,
+                 "game_has_password":false,
+                 "game_properties":{
+        
+                 }
+              }
+           ]
+        }
+
+### Create a Game [PUT]
++ Request (application/json)
+
+        {
+           "game_name":"YCombinator",
+           "game_password":null,
+           "game_id":"",
+           "game_started":false,
+           "game_has_password":false,
+           "member":true
+        }
+
++ Response 201 (application/json)
+
+        {
+           "game_id":"e288edc7-cc4e-4885-a3b5-e328f154c3ad",
+           "game_name":"YCombinator",
+           "game_started":false,
+           "game_has_password":false,
+           "game_properties":{
+              "timezone":"America/New_York"
+           }
+        }
+
