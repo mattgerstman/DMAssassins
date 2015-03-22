@@ -428,3 +428,24 @@ Games resource in the context of a user
            "team_name":"Technology"
         }
         
+### Rename a team [PUT]
++ Request (application/json)
+
+        {
+           "team_id":"9216e212-a1e6-4f85-804f-d2e243a5184d",
+           "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+           "team_name":"DMatUF"
+        }
++ Response 200 (application/json)
+
+        {
+           "team_id":"9216e212-a1e6-4f85-804f-d2e243a5184d",
+           "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+           "team_name":"DMatUF"
+        }
+
+### Delete a team [DELETE]
+
++ Request (application/json)
+
++ Response 204 (application/json)
