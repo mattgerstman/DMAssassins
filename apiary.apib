@@ -229,3 +229,202 @@ Games resource in the context of a user
         
         ""
 
+
+## Targets [/game/<game_id>/targets/]
+### Get targets for a game [GET]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "0195ec3c-d53f-4963-b645-a31d457e2079":{
+              "assassin_id":"0195ec3c-d53f-4963-b645-a31d457e2079",
+              "assassin_name":"Hermione Granger",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"43114969-c022-40b3-8056-8c04b1611ccc",
+              "target_name":"Ginny Weasley",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           },
+           "43114969-c022-40b3-8056-8c04b1611ccc":{
+              "assassin_id":"43114969-c022-40b3-8056-8c04b1611ccc",
+              "assassin_name":"Ginny Weasley",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"7dccc355-16c7-4d52-879a-8d35c0adc1dc",
+              "target_name":"Harry Potter",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           },
+           "4e14e850-786d-46ad-9c5d-368a254b3689":{
+              "assassin_id":"4e14e850-786d-46ad-9c5d-368a254b3689",
+              "assassin_name":"Ryan Lewis",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"63cb7690-9468-4982-a4da-95ec2ffe7319",
+              "target_name":"Zac Johnson",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           },
+           "63cb7690-9468-4982-a4da-95ec2ffe7319":{
+              "assassin_id":"63cb7690-9468-4982-a4da-95ec2ffe7319",
+              "assassin_name":"Zac Johnson",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"ea50b303-da16-427c-8138-499d3bc31f46",
+              "target_name":"Ron Weasley",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           },
+           "7dccc355-16c7-4d52-879a-8d35c0adc1dc":{
+              "assassin_id":"7dccc355-16c7-4d52-879a-8d35c0adc1dc",
+              "assassin_name":"Harry Potter",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"4e14e850-786d-46ad-9c5d-368a254b3689",
+              "target_name":"Ryan Lewis",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           },
+           "ea50b303-da16-427c-8138-499d3bc31f46":{
+              "assassin_id":"ea50b303-da16-427c-8138-499d3bc31f46",
+              "assassin_name":"Ron Weasley",
+              "assassin_team_name":"No Team",
+              "assassin_user_role":"dm_user",
+              "assassin_kills":0,
+              "target_id":"0195ec3c-d53f-4963-b645-a31d457e2079",
+              "target_name":"Hermione Granger",
+              "target_team_name":"No Team",
+              "target_user_role":"dm_user",
+              "target_kills":0
+           }
+        }
+        
+## Team [/game/<game_id>/team/]
+### Get a list of teams for a game [GET]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        [
+           {
+              "team_id":"28511ec6-44ef-4b49-9fa2-4311a0eaee5f",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Art/Layout"
+           },
+           {
+              "team_id":"2602672f-0b42-4cfc-be97-46c687af3f11",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Community Events"
+           },
+           {
+              "team_id":"d43fa392-56bd-4489-83ca-b9f09475f4cf",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Dancer Relations"
+           },
+           {
+              "team_id":"51d9a2e1-8299-4e1e-bf91-f1b83fc2177c",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Delegates"
+           },
+           {
+              "team_id":"8c7f42c4-f498-44f7-a7ba-30530631df70",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Entertainment"
+           },
+           {
+              "team_id":"6320647e-beb0-4ce3-becf-1e4cf85d8e47",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Family Relations"
+           },
+           {
+              "team_id":"c00ed39e-24d1-4b2b-a62e-8d0594f0c2fc",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Finance"
+           },
+           {
+              "team_id":"1be27036-ba60-49e0-9f6b-f81953cf32e1",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Hospitality"
+           },
+           {
+              "team_id":"8771f435-0ba3-4d6f-98a9-d302bebdf83d",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Managers"
+           },
+           {
+              "team_id":"631ae71e-eda8-4d65-b1f6-32a01a263036",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Marathon Relations"
+           },
+           {
+              "team_id":"7c4ff7f0-ba18-41b0-9f33-f531dcb56dd0",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Marketing"
+           },
+           {
+              "team_id":"2bd63351-4cc8-48f1-811f-1b6d37d4deb0",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Morale"
+           },
+           {
+              "team_id":"8e5ae750-d723-4534-a69f-211787be3c3e",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Operations"
+           },
+           {
+              "team_id":"fc70a419-471a-46e5-90fb-a55522b95d60",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Public Relations"
+           },
+           {
+              "team_id":"9603603d-e015-4400-9ccb-5b6334659098",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Recruitment"
+           },
+           {
+              "team_id":"d480a1a2-0030-4585-b19b-50384ef57f18",
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "team_name":"Technology"
+           }
+        ]
+        
+### Creates a team for a game [POST]
++ Request (application/x-www-form-urlencoded)
+
+        team_name=YCombinator
+        
++ Response 201 (application/json)
+
+        {
+           "team_id":"9216e212-a1e6-4f85-804f-d2e243a5184d",
+           "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+           "team_name":"YCombinator"
+        }
+
+## Team/TeamId [/game/<game_id>/team/<team_id>/]
+### Get a team by id [GET]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "team_id":"d480a1a2-0030-4585-b19b-50384ef57f18",
+           "game_id":"d480a1a2-0030-4585-b19b-50384ef57f18",
+           "team_name":"Technology"
+        }
+        
