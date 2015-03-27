@@ -452,10 +452,80 @@ Games resource in the context of a user
 
 # Group Game/Users
 ## Users/ [/game/<game_id>/users/]
+### Get all users for a game [GET]
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "5c739d8e-1194-4226-a279-03e50377acf5":{
+              "user_id":"5c739d8e-1194-4226-a279-03e50377acf5",
+              "username":"",
+              "email":"matt+admin@dmassassins.com",
+              "facebook_id":"10152622020481913",
+              "properties":{
+                 "alive":"true",
+                 "allow_email":"true",
+                 "allow_post":"false",
+                 "facebook":"https://facebook.com/10152622020481913",
+                 "first_name":"Matt",
+                 "last_name":"Gerstman",
+                 "photo":"https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xaf1/t31.0-8/q82/p180x540/10620140_10152819665341913_4672725081441389456_o.jpg",
+                 "photo_thumb":"https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xaf1/v/t1.0-9/q82/p75x225/10710631_10152819665341913_4672725081441389456_n.jpg?oh=aab9c8036dfa790d58f2bc6f1c87e707\u0026oe=55941F8F\u0026__gda__=1433903409_d0e55d71c07def624835b6b3b2651643",
+                 "team":"null",
+                 "user_role":"dm_admin"
+              }
+           }
+        }
+
 ## Users/Email [/game/<game_id>/users/email/]
+### Get Emails for all users [GET]
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "alive":[
+              "matt+admin@dmassassins.com"
+           ],
+           "all":[
+              "matt+admin@dmassassins.com"
+           ]
+        }
+
 
 # Group Game/User
 ## User [/game/<game_id>/user/<user_id>/]
+### Get a user's information in the context of a game [GET]
+
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "user_id":"79465c81-5044-484c-be7c-c5aa1c482e61",
+           "username":"AbbeyJordan",
+           "email":"akonchan11@gmail.com",
+           "facebook_id":"10152447095593309",
+           "properties":{
+              "alive":"false",
+              "allow_email":"false",
+              "facebook":"https://facebook.com/10152447095593309",
+              "first_name":"Abbey",
+              "last_killed":"1416765117",
+              "last_name":"Jordan",
+              "name":"Abbey Jordan",
+              "photo":"https://graph.facebook.com/10152447095593309/picture?width=1000",
+              "photo_thumb":"https://graph.facebook.com/10152447095593309/picture?width=300\u0026height=300",
+              "secret":"ChandlerSkeeterSirius",
+              "team":"Family Relations",
+              "user_role":"dm_user"
+           }
+        }
+
+### Let a user quit the game [DELETE]
+
+
 ## Ban [/game/<game_id>/user/<user_id>/ban/]
 ## Kill [/game/<game_id>/user/<user_id>/kill/]
 ## Revive [/game/<game_id>/user/<user_id>/revive/]
