@@ -523,8 +523,62 @@ Games resource in the context of a user
            }
         }
 
-### Let a user quit the game [DELETE]
+### Update user properties [PUT] 
 
++ Request (application/json)
+
+        Accepted Properties: (photo, photo_thumb, allow_email, allow_post, email)
+        {
+           "properties":{
+              "alive":"false",
+              "allow_email":"false",
+              "allow_posts":"true",
+              "facebook":"https://facebook.com/1517261158489822",
+              "first_name":"Ron",
+              "last_name":"Weasley",
+              "name":"Ron Weasley",
+              "photo":"https://graph.facebook.com/1517261158489822/picture?width=1000",
+              "photo_thumb":"https://graph.facebook.com/1517261158489822/picture?width=300&height=300",
+              "secret":"JustinBillJimmy",
+              "team":"",
+              "user_role":"dm_user",
+              "allow_post":"false"
+           }
+        }
+        
++ Response 200 (application/json)
+
+        null
+
+
+### Join a game [POST]
++ Request (application/json)
+
+    + Headers
+    
+            x-dmassassins-game-password: ForTheKids1
+            x-dmassassins-team-id: 00000000-00000000-00000000-00000000
+        
++ Response 201 (application/json)
+
+        {
+           "user_id":"ea50b303-da16-427c-8138-499d3bc31f46",
+           "game_id":"e288edc7-cc4e-4885-a3b5-e328f154c3ad",
+           "team_id":"",
+           "user_role":"dm_user",
+           "secret":"DuckBillNicole",
+           "kills":0,
+           "alive":true
+        }
+    
+### Let a user quit the game [DELETE]
++ Request
+
+    + Headers
+    
+            x-dmassassins-secret: CharlieLudoFudge
+
++ Response 204
 
 ## Ban [/game/<game_id>/user/<user_id>/ban/]
 ## Kill [/game/<game_id>/user/<user_id>/kill/]
