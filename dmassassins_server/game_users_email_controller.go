@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-// GET - Wrapper for GameMapping:GetGameMapping, usually used for user_role or alive/kill status
+// GET - Gets user emails, seperates by alive and all
 func getGameUsersEmails(r *http.Request) (emails map[string][]string, appErr *ApplicationError) {
-	_, appErr = RequiresAdmin(r)
+	_, appErr = RequiresSuperAdmin(r)
 	if appErr != nil {
 		return nil, appErr
 	}
