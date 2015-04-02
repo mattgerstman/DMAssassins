@@ -581,14 +581,99 @@ Games resource in the context of a user
 + Response 204
 
 ## Ban [/game/<game_id>/user/<user_id>/ban/]
+### Ban a user [DELETE]
++ Request
+
+    + Headers
+        
+            x-DMAssassins-Send-Email: false
+        
++ Response 204
+
 ## Kill [/game/<game_id>/user/<user_id>/kill/]
+### Kills a user [POST]
++ Request (application/json)
+
+            {
+               "send_email":false
+            }
+
++ Response 204
+
 ## Revive [/game/<game_id>/user/<user_id>/revive/]
+### Revive a user [POST]
++ Request (application/json)
+
+            {
+               "send_email":false
+            }
++ Response 204
+
 ## Role [/game/<game_id>/user/<user_id>/role/]
+### Change a user's role [POST]
++ Request (application/x-www-form-url-encoded)
+
+            role=dm_super_admin
+            
++ Response 201
 
 # Group Game/User/Target
 ## Target [/game/<game_id>/user/<user_id>/target/]
-## Friends [/game/<game_id>/user/<user_id>/target/friends/]
+### Get Target [GET]
++ Request (application/json)
 
++ Response 200 (application/json)
+
+        {
+           "user_id":"548a02a4-52d3-425f-b0f9-18ac2bc68a3b",
+           "username":"RyanLewis",
+           "email":"matt+ryanlewis@dmassassins.com",
+           "facebook_id":"347343548763059",
+           "properties":{
+              "allow_email":"true",
+              "allow_post":"false",
+              "facebook":"https://facebook.com/347343548763059",
+              "first_name":"Ryan",
+              "last_killed":"1419446798",
+              "last_name":"Lewis",
+              "name":"Ryan Lewis",
+              "photo":"https://graph.facebook.com/347343548763059/picture?width=1000",
+              "photo_thumb":"https://graph.facebook.com/347343548763059/picture?width=300"
+           }
+        }
+
+### Kill Target [DELETE]
++ Request
+
+    + Headers
+    
+            X-DMAssassins-Secret:TomRachelHermione
++ Response 200
+
+## Friends [/game/<game_id>/user/<user_id>/target/friends/]
+### Get a user's mutual friends with their target
++ Request (application/json)
+
++ Response 200 (application/json)
+
+        {
+           "count":2,
+           "friends":[
+              {
+                 "facebook_id":"334599530035888",
+                 "user_name":"HarryPotter"
+              },
+              {
+                 "facebook_id":"1389615437995324",
+                 "user_name":"SteveJobs"
+              },
+              {
+                 "facebook_id":"1465920003684029",
+                 "user_name":"HermioneGranger"
+              }
+           ]
+        }
+        
 # Group Misc
 ## Unsubscribe [/unsubscribe/<user_id>/]
 ### Unsubscribe Email [GET]
@@ -599,4 +684,1492 @@ Games resource in the context of a user
         {}
 
 ## Support [/support/]
+### File a support ticket [POST]
++ Request (application/json)
+
+            {
+               "name":"Harry Potter",
+               "email":"matt+harrypotter@dmassassins.com",
+               "subject":"Voldemort is Back!",
+               "message":"Why won't anyone believe me?!?"
+            }
++ Response 201 (application/json)
+
+            {
+               "email":"matt+harrypotter@dmassassins.com",
+               "message":"Why won't anyone believe me?!?",
+               "name":"Harry Potter",
+               "subject":"Voldemort is Back!"
+            }
+
 ## Session [/session/]
+### Create a session [POST]
++ Request (application/x-www-form-urlencoded)
+
+            facebook_id=334599530035888&facebook_token=CAAJPKJ2eMPIBAHZAZBIlseccVMTMpUnuSoFipUNqhPZBUvRO0396w7r3v5zZBZC4Qsh5jEvTgiRuudUOJAcMjmNPep4VW2zrbeD6sbqxnycgZB2WcokzKWFyRZB2hJi4Cbwvl1ZATa1MlNXX3ZCjyN1tiNXqzI8q1XdppPx5hOP5Mq8X4qfCNMWZCqxU36YH3h0InC01HKTp7NHJfxZCJ5H1p5onXIyXmPuNh4ZD&game_id=
+            
++ Response 201 (application/json)
+
+        {
+           "game":{
+              "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+              "game_name":"DMatUF",
+              "game_started":true,
+              "game_has_password":true,
+              "game_properties":{
+                 "game_page_access_token":"CAAJPKJ2eMPIBADax8rcuiwO8jyT2DBKiS8ggyfQrcQZASYJXBDeT2fBi0efxSpiPl28SgW9Th0w3RekauWoeUD4tLHMmdSrewwkYvlo16KWAYZCbC8UZBV8XEfi3gZAUvpdtV0AqYxOmfhaxOMN2exnYMXqRyK8517JeaAGkZCqOMH3o3TJWH7D6uzbkO2TdXydzCtjq8sY9gWkhpdkiAJrbndohM8KMZD",
+                 "game_page_id":"1697108740514966",
+                 "game_page_name":"DMAssassins",
+                 "has_kill_timer":"false",
+                 "kill_mode":"normal",
+                 "rules":"\u003ch2\u003eKilling\u003c/h2\u003e\n\n\u003cp\u003eTo assassinate your target perform the following steps:\u003c/p\u003e\n\n\u003col\u003e\n\u003cli\u003eShoot them with silly string.\u003c/li\u003e\n\u003cli\u003eAsk the user for their secret\u003c/li\u003e\n\u003cli\u003eEnter their secret on the website.\u003c/li\u003e\n\u003cli\u003eReceive your new target.\u003c/li\u003e\n\u003c/ol\u003e\n\n\u003cp\u003eIf your assassins shoots you, you are eliminated from the game and you must give up your secret.\nYou are only allowed to kill the person who is your current target on the website.\u003c/p\u003e\n\n\u003cp\u003e\u003cstrong\u003eIf you do not give up your secret within an hour of dying you will be banned from the game (all your kills no longer count) and your team will lose 2 points.\u003c/strong\u003e\u003c/p\u003e\n\n\u003ch2\u003eDefense\u003c/h2\u003e\n\n\u003cp\u003eTo defend your self from assassination, you may shoot your assassin with silly string. This will grant you 30 minutes of immunity.\u003c/p\u003e\n\n\u003ch2\u003eSafe Zones\u003c/h2\u003e\n\n\u003cp\u003eAll players are safe on the 2nd floor of Reitz Union and while they are in class or at official Dance Marathon events. These include, but are not limited to, spirit point check-ins and OT, Captain, or Delegate meetings. Physically outside of official Dance Marathon events, however, are considered fair game, with a minimum of 10 feet from the main event. Parking lots are encouraged.\u003c/p\u003e\n\n\u003cp\u003ePlayers actively volunteering at organization fundraisers are neither allowed to kill or be killed while they are at the fundraiser; however, players simply attending may kill other attendees.\u003c/p\u003e\n\n\u003ch2\u003eWinners\u003c/h2\u003e\n\n\u003cp\u003eThe winners will be the last player standing and the player with the most kills.\nIn the event of a draw or multiple winners, the distribution of prizes will be determined by the admin.\u003c/p\u003e\n\n\u003ch2\u003ePauses\u003c/h2\u003e\n\n\u003cp\u003eThe game may be paused at the admin's discretion. You will be notified of this by email.\u003c/p\u003e\n\n\u003ch2\u003ePlayers\u003c/h2\u003e\n\n\u003cp\u003eOnly current Overalls, Captains, and Delegates are eligible to play. If someone who's not one of those three constituents wants to play, contact \u003ca href=\"mailto:amigdall@floridadm.org\"\u003eamigdall@floridadm.org\u003c/a\u003e.\u003c/p\u003e\n\n\u003ch2\u003ePlot Twists\u003c/h2\u003e\n\n\u003cp\u003eThere will be several plot twists that will change the game dynamic. They can include, but are not limited to: Changing Targets, Changing the amount of kills earned for a single kill, Setting time limits to complete a kill, etc. You will be notified of these by email.\u003c/p\u003e\n\n\u003cp\u003eIf at any point you kill your target and your target changes before you can log the kill, that kill is considered null and void.\u003c/p\u003e\n\n\u003ch2\u003ePrizes\u003c/h2\u003e\n\n\u003cp\u003ePlayers Eligible for Prizes: Last Player Standing, Top 3 Highest Kills, Top 3 Teams based on Average Kills/Player\u003c/p\u003e\n\n\u003ch2\u003eCheating\u003c/h2\u003e\n\n\u003cp\u003eIf a player is caught cheating they will be completely removed from the game.\nIf someone refuses to give up their secret, you can contact the admin at \u003ca href=\"mailto:matt@dmassassins.com\"\u003ematt@dmassassins.com\u003c/a\u003e.\u003c/p\u003e\n",
+                 "teams_enabled":"true",
+                 "timezone":"America/New_York"
+              }
+           },
+           "games":{
+              "available":[
+                 {
+                    "game_id":"8989a106-8116-43da-93f6-1c5618139551",
+                    "game_name":"Silicon Valley Test Game",
+                    "game_started":false,
+                    "game_has_password":false,
+                    "game_properties":{
+        
+                    }
+                 },
+                 {
+                    "game_id":"3a2a5520-4bf1-43a3-b88c-52f99373359e",
+                    "game_name":"Tau Kappa Epsilon Brotherhood Event",
+                    "game_started":false,
+                    "game_has_password":true,
+                    "game_properties":{
+        
+                    }
+                 }
+              ],
+              "member":[
+                 {
+                    "game_id":"9f381ec6-2d07-42a5-bb2b-b31424850936",
+                    "game_name":"DMatUF",
+                    "game_started":true,
+                    "game_has_password":true,
+                    "game_properties":{
+        
+                    }
+                 },
+                 {
+                    "game_id":"5a32bcd7-0f87-4d79-b0b4-37fb2054509e",
+                    "game_name":"Rachel Greep",
+                    "game_started":true,
+                    "game_has_password":false,
+                    "game_properties":{
+        
+                    }
+                 }
+              ]
+           },
+           "leaderboard":{
+              "teams_enabled":true,
+              "users":[
+                 {
+                    "name":"Connor Santo",
+                    "kills":9,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Aly Gerstman",
+                    "kills":8,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Arielle Darvin",
+                    "kills":6,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Garrett Robertson",
+                    "kills":6,
+                    "alive":true,
+                    "team_name":"Finance"
+                 },
+                 {
+                    "name":"Catherine Verga",
+                    "kills":5,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Travus White",
+                    "kills":5,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Melissa Lanes",
+                    "kills":5,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Brooke Schultz",
+                    "kills":5,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Jacob Peek",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Erica Allison",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Maria Mandese",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Joey Whelihan",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Micayla Johnson",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Mallory Wood",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Valery Young",
+                    "kills":4,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Leland Van Alstyne",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Jenni Donnellan",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Cassandra Etzig",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Ashley Rocque",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Kelsey Johnson",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Eric Hedberg",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Bayley Wright",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Ashley Cahill",
+                    "kills":3,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Jennifer Stehlin",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Addie Kraemer",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Jessica Joyce",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Brennan Batten",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Brittany Pashkow",
+                    "kills":2,
+                    "alive":false,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Alyson Giambalvo",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Mary Katherine",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Emily Coyle",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Aubrey Breneman",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Rachel Sonenblum",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Torrie Scianna",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Jenna Baxter",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Erin Ginn",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Vanessa Harrison",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Jacob Leuze",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Stephanie Elkin",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Daniela Manrique",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Susannah Schrimsher",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Michael Cleveland",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Danielle Kripitzer",
+                    "kills":2,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Kristina Murphy",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Bradley Bean",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Tori Tippin",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Katie McMullen",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Harry Potter",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Chris Cerreta",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"David Walsh",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Emily Crissman",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Taryn Tacher",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Public Relations"
+                 },
+                 {
+                    "name":"Haley Ponnock",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Natalie Perez",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Tatyana Mann",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Amanda Elia",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Jess Nicole",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Mackenzie LaPorte",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Rachel Sharpe",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Andrea Esinhart",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Heather Baeta",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Amanda Byrne",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Sarah Hayo",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Brandon Newell",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Melissa Edwards",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Sam Book",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Sofi Torrents",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Jordan Rutner",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Carter Long",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Katie Mesa",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Rachel Mowat",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Maddie Vaughn",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Public Relations"
+                 },
+                 {
+                    "name":"Hailey Boerema",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Joel Davila",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Kelsie Boudreau",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Kevin Kimbrough",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Jake Leichtenschlag",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Emily Braun",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Lacy Rubloff",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Hannah Ritchey",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Julia Stevens",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Zack Mckerley",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Lexi Christi",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Sophia Marchetti",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Forrest Hoffman",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Matthew Weider",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Lauren Fernandez",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Bobby Bacchus",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Jacqueline Papilsky",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Daniel Harbus",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Sebastian Marin",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Brian Portman",
+                    "kills":1,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Kayla Marcus",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Stephanie Kinchla",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Ashley Talham",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Car Son",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Rory McCormack",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Elizabeth Sitton",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Rachel Carter",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Charlie Santa",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Shannon Lalli",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Brooke Gardner",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Hunter Waters",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Avery Bramnik",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Monica Bramnik",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Berni Schor",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Jessie Anderson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Olivia Molina",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Karlin Hugghins",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Shannon Kelly",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Caroline Josey",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Alexandria Burry",
+                    "kills":0,
+                    "alive":false,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Monty Karas",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Nedim Dadream",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Missy Perez",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Samit Sajwani",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Rachel Eleanor",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Madison Grubb",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Jon Franke",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Jared Coldiron",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Jimmy Taylor",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Ryan Lewis",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Julie Riddle",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Andrew Giacini",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Managers"
+                 },
+                 {
+                    "name":"Taylor Michael",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Managers"
+                 },
+                 {
+                    "name":"Melissa Dukes",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Public Relations"
+                 },
+                 {
+                    "name":"Keith Shopa",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Libby Tonner",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Scott Strauss",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Nikki Masse",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Grant Mandato",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Julie Rothe",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Savannah Snowden",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Stephen Schwartz",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Virginia Horan",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Sammi Wood",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Francesca Favorule",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Katie Chomin",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Brielle Cohen",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Jackie Modist",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Michael Dingess",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Emily Murrow",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Vicki Baker",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Tori Cook",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Michael Perkins",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Samantha Davies",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Allison Stroop",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Public Relations"
+                 },
+                 {
+                    "name":"John Phillips",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Jennifer Kirkpatrick",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Samantha Marozzi",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Emily Julson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Allison Buenaga",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Dylan Schmer",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Becca Turkel",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Grace Caswell",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Stephen Beutler",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Tyler Auker",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Ashley Innis",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Lauren Blakely",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Public Relations"
+                 },
+                 {
+                    "name":"Lea San Martano",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Kaley LaMarca",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Stuart Fisher",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Kelsey Eisch",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Joel Rivera",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Caylin Ann",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Demi Hernandez",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Sloan Patterson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Alina Avalos",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Hillary Thornton",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Catherine Rizzuti",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Caroline Greene",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Monica Lieberman",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Ker Ry",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Kason Green",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Alana Horowitz",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Caroline Gibson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Stephanie Carmen",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Kaleigh Harder",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Kelcie Roscoe",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Technology"
+                 },
+                 {
+                    "name":"Kayla Core",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Max Wolfson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Family Relations"
+                 },
+                 {
+                    "name":"Katie Dutton",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Gerrett Rice",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Ally Hatcher",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Delaney Cooksey",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Community Events"
+                 },
+                 {
+                    "name":"Nakisa Behi",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Pierce Ginzberg",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Reid Casey",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Entertainment"
+                 },
+                 {
+                    "name":"Brian Basnight",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Brittany Hammer",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Recruitment"
+                 },
+                 {
+                    "name":"Lynna Lawrence",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marketing"
+                 },
+                 {
+                    "name":"Brad Wheeler",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Mac Bailey",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Court Knee",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Bobby Finigan",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Sean Bowles",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Caroline Garrity",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Jenna Glick",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Spencer Kasmere",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Delegates"
+                 },
+                 {
+                    "name":"Jillian Gruss",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Kallie Erickson",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Shelly Seneca",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Drew Carlton",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Christopher Dela Cruz",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Gt Gonzalez",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Marathon Relations"
+                 },
+                 {
+                    "name":"Tommy Moffitt",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"Leah Miller",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Morale"
+                 },
+                 {
+                    "name":"Ford Cheeseman",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Operations"
+                 },
+                 {
+                    "name":"David McCaskill",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Danielle Vollender",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 },
+                 {
+                    "name":"Tami Moreno",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Art/Layout"
+                 },
+                 {
+                    "name":"Morgan Earp",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Hospitality"
+                 },
+                 {
+                    "name":"Nikki Rode",
+                    "kills":0,
+                    "alive":true,
+                    "team_name":"Dancer Relations"
+                 }
+              ],
+              "teams":{
+                 "Art/Layout":{
+                    "kills":9,
+                    "alive":12,
+                    "players":13
+                 },
+                 "Community Events":{
+                    "kills":7,
+                    "alive":7,
+                    "players":7
+                 },
+                 "Dancer Relations":{
+                    "kills":21,
+                    "alive":25,
+                    "players":25
+                 },
+                 "Delegates":{
+                    "kills":10,
+                    "alive":20,
+                    "players":20
+                 },
+                 "Entertainment":{
+                    "kills":3,
+                    "alive":10,
+                    "players":10
+                 },
+                 "Family Relations":{
+                    "kills":33,
+                    "alive":23,
+                    "players":24
+                 },
+                 "Finance":{
+                    "kills":6,
+                    "alive":1,
+                    "players":1
+                 },
+                 "Hospitality":{
+                    "kills":9,
+                    "alive":10,
+                    "players":10
+                 },
+                 "Managers":{
+                    "kills":0,
+                    "alive":2,
+                    "players":2
+                 },
+                 "Marathon Relations":{
+                    "kills":3,
+                    "alive":12,
+                    "players":12
+                 },
+                 "Marketing":{
+                    "kills":11,
+                    "alive":13,
+                    "players":13
+                 },
+                 "Morale":{
+                    "kills":42,
+                    "alive":28,
+                    "players":28
+                 },
+                 "Operations":{
+                    "kills":2,
+                    "alive":14,
+                    "players":14
+                 },
+                 "Public Relations":{
+                    "kills":2,
+                    "alive":5,
+                    "players":5
+                 },
+                 "Recruitment":{
+                    "kills":26,
+                    "alive":16,
+                    "players":16
+                 },
+                 "Technology":{
+                    "kills":6,
+                    "alive":13,
+                    "players":13
+                 }
+              }
+           },
+           "rules":null,
+           "target":{
+              "user_id":"aa8cd7d2-9f83-4ba4-9f61-600c5fa66857",
+              "username":"BrennanBatten",
+              "email":"mgerstman+test@dmassassins.com",
+              "facebook_id":"10152807230004819",
+              "properties":{
+                 "allow_email":"true",
+                 "facebook":"https://facebook.com/10152807230004819",
+                 "first_name":"Brennan",
+                 "last_killed":"1415246700",
+                 "last_name":"Batten",
+                 "name":"Brennan Batten",
+                 "photo":"https://graph.facebook.com/10152807230004819/picture?width=1000",
+                 "photo_thumb":"https://graph.facebook.com/10152807230004819/picture?width=300\u0026height=300"
+              }
+           },
+           "token":"CAAJPKJ2eMPIBAA8JoMceZA27dldFH5LO3OeDMZBsZBYGtPibG5ILTrJEJHkZCTmHieJrejx08mkm1OPkAemizhCdeLJnwnXOuXvZChFlWwDPT1HSrEYx8ZCjG1UbHls56CIlFPCK33wJNtD8GCG7VyJfjWZBzQZCdjAjxCSDPvFq7hgTEHOqvU7NtuvEaZCZAkcIYZD",
+           "user":{
+              "user_id":"38180acb-2c12-46cb-8858-cf1717ae87d7",
+              "username":"HarryPotter",
+              "email":"harry_utaqjto_potter@tfbnw.net",
+              "facebook_id":"334599530035888",
+              "properties":{
+                 "alive":"true",
+                 "allow_email":"true",
+                 "facebook":"https://facebook.com/334599530035888",
+                 "first_name":"Harry",
+                 "last_killed":"1427989490",
+                 "last_name":"Potter",
+                 "name":"Harry Potter",
+                 "photo":"https://graph.facebook.com/334599530035888/picture?width=1000",
+                 "photo_thumb":"https://graph.facebook.com/334599530035888/picture?width=300\u0026height=300",
+                 "secret":"HecklesGriffinHooch",
+                 "team":"Technology",
+                 "user_role":"dm_user"
+              }
+           }
+        }
