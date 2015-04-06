@@ -10,12 +10,13 @@ import (
 	"net/http"
 )
 
-type PlotTwistPut struct {
+type PlotTwistPost struct {
 	PlotTwistName string `json:"plot_twist_name"`
 	SendEmail     bool   `json:"send_email"`
 }
 
-func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
+// POST - creates a plot twist
+func postPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -38,15 +39,15 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 
 	// Decode json
 	decoder := json.NewDecoder(r.Body)
-	var plotTwistPut PlotTwistPut
-	err := decoder.Decode(&plotTwistPut)
+	var plotTwistPost PlotTwistPost
+	err := decoder.Decode(&plotTwistPost)
 	if err != nil {
 		msg := "Invalid JSON"
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidJSON)
 	}
 	// Validate Name
-	plotTwistName := plotTwistPut.PlotTwistName
+	plotTwistName := plotTwistPost.PlotTwistName
 	if plotTwistName == "" {
 		msg := "Missing Parameter: plot_twist_name"
 		err := errors.New(msg)
@@ -59,8 +60,8 @@ func putPlotTwist(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
-	fmt.Println(plotTwistPut)
-	if !plotTwistPut.SendEmail {
+	fmt.Println(plotTwistPost)
+	if !plotTwistPost.SendEmail {
 		return game, nil
 	}
 
@@ -82,9 +83,7 @@ func GamePlotTwistHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "POST":
-			fallthrough
-		case "PUT":
-			obj, err = putPlotTwist(r)
+			obj, err = postPlotTwist(r)
 		default:
 			obj = nil
 			msg := "Not Found"

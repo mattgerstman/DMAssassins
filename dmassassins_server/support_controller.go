@@ -13,48 +13,49 @@ type SupportPost struct {
 	Subject string `json:"subject"`
 }
 
-// POST - Creates a team for a game
-func postSupport(r *http.Request) (supportPost *SupportPost, appErr *ApplicationError) {
+// POST - Creates a support ticket
+func postSupport(r *http.Request) (issueNum int, appErr *ApplicationError) {
 
+	var supportPost SupportPost
 	// Decode json
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&supportPost)
 	if err != nil {
 		msg := "Invalid JSON"
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidJSON)
+		return 0, NewApplicationError(msg, err, ErrCodeInvalidJSON)
 	}
 
 	// Check for missing parametsrs
 	if supportPost.Name == "" {
 		msg := "Missing Parameter: name"
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return 0, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 	if supportPost.Email == "" {
 		msg := "Missing Parameter: email"
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return 0, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
 	if supportPost.Message == "" {
 		msg := "Missing Parameter: message"
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return 0, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
 	if supportPost.Subject == "" {
 		msg := "Missing Parameter: subject"
 		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return 0, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	appErr = postGithubIssue(supportPost.Subject, supportPost.Message, supportPost.Email, supportPost.Name)
+	issueNum, appErr = postGithubIssue(supportPost.Subject, supportPost.Message, supportPost.Email, supportPost.Name)
 	if appErr != nil {
-		return nil, appErr
+		return 0, appErr
 	}
 
-	return supportPost, nil
+	return issueNum, nil
 
 }
 

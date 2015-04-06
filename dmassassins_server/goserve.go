@@ -16,6 +16,8 @@ import (
 var db *sql.DB
 
 const (
+	gamePath = "/game/"
+
 	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameKillTimerPath   = "/game/{game_id}/kill_timer/"
@@ -36,7 +38,6 @@ const (
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 
-	gamePath        = "/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
 	supportPath     = "/support/"
 	sessionPath     = "/session/"
@@ -174,9 +175,9 @@ func StartServer() {
 	// Just Game
 	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "PUT", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
-	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "PUT")
 	r.HandleFunc(gameKillTimerPath, GameKillTimerHandler()).Methods("GET", "DELETE")
-	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
+	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("POST")
 	r.HandleFunc(gameTargetsPath, GameTargetsHandler()).Methods("GET")
 
 	// Game then User
@@ -199,7 +200,7 @@ func StartServer() {
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
-	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE", "PUT")
+	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "DELETE", "PUT")
 
 	// User then Game
 	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST")

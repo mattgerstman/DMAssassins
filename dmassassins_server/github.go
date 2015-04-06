@@ -12,7 +12,11 @@ type Issue struct {
 	Labels []string `json:"labels"`
 }
 
-func postGithubIssue(title, message, email, name string) (appErr *ApplicationError) {
+type GithubResponse struct {
+	Number int `json:"number"`
+}
+
+func postGithubIssue(title, message, email, name string) (issueNum int, appErr *ApplicationError) {
 
 	var body string
 	body = "Name: " + name + "\n"
@@ -24,16 +28,22 @@ func postGithubIssue(title, message, email, name string) (appErr *ApplicationErr
 
 	data, err := json.Marshal(issue)
 	if err != nil {
-		return NewApplicationError(`Error creating issue`, err, ErrCodeInternalServerWTF)
+		return 0, NewApplicationError(`Error creating issue`, err, ErrCodeInternalServerWTF)
 	}
 
 	buf := bytes.NewBuffer(data)
-	resp, err := http.Post(url, "application/json", buf)
+	r, err := http.Post(url, "application/json", buf)
 	if err != nil {
-		return NewApplicationError(`Error creating issue`, err, ErrCodeExternalService)
+		return 0, NewApplicationError(`Error creating issue`, err, ErrCodeExternalService)
 	}
 
-	_ = resp
+	var githubResponse GithubResponse
+	decoder := json.NewDecoder(r.Body)
+	err = decoder.Decode(&githubResponse)
+	if err != nil {
+		return 0, NewApplicationError(`Error creating issue`, err, ErrCodeInvalidJSON)
+	}
 
-	return nil
+	return githubResponse.Number, nil
+
 }

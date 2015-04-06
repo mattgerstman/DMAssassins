@@ -8,14 +8,14 @@ import (
 	"net/http"
 )
 
-type TeamPost struct {
+type TeamIdPost struct {
 	TeamId   string `json:"team_id"`
 	TeamName string `json:"team_name"`
 	GameId   string `json:"game_id"`
 }
 
 // POST - rename a team
-func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
+func putGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -35,7 +35,7 @@ func postGameTeamId(r *http.Request) (team *Team, appErr *ApplicationError) {
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	var teamInfo TeamPost
+	var teamInfo TeamIdPost
 	err := decoder.Decode(&teamInfo)
 	if err != nil {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
@@ -100,9 +100,7 @@ func GameTeamIdHandler() http.HandlerFunc {
 		case "GET":
 			obj, err = getGameTeamId(r)
 		case "PUT":
-			obj, err = postGameTeamId(r)
-		case "POST":
-			obj, err = postGameTeamId(r)
+			obj, err = putGameTeamId(r)
 		case "DELETE":
 			obj, err = nil, deleteGameTeamId(r)
 		default:

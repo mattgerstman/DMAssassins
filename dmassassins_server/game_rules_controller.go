@@ -12,11 +12,11 @@ type RulesPost struct {
 	Rules string `json:"rules"`
 }
 
-// POST - Update rules for a game
-func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
+// put - Update rules for a game
+func putGameRules(r *http.Request) (appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
-		return "", appErr
+		return appErr
 	}
 
 	vars := mux.Vars(r)
@@ -24,33 +24,33 @@ func postGameRules(r *http.Request) (success string, appErr *ApplicationError) {
 	if gameId == nil {
 		msg := "Invalid UUID: game_id " + vars["game_id"]
 		err := errors.New(msg)
-		return "", NewApplicationError(msg, err, ErrCodeInvalidUUID)
+		return NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
 	game, appErr := GetGameById(gameId)
 	if appErr != nil {
-		return "", appErr
+		return appErr
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	var rulesPost RulesPost
 	err := decoder.Decode(&rulesPost)
 	if err != nil {
-		return "", NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+		return NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
 
 	rules := rulesPost.Rules
 	if rules == "" {
 		msg := "Missing Parameter: rules"
 		err := errors.New(msg)
-		return "", NewApplicationError(msg, err, ErrCodeMissingParameter)
+		return NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
 	appErr = game.SetRules(rules)
 	if appErr != nil {
-		return "", appErr
+		return appErr
 	}
-	return "", nil
+	return nil
 }
 
 // GET - Gets rules for a game
@@ -94,8 +94,8 @@ func GameRulesHandler() http.HandlerFunc {
 		switch r.Method {
 		case "GET":
 			obj, err = getGameRules(r)
-		case "POST":
-			obj, err = postGameRules(r)
+		case "PUT":
+			obj, err = nil, putGameRules(r)
 		default:
 			obj = nil
 			msg := "Not Found"
