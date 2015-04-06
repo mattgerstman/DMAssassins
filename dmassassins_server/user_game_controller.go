@@ -14,8 +14,8 @@ type NewGamePost struct {
 	GamePassword string `json:"game_password"`
 }
 
-// PUT - Controller Wrapper for Game:NewGame
-func putUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
+// POST - Controller Wrapper for Game:NewGame
+func postUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -97,14 +97,14 @@ func getUserGame(r *http.Request) (response map[string][]*Game, appErr *Applicat
 }
 
 // Handler for /game path
-func UserGameHandler() http.HandlerFunc {
+func GameHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var obj interface{}
 		var err *ApplicationError
 
 		switch r.Method {
-		case "PUT":
-			obj, err = putUserGame(r)
+		case "POST":
+			obj, err = postUserGame(r)
 		case "GET":
 			obj, err = getUserGame(r)
 		default:

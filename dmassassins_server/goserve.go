@@ -36,7 +36,7 @@ const (
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 
-	userGamePath    = "/user/{user_id}/game/"
+	gamePath        = "/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
 	supportPath     = "/support/"
 	sessionPath     = "/session/"
@@ -202,7 +202,7 @@ func StartServer() {
 	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE", "PUT")
 
 	// User then Game
-	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")
+	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST")
 
 	// Just Support
 	r.HandleFunc(supportPath, SupportHandler()).Methods("POST")
