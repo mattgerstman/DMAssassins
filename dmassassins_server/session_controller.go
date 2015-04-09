@@ -93,31 +93,33 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		return nil, appErr
 	}
 
-	game.GetHTMLRules()
-
 	response["game"] = game
 
-	appErr = user.GetUserGameProperties(gameMapping.GameId)
-	if appErr != nil {
-		return nil, appErr
-	}
-	response["user"] = user
+	// game.GetHTMLRules()
 
-	target, appErr := user.GetTarget(game.GameId)
-	if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
-		return nil, appErr
-	}
-	if target != nil {
-		target.GetTeamByGameId(gameId)
-	}
-	response["target"] = target
+	// response["game"] = game
 
-	// Get the Leaderboard for the game
-	leaderboard, appErr := game.GetLeaderboard()
-	if appErr != nil {
-		return nil, appErr
-	}
-	response["leaderboard"] = leaderboard
+	// appErr = user.GetUserGameProperties(gameMapping.GameId)
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+	// response["user"] = user
+
+	// target, appErr := user.GetTarget(game.GameId)
+	// if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
+	// 	return nil, appErr
+	// }
+	// if target != nil {
+	// 	target.GetTeamByGameId(gameId)
+	// }
+	// response["target"] = target
+
+	// // Get the Leaderboard for the game
+	// leaderboard, appErr := game.GetLeaderboard()
+	// if appErr != nil {
+	// 	return nil, appErr
+	// }
+	// response["leaderboard"] = leaderboard
 
 	return response, nil
 }

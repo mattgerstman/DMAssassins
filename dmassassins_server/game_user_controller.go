@@ -91,6 +91,11 @@ func putGameUser(r *http.Request) (user *User, appErr *ApplicationError) {
 	return nil, nil
 }
 
+type GameUserPost struct {
+	GamePassword string `json:"game_password"`
+	TeamId       string `json:"team_id"`
+}
+
 // POST - Wrapper for GameMapping:JoinGame
 func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
@@ -112,20 +117,24 @@ func postGameUser(r *http.Request) (gameMapping *GameMapping, appErr *Applicatio
 		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
 	}
 
-	gamePassword := r.Header.Get("X-DMAssassins-Game-Password")
-
 	user, appErr := GetUserById(userId)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	gameMapping, appErr = user.JoinGame(gameId, gamePassword)
+	decoder := json.NewDecoder(r.Body)
+	var gameUserPost GameUserPost
+	err := decoder.Decode(&gameUserPost)
+	if err != nil {
+		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
+
+	gameMapping, appErr = user.JoinGame(gameId, gameUserPost.GamePassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	teamIdHeader := r.Header.Get("X-DMAssassins-Team-Id")
-	teamId := uuid.Parse(teamIdHeader)
+	teamId := uuid.Parse(gameUserPost.TeamId)
 	if teamId == nil {
 		return gameMapping, nil
 	}

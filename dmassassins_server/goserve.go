@@ -188,7 +188,7 @@ func StartServer() {
 	r.HandleFunc(gameUserTargetFriendsPath, TargetFriendsHandler()).Methods("GET")
 
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
-	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
+	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("PUT")
 
 	// User actions
 	r.HandleFunc(gameUserBanPath, GameUserBanHandler()).Methods("DELETE")

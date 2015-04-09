@@ -15,7 +15,7 @@ type NewGamePost struct {
 }
 
 // POST - Controller Wrapper for Game:NewGame
-func postUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
+func postGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -66,7 +66,7 @@ func postUserGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 }
 
 // GET - gets a list of games for a user
-func getUserGame(r *http.Request) (response map[string][]*Game, appErr *ApplicationError) {
+func getGame(r *http.Request) (response map[string][]*Game, appErr *ApplicationError) {
 	appErr = RequiresLogin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -104,9 +104,9 @@ func GameHandler() http.HandlerFunc {
 
 		switch r.Method {
 		case "POST":
-			obj, err = postUserGame(r)
+			obj, err = postGame(r)
 		case "GET":
-			obj, err = getUserGame(r)
+			obj, err = getGame(r)
 		default:
 			obj = nil
 			msg := "Not Found"
