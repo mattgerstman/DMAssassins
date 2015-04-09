@@ -43,8 +43,6 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 
 	// Set all of the following to nil if we don't have them yet
 	response["game"] = nil
-	response["rules"] = nil
-	response["leaderboard"] = nil
 
 	// Get games user is a part of
 	games := make(map[string][]*Game)
