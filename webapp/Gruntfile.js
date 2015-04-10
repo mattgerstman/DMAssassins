@@ -19,7 +19,7 @@ module.exports = function(grunt) {
       dist: {
         src: [
           'js/config.js',
-          'js/lib/*.js',      
+          'js/lib/*.js',
           'js/models/*.js',
           'js/collections/*.js',
           'js/views/*.js',
@@ -51,7 +51,7 @@ module.exports = function(grunt) {
         ],
       gruntfile: {
         src: 'Gruntfile.js'
-      },      
+      },
     },
     lintspaces: {
 	    javascript: {
@@ -76,7 +76,7 @@ module.exports = function(grunt) {
 	},
     env : {
       options : {
-          VERSION: '<%= pkg.version %>',          
+          VERSION: '<%= pkg.version %>',
       },
       dev: {
           NODE_ENV: 'DEVELOPMENT',
@@ -102,7 +102,7 @@ module.exports = function(grunt) {
     less: {
       dev: {
         options: {
-          banner: '<%= banner %>',          
+          banner: '<%= banner %>',
           strictMath: true,
           sourceMap: true,
           outputSourceFiles: true,
@@ -110,7 +110,7 @@ module.exports = function(grunt) {
           sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map'
         },
         files: {
-          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/DMAssassins.less'          
+          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/DMAssassins.less'
         }
       },
       prod: {
@@ -123,8 +123,8 @@ module.exports = function(grunt) {
           sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map',
           cleancss: true
         },
-        files: {          
-          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/DMAssassins.less'          
+        files: {
+          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/DMAssassins.less'
         }
       }
     },
@@ -141,13 +141,13 @@ module.exports = function(grunt) {
         files: 'index.html.template',
         tasks: ['env:dev', 'preprocess:dev']
       }
-      
+
     }
   });
 
   // These plugins provide necessary tasks.
-  
-  grunt.loadNpmTasks('grunt-contrib-concat');  
+
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -159,5 +159,5 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
   grunt.registerTask('prod', ['concat', 'uglify', 'less:prod', 'env:prod', 'preprocess:prod']);
-
+  grunt.registerTask('default', ['dev']);
 };
