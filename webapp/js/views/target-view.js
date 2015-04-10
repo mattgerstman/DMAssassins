@@ -111,7 +111,8 @@ var app = app || {
         },
         render: function() {
             var data = this.model.attributes;
-            data.teams_enabled = app.Running.Games.getActiveGame().areTeamsEnabled();
+            var activeGame = app.Running.Games.getActiveGame();
+            data.teams_enabled = activeGame && activeGame.areTeamsEnabled();
             this.$el.html(this.template(data));
             this.targetFriendsView.$el = this.$el.find('.js-target-friends');
             this.targetFriendsView.render();

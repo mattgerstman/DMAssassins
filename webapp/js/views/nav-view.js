@@ -53,7 +53,11 @@ var app = app || {
             this.handleTarget();
 
 
-            var selectedElem = this.$el.find('#js-nav-' + Backbone.history.fragment.replace('_', '-'));
+            var fragment = Backbone.history.fragment.replace('_', '-');
+            if (fragment === '') {
+                fragment = config.DEFAULT_VIEW;
+            }
+            var selectedElem = this.$el.find('#js-nav-' + fragment);
             this.highlight(selectedElem);
 
             if (app.Running.NavGameView)

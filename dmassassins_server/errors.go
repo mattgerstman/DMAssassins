@@ -61,6 +61,7 @@ const (
 	ErrCodeEmail                  = 50004
 	ErrCodeBadTemplate            = 50005
 	ErrCodeExternalService        = 50006
+	ErrCodeNoUserForContext       = 50010
 	ErrCodeSession                = 50010 // Malformed Session
 )
 

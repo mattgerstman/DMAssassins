@@ -23,6 +23,11 @@ var app = app || {
         defaults: {
             rules: 'Loading...'
         },
+        save: function (attrs, options) {
+            options = options || {};
+            options.type = 'PUT';
+            return Backbone.Model.prototype.save.call(this, attrs, options);
+        },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/rules/';

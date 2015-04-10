@@ -33,7 +33,12 @@ func putGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *Applica
 		return nil, appErr
 	}
 
-	role, appErr := GetStringParam(r, true, "role")
+	params, appErr := NewParams(r)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	role, appErr := params.GetStringParam("role")
 	if appErr != nil {
 		return nil, appErr
 	}

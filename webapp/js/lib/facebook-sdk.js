@@ -24,7 +24,7 @@ $(function() {
             return;
 
         var authenticated =  app.Session.get('authenticated');
-        if ((authenticated === true) || (authenticated =='true'))
+        if ((authenticated === true) || (authenticated === 'true'))
         {
             // If we're already authenticated recover the previous session
             app.Session.recoverSession(response);

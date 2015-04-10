@@ -24,8 +24,8 @@ var app = app || {
 
         // default profile properties
         defaults: {
-            'user_id': '',
-            'team_id': '',
+            'user_id': null,
+            'team_id': null,
             'team_name': ''
         },
         idAttribute : 'team_id',
@@ -37,7 +37,10 @@ var app = app || {
             if (!!user_id) {
                 return config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/team/' + team_id + '/';
             }
-            return config.WEB_ROOT + 'game/' + game_id + '/team/' + team_id + '/';
+            if (!!team_id) {
+                return config.WEB_ROOT + 'game/' + game_id + '/team/' + team_id + '/';
+            }
+            return config.WEB_ROOT + 'game/' + game_id + '/team/';
         }
 
     });

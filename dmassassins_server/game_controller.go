@@ -1,11 +1,9 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
 	"github.com/getsentry/raven-go"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -21,12 +19,11 @@ func postGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
-	vars := mux.Vars(r)
-	userId := uuid.Parse(vars["user_id"])
-	if userId == nil {
-		msg := "Invalid UUID: user_id " + vars["user_id"]
-		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
+	user := GetUserForRequest(r)
+	if user == nil {
+		msg := "Internal Error"
+		err := errors.New("Missing user for request")
+		return nil, NewApplicationError(msg, err, ErrCodeNoUserForContext)
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -44,19 +41,12 @@ func postGame(r *http.Request) (game *Game, appErr *ApplicationError) {
 	}
 
 	gamePassword := newGame.GamePassword
-	game, appErr = NewGame(gameName, userId, gamePassword)
+	game, appErr = NewGame(gameName, user.UserId, gamePassword)
 	if appErr != nil {
 		return nil, appErr
 	}
 
 	sentryRequest := raven.NewHttp(r)
-
-	user, appErr := GetUserById(userId)
-	if appErr != nil {
-		LogWithSentry(appErr, nil, raven.WARNING, map[string]interface{}{"user_id": userId.String()}, sentryRequest)
-		return game, nil
-	}
-
 	sentryUser := NewSentryUser(user)
 	_, appErr = user.SendAdminWelcomeEmail()
 	if appErr != nil {
@@ -71,17 +61,12 @@ func getGame(r *http.Request) (response map[string][]*Game, appErr *ApplicationE
 	if appErr != nil {
 		return nil, appErr
 	}
-	vars := mux.Vars(r)
-	userId := uuid.Parse(vars["user_id"])
-	if userId == nil {
-		msg := "Invalid UUID: user_id " + vars["user_id"]
-		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
-	}
 
-	user, appErr := GetUserById(userId)
-	if appErr != nil {
-		return nil, appErr
+	user := GetUserForRequest(r)
+	if user == nil {
+		msg := "Internal Error"
+		err := errors.New("Missing user for request")
+		return nil, NewApplicationError(msg, err, ErrCodeNoUserForContext)
 	}
 
 	response = make(map[string][]*Game)

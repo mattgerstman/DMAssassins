@@ -47,11 +47,11 @@ var app = app || {
             var last_game_id = app.Running.Games.getActiveGameId();
             this.save(null, {
                 url: config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/',
-                type: 'post',
-                headers: {
-                    'X-DMAssassins-Game-Password': game_password,
-                    'X-DMAssassins-Team-Id': team_id
-                },
+                type: 'POST',
+                data: JSON.stringify({
+                    'game_password': game_password,
+                    'team_id': team_id
+                }),
                 success: function() {
                     app.Running.Games.setActiveGame(game_id).set('member', true);
                     that.trigger('join-game');
@@ -129,6 +129,16 @@ var app = app || {
                     }
                 }
             });
+        },
+        changeRole: function(role_id, options) {
+            var url = this.url() + 'role/';
+            _.extend(options, {
+                type:"PUT",
+                url: url,
+                data: JSON.stringify({role: role_id}),
+            });
+
+            $.ajax(options);
         },
         quit: function(secret) {
             var that = this;

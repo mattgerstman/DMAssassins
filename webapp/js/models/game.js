@@ -22,7 +22,7 @@ var app = app || {
 
         // default properties for a game to appear "Loading..."
         defaults: {
-            game_id: '',
+            game_id: null,
             game_name: 'Loading...',
             game_started: false,
             game_has_password: false,
@@ -32,7 +32,7 @@ var app = app || {
         // sets game_id as the id attribute
         idAttribute: 'game_id',
         // Sets the url root
-        urlRoot: config.WEB_ROOT + 'user/',
+        urlRoot: config.WEB_ROOT + 'game/',
         // Determine if teams are enabled for this game
         areTeamsEnabled: function() {
             return this.getProperty('teams_enabled') == 'true';
@@ -89,7 +89,6 @@ var app = app || {
         },
         url: function() {
             var url = this.urlRoot;
-            url += app.Session.get('user_id') + '/game/';
             var game_id = this.get('game_id');
             if (!game_id)
             {

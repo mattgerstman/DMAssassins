@@ -142,11 +142,13 @@ var app = app || {
         changeUserRole: function(event, user_id, role_id){
             // Sorry Taylor, a model for this one is overkill
             var game_id = app.Running.Games.getActiveGameId();
-            var url = config.WEB_ROOT + 'game/' + game_id + '/user/' + user_id + '/role/';
-            $.ajax({
-                type:"POST",
-                url: url,
-                data: {role: role_id},
+
+            var user = app.Running.Users.get(user_id);
+            if (!user) {
+                alert("There was an error changing this user's role. Try again later");
+                return;
+            }
+            user.changeRole(role_id, {
                 success: function(){
                     $('#js-role-saved-'+user_id).fadeIn(500, function(){ $(this).fadeOut(2000); });
                 },
@@ -242,13 +244,14 @@ var app = app || {
             var game_id = app.Running.Games.getActiveGameId();
             var url = config.WEB_ROOT + 'game/' + game_id + '/team/';
             var that = this;
-            $.post(url, {team_name:team_name}, function(team){
-                app.Running.Teams.add(team);
-                that.teams_view.render();
-                that.selectActiveTeam();
-                that.makeDroppable();
-            });
 
+            app.Running.Teams.create({team_name:team_name}, {
+                success: function(response) {
+                    that.teams_view.render();
+                    that.selectActiveTeam();
+                    that.makeDroppable();
+                }
+            });
         },
         newTeamKeypress: function(event) {
             if (event.keyCode == 27) {

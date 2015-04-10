@@ -1,41 +1,54 @@
 package main
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"errors"
 	"net/http"
 )
 
-func GetParams(r *http.Request) (params map[string]interface{}, appErr *ApplicationError) {
+type Params struct {
+	data map[string]interface{}
+}
+
+func NewParams(r *http.Request) (params *Params, appErr *ApplicationError) {
+
+	data := make(map[string]interface{})
+
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&params)
+	err := decoder.Decode(&data)
 	if err != nil {
 		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
 	}
-	return params, nil
+	return &Params{data}, nil
 }
 
-func GetParam(r *http.Request, required bool, key string) (param interface{}, appErr *ApplicationError) {
-	params, appErr := GetParams(r)
-	if appErr != nil {
-		return "", appErr
-	}
+func (params *Params) GetParam(key string) (param interface{}, appErr *ApplicationError) {
 
-	if _, ok := params[key]; !ok && required {
+	if _, ok := params.data[key]; !ok {
 		msg := "Missing Parameter: " + key
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	if _, ok := params[key]; !ok {
-		return nil, nil
-	}
-	return params[key], nil
+	return params.data[key], nil
 }
 
-func GetStringParam(r *http.Request, required bool, key string) (stringParam string, appErr *ApplicationError) {
+func (params *Params) GetIntParam(key string) (intParam int, appErr *ApplicationError) {
+	param, appErr := params.GetParam(key)
+	if appErr != nil {
+		return 0, appErr
+	}
 
-	param, appErr := GetParam(r, required, key)
+	if param == nil {
+		return 0, nil
+	}
+
+	return param.(int), nil
+}
+
+func (params *Params) GetStringParam(key string) (stringParam string, appErr *ApplicationError) {
+	param, appErr := params.GetParam(key)
 	if appErr != nil {
 		return "", appErr
 	}
@@ -45,4 +58,12 @@ func GetStringParam(r *http.Request, required bool, key string) (stringParam str
 	}
 
 	return param.(string), nil
+}
+
+func (params *Params) GetUUIDParam(key string) (uuidParam uuid.UUID, appErr *ApplicationError) {
+	stringParam, appErr := params.GetStringParam(key)
+	if appErr != nil {
+		return nil, appErr
+	}
+	return uuid.Parse(stringParam), nil
 }

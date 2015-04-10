@@ -37,9 +37,7 @@ var app = app || {
         active_game: null,
         // handle on initiliazation
         url:function(){
-            var user_id = app.Session.get('user_id');
-            return config.WEB_ROOT + 'user/' + user_id + '/game/';
-
+            return config.WEB_ROOT + 'game/';
         },
         // Add a game to the collection (usually after creation)
         addGame: function(game_id){

@@ -24,17 +24,17 @@ var app = app || {
             user_col_width: 20,
             team_col_width: 20,
             users: [{
-                name: "Loading...",
-                kills: "Loading...",
-                team_name: "Loading..."
-            }, {
-                name: "Loading...",
-                kills: "Loading...",
-                team_name: "Loading..."
+                name: strings.loading,
+                kills: strings.loading,
+                team_name: strings.loading
             }],
-            teams: [{
-                "Loading...": "Loading..."
-            }]
+            teams: {
+                "Loading...": {
+                    alive   : strings.loading,
+                    kills   : strings.loading,
+                    players : strings.loading
+                }
+            }
         },
         parse: function(data) {
             data.user_col_width = 100 / (3 + this.get('teams_enabled'));

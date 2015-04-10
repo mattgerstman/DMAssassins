@@ -66,7 +66,7 @@ var app = app || {
             $('.js-create-or-join').removeClass('hide');
             $('.js-logo').removeClass('hide');
         },
-        // show the create game s ubview
+        // show the create games ubview
         createGame: function(event) {
             event.preventDefault();
             var name = $('#create_game_name').val();

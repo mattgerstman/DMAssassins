@@ -35,14 +35,20 @@ var app = app || {
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
-            return config.WEB_ROOT + "game/" + game_id + '/user/' + this.get('assassin_id') + '/target/';
+            return config.WEB_ROOT + "game/" + game_id + '/user/' + app.Session.get('user_id') + '/target/';
         },
         idAttribute: 'assassin_id',
-        // consstructor
+        // constructor
         initialize: function() {
-            if (!this.get('assassin_id')) {
-                this.assassin_id = app.Session.get('user_id');
-            }
+            var target_id = app.Session.get('target_id');
+            this.set('user_id', target_id);
+            this.listenTo(this, 'fetch', this.saveUserId);
+            this.listenTo(this, 'change', this.saveUserId);
+            this.listenTo(this, 'reset', this.saveUserId);
+        },
+        saveUserId: function() {
+            var user_id = this.get('user_id');
+            app.Session.set('target_id', user_id);
         }
     });
 })();

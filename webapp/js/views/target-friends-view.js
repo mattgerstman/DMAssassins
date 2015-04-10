@@ -58,9 +58,9 @@ var app = app || {
             });
         },
         render: function() {
-            console.log('targetFriends render');
             var data = this.model.attributes;
             data.user_friends = app.Running.Permissions.get('user_friends');
+            data.show_button = app.Running.TargetModel.get('game_id');
             this.$el.html(this.template(data));
             return this;
         }

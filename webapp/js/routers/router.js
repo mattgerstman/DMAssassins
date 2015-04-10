@@ -24,7 +24,7 @@ var app = app || {
         history: [],
         // All the routes
         routes: {
-            '': 'my_profile',
+            '': config.DEFAULT_VIEW,
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
@@ -98,7 +98,10 @@ var app = app || {
             var hasGame = (sessionHasGame == "true") || (sessionHasGame === true);
 
             // is the game started
-            var hasTarget = !!app.Running.TargetModel.get('user_id') && app.Running.Games.getActiveGame().get('game_started');
+            var gameStarted = app.Running.Games.getActiveGame() && app.Running.Games.getActiveGame().get('game_started');
+
+            // is the game started
+            var hasTarget = !!app.Running.TargetModel.get('user_id') && gameStarted;
 
             // do we need to be a captain
             var needCaptain = _.contains(this.requiresCaptain, path);
@@ -321,7 +324,7 @@ var app = app || {
             // if we have a nav and highlight the nav item
             if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
                 if (fragment === '')
-                    fragment = 'my_profile';
+                    fragment = config.DEFAULT_VIEW;
 
                 fragment = fragment.replace('_', '-');
                 app.Running.NavView.highlight('#js-nav-' + fragment);
