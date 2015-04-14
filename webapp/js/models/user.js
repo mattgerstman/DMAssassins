@@ -159,7 +159,9 @@ var app = app || {
                 }
             });
         },
-        checkAccess: function(){
+        handleRole: function(){
+            var user_role = this.getProperty('user_role');
+            app.Session.set('user_role', user_role);
             app.Running.Router.before({}, function(){});
         }
     });

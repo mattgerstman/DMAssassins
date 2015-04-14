@@ -91,12 +91,16 @@ module.exports = function(grunt) {
     },
     preprocess: {
       dev : {
-          src : 'index.html.template',
-          dest : 'index.html'
+            files: {
+                'index.html' : 'index.html.template',
+                'admin.html' : 'admin.html.template'
+            }
       },
       prod : {
-          src : 'index.html.template',
-          dest : 'index.html'
+            files: {
+                'index.html' : 'index.html.template',
+                'admin.html' : 'admin.html.template'
+            }
       }
     },
     less: {
@@ -141,7 +145,14 @@ module.exports = function(grunt) {
         files: 'index.html.template',
         tasks: ['env:dev', 'preprocess:dev']
       }
-
+    },
+    connect: {
+        server: {
+            options: {
+                port: 8888,
+                keepalive: true
+            }
+        }
     }
   });
 
@@ -155,9 +166,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-preprocess');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-lintspaces');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   // Default task.
   grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
   grunt.registerTask('prod', ['concat', 'uglify', 'less:prod', 'env:prod', 'preprocess:prod']);
+  grunt.registerTask('server', 'connect');
   grunt.registerTask('default', ['dev']);
 };

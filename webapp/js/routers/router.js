@@ -43,13 +43,13 @@ var app = app || {
 
         },
         // routes that require we have a game that has been started
-        requiresTarget: ['#target'],
+        requiresTarget: ['', '#target'],
 
         // routes that require just authentication
-        requiresJustAuth: ['#multigame', ''],
+        requiresJustAuth: ['#multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules', '#', ''],
+        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules'],
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['#users'],
@@ -75,6 +75,9 @@ var app = app || {
         // place to redirect users who aren't logged in
         redirectWithoutAuth: '#login',
 
+        // place to redirect to when a user doesn't have a target
+        redirectWithoutTarget: '#my_profile',
+
         before: function(params, next) {
 
             // is the user authenticated
@@ -97,12 +100,6 @@ var app = app || {
             var sessionHasGame = app.Session.get('has_game');
             var hasGame = (sessionHasGame == "true") || (sessionHasGame === true);
 
-            // is the game started
-            var gameStarted = app.Running.Games.getActiveGame() && app.Running.Games.getActiveGame().get('game_started');
-
-            // is the game started
-            var hasTarget = !!app.Running.TargetModel.get('user_id') && gameStarted;
-
             // do we need to be a captain
             var needCaptain = _.contains(this.requiresCaptain, path);
 
@@ -113,7 +110,7 @@ var app = app || {
             var needSuperAdmin = _.contains(this.requiresSuperAdmin, path);
 
             // The active user's role in the current game
-            var userRole = app.Running.User.getProperty('user_role');
+            var userRole = app.Running.User.getProperty('user_role') || app.Session.get('user_role');
 
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
@@ -124,16 +121,23 @@ var app = app || {
             // is the user a super admin
             var isSuperAdmin = AuthUtils.requiresSuperAdmin(userRole);
 
+            // is the game started
+            var gameStarted = app.Running.Games.getActiveGame() && app.Running.Games.getActiveGame().get('game_started');
+
+            // is the game started
+            var hasTarget = !!app.Running.TargetModel.get('user_id') && gameStarted && !isAdmin;
+
             /*
-			Variables I use when shit's not routing properly */
-            /*/
-			console.log('path:', path);
-			console.log('needGameAndAuth: ', needGameAndAuth);
-			console.log('hasGame: ', hasGame);
-			console.log('hasTarget: ', hasTarget);
-			console.log('needAuth: ', needAuth);
-			console.log('isAuth: ', isAuth);
-			console.log('cancelAccess: ', cancelAccess);
+      Variables I use when shit's not routing properly */
+            //
+            console.log('userRole:', userRole);
+            console.log('path:', path);
+            console.log('needGameAndAuth: ', needGameAndAuth);
+            console.log('hasGame: ', hasGame);
+            console.log('hasTarget: ', hasTarget);
+            console.log('needAuth: ', needAuth);
+            console.log('isAuth: ', isAuth);
+            console.log('cancelAccess: ', cancelAccess);
             console.log('needCaptain: ', needCaptain);
             console.log('isCaptain: ', isCaptain);
             console.log('needAdmin: ', needAdmin);
@@ -153,7 +157,7 @@ var app = app || {
                     trigger: true
                 });
             }
-            // do we need a game and is it started
+            // do we need a target and do we have one
             else if (needTarget && !hasTarget) {
                 Backbone.history.navigate(this.redirectWithoutTarget, {
                     trigger: true

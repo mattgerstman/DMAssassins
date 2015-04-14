@@ -217,6 +217,10 @@ var app = app || {
                 // reload the data for all models
                 app.Running.User.set(user);
 
+                var last_role = app.Session.get('user_role');
+                console.log('last_role', last_role);
+                app.Running.User.setProperty('user_role', last_role);
+
                 // store the basic auth token in the session in case we need to reload it on app launch
                 app.Session.storeSession(response);
                 if (game.game_id) {
@@ -295,7 +299,6 @@ var app = app || {
             this.set('authKey', base64Key);
             this.setAuthHeader();
         },
-
         // sets the Basic Auth header for all ajax requests
         setAuthHeader: function() {
             var base64Key = this.get('authKey');
