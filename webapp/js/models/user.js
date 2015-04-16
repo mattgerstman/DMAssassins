@@ -24,7 +24,7 @@ var app = app || {
 
         // default profile properties
         defaults: {
-            'user_id': '',
+            'user_id': null,
             'username': '',
             'email': 'Loading...',
             'properties': {
@@ -41,6 +41,12 @@ var app = app || {
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/user/' + this.get('user_id') + '/';
+        },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
         },
         joinGame: function(game_id, game_password, team_id) {
             var that = this;
@@ -141,7 +147,20 @@ var app = app || {
             $.ajax(options);
         },
         getRole: function() {
-            return this.getProperty('user_role') || app.Session.get('user_role');
+
+            // get the user role from this user
+            var user_role = this.getProperty('user_role');
+            if (user_role !== null) {
+                return user_role;
+            }
+
+            // if we don't have a user role see if this is the same user as the one in the session
+            if ((this.get('user_id') === null) || (app.Session.get('user_id') === this.get('user_id'))) {
+                return app.Session.get('user_role');
+            }
+
+            // if all else fails return null
+            return null;
         },
         quit: function(secret) {
             var that = this;

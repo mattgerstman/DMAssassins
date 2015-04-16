@@ -218,7 +218,6 @@ var app = app || {
                 app.Running.User.set(user);
 
                 var last_role = app.Session.get('user_role');
-                console.log('last_role', last_role);
                 app.Running.User.setProperty('user_role', last_role);
 
                 // store the basic auth token in the session in case we need to reload it on app launch

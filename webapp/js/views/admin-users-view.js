@@ -58,6 +58,7 @@ var app = app || {
             this.collection = app.Running.Users;
             this.userViews = [];
             this.teams_view = new app.Views.AdminUsersTeamsView();
+            this.listenTo(this.collection, 'sync', this.render);
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(this.collection, 'reset', this.render);
         },

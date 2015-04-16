@@ -44,7 +44,7 @@ $(function() {
     app.Running.TargetModel.listenTo(app.Running.Games, 'game-change', app.Running.TargetModel.fetch);
     app.Running.LeaderboardModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
     app.Running.RulesModel.listenTo(app.Running.Games, 'game-change', app.Running.RulesModel.fetch);
-    app.Running.Teams.listenTo(app.Running.User, 'change:properties', app.Running.Teams.tryFetch);
+    app.Running.Teams.listenTo(app.Running.User, 'change:properties', app.Running.Teams.fetch);
     app.Running.TargetFriendsModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
 
     app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.handleRole);

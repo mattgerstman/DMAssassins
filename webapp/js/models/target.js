@@ -49,6 +49,12 @@ var app = app || {
         saveUserId: function() {
             var user_id = this.get('user_id');
             app.Session.set('target_id', user_id);
+        },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
         }
     });
 })();

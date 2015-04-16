@@ -66,6 +66,12 @@ var app = app || {
             }
             return data;
         },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             if (!game_id)

@@ -27,6 +27,12 @@ var app = app || {
             response.friends = response.friends || [];
             return response;
         },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();
             var user_id = app.Running.User.get('user_id');

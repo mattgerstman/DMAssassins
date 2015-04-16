@@ -79,6 +79,12 @@ var app = app || {
                 return null;
             return properties[key];
         },
+        fetch: function(options) {
+            if (this.get('game_id') === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
         fetchProperties: function() {
             var url = this.gameUrl();
             return this.fetch({url: url});

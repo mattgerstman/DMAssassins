@@ -17,23 +17,23 @@ var app = app || {
         parse: function(response){
             return _.values(response);
         },
-        tryFetch: function(){
-            var game_id = app.Running.Games.getActiveGameId();
-            if (!game_id)
-            {
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
                 return;
             }
             // The active user's role in the current game
-            var userRole = app.Running.User.getProperty('user_role');
+            var userRole = app.Running.User.getRole();
 
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
-            if (isCaptain)
+            if (!isCaptain)
             {
-                this.fetch();
+                return;
             }
 
+            return Backbone.Model.prototype.fetch.call(this, options);
         },
+
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/team/';
