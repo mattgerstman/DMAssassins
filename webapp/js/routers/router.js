@@ -20,7 +20,7 @@ var app = app || {
 
     app.Routers.Router = app.Routers.BaseRouter.extend({
 
-        // Sometime we wanna go back and tis is the only wat to do that.
+        // Sometime we wanna go back and this is the only way to do that.
         history: [],
         // All the routes
         routes: {
@@ -110,7 +110,7 @@ var app = app || {
             var needSuperAdmin = _.contains(this.requiresSuperAdmin, path);
 
             // The active user's role in the current game
-            var userRole = app.Running.User.getProperty('user_role') || app.Session.get('user_role');
+            var userRole = app.Running.User.getRole();
 
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
@@ -129,7 +129,7 @@ var app = app || {
 
             /*
       Variables I use when shit's not routing properly */
-            //
+            /*/
             console.log('userRole:', userRole);
             console.log('path:', path);
             console.log('needGameAndAuth: ', needGameAndAuth);

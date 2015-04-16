@@ -140,6 +140,9 @@ var app = app || {
 
             $.ajax(options);
         },
+        getRole: function() {
+            return this.getProperty('user_role') || app.Session.get('user_role');
+        },
         quit: function(secret) {
             var that = this;
             this.destroy({
@@ -160,7 +163,7 @@ var app = app || {
             });
         },
         handleRole: function(){
-            var user_role = this.getProperty('user_role');
+            var user_role = this.getRole();
             app.Session.set('user_role', user_role);
             app.Running.Router.before({}, function(){});
         }
