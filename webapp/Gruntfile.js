@@ -41,6 +41,21 @@ module.exports = function(grunt) {
     },
     jshint: {
       files: [
+        'js/config.js',
+        'js/lib/*.js',
+        'js/models/*.js',
+        'js/collections/*.js',
+        'js/views/*.js',
+        'js/routers/*.js',
+        'js/*.js'
+      ],
+      gruntfile: {
+        src: 'Gruntfile.js'
+      },
+    },
+    lintspaces: {
+	    javascript: {
+        src: [
           'js/config.js',
           'js/lib/*.js',
           'js/models/*.js',
@@ -49,58 +64,54 @@ module.exports = function(grunt) {
           'js/routers/*.js',
           'js/*.js'
         ],
-      gruntfile: {
-        src: 'Gruntfile.js'
-      },
-    },
-    lintspaces: {
-	    javascript: {
-	        src: [
-	          'js/config.js',
-	          'js/lib/*.js',
-	          'js/models/*.js',
-	          'js/collections/*.js',
-	          'js/views/*.js',
-	          'js/routers/*.js',
-	          'js/*.js'
-	        ],
-	        options: {
-	            newline: true,
-	            newlineMaximum: 2,
-	            trailingspaces: true,
-	            indentation: 'spaces',
-	            spaces: 4,
-	            ignores: ['js-comments']
-	        }
+        options: {
+          newline: true,
+          newlineMaximum: 2,
+          trailingspaces: true,
+          indentation: 'spaces',
+          spaces: 4,
+          ignores: ['js-comments']
+        }
+	    },
+	    grunt: {
+  	    src: [
+    	    'Gruntfile.js'
+  	    ],
+  	    options: {
+          newline: true,
+          newlineMaximum: 2,
+          trailingspaces: true,
+          indentation: 'spaces',
+          spaces: 2,
+          ignores: ['js-comments']
+  	    }
 	    }
 	},
     env : {
       options : {
-          VERSION: '<%= pkg.version %>',
+        VERSION: '<%= pkg.version %>',
       },
       dev: {
-          NODE_ENV: 'DEVELOPMENT',
-          BETA: '<%= pkg.beta %>',
-          BANNER: '<%= banner %>',
+        NODE_ENV: 'DEVELOPMENT',
+        BETA: '<%= pkg.beta %>',
+        BANNER: '<%= banner %>',
       },
       prod : {
-          NODE_ENV: 'PRODUCTION',
-          BETA: '<%= pkg.beta %>',
-          BANNER: '<%= banner %>',
+        NODE_ENV: 'PRODUCTION',
+        BETA: '<%= pkg.beta %>',
+        BANNER: '<%= banner %>',
       }
     },
     preprocess: {
       dev : {
-            files: {
-                'index.html' : 'index.html.template',
-                'admin.html' : 'admin.html.template'
-            }
+        files: {
+          'index.html' : 'index.html.template'
+        }
       },
       prod : {
-            files: {
-                'index.html' : 'index.html.template',
-                'admin.html' : 'admin.html.template'
-            }
+        files: {
+          'index.html' : 'index.html.template'
+        }
       }
     },
     less: {
@@ -147,12 +158,12 @@ module.exports = function(grunt) {
       }
     },
     connect: {
-        server: {
-            options: {
-                port: 8888,
-                keepalive: true
-            }
+      server: {
+        options: {
+          port: 8888,
+          keepalive: true
         }
+      }
     }
   });
 
