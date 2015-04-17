@@ -23,48 +23,32 @@ var app = app || {
 
 
         template: _.template($('#template-nav').html()),
-        el: '#js-wrapper-nav',
+        el: '.js-wrapper-nav',
 
         tagName: 'nav',
-
         events: {
             'click .js-nav-link': 'select'
         },
-
         // constructor
         initialize: function() {
-            this.NavGameView = app.Running.NavGameView;
-            this.listenTo(app.Running.TargetModel, 'fetch', this.handleTarget);
-            this.listenTo(app.Running.TargetModel, 'change', this.handleTarget);
+            this.NavGameView = new app.Views.NavGameView();
+            this.model = new app.Models.Nav();
             this.listenTo(app.Running.User, 'fetch', this.render);
             this.listenTo(app.Running.User, 'change', this.render);
             this.listenTo(app.Running.Games, 'game-change', this.render);
+            this.listenTo(this.model, 'change', this.render);
         },
 
         // if we don't have a target hide that view
         render: function() {
-            var role = app.Running.User.getProperty('user_role');
-            var data = {};
-            data.is_captain = AuthUtils.requiresCaptain(role);
-            data.is_admin = AuthUtils.requiresAdmin(role);
-            data.is_super_admin = AuthUtils.requiresSuperAdmin(role);
 
+            var data = this.model.attributes;
             this.$el.html(this.template(data));
-            this.handleTarget();
-
-
-            var fragment = Backbone.history.fragment.replace('_', '-');
-            if (fragment === '') {
-                fragment = config.DEFAULT_VIEW;
-            }
-            var selectedElem = this.$el.find('#js-nav-' + fragment);
-            this.highlight(selectedElem);
-
-            if (app.Running.NavGameView)
-                app.Running.NavGameView.setElement(this.$('#js-nav-games-dropdown')).render();
+            this.updateHighlight();
+            this.NavGameView.setElement(this.$('.js-dropdown-parent-games')).render();
+            this.NavGameView.render();
             return this;
         },
-
         // select an item on the nav bar
         select: function(event) {
             var target = event.currentTarget;
@@ -73,72 +57,35 @@ var app = app || {
                 return;
             }
 
-            $('.navbar-collapse.in').collapse('hide');
+            this.$('.navbar-collapse.in').collapse('hide');
             this.highlight(target);
 
         },
+        updateHighlight: function() {
+            var fragment = Backbone.history.fragment.replace('_', '-');
+            if (fragment === '') {
+                fragment = config.DEFAULT_VIEW;
+            }
+            var selectedElem = this.$el.find('.js-nav-' + fragment);
+            this.highlight(selectedElem);
 
+        },
         // highlight an item on the nav bar and unhighlight the rest of them
         highlight: function(elem) {
-            if ($(elem).hasClass('js-dropdown-parent')) {
+            if (this.$(elem).hasClass('js-dropdown-parent')) {
                 return;
             }
 
-            if ($(elem).attr('dropdown')) {
+            if (this.$(elem).attr('dropdown')) {
                 var dropdown = $(elem).attr('dropdown');
-                var parent = '#js-dropdown-parent-'+ dropdown;
+                var parent = '.js-dropdown-parent-'+ dropdown;
                 elem = parent;
             }
 
-            $('.active').removeClass('active');
-            $(elem).addClass('active');
-        },
-        handleAdmin: function() {
-            var role = app.Running.User.getProperty('user_role');
-            var allowed = AuthUtils.requiresCaptain(role);
-            if (allowed) {
-                $('#js-dropdown-parent-admin').removeClass('hide');
-                return;
-            }
-            $('#js-dropdown-parent-admin').addClass('hide');
-            return;
-
-        },
-        handleTarget: function() {
-            var game = app.Running.Games.getActiveGame();
-            if (!game)
-            {
-                this.disableTarget();
-                return;
-            }
-            if (!game.get('game_started'))
-            {
-                this.disableTarget();
-                return;
-            }
-
-            if (!app.Running.TargetModel.get('user_id'))
-            {
-                this.disableTarget();
-                return;
-            }
-
-            this.enableTarget();
-            return;
-        },
-
-        // hides the target nav item
-        enableTarget: function() {
-            this.$el.find('#js-nav-target').removeClass('disabled');
-            this.$el.find('#js-nav-target a').removeClass('disabled');
-        },
-
-        // shows the target nav item
-        disableTarget: function() {
-            this.$el.find('#js-nav-target').addClass('disabled');
-            this.$el.find('#js-nav-target a').addClass('disabled');
+            this.$('.active').removeClass('active');
+            this.$(elem).addClass('active');
+            return this;
         }
-
     });
 
 })(jQuery);

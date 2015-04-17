@@ -81,7 +81,7 @@ var app = app || {
         before: function(params, next) {
 
             // is the user authenticated
-            var isAuth = app.Session.get('authenticated');
+            var isAuth = app.Session.get('authenticated') === true;
             var path = Backbone.history.location.hash;
 
             // do we need a game and authentication
@@ -97,8 +97,7 @@ var app = app || {
             var needTarget = _.contains(this.requiresTarget, path);
 
             // is there a game
-            var sessionHasGame = app.Session.get('has_game');
-            var hasGame = (sessionHasGame == "true") || (sessionHasGame === true);
+            var hasGame = app.Session.get('has_game') === true;
 
             // do we need to be a captain
             var needCaptain = _.contains(this.requiresCaptain, path);
@@ -122,14 +121,14 @@ var app = app || {
             var isSuperAdmin = AuthUtils.requiresSuperAdmin(userRole);
 
             // is the game started
-            var gameStarted = app.Running.Games.getActiveGame() && app.Running.Games.getActiveGame().get('game_started');
-
+            var gameStarted = app.Running.Games.hasActiveGameStarted();
             // is the game started
             var hasTarget = !!app.Running.TargetModel.get('user_id') && gameStarted && !isAdmin;
 
             /*
-      Variables I use when shit's not routing properly */
+            Variables I use when shits not routing properly */
             /*/
+            console.log('gameStarted:', gameStarted);
             console.log('userRole:', userRole);
             console.log('path:', path);
             console.log('needGameAndAuth: ', needGameAndAuth);
@@ -311,29 +310,21 @@ var app = app || {
         render: function() {
             var fragment = Backbone.history.fragment;
             // if it's a view with a nav and we don't have one, make one
-            if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (!app.Running.NavView)) {
-                if (!app.Running.NavGameView) {
-                    app.Running.NavGameView = new app.Views.NavGameView();
-                    app.Running.NavGameView.render();
-                }
+            if ((this.noNav.indexOf(Backbone.history.fragment) === -1) && (fragment !== 'login') && (!app.Running.NavView)) {
                 app.Running.NavView = new app.Views.NavView();
                 app.Running.NavView = app.Running.NavView.render();
             }
             // if it explicitely shouldn't have a nav and we have one kill it
-            else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.NavView)) {
+            else if ((this.noNav.indexOf(Backbone.history.fragment) !== -1) && (app.Running.NavView)) {
                 app.Running.NavView.$el.html('');
                 app.Running.NavView = null;
-                app.Running.navGameView = null;
             }
             // if we have a nav and highlight the nav item
-            if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
+            if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) === -1)) {
                 if (fragment === '')
                     fragment = config.DEFAULT_VIEW;
 
-                fragment = fragment.replace('_', '-');
-                app.Running.NavView.highlight('#js-nav-' + fragment);
-                app.Running.NavView.handleTarget();
-                app.Running.NavGameView.updateText();
+                app.Running.NavView.updateHighlight();
             }
 
             // render our page within the app

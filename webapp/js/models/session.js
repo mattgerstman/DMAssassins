@@ -42,9 +42,12 @@ var app = app || {
         get: function(key) {
             if (this.supportStorage) {
                 var data = localStorage.getItem(key);
-                if (data && data[0] === '{') {
+                try {
                     return JSON.parse(data);
-                } else {
+                } catch (err) {
+                    console.log("ERROR ACCESSING SESSION DATA");
+                    console.log(err);
+                    console.log(data);
                     return data;
                 }
             } else {
@@ -55,7 +58,7 @@ var app = app || {
         // sets a session variable
         set: function(key, value) {
             if (this.supportStorage) {
-                localStorage.setItem(key, value);
+                localStorage.setItem(key, JSON.stringify(value));
             } else {
                 Backbone.Model.prototype.set.call(this, key, value);
             }
@@ -79,6 +82,7 @@ var app = app || {
             } else {
                 Backbone.Model.prototype.clear(this);
             }
+            return this;
         },
         // calls the facebook login function and handles it appropriately
         // if they are logged into facebook and connected to the app a session is created automatically
@@ -161,9 +165,8 @@ var app = app || {
                         // scope are the facebook permissions we're requesting
                         scope: config.ALL_PERMISSIONS
                     });
-
-
                 }
+                return this;
             });
 
         },
@@ -286,6 +289,7 @@ var app = app || {
             this.set('authenticated', true);
             this.set('has_game', data.game !== null);
             this.storeBasicAuth(data);
+            return this;
         },
         // stores all the basic auth variables in the session
         storeBasicAuth: function(data) {
@@ -297,6 +301,7 @@ var app = app || {
             var base64Key = window.btoa(plainKey);
             this.set('authKey', base64Key);
             this.setAuthHeader();
+            return this;
         },
         // sets the Basic Auth header for all ajax requests
         setAuthHeader: function() {
@@ -306,7 +311,7 @@ var app = app || {
                     'Authorization': "Basic " + base64Key
                 }
             });
-
+            return this;
         }
     });
 })();

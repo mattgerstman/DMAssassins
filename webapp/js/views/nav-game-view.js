@@ -21,8 +21,6 @@ var app = app || {
     'use strict';
     app.Views.NavGameView = Backbone.View.extend({
         template: _.template($('#template-nav-game').html()),
-        el: '#games_dropdown',
-
         tagName: 'ul',
 
         events: {
@@ -31,75 +29,14 @@ var app = app || {
         // constructor, loads a user id so we can get their games from the model
         initialize: function() {
             this.collection = app.Running.Games;
-            this.listenTo(this.collection, 'fetch', this.render);
-            this.listenTo(this.collection, 'change', this.render);
-            this.listenTo(this.collection, 'reset', this.render);
-            this.listenTo(this.collection, 'add', this.render);
-            this.listenTo(this.collection, 'remove', this.render);
-            this.listenTo(this.collection, 'game-change', this.render);
+            this.model = new app.Models.NavGames();
+            this.listenTo(this.model, 'change', this.render);
 
-        },
-        handleJoin: function () {
-            var availableGame = _.findWhere(this.collection.toJSON(), {member: false});
-            if (availableGame === undefined)
-            {
-                this.hideJoin();
-                return;
-            }
-            this.showJoin();
-        },
-        hideJoin: function () {
-            this.$el.find('#js-nav-join-game').addClass('hide');
-        },
-        showJoin: function () {
-            this.$el.find('#js-nav-join-game').removeClass('hide');
-        },
-        showCurrentGame: function() {
-            var game_id = app.Running.Games.getActiveGameId();
-            this.$el.find('#nav_' + game_id).removeClass('hide');
-        },
-        updateText: function() {
-
-            $('.js-game-name').removeClass('hide');
-            if (Backbone.history.fragment == 'join_game') {
-                this.showCurrentGame();
-                $('.js-header-games').text('Join Game');
-                $('.js-header-games-short').text('Join Game');
-                return this;
-            }
-
-            if (Backbone.history.fragment == 'create_game') {
-                this.showCurrentGame();
-                $('.js-header-games').text('Create Game');
-                $('.js-header-games-short').text('Create Game');
-                return this;
-            }
-
-            var game = this.collection.getActiveGame();
-            if (!game)
-            {
-                return this;
-            }
-            var game_name = game.get('game_name');
-            $('.js-header-games').text(game_name);
-            var max = 9;
-            if (game_name.length > max) {
-                game_name = game_name.substr(0, max - 3) + '...';
-            }
-            $('.js-header-games-short').text(game_name);
-
-            var game_id = app.Running.Games.getActiveGameId();
-            this.$el.find('#js-nav-' + game_id).addClass('hide');
         },
         // loads the items into the dropdown and changes the dropdown title to the current game
         render: function() {
-            this.$el.html(this.template({
-                games: _.where(this.collection.toJSON(), {
-                    member: true
-                })
-            }));
-            this.handleJoin();
-            this.updateText();
+            var data = this.model.attributes;
+            this.$el.html(this.template(data));
             return this;
 
         },
@@ -107,7 +44,6 @@ var app = app || {
         select: function(event) {
             var game_id = $(event.target).attr('game_id');
             app.Running.Games.setActiveGame(game_id);
-
         }
     });
 

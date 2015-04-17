@@ -21,14 +21,14 @@ var app = app || {
     app.Models.Target = Backbone.Model.extend({
         defaults: {
             'game_id': null,
-            'assassin_id': '',
-            'facebook_id': '',
-            'username': '',
-            'user_id': '',
+            'assassin_id': null,
+            'facebook_id': null,
+            'username': null,
+            'user_id': null,
             'properties': {
-                'name': 'Loading...',
-                'facebook': 'Loading...',
-                'team':'Loading...',
+                'name': strings.loading,
+                'facebook': strings.loading,
+                'team':strings.loading,
                 'photo_thumb': SPY,
                 'photo': SPY
             }

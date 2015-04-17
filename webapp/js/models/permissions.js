@@ -29,7 +29,7 @@ var app = app || {
                     return data;
                 }
                 _.each(response.data, function(permission) {
-                    that.set(permission.permission, permission.status == 'granted');
+                    that.set(permission.permission, permission.status === 'granted');
                 });
             });
         }

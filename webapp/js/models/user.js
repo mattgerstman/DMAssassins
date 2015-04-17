@@ -25,13 +25,13 @@ var app = app || {
         // default profile properties
         defaults: {
             'user_id': null,
-            'username': '',
-            'email': 'Loading...',
+            'username': null,
+            'email': strings.loading,
             'properties': {
-                'name': 'Loading..',
-                'facebook': 'Loading..',
-                'secret': 'Loading..',
-                'team': 'Loading..',
+                'name': strings.loading,
+                'facebook': strings.loading,
+                'secret': strings.loading,
+                'team': strings.loading,
                 'photo_thumb': SPY,
                 'photo': SPY
             }
@@ -63,7 +63,7 @@ var app = app || {
                     that.trigger('join-game');
                 },
                 error: function(that, response, options) {
-                    if (response.status == 401) {
+                    if (response.status === 401) {
                         that.trigger('join-error-password');
                         app.Running.Games.get(game_id).set('member', false);
                         if (!!last_game_id)
@@ -73,6 +73,7 @@ var app = app || {
                     }
                 }
             });
+            return this;
         },
         setProperty: function(key, value, silent) {
             var properties = this.get('properties');
@@ -114,6 +115,7 @@ var app = app || {
                     }
                 }
             });
+            return this;
         },
         revive: function(data, successCallback, errorCallback) {
             var that = this;
@@ -135,6 +137,7 @@ var app = app || {
                     }
                 }
             });
+            return this;
         },
         changeRole: function(role_id, options) {
             var url = this.url() + 'role/';
@@ -145,6 +148,7 @@ var app = app || {
             });
 
             $.ajax(options);
+            return this;
         },
         getRole: function() {
 
@@ -180,11 +184,13 @@ var app = app || {
                     alert(response.responseText);
                 }
             });
+            return this;
         },
         handleRole: function(){
             var user_role = this.getRole();
             app.Session.set('user_role', user_role);
             app.Running.Router.before({}, function(){});
+            return this;
         }
     });
 })();

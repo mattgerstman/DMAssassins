@@ -11,36 +11,8 @@ module.exports = function(grunt) {
       ' * Copyright (c) <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>;\n' +
       ' */',
     // Task configuration.
-    concat: {
-      options: {
-        banner: '<%= banner %>',
-        stripBanners: true
-      },
-      dist: {
-        src: [
-          'js/config.js',
-          'js/lib/*.js',
-          'js/models/*.js',
-          'js/collections/*.js',
-          'js/views/*.js',
-          'js/routers/*.js',
-          'js/*.js'
-          ],
-        dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.js'
-      }
-    },
-    uglify: {
-      options: {
-        banner: '<%= banner %>',
-        sourceMap: true
-      },
-      dist: {
-        src: '<%= concat.dist.dest %>',
-        dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.min.js'
-      }
-    },
-    jshint: {
-      files: [
+    dependencies: {
+      js: [
         'js/config.js',
         'js/lib/*.js',
         'js/models/*.js',
@@ -48,22 +20,27 @@ module.exports = function(grunt) {
         'js/views/*.js',
         'js/routers/*.js',
         'js/*.js'
-      ],
+      ]
+    },
+    uglify: {
+      options: {
+        banner: '<%= banner %>',
+        sourceMap: true
+      },
+      dist: {
+        src: '<%= dependencies.js %>',
+        dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.min.js'
+      }
+    },
+    jshint: {
+      files: '<%= dependencies.js %>',
       gruntfile: {
         src: 'Gruntfile.js'
       },
     },
     lintspaces: {
 	    javascript: {
-        src: [
-          'js/config.js',
-          'js/lib/*.js',
-          'js/models/*.js',
-          'js/collections/*.js',
-          'js/views/*.js',
-          'js/routers/*.js',
-          'js/*.js'
-        ],
+        src: '<%= dependencies.js %>',
         options: {
           newline: true,
           newlineMaximum: 2,
@@ -86,7 +63,7 @@ module.exports = function(grunt) {
           ignores: ['js-comments']
   	    }
 	    }
-	},
+	  },
     env : {
       options : {
         VERSION: '<%= pkg.version %>',
@@ -114,6 +91,27 @@ module.exports = function(grunt) {
         }
       }
     },
+    injector: {
+      options: {
+
+      },
+      dev: {
+        files: {
+          'index.html' : [
+            '<%= dependencies.js %>',
+            '<%= less.dev.dest %>'
+          ]
+        }
+      },
+      prod: {
+        files: {
+          'index.html' : [
+            '<%= uglify.dist.dest %>',
+            '<%= less.prod.dest %>'
+          ]
+        }
+      }
+    },
     less: {
       dev: {
         options: {
@@ -124,9 +122,8 @@ module.exports = function(grunt) {
           sourceMapURL: 'DMAssassins.css.map',
           sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map'
         },
-        files: {
-          'dist/<%= pkg.version %>/DMAssassins.css': 'assets/styles/DMAssassins.less'
-        }
+        src: 'assets/styles/DMAssassins.less',
+        dest: 'dist/<%= pkg.version %>/DMAssassins.css'
       },
       prod: {
         options: {
@@ -138,9 +135,9 @@ module.exports = function(grunt) {
           sourceMapFilename: 'dist/<%= pkg.version %>/DMAssassins.css.map',
           cleancss: true
         },
-        files: {
-          'dist/<%= pkg.version %>/DMAssassins.min.css': 'assets/styles/DMAssassins.less'
-        }
+        src: 'assets/styles/DMAssassins.less',
+        dest: 'dist/<%= pkg.version %>/DMAssassins.min.css'
+
       }
     },
     watch : {
@@ -169,7 +166,6 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
 
-  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -178,10 +174,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-lintspaces');
   grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-injector');
 
   // Default task.
-  grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev']);
-  grunt.registerTask('prod', ['concat', 'uglify', 'less:prod', 'env:prod', 'preprocess:prod']);
+  grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev', 'injector:dev']);
+  grunt.registerTask('prod', ['uglify', 'less:prod', 'env:prod', 'preprocess:prod', 'injector:prod']);
   grunt.registerTask('server', 'connect');
   grunt.registerTask('default', ['dev']);
 };

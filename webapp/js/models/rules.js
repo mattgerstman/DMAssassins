@@ -21,7 +21,7 @@ var app = app || {
 
     app.Models.Rules = Backbone.Model.extend({
         defaults: {
-            rules: 'Loading...'
+            rules: strings.loading
         },
         save: function (attrs, options) {
             options = options || {};

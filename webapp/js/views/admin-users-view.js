@@ -189,7 +189,7 @@ var app = app || {
         },
         addUser: function(user, extras){
             extras.logged_in = false;
-            if (user.get('user_id') == app.Session.get('user_id')) {
+            if (user.get('user_id') === app.Session.get('user_id')) {
                 extras.logged_in = true;
             }
             var userView = new app.Views.AdminUserView(user);
@@ -200,12 +200,12 @@ var app = app || {
             event.preventDefault();
             this.team = $(event.currentTarget).data('team-name');
             this.team_id = $(event.currentTarget).data('team-id');
-            if (this.team_id == 'SHOW_ALL') {
+            if (this.team_id === 'SHOW_ALL') {
                 this.team = undefined;
                 this.team_id = 'all';
             }
 
-            if (this.team_id == 'NO_TEAM') {
+            if (this.team_id === 'NO_TEAM') {
                 this.team = "null";
                 this.team_id = 'null';
             }
@@ -255,11 +255,11 @@ var app = app || {
             });
         },
         newTeamKeypress: function(event) {
-            if (event.keyCode == 27) {
+            if (event.keyCode === 27) {
                 event.preventDefault();
                 this.hideNewTeam();
             }
-            if (event.keyCode == 13) {
+            if (event.keyCode === 13) {
                 event.preventDefault();
                 this.createNewTeam(event);
             }
@@ -287,7 +287,7 @@ var app = app || {
             var team_id = $(event.currentTarget).data('team-id');
             var team = app.Running.Teams.get(team_id);
             var name = $('#js-nav-team-'+team_id).find('.edit-team-name').val();
-            if (name == team.get('team_name'))
+            if (name === team.get('team_name'))
             {
                 this.hideEditTeam(event);
                 return;
@@ -313,12 +313,12 @@ var app = app || {
             var team = app.Running.Teams.get(team_id);
             var that = this;
             team.destroy({success:function(){
-                if (that.team == team_name) {
+                if (that.team === team_name) {
                     that.team = 'null';
                     that.team_id = 'null';
                 }
                 app.Running.Users.each(function(user){
-                    if (user.getProperty('team') == team_name)
+                    if (user.getProperty('team') === team_name)
                     {
                         user.setProperty('team', 'null');
 
@@ -364,7 +364,7 @@ var app = app || {
             if (this.team !== undefined)
             {
                 data = _.filter(data, function(user){
-                    return user.getProperty('team') == that.team;
+                    return user.getProperty('team') === that.team;
                 });
             }
             this.selectActiveTeam();

@@ -32,7 +32,7 @@ var app = app || {
             var that = this;
             app.Running.FB.login(function(response) {
                 var fb_manage_pages = response.authResponse.grantedScopes.search('manage_pages');
-                if (fb_manage_pages == -1)
+                if (fb_manage_pages === -1)
                 {
                     return that.needPages();
                 }
@@ -150,7 +150,7 @@ var app = app || {
 
             app.Running.FB.login(function(response) {
                 var fb_publish_actions = response.authResponse.grantedScopes.search('publish_actions');
-                if (fb_publish_actions == -1)
+                if (fb_publish_actions === -1)
                 {
                     return that.needPages();
                 }

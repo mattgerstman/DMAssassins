@@ -70,7 +70,6 @@
     <link href="//cdn.datatables.net/1.10.2/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="//cdn.datatables.net/plug-ins/a5734b29083/integration/bootstrap/3/dataTables.bootstrap.css" rel="stylesheet" type="text/css">
     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-markdown/2.7.0/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
-    <link href="dist/<!-- @echo VERSION -->/DMAssassins.min.css" rel="stylesheet" type="text/css">
     <!-- @endif -->
     <!-- @if NODE_ENV='DEVELOPMENT' -->
     <title>DevAssassins</title>
@@ -80,8 +79,10 @@
     <link href="/bower_components/datatables/media/css/jquery.dataTables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/datatables-bootstrap3/BS3/assets/css/datatables.css" rel="stylesheet" type="text/css">
     <link href="/bower_components/bootstrap-markdown/css/bootstrap-markdown.min.css" rel="stylesheet" type="text/css">
-    <link href="dist/<!-- @echo VERSION -->/DMAssassins.css" rel="stylesheet" type="text/css">
     <!-- @endif -->
+
+    <!-- injector:css -->
+    <!-- endinjector -->
 
     <!-- /Navigation Template -->
     <script id="template-nav" type="text/template">
@@ -107,35 +108,20 @@
                 <div class="collapse navbar-collapse" id="main_nav">
                     <!-- Left Navbar -->
                     <ul class="nav navbar-nav">
-                        <li id="js-nav-target"><a class="js-nav-link" href="#target">Target</a></li>
-                        <li id="js-nav-my-profile"><a class="js-nav-link" href="#my_profile">My Profile</a></li>
-                        <li id="js-nav-leaderboard"><a class="js-nav-link" href="#leaderboard">Leaderboard</a></li>
-                        <li id="js-nav-rules"><a class="js-nav-link" href="#rules">Rules</a></li>
+                        <li class="js-nav-target <% if(target_disabled) {%> disabled <% } %>"><a class="js-nav-link" href="#target">Target</a></li>
+                        <li class="js-nav-my-profile"><a class="js-nav-link" href="#my_profile">My Profile</a></li>
+                        <li class="js-nav-leaderboard"><a class="js-nav-link" href="#leaderboard">Leaderboard</a></li>
+                        <li class="js-nav-rules"><a class="js-nav-link" href="#rules">Rules</a></li>
                     </ul>
 
                     <!-- Right Navbar -->
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="js-dropdown-parent" id="js-dropdown-parent-games">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <div class="hidden-sm">
-                                    <span class="js-header-games">
-                                        Loading...
-                                    </span>
-                                    <span class="caret"></span>
-                                </div>
-                                <div class="visible-sm">
-                                    <span class="js-header-games-short">
-                                        Loading...
-                                    </span>
-                                    <span class="caret"></span>
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu" role="menu" id="js-nav-games-dropdown">
-                            </ul>
+                        <li class="js-dropdown-parent js-dropdown-parent-games">
+
                         </li>
                         <!-- Admin Links -->
                         <% if (is_admin) { %>
-                            <li id="js-dropdown-parent-admin" class="js-dropdown-parent">
+                            <li class="js-dropdown-parent js-dropdown-parent-admin">
                                 <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                     <div class="hidden-sm">
                                         <span>
@@ -174,15 +160,31 @@
 
     <!-- Game List In Nav Template -->
     <script id="template-nav-game" type="text/template">
-    <%
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <div class="hidden-sm">
+            <span class="js-header-games">
+                <%= long_text %>
+            </span>
+            <span class="caret"></span>
+        </div>
+        <div class="visible-sm">
+            <span class="js-header-games-short">
+                <%= short_text %>
+            </span>
+            <span class="caret"></span>
+        </div>
+      </a>
+      <ul class="dropdown-menu js-nav-games-dropdown" role="menu">
+        <%
         _.each(games, function(game) {
         %>
-            <li id="js-nav-<%=game.game_id %>" class="js-dropdown-item js-game-name" dropdown="games"><a game_id="<%=game.game_id %>" class="js-switch-game js-nav-link" href="#switch_game"><%=game.game_name%></a></li>
+            <li id="js-nav-<%=game.game_id %>" class="js-dropdown-item js-game-name <% if (active_game_id === game.game_id) { %> hide <% } %>" dropdown="games"><a game_id="<%=game.game_id %>" class="js-switch-game js-nav-link" href="#switch_game"><%=game.game_name%></a></li>
         <%
         })
         %>
-        <li id="js-nav-create-game" dropdown="games"><a class="js-nav-link" href="#create_game">Create New Game</a></li>
-        <li id="js-nav-join-game" dropdown="games"><a class="js-nav-link" href="#join_game">Join New Game</a></li>
+        <li id="js-nav-create-game" dropdown="games"><a class="js-nav-link <% if (active_game_id === 'create_game') { %> hide <% } %>" href="#create_game">Create New Game</a></li>
+        <li id="js-nav-join-game" dropdown="games"><a class="js-nav-link <% if ( (!show_join) || (active_game_id === 'join_game') ) { %> hide <% } %>" href="#join_game">Join New Game</a></li>
+      </ul>
     </script>
     <!-- /Game List In Nav Template -->
 
@@ -523,13 +525,12 @@
             </div>
     </script>
     <script id="template-login" type="text/template">
-    <div class="col-md-2"></div>
-        <div class="container col-md-8">
-            <img src="/assets/img/logo.png" class="center-block img-responsive logo" />
-            <button class="btn btn-facebook js-login btn-lg center-block hidden-xs"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
-        </div>
-        <div class="col-md-2"></div>
-        <button class="btn btn-facebook js-login btn-block center-block visible-xs-block"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
+      <div class="container col-md-offset-2 col-md-8">
+          <img src="/assets/img/logo.png" class="center-block img-responsive logo" />
+          <button class="btn btn-facebook js-login btn-lg center-block hidden-xs"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
+      </div>
+      <div class="col-md-2"></div>
+      <button class="btn btn-facebook js-login btn-block center-block visible-xs-block"><i class="fa fa-facebook"></i> | Connect with Facebook</button>
     </script>
     <script id="template-leaderboard" type="text/template">
     <div class="container">
@@ -1506,84 +1507,83 @@
 
 
     <script id="template-support" type="text/template">
-        <div class="modal fade js-modal-support" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
-          	<div class="modal-dialog">
-            	<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-						<h4 class="modal-title">Support</h4>
-					</div>
-					<form role="form">
-                  		<div class="modal-body">
-                            <div class="form-group">
-                                <label for="support-name">Name:</label>
-                                <input type="text" id="support-name" class="form-control" placeholder="Enter Name" />
-                            </div>
+      <div class="modal fade js-modal-support" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+        	<div class="modal-dialog">
+          	<div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">Support</h4>
+              </div>
+              <form role="form">
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="js-support-name">Name:</label>
+                    <input type="text" id="js-support-name" class="form-control" placeholder="Enter Name" />
+                  </div>
 
-                            <div class="form-group">
-                                <label for="support-email">Email:</label>
-                                <input type="text" id="support-email" class="form-control" placeholder="Enter Email" />
-                            </div>
+                  <div class="form-group">
+                    <label for="js-support-email">Email:</label>
+                    <input type="text" id="js-support-email" class="form-control" placeholder="Enter Email" />
+                  </div>
 
-                            <div class="form-group">
-                                <label for="support-subject">Subject:</label>
-                                <input type="text" id="support-subject" class="form-control" placeholder="Enter Subject" />
-                            </div>
+                  <div class="form-group">
+                    <label for="js-support-subject">Subject:</label>
+                    <input type="text" id="js-support-subject" class="form-control" placeholder="Enter Subject" />
+                  </div>
 
+                  <div class="form-group">
+                    <label for="js-support-message">Message:</label>
+                    <textarea id="js-support-message" class="form-control" placeholder="Enter Message" />
+                  </div>
 
-                            <div class="form-group">
-                                <label for="support-message">Message:</label>
-                                <textarea id="support-message" class="form-control" placeholder="Enter Message" />
-                            </div>
-
-				  			<div class="modal-footer">
-			                    <div class="hidden-xs">
-			                        <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
-			                        <button class="btn btn-primary btn-medium js-support-submit">Submit</button>
-			                    </div>
-			                    <div class="visible-xs-block">
-			                        <button class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-			                        <button class="btn btn-primary btn-block js-support-submit">Submit</button>
-			                    </div>
-							</div>
-						</div>
-					</form>
-				</div><!-- /.modal-content -->
-          	</div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
+  				  			<div class="modal-footer">
+                    <div class="hidden-xs">
+                      <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
+                      <button class="btn btn-primary btn-medium js-support-submit">Submit</button>
+                    </div>
+                    <div class="visible-xs-block">
+                      <button class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+                      <button class="btn btn-primary btn-block js-support-submit">Submit</button>
+                    </div>
+  							</div>
+						  </div>
+					  </form>
+				  </div><!-- /.modal-content -->
+      	</div><!-- /.modal-dialog -->
+      </div><!-- /.modal -->
     </script>
+
 
     <script src="//cdn.ravenjs.com/1.1.16/backbone,jquery,native/raven.min.js"  type="text/javascript"></script>
     <div id="fb-root"></div>
     <script src="//connect.facebook.net/en_US/sdk.js" type="text/javascript"></script>
 
     <!-- @if NODE_ENV='DEVELOPMENT' -->
-    <script src="js/config.js" type="text/javascript"></script>
     <script src="/bower_components/jquery/dist/jquery.js" type="text/javascript"></script>
-    <script src="/bower_components/jquery-ui/jquery-ui.js" type="text/javascript"></script>
     <script src="/bower_components/underscore/underscore.js" type="text/javascript"></script>
     <script src="/bower_components/backbone/backbone.js" type="text/javascript"></script>
+    <script src="/bower_components/base64/base64.js" type="text/javascript"></script>
     <script src="/bower_components/bootstrap/dist/js/bootstrap.js" type="text/javascript"></script>
+    <script src="/bower_components/jquery-ui/jquery-ui.js" type="text/javascript"></script>
     <script src="/bower_components/datatables/media/js/jquery.dataTables.js" type="text/javascript" charset="utf8"></script>
     <script src="/bower_components/datatables-bootstrap3/BS3/assets/js/dataTables.js" type="text/javascript" charset="utf8"></script>
-    <script src="/bower_components/base64/base64.js" type="text/javascript"></script>
+
     <script src="/bower_components/marked/lib/marked.js" type="text/javascript"></script>
     <script src="/bower_components/bootstrap-markdown/js/bootstrap-markdown.js" type="text/javascript"></script>
     <!-- @endif -->
 
     <!-- @if NODE_ENV='PRODUCTION' -->
     <script src="//code.jquery.com/jquery-2.1.3.min.js" type="text/javascript"></script>
-    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.min.js" type="text/javascript"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js" type="text/javascript"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Base64/0.3.0/base64.min.js" type="text/javascript"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js" type="text/javascript" charset="utf8"></script>
     <script src="//cdn.datatables.net/plug-ins/a5734b29083/integration/bootstrap/3/dataTables.bootstrap.min.js" type="text/javascript"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Base64/0.3.0/base64.min.js" type="text/javascript"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.min.js" type="text/javascript"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-markdown/2.7.0/js/bootstrap-markdown.min.js" type="text/javascript"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/marked/0.3.2/marked.min.js" type="text/javascript"></script>
 
-    <script src="dist/<!-- @echo VERSION -->/DMAssassins.min.js" type="text/javascript"></script>
     <script>
 
           (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -1598,66 +1598,16 @@
     <!-- @endif -->
 
 
-    <!-- @if NODE_ENV='DEVELOPMENT' -->
-    <script src="js/lib/facebook-sdk.js" type="text/javascript"></script>
-    <script src="js/lib/auth-utils.js" type="text/javascript"></script>
-    <script src="js/lib/constants.js" type="text/javascript"></script>
-    <script src="js/lib/strings.js" type="text/javascript"></script>
 
-    <script src="js/models/session.js" type="text/javascript"></script>
-    <script src="js/models/game.js" type="text/javascript"></script>
-    <script src="js/models/user.js" type="text/javascript"></script>
-    <script src="js/models/team.js" type="text/javascript"></script>
-    <script src="js/models/target.js" type="text/javascript"></script>
-    <script src="js/models/target-friends.js" type="text/javascript"></script>
-    <script src="js/models/leaderboard.js" type="text/javascript"></script>
-    <script src="js/models/rules.js" type="text/javascript"></script>
-    <script src="js/models/plot-twist.js" type="text/javascript"></script>
-    <script src="js/models/photos.js" type="text/javascript"></script>
-    <script src="js/models/pages.js" type="text/javascript"></script>
-    <script src="js/models/targets.js" type="text/javascript"></script>
-    <script src="js/models/permissions.js" type="text/javascript"></script>
-    <script src="js/models/support.js" type="text/javascript"></script>
-    <script src="js/models/kill-timer.js" type="text/javascript"></script>
-
-    <script src="js/collections/games.js" type="text/javascript"></script>
-    <script src="js/collections/users.js" type="text/javascript"></script>
-    <script src="js/collections/teams.js" type="text/javascript"></script>
-
-    <script src="js/views/support-view.js" type="text/javascript"></script>
-    <script src="js/views/profile-view.js" type="text/javascript"></script>
-    <script src="js/views/target-view.js" type="text/javascript"></script>
-    <script src="js/views/target-friends-view.js" type="text/javascript"></script>
-    <script src="js/views/leaderboard-view.js" type="text/javascript"></script>
-    <script src="js/views/rules-view.js" type="text/javascript"></script>
-    <script src="js/views/profile-photos-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-pages-view.js" type="text/javascript"></script>
-
-    <script src="js/views/admin-user-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-users-teams-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-users-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-edit-rules-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-game-settings-view.js" type="text/javascript"></script>
-    <script src="js/views/admin-kill-timer-view.js" type="text/javascript"></script>
-
-    <script src="js/views/super-admin-targets-view.js" type="text/javascript"></script>
-
-    <script src="js/views/app-view.js" type="text/javascript"></script>
-    <script src="js/views/nav-view.js" type="text/javascript"></script>
-    <script src="js/views/select-game-view.js" type="text/javascript"></script>
-    <script src="js/views/nav-game-view.js" type="text/javascript"></script>
-    <script src="js/views/login-view.js" type="text/javascript"></script>
-    <script src="js/routers/baserouter.js" type="text/javascript"></script>
-    <script src="js/routers/router.js" type="text/javascript"></script>
-    <script src="js/app.js" type="text/javascript"></script>
-    <!-- @endif -->
+    <!-- injector:js -->
+    <!-- endinjector -->
 
 </head>
 
 <body id="app">
-    <section id="js-wrapper-nav"></section>
+    <section class="js-wrapper-nav"></section>
 
-    <section class="container-fluid" id="js-wrapper-app"></section>
+    <section class="container-fluid js-wrapper-app"></section>
 
 
     <div class="js-wrapper-support"></div>

@@ -15,16 +15,16 @@ var app = app || {
             loops: [
                 [
                     {
-                        "assassin_id": "Loading...",
-                        "assassin_name": "Loading...",
-                        "assassin_team_name": "Loading...",
-                        "assassin_user_role": "Loading...",
-                        "assassin_kills": "Loading...",
-                        "target_id": "Loading...",
-                        "target_name": "Loading...",
-                        "target_team_name": "Loading...",
-                        "target_user_role": "Loading...",
-                        "target_kills": "Loading..."
+                        "assassin_id": strings.loading,
+                        "assassin_name": strings.loading,
+                        "assassin_team_name": strings.loading,
+                        "assassin_user_role": strings.loading,
+                        "assassin_kills": strings.loading,
+                        "target_id": strings.loading,
+                        "target_name": strings.loading,
+                        "target_team_name": strings.loading,
+                        "target_user_role": strings.loading,
+                        "target_kills": strings.loading
                     }
                 ]
             ]

@@ -17,7 +17,7 @@ var app = app || {
 
 // Instantiates all of the running models, routers, and session
 
-$(function() {
+$(document).ready(function() {
     'use strict';
 
     Raven.config(config.SENTRY_DSN, {

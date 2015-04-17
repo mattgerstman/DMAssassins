@@ -26,17 +26,22 @@ var app = app || {
         tagName: 'div',
         el: '.js-wrapper-support',
         events: {
-            'click .js-support-submit': 'submit'
+            'click .js-support-submit': 'clickSubmit'
         },
         initialize: function() {
-
+            return this;
         },
-        submit: function(e) {
+        clickSubmit: function(e) {
             e.preventDefault();
-            var name        = $('#support-name').val();
-            var email       = $('#support-email').val();
-            var subject     = $('#support-subject').val();
-            var message     = $('#support-message').val();
+            this.submit();
+            return this;
+        },
+        submit: function() {
+
+            var name        = this.$('#js-support-name').val();
+            var email       = this.$('#js-support-email').val();
+            var subject     = this.$('#js-support-subject').val();
+            var message     = this.$('#js-support-message').val();
 
             var data = {
                 name:       name,
@@ -53,13 +58,10 @@ var app = app || {
                     $('.js-modal-support').modal('hide');
                 },
                 error: function(a, b, c) {
-                    console.log(a);
-                    console.log(b);
-                    console.log(c);
                     alert('There was an error submitting your issue, please try again later');
                 }
             });
-
+            return this;
         },
         render: function() {
             // var data = this.model.attributes;

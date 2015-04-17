@@ -39,7 +39,7 @@ var app = app || {
         selectPhoto: function(e) {
             var photo = $(e.currentTarget);
             var index = photo.data('index');
-            if (index == 'profile')
+            if (index === 'profile')
             {
                 return this.setProfilePicture();
             }

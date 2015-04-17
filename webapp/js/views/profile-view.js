@@ -79,7 +79,7 @@ var app = app || {
             $('.js-modal-account-settings').modal();
         },
         emailEnter: function(event) {
-            if (event.which == 13) {
+            if (event.which === 13) {
                 this.saveEmailSettings();
             }
         },
@@ -117,13 +117,13 @@ var app = app || {
             if (game) {
                 data.teams_enabled = game.areTeamsEnabled();
             }
-            data.allow_email = data.properties.allow_email == 'true';
+            data.allow_email = data.properties.allow_email === 'true';
 
             var role = app.Running.User.getProperty('user_role');
             var allow_quit = !AuthUtils.requiresCaptain(role);
             data.allow_quit = allow_quit;
 
-            data.allow_post = data.properties.allow_post == 'true';
+            data.allow_post = data.properties.allow_post === 'true';
             data.has_page = false;
             if (game)
             {

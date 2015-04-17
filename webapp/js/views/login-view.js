@@ -16,26 +16,25 @@ var app = app || {
     Session: {}
 };
 
-(function($) {
+(function() {
     'use strict';
     app.Views.LoginView = Backbone.View.extend({
-
         template: _.template($('#template-login').html()),
-
         events: {
             'click .js-login': 'login'
         },
-
         initialize: function() {
             this.model = app.Session;
+            return this;
         },
         // call the model login function
         login: function(e) {
             var button = $(e.currentTarget);
             var width = button.width();
-            button.html('<i class="fa fa-facebook"></i> | Loading...').css('width', width+'px');
+            button.html('<i class="fa fa-facebook"></i> | ' + strings.loading).css('width', width+'px');
             button.attr('disabled', true);
             this.model.login();
+            return this;
         },
         // render the login page
         render: function() {
@@ -43,5 +42,4 @@ var app = app || {
             return this;
         },
     });
-
-})(jQuery);
+})();

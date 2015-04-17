@@ -34,17 +34,17 @@ var app = app || {
         },
         loadEditor: function(){
             var that = this;
-            this.$el.find(".js-rules-editor").markdown({
+            this.$(".js-rules-editor").markdown({
                 savable:true,
                 saveButtonClass: 'btn btn-md btn-primary',
-                footer: '<div class="rules-saved js-saved hide">Saving...</div>',
+                footer: '<div class="rules-saved js-saved hide">'+strings.saving+'</div>',
                 onSave: function(event) {
                         var rules = event.getContent();
                         that.model.set('rules', rules);
-                        $('.js-saved').removeClass('hide');
+                        that.$('.js-saved').removeClass('hide');
                         that.model.save(null, {success: function(){
-                            $('.js-saved').text('Saved.').fadeOut(2000, function(){
-                                $(this).text('Saving...');
+                            that.$('.js-saved').text(strings.saved).fadeOut(2000, function(){
+                                $(this).text(strings.saving);
                             });
 
                         }});

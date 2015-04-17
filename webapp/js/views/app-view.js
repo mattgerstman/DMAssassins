@@ -16,34 +16,41 @@ var app = app || {
     Session: {}
 };
 
-(function($) {
+(function() {
     'use strict';
     app.Views.AppView = Backbone.View.extend({
         el: '#app',
         // constructor
         events: {
-            'click .js-support' : 'support'
+            'click .js-support' : 'clickSupport'
         },
         initialize: function() {
-            this.$body = $('#js-wrapper-app');
+            this.$body = this.$('.js-wrapper-app');
+            return this;
         },
-        support: function(e) {
-            console.log(e);
+        // handler for when the user clicks support
+        clickSupport: function(e) {
             e.preventDefault();
+            this.showSupport();
+            return this;
+        },
+        showSupport: function() {
             var supportView = new app.Views.SupportView();
             supportView.render();
+            return this;
         },
         // renders a page within the body of the app
         renderPage: function(page) {
             // Removes modal backdrop if we rapidly change pages
             $('.modal-backdrop').remove();
             this.$body.html(page.render().el);
+            return this;
         },
         setCurrentView: function(view) {
             if (app.Running.currentView)
                 app.Running.currentView.remove();
             app.Running.currentView = view;
-
+            return this;
         }
     });
-})(jQuery);
+})();

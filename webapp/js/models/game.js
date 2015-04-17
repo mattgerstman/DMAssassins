@@ -23,7 +23,7 @@ var app = app || {
         // default properties for a game to appear "Loading..."
         defaults: {
             game_id: null,
-            game_name: 'Loading...',
+            game_name: strings.loading,
             game_started: false,
             game_has_password: false,
             member: true
@@ -35,7 +35,7 @@ var app = app || {
         urlRoot: config.WEB_ROOT + 'game/',
         // Determine if teams are enabled for this game
         areTeamsEnabled: function() {
-            return this.getProperty('teams_enabled') == 'true';
+            return this.getProperty('teams_enabled') === 'true';
         },
         start: function(data, successCallback, errorCallback) {
             var url = this.gameUrl();
@@ -46,7 +46,7 @@ var app = app || {
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function(response) {
-                    if (typeof successCallback == 'function') {
+                    if (typeof successCallback === 'function') {
                         successCallback(that, response);
                     }
                 },
@@ -56,7 +56,7 @@ var app = app || {
                     }
                 }
             });
-
+            return this;
         },
         // set game property
         setProperty: function(key,value, silent) {

@@ -19,7 +19,6 @@ indent_size = 4
 index_style = space
 indent_size = 2
 
-
 # Matches the exact files either package.json or .travis.yml
 [{package.json,Gruntfile.js}]
 indent_style = space

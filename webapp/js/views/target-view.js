@@ -35,7 +35,6 @@ var app = app || {
         needFriends: function() {
             alert('You must grant access to your friends to use this feature');
             return;
-
         },
         getFriends:function() {
             var that = this;
@@ -45,7 +44,7 @@ var app = app || {
                     return that.needFriends();
                 }
                 var user_friends = response.authResponse.grantedScopes.search('user_friends');
-                if (user_friends == -1)
+                if (user_friends === -1)
                 {
                     return that.needFriends();
                 }
@@ -82,7 +81,7 @@ var app = app || {
             if (!secret) {
                 alert("Enter your target's secret to kill them!");
             }
-            $('.js-target-secret').val('');
+            this.$('.js-target-secret').val('');
             var view = this;
             this.model.destroy({
                 headers: {
@@ -92,7 +91,7 @@ var app = app || {
                     view.model.fetch();
                 },
                 error: function(model, response){
-                    if (status == 401)
+                    if (status === 401)
                     {
                         alert(response.responseText);
                     }
@@ -100,9 +99,9 @@ var app = app || {
             });
         },
         secretKeyup: function(e){
-            if (e.keyCode == 13) {
+            if (e.keyCode === 13) {
                 e.preventDefault();
-                var secret = this.$el.find('.js-target-secret').val();
+                var secret = this.$('.js-target-secret').val();
                 if (!secret) {
                     return;
                 }
@@ -111,8 +110,7 @@ var app = app || {
         },
         render: function() {
             var data = this.model.attributes;
-            var activeGame = app.Running.Games.getActiveGame();
-            data.teams_enabled = activeGame && activeGame.areTeamsEnabled();
+            data.teams_enabled = app.Running.Games.getActiveGameTeamsEnabled();
             this.$el.html(this.template(data));
             this.targetFriendsView.$el = this.$el.find('.js-target-friends');
             this.targetFriendsView.render();

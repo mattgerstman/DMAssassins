@@ -177,7 +177,7 @@ var app = app || {
 
             // Set teams to loading if the game has teams
             var teamField = this.$el.find('#js-join-game-team');
-            teamField.find('#js-team-placeholder').text('Loading..');
+            teamField.find('#js-team-placeholder').text(strings.loading);
 
             // Set the teams
             var that = this;
