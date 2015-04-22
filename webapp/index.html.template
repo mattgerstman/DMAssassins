@@ -84,7 +84,7 @@
     <!-- injector:css -->
     <!-- endinjector -->
 
-    <!-- /Navigation Template -->
+    <!-- Navigation Template -->
     <script id="template-nav" type="text/template">
         <nav role="navigation" class="navbar navbar-default navbar-fixed-top">
             <div class="container">

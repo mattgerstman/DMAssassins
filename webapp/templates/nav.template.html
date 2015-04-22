@@ -1,0 +1,75 @@
+<nav role="navigation" class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button data-target="#main_nav" data-toggle="collapse" class="navbar-toggle" type="button">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- @if NODE_ENV='PRODUCTION' -->
+      <a href="#" class="navbar-brand">DMAssassins</a>
+      <!-- @endif -->
+      <!-- @if NODE_ENV='DEVELOPMENT' -->
+      <a href="#" class="navbar-brand">DevAssassins</a>
+      <!-- @endif -->
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="main_nav">
+      <!-- Left Navbar -->
+      <ul class="nav navbar-nav">
+        <li class="js-nav-target
+        {{#if target_disabled ~}}
+          disabled">
+          {{~/if~}}
+          <a class="js-nav-link" href="#target">Target</a>
+        </li>
+        <li class="js-nav-my-profile"><a class="js-nav-link" href="#my_profile">My Profile</a></li>
+        <li class="js-nav-leaderboard"><a class="js-nav-link" href="#leaderboard">Leaderboard</a></li>
+        <li class="js-nav-rules"><a class="js-nav-link" href="#rules">Rules</a></li>
+      </ul>
+
+      <!-- Right Navbar -->
+      <ul class="nav navbar-nav navbar-right">
+        <li class="js-dropdown-parent js-dropdown-parent-games">
+
+        </li>
+        <!-- Admin Links -->
+        {{#if is_admin }}
+          <li class="js-dropdown-parent js-dropdown-parent-admin">
+            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+              <div class="hidden-sm">
+                <span>
+                  Admin
+                </span>
+                <span class="caret"></span>
+              </div>
+              <div class="visible-sm">
+                <span>
+                  Admin
+                </span>
+                <span class="caret"></span>
+              </div>
+            </a>
+            <ul class="dropdown-menu" role="menu" id="js-nav-admin-dropdown">
+              <li dropdown="admin" id="js-nav-users"><a class="js-nav-link" href="#users">Manage Users</a></li>
+              <li dropdown="admin" id="js-nav-edit-rules"><a class="js-nav-link" href="#edit_rules">Edit Rules</a></li>
+              <li dropdown="admin" id="js-nav-game-settings"><a class="js-nav-link" href="#game_settings">Game Settings</a></li>
+              <!-- Super Admin Links -->
+              {{~#if is_super_admin}}
+                  <li dropdown="admin" id="js-nav-targets"><a class="js-nav-link" href="#targets">View Targets</a></li>
+              {{~/if~}}
+            </ul>
+          </li>
+          <!-- Captain Links -->
+          {{~/if~}}
+          {{#if is_captain }}
+            <li id="js-nav-users"><a class="js-nav-link" href="#users">Manage Users</a></li>
+          {{~/if~}}
+          <li id="js-nav-logout"><a class="js-nav-link" href="#logout">Logout</a></li>
+        </ul>
+    </div> <!-- /.navbar-collapse -->
+  </div> <!-- /.container -->
+</nav> <!-- /.navbar -->

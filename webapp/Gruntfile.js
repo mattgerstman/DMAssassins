@@ -166,15 +166,15 @@ module.exports = function(grunt) {
 
   // These plugins provide necessary tasks.
 
+  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-less');
+  grunt.loadNpmTasks('grunt-injector');
+  grunt.loadNpmTasks('grunt-lintspaces');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-env');
   grunt.loadNpmTasks('grunt-preprocess');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-lintspaces');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-injector');
 
   // Default task.
   grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev', 'injector:dev']);
