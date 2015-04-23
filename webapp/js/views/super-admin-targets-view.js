@@ -20,7 +20,7 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.SuperAdminTargetsView = Backbone.View.extend({
-        template: _.template($('#template-super-admin-targets').html()),
+        template: app.Templates.targets,
         tagName:'div',
         initialize: function(){
             this.model = new app.Models.Targets();

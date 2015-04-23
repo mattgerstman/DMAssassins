@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title">Select Page</h4>
+</div>
+<div class="modal-body">
+    <div class="container-fluid">
+        <% _.each(pages, function(page, index) { %>
+            <div class="col-sm-6 col-md-4">
+                <h3 class="page-title js-select-page" data-index="<%= index %>"><%=page.name%></h3>
+                <div class="container-select-page">
+                    <img class="select-page js-select-page" src="https://graph.facebook.com/<%= page.id %>/picture?width=160&access_token=<%=page.access_token%>" data-index="<%= index %>" />
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+<div class="modal-footer">
+    <span class="glyphicon glyphicon-chevron-left  <% if (!previous) { %> arrow-inactive <% } else { %> arrow-active js-page-previous <% } %>"></span>
+    <span class="glyphicon glyphicon-chevron-right <% if (!next)     { %> arrow-inactive <% } else { %> arrow-active js-page-next     <% } %>"></span>
+</div><!-- /.modal-footer -->

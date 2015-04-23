@@ -22,7 +22,7 @@ var app = app || {
     app.Views.AdminEditRulesView = Backbone.View.extend({
 
 
-        template: _.template($('#template-admin-edit-rules').html()),
+        template: app.Templates["edit-rules"],
         tagName: 'div',
 
         initialize: function(params) {

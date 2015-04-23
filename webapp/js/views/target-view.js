@@ -22,7 +22,7 @@ var app = app || {
     app.Views.TargetView = Backbone.View.extend({
 
 
-        template: _.template($('#template-target').html()),
+        template: app.Templates.target,
         tagName: 'div',
 
         // The DOM events specific to an item.

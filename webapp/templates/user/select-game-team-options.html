@@ -1,0 +1,8 @@
+<option value="" id="js-team-placeholder">Select a Team</option>
+<%
+_.each(teams, function(team){
+%>
+    <option value="<%= team.team_id %>"><%= team.team_name %></option>
+<%
+})
+%>

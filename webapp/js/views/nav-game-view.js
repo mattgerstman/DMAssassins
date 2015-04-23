@@ -20,7 +20,7 @@ var app = app || {
 (function($) {
     'use strict';
     app.Views.NavGameView = Backbone.View.extend({
-        template: _.template($('#template-nav-game').html()),
+        template: app.Templates["nav-game"],
         tagName: 'ul',
 
         events: {

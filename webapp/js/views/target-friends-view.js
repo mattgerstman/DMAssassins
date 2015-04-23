@@ -22,7 +22,7 @@ var app = app || {
     app.Views.TargetFriendsView = Backbone.View.extend({
 
 
-        template: _.template($('#template-target-friends').html()),
+        template: app.Templates["target-friends"],
         tagName: 'div',
         el: '.js-target-friends',
         // constructor
@@ -53,8 +53,7 @@ var app = app || {
                 var i = 0;
                 var user_facebook_id = app.Running.User.get('facebook_id');
 
-                var template = _.template($('#template-mutual-friends').html());
-                that.$el.find('.js-mutual-friends').html(template({friends: friends}));
+                that.$el.find('.js-mutual-friends').html(this.template({friends: friends}));
             });
         },
         render: function() {

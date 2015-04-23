@@ -22,7 +22,7 @@ var app = app || {
     app.Views.SelectGameView = Backbone.View.extend({
 
 
-        template: _.template($('#select-game-template').html()),
+        template: app.Templates["select-game"],
         tagName: 'div',
         events: {
             'click  .js-create-game-submit'          : 'createGame',
@@ -193,7 +193,7 @@ var app = app || {
                     // if we have teams mark it as not disabled
                     teamField.attr('disabled', false);
                     // render team select
-                    var teamOptionsTemplate = _.template($('#select-game-team-option').html());
+                    var teamOptionsTemplate = app.Templates["select-game-team-options"];
                     var teamOptionsHTML = teamOptionsTemplate({teams: app.Running.Teams.toJSON()});
                     teamField.html(teamOptionsHTML);
                 },

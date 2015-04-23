@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.AdminUserView = Backbone.View.extend({
 
-        template: _.template($('#template-admin-user').html()),
+        template: app.Templates.user,
         tagName:'div',
         initialize: function(model){
             this.model = model;

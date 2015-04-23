@@ -22,7 +22,7 @@ var app = app || {
     app.Views.RulesView = Backbone.View.extend({
 
 
-        template: _.template($('#template-rules').html()),
+        template: app.Templates.rules,
         tagName: 'div',
 
         initialize: function(params) {

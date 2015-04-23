@@ -22,7 +22,7 @@ var app = app || {
     app.Views.AdminKillTimerView = Backbone.View.extend({
 
 
-        template: _.template($('#template-modal-kill-timer').html()),
+        template: app.Templates["modal-kill-timer"],
         tagName: 'div',
         el: '.js-wrapper-kill-timer',
         events: {

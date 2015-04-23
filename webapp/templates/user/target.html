@@ -1,0 +1,35 @@
+<div class="user_view">
+     <div class="view text-center">
+        <div class="row">
+            <label>Name:</label> <%= properties.name %>
+        </div>
+        <div class="row">
+            <label>Facebook:</label> <a href="<%= properties.facebook %>"><%= properties.facebook.replace('https://facebook','fb') %></a>
+        </div>
+        <% if (teams_enabled && properties.team) { %>
+            <div class="row">
+                <label>Team:</label> <%= properties.team %>
+            </div>
+        <% } %>
+        <div class="row">
+            <a class="thumbnail profile-thumbnail js-target-picture">
+                <div class="profile-thumbnail-container">
+                    <img src=<%= properties.photo_thumb %>>
+                </div>
+            </a>
+        </div>
+        <div class="row user-column js-target-friends">
+        </div>
+        <div class="row user-column">
+            <form class="form-inline">
+                <input class="form-control input-secret js-target-secret" placeholder="Enter Secret"/>
+                <button type="button" class="btn btn-danger btn-kill js-target-kill">Kill Target</button>
+            </form>
+        </div>
+     </div>
+</div>
+<div class="modal fade js-modal-target-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true" data-keyboard="true">
+  <div class="modal-dialog">
+    <img class="img-responsive center-block" src=<%= properties.photo %> />
+  </div>
+</div>

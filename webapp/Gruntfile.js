@@ -17,10 +17,39 @@ module.exports = function(grunt) {
         'js/lib/*.js',
         'js/models/*.js',
         'js/collections/*.js',
+        'dist/<%= pkg.version %>/templates/*.js',
         'js/views/*.js',
         'js/routers/*.js',
         'js/*.js'
       ]
+    },
+    jst: {
+      site: {
+        options: {
+          prettify: true,
+          namespace: 'app.Templates',
+          processName: function(path) {
+            return path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'));
+          }
+        },
+        files: {
+          "dist/<%= pkg.version %>/templates/user.js": ["templates/user/*.html"],
+          "dist/<%= pkg.version %>/templates/admin.js": ["templates/admin/*.html"],
+          "dist/<%= pkg.version %>/templates/superadmin.js": ["templates/superadmin/*.html"]
+        }
+      },
+      plotTwists: {
+        options: {
+          prettify: true,
+          namespace: 'app.Templates.PlotTwist',
+          processName: function(path) {
+            return path.substring(path.lastIndexOf('/')+1, path.lastIndexOf('.'));
+          }
+        },
+        files: {
+          "dist/<%= pkg.version %>/templates/plot-twists.js": ["templates/plot-twists/*.html"],
+        }
+      }
     },
     uglify: {
       options: {
@@ -28,19 +57,28 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       dist: {
-        src: '<%= dependencies.js %>',
+        src: [
+          '<%= dependencies.js %>',
+          '<%= dependencies.templates %>'
+        ],
         dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.min.js'
       }
     },
     jshint: {
-      files: '<%= dependencies.js %>',
+      files: [
+        '<%= dependencies.js %>',
+        '!dist/<%= pkg.version %>/templates/*.js'
+      ],
       gruntfile: {
         src: 'Gruntfile.js'
       },
     },
     lintspaces: {
 	    javascript: {
-        src: '<%= dependencies.js %>',
+        src: [
+          '<%= dependencies.js %>',
+          '!dist/<%= pkg.version %>/templates/*.js'
+        ],
         options: {
           newline: true,
           newlineMaximum: 2,
@@ -152,6 +190,10 @@ module.exports = function(grunt) {
       index: {
         files: 'index.html.template',
         tasks: ['env:dev', 'preprocess:dev']
+      },
+      templates: {
+        files: 'templates/*/*',
+        tasks: ['jst']
       }
     },
     connect: {
@@ -168,6 +210,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-jst');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-injector');
   grunt.loadNpmTasks('grunt-lintspaces');
@@ -177,8 +220,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-preprocess');
 
   // Default task.
-  grunt.registerTask('dev', ['lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev', 'injector:dev']);
-  grunt.registerTask('prod', ['uglify', 'less:prod', 'env:prod', 'preprocess:prod', 'injector:prod']);
+  grunt.registerTask('dev', ["jst", 'lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev', 'injector:dev']);
+  grunt.registerTask('prod', ["jst", 'uglify', 'less:prod', 'env:prod', 'preprocess:prod', 'injector:prod']);
   grunt.registerTask('server', 'connect');
   grunt.registerTask('default', ['dev']);
 };

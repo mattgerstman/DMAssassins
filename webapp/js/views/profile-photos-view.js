@@ -22,7 +22,7 @@ var app = app || {
     app.Views.ProfilePhotosView = Backbone.View.extend({
 
 
-        template: _.template($('#template-modal-change-photo').html()),
+        template: app.Templates["modal-change-photo"],
         tagName: 'div',
         el: '.js-profile-select',
         events: {

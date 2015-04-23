@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.AdminGameSettingsView = Backbone.View.extend({
 
-        template: _.template($('#template-admin-game-settings').html()),
+        template: app.Templates["game-settings"],
         tagName:'div',
         events: {
             'click .js-end-game'            : 'endGameModal',
@@ -125,7 +125,7 @@ var app = app || {
         },
         twistModalOptions: {
             delete_targets: {
-                id:           '#plot-twist-body-delete-targets-template',
+                template:     'delete-targets',
                 title:        'Delete Targets',
                 twist_name:   'delete_targets',
                 submit_class: 'btn-primary',
@@ -133,7 +133,7 @@ var app = app || {
                 checked:       true
             },
             randomize_targets: {
-                id:           '#plot-twist-body-randomize-targets-template',
+                template:     'randomize-targets',
                 title:        'Randomize Targets',
                 twist_name:   'randomize_targets',
                 submit_class: 'btn-primary',
@@ -141,7 +141,7 @@ var app = app || {
                 checked:       true
             },
             reverse_targets: {
-                id:           '#plot-twist-body-reverse-targets-template',
+                template:      'reverse-targets',
                 title:        'Reverse Targets',
                 twist_name:   'reverse_targets',
                 submit_class: 'btn-primary',
@@ -149,7 +149,7 @@ var app = app || {
                 checked:       true
             },
             successive_kills: {
-                id:           '#plot-twist-body-successive-kills-template',
+                template:      'successive-kills',
                 title:        'Kill Mode - Successive Kills Count Double',
                 twist_name:   'successive_kills',
                 submit_class: 'btn-primary',
@@ -157,7 +157,7 @@ var app = app || {
                 checked:       false
             },
             strong_weak: {
-                id:           '#plot-twist-body-strong-weak-template',
+                template:     'strong-weak',
                 title:        'Strong Target Weak',
                 twist_name:   'strong_weak',
                 submit_class: 'btn-primary',
@@ -165,7 +165,7 @@ var app = app || {
                 checked:       true
             },
             strong_closed: {
-                id:           '#plot-twist-body-strong-closed-template',
+                template:     'strong-closed',
                 title:        'Put Strong Players in a Closed Loop',
                 twist_name:   'strong_closed',
                 submit_class: 'btn-primary',
@@ -173,7 +173,7 @@ var app = app || {
                 checked:       true
             },
             timer_24: {
-                id:           '#plot-twist-body-timer-24-template',
+                template:     'timer-24',
                 title:        '24 Hours To Kill',
                 twist_name:   'timer_24',
                 submit_class: 'btn-primary',
@@ -186,12 +186,12 @@ var app = app || {
             var twist = $(e.currentTarget).attr('id');
             var data = this.twistModalOptions[twist];
 
-            var modal = _.template($('#template-modal-plot-twist').html());
+            var modal = app.Templates["modal-plot-twist"];
 
             var detailVars = {};
             detailVars.teams_enabled = this.model.areTeamsEnabled();
 
-            var details = _.template($(data.id).html());
+            var details = app.Templates.PlotTwist[data.template];
             data.details = details(detailVars);
 
             var modalHTML = modal(data);

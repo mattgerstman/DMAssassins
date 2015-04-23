@@ -1,4 +1,5 @@
 var config = {
+  BRAND_NAME: "Assassins",
   DEFAULT_VIEW: "target",
   ENV: "",
 	LOCAL_ROOT : '/Users/Matthew/Dropbox/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/',

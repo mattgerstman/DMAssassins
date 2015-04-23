@@ -1,0 +1,62 @@
+<div class="container">
+    <% if (teams_enabled) { %>
+        <h3>Team Rankings</h3>
+        <table class="stripe compact js-table-leaderboard-teams">
+            <thead>
+                <th>Team Name</th>
+                <th>Total Players</th>
+                <th>Players Left</th>
+                <th>Kills</th>
+                <th>Avg Kills</th>
+            </thead>
+            <tbody>
+                    <%
+                    _.each(teams, function(team, name) {
+                    %>
+                    <tr>
+                        <td style="width:<%=team_col_width%>%"><%=name%></td>
+                        <td style="width:<%=team_col_width%>%"><%=team.players%></td>
+                        <td style="width:<%=team_col_width%>%"><%=team.alive%></td>
+                        <td style="width:<%=team_col_width%>%"><%=team.kills%></td>
+                        <td style="width:<%=team_col_width%>%">
+                          <% if (!parseFloat(team.players)) { %>
+                            &nbsp;
+                          <% } else { %>
+                            <%=parseFloat(team.kills/team.players).toFixed(2)%>
+                          <% } %>
+                        </td>
+                    </tr>
+                    <%
+                    })
+                    %>
+            </tbody>
+        </table>
+    <% } %>
+    <h3>Player Rankings</h3>
+    <table class="stripe compact js-table-leaderboard-users">
+        <thead>
+            <th style="width:<%=user_col_width%>%">Name</th>
+            <% if (teams_enabled) { %>
+                <th style="width:<%=user_col_width%>%">Team</th>
+            <% } %>
+            <th style="width:<%=user_col_width%>%">Alive</th>
+            <th style="width:<%=user_col_width%>%">Kills</th>
+        </thead>
+        <tbody>
+            <%
+            _.each(users, function(user) {
+            %>
+            <tr>
+                <td><%=user.name%></td>
+                <% if (teams_enabled) { %>
+                    <td><%= user.team_name %></td>
+                <% } %>
+                <td><%= user.alive ? 'Yes' : 'No'%></td>
+                <td><%= user.kills %></td>
+            </tr>
+            <%
+            })
+            %>
+        </tbody>
+    </table>
+</div>

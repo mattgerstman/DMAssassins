@@ -21,8 +21,7 @@ var app = app || {
     'use strict';
     app.Views.SupportView = Backbone.View.extend({
 
-
-        template: _.template($('#template-support').html()),
+        template: app.Templates.support,
         tagName: 'div',
         el: '.js-wrapper-support',
         events: {

@@ -22,7 +22,7 @@ var app = app || {
     app.Views.ProfileView = Backbone.View.extend({
 
 
-        template: _.template($('#template-profile').html()),
+        template: app.Templates.profile,
         tagName: 'div',
 
         // The DOM events specific to an item.
@@ -59,7 +59,7 @@ var app = app || {
             var templateVars = {
                 quit_game_name: app.Running.Games.getActiveGame().get('game_name')
             };
-            var template = _.template($('#template-modal-quit').html());
+            var template = app.Templates["modal-quit"];
             var html = template(templateVars);
             $('.js-wrapper-quit-modal').html(html);
             $('.js-profile-quit-modal').modal();

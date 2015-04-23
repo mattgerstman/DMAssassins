@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.AdminUsersTeamsView = Backbone.View.extend({
 
-        template: _.template($('#template-admin-users-teams').html()),
+        template: app.Templates["users-teams"],
         tagName: 'ul',
         initialize: function() {
             this.collection = app.Running.Teams;

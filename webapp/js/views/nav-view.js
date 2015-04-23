@@ -17,12 +17,12 @@ var app = app || {
     Session: {}
 };
 
-(function($) {
+(function() {
     'use strict';
     app.Views.NavView = Backbone.View.extend({
 
 
-        template: _.template($('#template-nav').html()),
+        template: app.Templates.nav,
         el: '.js-wrapper-nav',
 
         tagName: 'nav',
@@ -43,6 +43,7 @@ var app = app || {
         render: function() {
 
             var data = this.model.attributes;
+            data.brand_name = config.BRAND_NAME;
             this.$el.html(this.template(data));
             this.updateHighlight();
             this.NavGameView.setElement(this.$('.js-dropdown-parent-games')).render();
@@ -88,4 +89,4 @@ var app = app || {
         }
     });
 
-})(jQuery);
+})();

@@ -22,7 +22,7 @@ var app = app || {
     app.Views.AdminUsersView = Backbone.View.extend({
 
 
-        template: _.template($('#admin-users-template').html()),
+        template: app.Templates.users,
         tagName: 'div',
 
         // The DOM events specific to an item.

@@ -22,7 +22,7 @@ var app = app || {
     app.Views.AdminPagesView = Backbone.View.extend({
 
 
-        template: _.template($('#template-modal-pages').html()),
+        template: app.Templates['modal-pages'],
         tagName: 'div',
         el: '.js-pages-select',
         events: {

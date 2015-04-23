@@ -19,7 +19,7 @@ var app = app || {
 (function() {
     'use strict';
     app.Views.LoginView = Backbone.View.extend({
-        template: _.template($('#template-login').html()),
+        template: app.Templates.login,
         events: {
             'click .js-login': 'login'
         },

@@ -21,7 +21,7 @@ var app = app || {
     'use strict';
     app.Views.LeaderboardView = Backbone.View.extend({
 
-        template: _.template($('#template-leaderboard').html()),
+        template: app.Templates.leaderboard,
         tagName: 'div',
 
         // constructor

@@ -1,0 +1,30 @@
+<div class="modal fade js-modal-plot-twist" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title"><%= title %></h4>
+      </div>
+      <form role="form" id="plot_twist_form">
+        <div class="modal-body">
+            <div class="twist-details"><%= details %></div>
+            <form>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" class="js-notify-plot-twist" checked /> Notify Users By Email
+                    </label>
+                </div>
+            </form>
+             <!-- @endif -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn hidden-xs js-submit-twist <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
+
+            <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-block visible-xs js-submit-twist  <%=submit_class%>" data-twist-name="<%= twist_name %>"><%= submit_text %></button>
+        </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
