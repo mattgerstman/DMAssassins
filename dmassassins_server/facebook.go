@@ -53,8 +53,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 		extra := make(map[string]interface{})
 		extra[`facebook`] = res
 		extra[`facebook_id`] = facebookId
-		sentryUser := NewSentryUser(user)
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra, sentryUser)
+		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra, nil)
 	}
 
 	err = res.DecodeField("link", &facebook)
