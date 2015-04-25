@@ -12,7 +12,7 @@ import (
 func getFbApp() *fb.App {
 	fb.Version = "v2.2"
 	var app = fb.New(Config.FBAppId, Config.FBAppSecret)
-	app.RedirectUri = "http://dmassassins.com"
+	app.RedirectUri = "http://playassassins.com"
 	return app
 }
 
@@ -48,7 +48,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	err = res.DecodeField("email", &email)
 	if err != nil {
-		email = `none-provided@dmassassins.com`
+		email = `none-provided@playassassins.com`
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 		extra := make(map[string]interface{})
 		extra[`facebook`] = res

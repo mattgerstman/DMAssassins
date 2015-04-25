@@ -62,7 +62,7 @@
     <meta name="google-site-verification" content="yRrmu_JevwQq80UCPBJNVh1K-V-FbxVabk8wXBKpzgg" />
 
     <!-- @if NODE_ENV='PRODUCTION' -->
-    <title>DMAssassins</title>
+    <title>Assassins</title>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <!--link href="/assets/styles/bootswatch.css" rel="stylesheet" type="text/css"-->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -96,7 +96,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <!-- @if NODE_ENV='PRODUCTION' -->
-                    <a href="#" class="navbar-brand">DMAssassins</a>
+                    <a href="#" class="navbar-brand">Assassins</a>
                     <!-- @endif -->
                     <!-- @if NODE_ENV='DEVELOPMENT' -->
                     <a href="#" class="navbar-brand">DevAssassins</a>
@@ -1241,7 +1241,7 @@
                 <h4 class="modal-title">End Game</h4>
               </div>
               <div class="modal-body">
-                <p>Are you sure you want to end the game <strong><span><%= game_name %></span></strong>? This will immediately delete the game from dmassassins.com<br />
+                <p>Are you sure you want to end the game <strong><span><%= game_name %></span></strong>? This will immediately delete the game from playassassins.com<br />
                     If you're not ready to end the game, close this window.
                 </p>
               <form>
