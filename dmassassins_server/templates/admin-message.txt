@@ -1,9 +1,9 @@
 Hey %recipient.first_name%,
 
-The admin for {{.GameName}} DMAssassins has sent out the following update:
+The admin for {{.GameName}} Assassins has sent out the following update:
 
 {{.Message}}
 
--The DMAssassins Team
+-The Assassins Team
 
-To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
+To unsubscribe from all future Assassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%

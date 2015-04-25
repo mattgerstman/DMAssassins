@@ -3,7 +3,7 @@ Hey %recipient.first_name%,
 Unfortunately the weakest player from your team was killed and you were next on the chopping block. As a result you're now dead. Better luck next time!
 
 Sincerely,
-The DMAssassins Team
+The Assassins Team
 
 
-To unsubscribe from all future DMAssassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
+To unsubscribe from all future Assassins emails go to http://{{.APIDomain}}unsubscribe/%recipient.user_id%
