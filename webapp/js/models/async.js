@@ -23,7 +23,6 @@
                 url: url,
                 cache: true,
                 // dataType: "script",
-
 /*
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader ("Authorization", "Basic " + base64Key);
