@@ -27,6 +27,11 @@ func GetDumbUser(userId uuid.UUID) (user *User) {
 
 // Add a user to the DB and return it as a user object
 func NewUser(username, email, facebookId string, properties map[string]string) (user *User, appErr *ApplicationError) {
+	fmt.Println(username)
+	fmt.Println(email)
+	fmt.Println(facebookId)
+	fmt.Println(properties)
+
 	// Generate the UUID and insert it
 	userId := uuid.NewRandom()
 

@@ -3,7 +3,6 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-	"fmt"
 	"github.com/getsentry/raven-go"
 	fb "github.com/huandu/facebook"
 )
@@ -49,10 +48,13 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	err = res.DecodeField("email", &email)
 	if err != nil {
 		email = "none-provided@playassassins.com"
-		appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
-		extra := make(map[string]interface{})
-		extra[`facebook_id`] = facebookId
-		LogWithSentry(appErr, nil, raven.WARNING, extra, nil)
+		// DROIDS ask taylor why this would cause a panic
+		// I think the appErr is getting dereferenced and then broken
+
+		// appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
+		// extra := make(map[string]interface{})
+		// extra[`facebook_id`] = facebookId
+		// LogWithSentry(appErr, nil, raven.WARNING, nil, nil)
 	}
 
 	err = res.DecodeField("link", &facebook)
@@ -335,9 +337,7 @@ func (game *Game) FacebookPost(message string) (appErr *ApplicationError) {
 	}
 
 	session := getFacebookSession(accessToken)
-	res, err := session.Post(`/`+pageId+`/feed`, fb.Params{"message": message, "access_token": accessToken})
-	fmt.Println(res)
-	fmt.Println(err)
+	_, err := session.Post(`/`+pageId+`/feed`, fb.Params{"message": message, "access_token": accessToken})
 	if err != nil {
 		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}
