@@ -48,10 +48,9 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	err = res.DecodeField("email", &email)
 	if err != nil {
-		email = `none-provided@playassassins.com`
+		email = "none-provided@playassassins.com"
 		appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
 		extra := make(map[string]interface{})
-		extra[`facebook`] = res
 		extra[`facebook_id`] = facebookId
 		LogWithSentry(appErr, nil, raven.WARNING, extra, nil)
 	}
