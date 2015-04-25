@@ -8,16 +8,7 @@
 // handles the game dropdown in the nav
 
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.NavGameView = Backbone.View.extend({
         template: app.Templates["nav-game"],
@@ -47,4 +38,4 @@ var app = app || {
         }
     });
 
-})(jQuery);
+})();

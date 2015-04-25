@@ -7,15 +7,6 @@
 //
 // Handles all the URL *Magic*
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
 
     app.Routers.Router = app.Routers.BaseRouter.extend({
@@ -186,7 +177,16 @@ var app = app || {
                 });
             }
             else {
-                //No problem handle the route
+                // No problem handle the route
+                if (needCaptain) {
+                    return app.Running.Async.requiresCaptain(next);
+                }
+                if (needAdmin) {
+                    return app.Running.Async.requiresAdmin(next);
+                }
+                if (needSuperAdmin) {
+                    return app.Running.Async.requiresSuperAdmin(next);
+                }
                 return next();
             }
         },

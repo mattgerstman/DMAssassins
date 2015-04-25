@@ -7,15 +7,6 @@
 //
 // Manages all local storage information and helps keep various models in sync
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
 
     app.Models.Session = Backbone.Model.extend({

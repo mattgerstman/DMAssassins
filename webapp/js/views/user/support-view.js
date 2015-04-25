@@ -7,17 +7,7 @@
 //
 // displays rules for a game
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.SupportView = Backbone.View.extend({
 
@@ -71,4 +61,4 @@ var app = app || {
 
     });
 
-})(jQuery);
+})();

@@ -7,15 +7,6 @@
 //
 // Single game model
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Models.Game = Backbone.Model.extend({

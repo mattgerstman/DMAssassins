@@ -7,17 +7,7 @@
 //
 // displays user profile
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.AdminUserView = Backbone.View.extend({
 
@@ -78,4 +68,4 @@ var app = app || {
             return this;
         }
     });
-})(jQuery);
+})();

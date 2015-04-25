@@ -8,15 +8,6 @@
 // displays user profile
 
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function($) {
     'use strict';
     app.Views.AdminUsersView = Backbone.View.extend({

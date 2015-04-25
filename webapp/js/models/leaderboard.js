@@ -7,14 +7,6 @@
 //
 // Leaderboard model, displays high scores for a game
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
 (function() {
     'use strict';
 

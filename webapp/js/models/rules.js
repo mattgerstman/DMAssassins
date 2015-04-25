@@ -7,15 +7,6 @@
 //
 // Rules model, loads rules from the db so that admins can define custom rules per game
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
 (function() {
     'use strict';
 

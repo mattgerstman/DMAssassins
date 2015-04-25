@@ -8,16 +8,7 @@
 // displays rules for a game
 
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.RulesView = Backbone.View.extend({
 
@@ -42,4 +33,4 @@ var app = app || {
 
     });
 
-})(jQuery);
+})();

@@ -7,17 +7,7 @@
 //
 // target view
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.TargetView = Backbone.View.extend({
 
@@ -117,4 +107,4 @@ var app = app || {
             return this;
         }
     });
-})(jQuery);
+})();

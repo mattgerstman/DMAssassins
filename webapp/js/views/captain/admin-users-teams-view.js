@@ -8,15 +8,6 @@
 // handles the game dropdown in the nav
 
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function($) {
     'use strict';
     app.Views.AdminUsersTeamsView = Backbone.View.extend({

@@ -39,6 +39,7 @@ const (
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 
 	unsubscribePath = "/unsubscribe/{user_id}"
+	jsPath          = "/js/{portal}/{version}/{file}"
 	supportPath     = "/support/"
 	sessionPath     = "/session/"
 	homePath        = "/"
@@ -211,11 +212,14 @@ func StartServer() {
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
+	r.HandleFunc(jsPath, JSHandler()).Methods("GET")
+
 	timeoutHandler := http.TimeoutHandler(r, time.Second*20, `Timeout Occurred!`)
 	corsHandler := corsHandler(timeoutHandler)
 	clearHandler := context.ClearHandler(corsHandler)
 
 	handler := clearHandler
 	http.Handle("/", handler)
+
 	http.ListenAndServe(":8000", nil)
 }

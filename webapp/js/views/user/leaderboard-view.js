@@ -7,17 +7,7 @@
 //
 // shows the list of high scores
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.LeaderboardView = Backbone.View.extend({
 
@@ -63,4 +53,4 @@ var app = app || {
 
     });
 
-})(jQuery);
+})();

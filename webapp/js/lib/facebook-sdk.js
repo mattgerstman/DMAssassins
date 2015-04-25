@@ -1,13 +1,3 @@
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-
 $(function() {
 
     // This is called with the results from from FB.getLoginStatus().

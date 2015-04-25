@@ -7,15 +7,6 @@
 //
 // model for nav
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Models.Nav = Backbone.Model.extend({

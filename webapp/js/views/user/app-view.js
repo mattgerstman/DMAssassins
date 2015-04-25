@@ -7,15 +7,6 @@
 //
 // loads pages within the body of the app
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Views.AppView = Backbone.View.extend({

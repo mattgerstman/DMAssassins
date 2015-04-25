@@ -7,16 +7,6 @@
 //
 // User model, manages single user
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-
 (function() {
     'use strict';
 

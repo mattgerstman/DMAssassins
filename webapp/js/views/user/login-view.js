@@ -7,15 +7,6 @@
 //
 // shows the login screen
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Views.LoginView = Backbone.View.extend({

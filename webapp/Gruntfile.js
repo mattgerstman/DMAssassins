@@ -17,8 +17,8 @@ module.exports = function(grunt) {
         'js/lib/*.js',
         'js/models/*.js',
         'js/collections/*.js',
-        'dist/<%= pkg.version %>/templates/*.js',
-        'js/views/*.js',
+        'dist/<%= pkg.version %>/templates/user.js',
+        'js/views/user/*.js',
         'js/routers/*.js',
         'js/*.js'
       ]
@@ -34,8 +34,9 @@ module.exports = function(grunt) {
         },
         files: {
           "dist/<%= pkg.version %>/templates/user.js": ["templates/user/*.html"],
-          "dist/<%= pkg.version %>/templates/admin.js": ["templates/admin/*.html"],
-          "dist/<%= pkg.version %>/templates/superadmin.js": ["templates/superadmin/*.html"]
+          "dist/captain/<%= pkg.version %>/templates/captain.js": ["templates/captain/*.html"],
+          "dist/admin/<%= pkg.version %>/templates/admin.js": ["templates/admin/*.html"],
+          "dist/superadmin/<%= pkg.version %>/templates/superadmin.js": ["templates/superadmin/*.html"]
         }
       },
       plotTwists: {
@@ -47,7 +48,7 @@ module.exports = function(grunt) {
           }
         },
         files: {
-          "dist/<%= pkg.version %>/templates/plot-twists.js": ["templates/plot-twists/*.html"],
+          "dist/admin/<%= pkg.version %>/templates/plot-twists.js": ["templates/plot-twists/*.html"],
         }
       }
     },
@@ -61,6 +62,28 @@ module.exports = function(grunt) {
           '<%= dependencies.js %>'
         ],
         dest: 'dist/<%= pkg.version %>/<%= pkg.name %>.min.js'
+      },
+      captain: {
+        src: [
+          'dist/<%= pkg.version %>/templates/captain.js',
+          'js/views/captain/*.js',
+        ],
+        dest: 'dist/captain/<%= pkg.version %>/<%= pkg.name %>-captain.min.js'
+      },
+      admin: {
+        src: [
+          'dist/<%= pkg.version %>/templates/admin.js',
+          'dist/<%= pkg.version %>/templates/plot-twist.js',
+          'js/views/admin/*.js',
+        ],
+        dest: 'dist/admin/<%= pkg.version %>/<%= pkg.name %>-admin.min.js'
+      },
+      superadmin: {
+        src: [
+          'dist/<%= pkg.version %>/templates/superadmin.js',
+          'js/views/superadmin/*.js',
+        ],
+        dest: 'dist/superadmin/<%= pkg.version %>/<%= pkg.name %>-superadmin.min.js'
       }
     },
     jshint: {
@@ -136,6 +159,8 @@ module.exports = function(grunt) {
         files: {
           'index.html' : [
             '<%= dependencies.js %>',
+            'dist/<%= pkg.version %>/templates/*.js',
+            'js/views/*/*.js',
             '<%= less.dev.dest %>'
           ]
         }

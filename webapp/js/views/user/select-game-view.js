@@ -7,17 +7,7 @@
 //
 // handles game selection
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-(function($) {
+(function() {
     'use strict';
     app.Views.SelectGameView = Backbone.View.extend({
 
@@ -213,4 +203,4 @@ var app = app || {
         }
 
     });
-})(jQuery);
+})();

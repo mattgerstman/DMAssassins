@@ -1,13 +1,6 @@
 // Targets Collection. Handles all of the targets for a game for a super admin
 // js/collections/targets.js
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
+
 (function() {
     'use strict';
     app.Models.Targets = Backbone.Model.extend({

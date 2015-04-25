@@ -6,17 +6,7 @@
 // MIT License.
 //
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 // Instantiates all of the running models, routers, and session
-
 $(document).ready(function() {
     'use strict';
 
@@ -49,6 +39,8 @@ $(document).ready(function() {
 
     app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.handleRole);
     app.Running.User.listenTo(app.Running.User, 'change', app.Running.User.handleRole);
+
+    app.Running.Async = new app.Models.Async();
 
     app.Running.Router = new app.Routers.Router();
     Backbone.history.start();

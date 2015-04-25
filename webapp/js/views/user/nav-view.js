@@ -7,16 +7,6 @@
 //
 // handles the nav bar at the top
 
-
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Views.NavView = Backbone.View.extend({
@@ -88,5 +78,4 @@ var app = app || {
             return this;
         }
     });
-
 })();
