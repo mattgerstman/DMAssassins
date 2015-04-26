@@ -43,6 +43,6 @@ $(document).ready(function() {
     app.Running.Async = new app.Models.Async();
 
     app.Running.Router = new app.Routers.Router();
-    Backbone.history.start();
+    Backbone.history.start({ pushState: true });
 
 });

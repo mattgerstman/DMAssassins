@@ -34,46 +34,46 @@
 
         },
         // routes that require we have a game that has been started
-        requiresTarget: ['', '#target'],
+        requiresTarget: ['', 'target'],
 
         // routes that require just authentication
-        requiresJustAuth: ['#multigame'],
+        requiresJustAuth: ['multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules'],
+        requiresGameAndAuth: ['my_profile', 'join_game', 'leaderboard', 'rules'],
 
         // routes that require the user is at least a team captain
-        requiresCaptain: ['#users'],
+        requiresCaptain: ['users'],
 
         // routes that require is at least a game admin
-        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],
+        requiresAdmin: ['edit_rules', 'game_settings', 'plot_twists', 'email_users'],
 
         // routes that require is a super admin
-        requiresSuperAdmin: ['#targets'],
+        requiresSuperAdmin: ['targets'],
 
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
 
         // routes that a logged in user can't access
-        preventAccessWhenAuth: ['#login'],
+        preventAccessWhenAuth: ['login'],
 
         // place to redirect users for requiresGameAndAuth
-        redirectWithoutGame: '#multigame',
+        redirectWithoutGame: 'multigame',
 
         // place to redirect logged in users who don't have a started game
         redirectWithoutGameStarted: 'my_profile',
 
         // place to redirect users who aren't logged in
-        redirectWithoutAuth: '#login',
+        redirectWithoutAuth: 'login',
 
         // place to redirect to when a user doesn't have a target
-        redirectWithoutTarget: '#my_profile',
+        redirectWithoutTarget: 'my_profile',
 
         before: function(params, next) {
 
             // is the user authenticated
             var isAuth = app.Session.get('authenticated') === true;
-            var path = Backbone.history.location.hash;
+            var path = Backbone.history.location.pathname;
 
             // do we need a game and authentication
             var needGameAndAuth = _.contains(this.requiresGameAndAuth, path);
@@ -243,6 +243,7 @@
         },
         // profile route
         my_profile: function() {
+            console.log('my_profile');
             var view = new app.Views.ProfileView();
             app.Running.AppView.setCurrentView(view);
             this.render();

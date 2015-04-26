@@ -99,15 +99,28 @@ func RequiresLogin(r *http.Request) (appErr *ApplicationError) {
 	return nil
 }
 
-// Compare two user roles by their int values
-func CompareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
-	var roles = map[string]int{
+func getRoleMap() (roleMap map[string]int) {
+	return map[string]int{
 		"dm_super_admin": RoleSuperAdmin,
 		"dm_admin":       RoleAdmin,
 		"dm_captain":     RoleCaptain,
 		"dm_user":        RoleUser,
 	}
+}
+
+// Compare two user roles by their int values
+func CompareRole(role string, roleId int) (greaterThanOrEqualTo bool) {
+	roles := getRoleMap()
 	return roles[role] >= roleId
+}
+
+// Compare two user roles by their int values
+func GetHigherRole(role1, role2 string) string {
+	roles := getRoleMap()
+	if roles[role1] >= roles[role2] {
+		return role1
+	}
+	return role2
 }
 
 // Requires the same user, captain for that team, or admin for that game
@@ -249,6 +262,48 @@ func validateFacebookToken(facebookToken, token, facebookId string) *Application
 	return nil
 }
 
+// gets the highest role a user has in any game from the request
+func GetHighestRoleFromRequest(r *http.Request) (highestRole string, appErr *ApplicationError) {
+	userId, token, appErr := GetBasicAuth(r)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	user, appErr := GetUserById(userId)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	facebookToken, appErr := user.GetToken()
+	if appErr != nil {
+		return "", appErr
+	}
+
+	appErr = validateFacebookToken(facebookToken, token, user.FacebookId)
+	if appErr != nil {
+		return "", appErr
+	}
+
+	rows, err := db.Query("SELECT distinct(user_role) FROM dm_user_game_mapping WHERE user_id = $1", userId.String())
+	if err == sql.ErrNoRows {
+		return "", NewApplicationError("No Game Mappings", err, ErrCodeNoGameMappings)
+	}
+	if err != nil {
+		return "", NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	highestRole = "dm_user"
+	for rows.Next() {
+		var dbRole string
+		rows.Scan(&dbRole)
+		highestRole = GetHigherRole(highestRole, dbRole)
+	}
+
+	SetUserForRequest(r, user)
+
+	return highestRole, nil
+}
+
 // Gets the userRole, teamId, and userId from the request to be validated upstream
 // We also use this to set up the user context for the request itself
 func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, userId uuid.UUID, appErr *ApplicationError) {
@@ -258,6 +313,11 @@ func getRoleFromRequest(r *http.Request) (userRole string, teamId uuid.UUID, use
 	}
 	vars := mux.Vars(r)
 	gameId := uuid.Parse(vars["game_id"])
+	if gameId == nil {
+		msg := "Invalid Game Id " + vars["game_id"]
+		err := errors.New(msg)
+		return "", nil, nil, NewApplicationError(msg, err, ErrCodeInvalidUUID)
+	}
 
 	var facebookId string
 	var teamIdBuffer, facebookToken, email, username sql.NullString

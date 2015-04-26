@@ -17,25 +17,25 @@ func Get404(path string) (appErr *ApplicationError) {
 // Handler for /js path
 func JSHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path[:1]
+		path := r.URL.Path
 		var appErr *ApplicationError
-		fmt.Println(path)
-		role, _, _, appErr := getRoleFromRequest(r)
+
+		role, appErr := GetHighestRoleFromRequest(r)
 		if appErr != nil {
 			fmt.Println(appErr)
 			HttpErrorLogger(w, appErr.Msg, appErr.Code)
 			return
 		}
 
-		if strings.HasPrefix(path, "/js/superadmin/") && CompareRole(role, RoleSuperAdmin) {
+		if strings.HasPrefix(path, "/js/superadmin/") && !CompareRole(role, RoleSuperAdmin) {
 			appErr = Get404(path)
 		}
 
-		if strings.HasPrefix(path, "/js/admin/") && CompareRole(role, RoleAdmin) {
+		if strings.HasPrefix(path, "/js/admin/") && !CompareRole(role, RoleAdmin) {
 			appErr = Get404(path)
 		}
 
-		if strings.HasPrefix(path, "/js/captain/") && CompareRole(role, RoleCaptain) {
+		if strings.HasPrefix(path, "/js/captain/") && !CompareRole(role, RoleCaptain) {
 			appErr = Get404(path)
 		}
 
@@ -48,6 +48,11 @@ func JSHandler() http.HandlerFunc {
 			HttpErrorLogger(w, appErr.Msg, appErr.Code)
 			return
 		}
-		http.ServeFile(w, r, path)
+
+		fmt.Println(path[1:])
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+		http.ServeFile(w, r, path[1:])
 	}
 }

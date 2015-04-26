@@ -1,6 +1,9 @@
 /*global module:false*/
 module.exports = function(grunt) {
 
+  // MODIFIED: add require for connect-modewrite
+  var modRewrite = require('connect-modrewrite');
+
   // Project configuration.
   grunt.initConfig({
     // Metadata.
@@ -65,22 +68,21 @@ module.exports = function(grunt) {
       },
       captain: {
         src: [
-          'dist/<%= pkg.version %>/templates/captain.js',
+          'dist/captain/<%= pkg.version %>/templates/*.js',
           'js/views/captain/*.js',
         ],
         dest: 'dist/captain/<%= pkg.version %>/<%= pkg.name %>-captain.min.js'
       },
       admin: {
         src: [
-          'dist/<%= pkg.version %>/templates/admin.js',
-          'dist/<%= pkg.version %>/templates/plot-twist.js',
+          'dist/admin/<%= pkg.version %>/templates/*.js',
           'js/views/admin/*.js',
         ],
         dest: 'dist/admin/<%= pkg.version %>/<%= pkg.name %>-admin.min.js'
       },
       superadmin: {
         src: [
-          'dist/<%= pkg.version %>/templates/superadmin.js',
+          'dist/superadmin/<%= pkg.version %>/templates/*.js',
           'js/views/superadmin/*.js',
         ],
         dest: 'dist/superadmin/<%= pkg.version %>/<%= pkg.name %>-superadmin.min.js'
@@ -224,14 +226,22 @@ module.exports = function(grunt) {
       server: {
         options: {
           port: 8888,
-          keepalive: true
+          keepalive: true,
+          middleware: function(connect, options) {
+            var middlewares = [];
+
+            middlewares.push(modRewrite(['^[^\\.]*$ /index.html [L]'])); //Matches everything that does not contain a '.' (period)
+            options.base.forEach(function(base) {
+              middlewares.push(connect.static(base));
+            });
+            return middlewares;
+          }
         }
       }
     }
   });
 
   // These plugins provide necessary tasks.
-
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-jst');
