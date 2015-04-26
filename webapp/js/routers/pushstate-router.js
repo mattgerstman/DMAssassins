@@ -1,7 +1,7 @@
 // All navigation that is relative should be passed through the navigate
 // method, to be processed by the router. If the link has a `data-bypass`
 // attribute, bypass the delegation completely.
-$(document).on("click", "a[href]:not([data-bypass])", function(evt) {
+$(document).on("click", "a[href]:not([data-bypass]):not([data-toggle])", function(evt) {
         // Get the absolute anchor href.
         var href = { prop: $(this).prop("href"), attr: $(this).attr("href") };
         // Get the absolute root.

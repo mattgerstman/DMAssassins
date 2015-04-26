@@ -74,6 +74,9 @@
             // is the user authenticated
             var isAuth = app.Session.get('authenticated') === true;
             var path = Backbone.history.location.pathname;
+            if (path.indexOf('/') === 0){
+                path = path.substring(1);
+            }
 
             // do we need a game and authentication
             var needGameAndAuth = _.contains(this.requiresGameAndAuth, path);
@@ -118,7 +121,8 @@
 
             /*
             Variables I use when shits not routing properly */
-            /*/
+            //
+            console.log('path:', path);
             console.log('gameStarted:', gameStarted);
             console.log('userRole:', userRole);
             console.log('path:', path);

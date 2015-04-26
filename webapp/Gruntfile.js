@@ -161,8 +161,8 @@ module.exports = function(grunt) {
         files: {
           'index.html' : [
             '<%= dependencies.js %>',
-            'dist/<%= pkg.version %>/templates/*.js',
-            'js/views/*/*.js',
+            // 'dist/<%= pkg.version %>/templates/*.js',
+            // 'js/views/*/*.js',
             '<%= less.dev.dest %>'
           ]
         }

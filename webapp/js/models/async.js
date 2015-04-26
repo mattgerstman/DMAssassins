@@ -11,9 +11,9 @@
     'use strict';
     app.Models.Async = Backbone.Model.extend({
         defaults: {
-            captain: config.ENV === 'dev',
-            admin: config.ENV === 'dev',
-            superadmin: config.ENV === 'dev'
+            captain: false,
+            admin: false,
+            superadmin: false
         },
         loadRole: function (key, callback) {
             var that = this;
@@ -22,14 +22,6 @@
             $.ajax({
                 url: url,
                 cache: true,
-                // dataType: "script",
-/*
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader ("Authorization", "Basic " + base64Key);
-                    xhr.setRequestHeader ("X-Yo", "Yo");
-                },
-*/
-
                 success: function(data, textStatus, jqxhr) {
                     that.set(key, true);
                     if (typeof callback === 'function') {
