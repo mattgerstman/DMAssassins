@@ -121,7 +121,7 @@
 
             /*
             Variables I use when shits not routing properly */
-            //
+            /*/
             console.log('path:', path);
             console.log('gameStarted:', gameStarted);
             console.log('userRole:', userRole);
