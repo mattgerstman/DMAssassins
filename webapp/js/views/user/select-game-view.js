@@ -1,5 +1,5 @@
 //
-// js/views/select-game-view.js
+// js/views/create-game-view.js
 // dmassassins.js
 //
 // Copyright (c) 2014 Matt Gerstman
@@ -34,10 +34,10 @@
         },
         // shows the create game subview
         showCreateGame: function() {
-            $('.js-logo').addClass('hide');
-            $('.js-create-or-join').addClass('hide');
-            $('.js-create-game').addClass('js-select-game-active');
-            $('.js-create-game').removeClass('hide');
+            Backbone.history.navigate('create-game', {
+                trigger: true
+            });
+
         },
         // shows the join game subview
         showJoinGame: function() {
