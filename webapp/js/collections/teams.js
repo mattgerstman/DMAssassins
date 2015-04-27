@@ -18,16 +18,11 @@ var app = app || {
             return _.values(response);
         },
         fetch: function(options) {
-            if (app.Running.Games.getActiveGameId() === null) {
-                return;
+            if (typeof options.url === 'string') {
+                return Backbone.Model.prototype.fetch.call(this, options);
             }
-            // The active user's role in the current game
-            var userRole = app.Running.User.getRole();
 
-            // is the user a captain
-            var isCaptain = AuthUtils.requiresCaptain(userRole);
-            if (!isCaptain)
-            {
+            if (app.Running.Games.getActiveGameId() === null) {
                 return;
             }
 
@@ -38,6 +33,5 @@ var app = app || {
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/team/';
         }
-
     });
 })();

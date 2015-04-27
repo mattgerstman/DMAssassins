@@ -204,6 +204,7 @@
             this.render();
         },
         showNewTeam: function(event) {
+            console.log(event);
             event.preventDefault();
             this.$el.find('.js-new-team-open').addClass('hide');
             this.$el.find('.js-form-new-team').removeClass('hide');

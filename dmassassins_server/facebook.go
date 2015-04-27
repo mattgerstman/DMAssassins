@@ -49,12 +49,13 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 	err = res.DecodeField("email", &email)
 	if err != nil {
 		email = `none-provided@playassassins.com`
-		appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
-		extra := make(map[string]interface{})
-		extra[`facebook`] = res
-		extra[`facebook_id`] = facebookId
-		sentryUser := NewSentryUser(user)
-		LogWithSentry(appErr, map[string]string{"user_id": user.UserId.String()}, raven.WARNING, extra, sentryUser)
+		// DROIDS ask taylor why this would cause a panic
+		// I think the appErr is getting dereferenced and then broken
+
+		// appErr := NewApplicationError("Internal Error", err, ErrCodeInvalidFBToken)
+		// extra := make(map[string]interface{})
+		// extra[`facebook_id`] = facebookId
+		// LogWithSentry(appErr, nil, raven.WARNING, nil, nil)
 	}
 
 	err = res.DecodeField("link", &facebook)

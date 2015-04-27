@@ -202,10 +202,9 @@
         back: function() {
             this.history.pop();
             var path = this.history.pop();
-            console.log(path);
             Backbone.history.navigate(path, {
-                    trigger: true
-                });
+                trigger: true
+            });
         },
         // login route
         login: function() {
@@ -220,9 +219,8 @@
         },
         // game selection route
         multigame: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.MultiGameView();
             app.Running.AppView.setCurrentView(view);
-            app.Running.currentView.collection.fetch();
             this.render();
         },
         // target route
@@ -233,17 +231,16 @@
         },
         // create a new game route
         create_game: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.CreateGameView();
             app.Running.AppView.setCurrentView(view);
             this.render();
-            app.Running.currentView.showCreateGame();
         },
         // join a new game route
         join_game: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.JoinGameView();
             app.Running.AppView.setCurrentView(view);
             this.render();
-            app.Running.currentView.loadJoinGame(app.Session.get('user_id'));
+
         },
         // profile route
         my_profile: function() {
@@ -295,7 +292,7 @@
             this.render();
             app.Running.currentView.model.fetch({reset: true});
         },
-        preventSwitchGameBack: ['join_game', 'create_game'],
+        preventSwitchGameBack: ['join-game', 'create-game'],
         switch_game: function() {
             var lastFragment = this.history[this.history.length - 1];
             if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
@@ -314,16 +311,18 @@
         // render function, also determines weather or not to render the nav
         render: function() {
             var fragment = Backbone.history.fragment;
-            // if it's a view with a nav and we don't have one, make one
-            if ((this.noNav.indexOf(Backbone.history.fragment) === -1) && (fragment !== 'login') && (!app.Running.NavView)) {
+
+            // if we have a game, create a navbar
+            if ((app.Running.Games.getActiveGame() !== null) && (fragment !== 'login') && (!app.Running.NavView)) {
                 app.Running.NavView = new app.Views.NavView();
                 app.Running.NavView = app.Running.NavView.render();
             }
-            // if it explicitely shouldn't have a nav and we have one kill it
-            else if ((this.noNav.indexOf(Backbone.history.fragment) !== -1) && (app.Running.NavView)) {
+            // if dont have a game, but we have a navbar delete it
+            else if ((app.Running.Games.getActiveGame() === null) && (app.Running.NavView)) {
                 app.Running.NavView.$el.html('');
                 app.Running.NavView = null;
             }
+
             // if we have a nav and highlight the nav item
             if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) === -1)) {
                 if (fragment === '')

@@ -215,7 +215,7 @@ module.exports = function(grunt) {
       },
       index: {
         files: 'index.html.template',
-        tasks: ['env:dev', 'preprocess:dev']
+        tasks: ['env:dev', 'preprocess:dev', 'injector:dev']
       },
       templates: {
         files: 'templates/*/*',
