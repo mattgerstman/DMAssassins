@@ -15,7 +15,7 @@
         template: app.Templates["join-game"],
         tagName: 'div',
         events: {
-            'click  .js-go-back'                    : 'goBack',
+            'click  .js-go-back'                     : 'goBack',
             'click  .js-join-game-submit'            : 'joinGame',
             'change #js-select-game'                 : 'checkFields',
             'click  .js-show-join-game'              : 'showJoinGame'
@@ -40,13 +40,19 @@
             event.preventDefault();
             var selected = this.$('#js-select-game option:selected');
             var game_id = selected.val();
-            var need_password = selected.data('game-has-password');
+
+            var game = this.collection.get(game_id);
+            if (!game) {
+                return;
+            }
+
+            var need_password = game.get('game_has_password');
             var password = need_password ? this.$('#js-join-game-password').val() : '';
 
-            var teams_enabled = this.$('#js-join-game-team').attr('disabled') != 'disabled';
+            var teams_disabled = game.get('teams_disabled') === true;
             var team_id = this.$('#js-join-game-team option:selected').val();
 
-            if (teams_enabled && !team_id) {
+            if (!teams_disabled && !team_id) {
                 this.badTeam();
                 return;
             }
@@ -67,21 +73,10 @@
             this.$('label[for=js-join-game-password]').text('Password:');
             this.$('label[for=js-join-game-team]').text('Team:');
         },
-        // finish up and navigate to your profile
-        finish: function(game) {
-            app.Running.Games.setActiveGame(game.get('game_id'));
-            Backbone.history.navigate('my_profile', {
-                trigger: true
-            });
-        },
         finishJoin: function(){
             Backbone.history.navigate('my_profile', {
                 trigger: true
             });
-        },
-        // toggles the password entry field on create game
-        togglePassword: function(e) {
-            this.$('#js-create-game-password').attr('disabled', !e.target.checked);
         },
         noTeams: function(){
             var teamField = this.$('#js-join-game-team');
@@ -94,8 +89,15 @@
             this.fixFields();
             // get selected game
             var selected = this.$('#js-select-game option:selected');
+            var game_id = selected.val();
+
+            var game = this.collection.get(game_id);
+            if (!game) {
+                return;
+            }
+
             // check if it needs a password
-            var need_password = selected.data('game-has-password');
+            var need_password = game.get('game_has_password');
 
             // grab the password field
             var passwordField = this.$('#js-join-game-password');
@@ -107,10 +109,9 @@
             passwordField.attr('disabled', !need_password);
             passwordField.val(passwordPlaceholder);
 
-            // Get game model
-            var game_id = selected.val();
-            var game = app.Running.Games.get(game_id);
-            if (!game) {
+
+            if (game.get('teams_disabled') === true) {
+                this.noTeams();
                 return;
             }
 
@@ -124,9 +125,10 @@
             app.Running.Teams.fetch({
                 url:url,
                 success:function(teams){
-                    // if there are no teams handle that appropraitely
+                    // if there are no teams handle that appropriately
                     if (!app.Running.Teams.length){
                         that.noTeams();
+                        game.set('teams_disabled', true);
                         return;
                     }
                     // if we have teams mark it as not disabled
