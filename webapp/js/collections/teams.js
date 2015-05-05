@@ -17,16 +17,19 @@ var app = app || {
         parse: function(response){
             return _.values(response);
         },
+        comparator: function(team) {
+            return team.get('team_name');
+        },
         fetch: function(options) {
-            if (typeof options.url === 'string') {
-                return Backbone.Model.prototype.fetch.call(this, options);
+            if (typeof options === 'object' && typeof options.url === 'string') {
+                return Backbone.Collection.prototype.fetch.call(this, options);
             }
 
             if (app.Running.Games.getActiveGameId() === null) {
                 return;
             }
 
-            return Backbone.Model.prototype.fetch.call(this, options);
+            return Backbone.Collection.prototype.fetch.call(this, options);
         },
 
         url: function(){

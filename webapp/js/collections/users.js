@@ -21,7 +21,7 @@ var app = app || {
             if (app.Running.Games.getActiveGameId() === null) {
                 return;
             }
-            return Backbone.Model.prototype.fetch.call(this, options);
+            return Backbone.Collection.prototype.fetch.call(this, options);
         },
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();

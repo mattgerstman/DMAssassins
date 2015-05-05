@@ -130,15 +130,11 @@
             return this;
         },
         changeRole: function(role_id, options) {
+            this.set('role', role_id);
+            this.setProperty('user_role', role_id);
             var url = this.url() + 'role/';
-            _.extend(options, {
-                type:"PUT",
-                url: url,
-                data: JSON.stringify({role: role_id}),
-            });
-
-            $.ajax(options);
-            return this;
+            options.url = url;
+            return this.save(null, options);
         },
         getRole: function() {
 
@@ -155,6 +151,25 @@
 
             // if all else fails return null
             return null;
+        },
+        changeTeam: function(team_id, team_name, success, error) {
+            var that = this;
+            return this.save(null, {
+                url: this.url() + 'team/' + team_id + '/',
+                success: function(user, response) {
+                    user.setProperty('team', team_name);
+                    user.set('team', team_id);
+                    console.log(user);
+                    if (typeof success === 'function') {
+                        success(user, response);
+                    }
+                },
+                error: function(response, user) {
+                    if (typeof error === 'function') {
+                        error(user, response);
+                    }
+                }
+            });
         },
         quit: function(secret) {
             var that = this;

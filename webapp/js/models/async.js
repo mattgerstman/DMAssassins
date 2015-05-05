@@ -11,9 +11,9 @@
     'use strict';
     app.Models.Async = Backbone.Model.extend({
         defaults: {
-            captain: false,
-            admin: false,
-            superadmin: false
+            captain: config.ENV !== 'prod',
+            admin: config.ENV !== 'prod',
+            superadmin: config.ENV !== 'prod'
         },
         loadRole: function (key, callback) {
             var that = this;
@@ -36,7 +36,6 @@
         },
         requiresRole: function(key, callback) {
             var hasRole = this.get(key);
-            console.log(key+ ': ' + hasRole);
             if (!hasRole) {
                 return this.loadRole(key, callback);
             }

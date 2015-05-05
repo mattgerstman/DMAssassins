@@ -266,7 +266,7 @@
             app.Running.Teams.fetch();
             var view = new app.Views.AdminUsersView();
             app.Running.AppView.setCurrentView(view);
-            app.Running.currentView.collection.fetch({reset: true});
+            // app.Running.currentView.collection.fetch({ reset: true });
             this.render();
         },
         edit_rules: function() {

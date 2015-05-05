@@ -15,32 +15,9 @@
     </li>
 <%
     }
-_.each(teams, function(team){
 %>
-    <li class="sidebar-team js-droppable-team" id="js-nav-team-<%= team.team_id %>" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
-        <div class="team-display">
-            <a href="#" class="js-team-name sidebar-teamName" data-team-id="<%= team.team_id %>" data-team-name="<%= team.team_name %>">
-                <%= team.team_name %>
-            </a>
-            <% if (is_admin) { %>
-                <div class="sidebar-teamButtons">
-                    <a href="#" class="js-edit-team"   data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon glyphicon-pencil sidebar-glyphicon sidebar-glyphicon-warning"></span></a>
-                    <a href="#" class="js-delete-team" data-team-name="<%= team.team_name %>" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
-                </div>
-            <% } %>
-        </div>
-        <% if (is_admin) { %>
-            <form class="edit-team-form form-inline hide">
-                <input type="text" class="edit-team-name form-control sidebar-input" value="<%= team.team_name %>"/>
-                <a href="#" class="js-save-edit-team  " data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-ok sidebar-glyphicon sidebar-glyphicon-success"></span></a>
-                <a href="#" class="js-cancel-edit-team" data-team-id="<%= team.team_id %>"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
-            </form>
-        <% } %>
 
-    </li>
-<%
-})
-%>
+
 <select id="team-select-placeholder" class="hide">
     <%
     _.each(teams, function(team){

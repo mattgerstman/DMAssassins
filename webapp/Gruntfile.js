@@ -3,6 +3,9 @@ module.exports = function(grunt) {
 
   // MODIFIED: add require for connect-modewrite
   var modRewrite = require('connect-modrewrite');
+  var url = require("url");
+  var fs = require("fs");
+  var path = require("path");
 
   // Project configuration.
   grunt.initConfig({
@@ -24,6 +27,18 @@ module.exports = function(grunt) {
         'js/views/user/*.js',
         'js/routers/*.js',
         'js/*.js'
+      ],
+      captain: [
+        'dist/captain/<%= pkg.version %>/templates/*.js',
+        'js/views/captain/*.js',
+      ],
+      admin: [
+        'dist/admin/<%= pkg.version %>/templates/*.js',
+        'js/views/admin/*.js',
+      ],
+      superadmin: [
+        'dist/superadmin/<%= pkg.version %>/templates/*.js',
+        'js/views/superadmin/*.js',
       ]
     },
     jst: {
@@ -68,22 +83,19 @@ module.exports = function(grunt) {
       },
       captain: {
         src: [
-          'dist/captain/<%= pkg.version %>/templates/*.js',
-          'js/views/captain/*.js',
+          '<%= dependencies.captain %>'
         ],
         dest: 'dist/captain/<%= pkg.version %>/<%= pkg.name %>-captain.min.js'
       },
       admin: {
         src: [
-          'dist/admin/<%= pkg.version %>/templates/*.js',
-          'js/views/admin/*.js',
+          '<%= dependencies.admin %>'
         ],
         dest: 'dist/admin/<%= pkg.version %>/<%= pkg.name %>-admin.min.js'
       },
       superadmin: {
         src: [
-          'dist/superadmin/<%= pkg.version %>/templates/*.js',
-          'js/views/superadmin/*.js',
+          '<%= dependencies.superadmin %>'
         ],
         dest: 'dist/superadmin/<%= pkg.version %>/<%= pkg.name %>-superadmin.min.js'
       }
@@ -161,8 +173,9 @@ module.exports = function(grunt) {
         files: {
           'index.html' : [
             '<%= dependencies.js %>',
-            // 'dist/<%= pkg.version %>/templates/*.js',
-            // 'js/views/*/*.js',
+            '<%= dependencies.captain %>',
+            '<%= dependencies.admin %>',
+            '<%= dependencies.superadmin %>',
             '<%= less.dev.dest %>'
           ]
         }
@@ -210,7 +223,7 @@ module.exports = function(grunt) {
         tasks: ['less:dev']
       },
       js: {
-        files: 'js/*/*.js',
+        files: 'js/*/*/*.js',
         tasks: ['lintspaces', 'jshint']
       },
       index: {
@@ -222,27 +235,42 @@ module.exports = function(grunt) {
         tasks: ['jst']
       }
     },
-    connect: {
-      server: {
-        options: {
-          port: 8888,
-          keepalive: true,
-          middleware: function(connect, options) {
-            var middlewares = [];
-
-            middlewares.push(modRewrite(['^[^\\.]*$ /index.html [L]'])); //Matches everything that does not contain a '.' (period)
-            options.base.forEach(function(base) {
-              middlewares.push(connect.static(base));
-            });
-            return middlewares;
+    browserSync: {
+      bsFiles: {
+        src : [
+          'js/*.js',
+          'js/*/*.js',
+          'js/*/*/*.js',
+          'js/*/*/*/*.js',
+          'index.html',
+          'dist/*.css'
+        ]
+      },
+      options: {
+        port: 8888,
+        open: 'ui',
+        ui: {
+          port: 9999
+        },
+        server: {
+          baseDir: "./",
+          target:"http://assassins.com",
+          middleware: function(req, res, next) {
+            var fileName = url.parse(req.url);
+            fileName = fileName.href.split(fileName.search).join("");
+            var fileExists = fs.existsSync(__dirname + fileName);
+            if (!fileExists && fileName.indexOf("browser-sync-client") < 0) {
+                req.url = "/index.html";
+            }
+            return next();
           }
-        }
+        },
       }
     }
   });
 
   // These plugins provide necessary tasks.
-  grunt.loadNpmTasks('grunt-contrib-connect');
+  grunt.loadNpmTasks('grunt-browser-sync');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-jst');
   grunt.loadNpmTasks('grunt-contrib-less');
@@ -256,6 +284,6 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask('dev', ["jst", 'lintspaces', 'jshint', 'less:dev', 'env:dev', 'preprocess:dev', 'injector:dev']);
   grunt.registerTask('prod', ["jst", 'uglify', 'less:prod', 'env:prod', 'preprocess:prod', 'injector:prod']);
-  grunt.registerTask('server', 'connect');
+  grunt.registerTask('server', 'browserSync');
   grunt.registerTask('default', ['dev']);
 };
