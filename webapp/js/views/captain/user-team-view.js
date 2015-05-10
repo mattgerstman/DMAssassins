@@ -14,15 +14,13 @@
 
         template: app.Templates["users-team"],
         events: {
-            'click  .js-edit-team'          : 'showEditTeamForm',
+            'click  .js-edit-team'          : 'clickEditTeam',
             'click  .js-cancel-edit-team'   : 'cancelEditTeam',
-            'click  .js-cancel-new-team'    : 'cancelNewTeam',
-            'click  .js-create-new-team'    : 'createNewTeam',
 
-            'keyup  .js-new-team-name'      : 'newTeamKeypress',
+            'keyup  .js-edit-team-name'     : 'editTeamKeypress',
 
 
-            'click  .js-save-edit-team'     : 'saveEditTeam',
+            'click  .js-save-edit-team'     : 'clickSaveEdit',
             'click  .js-delete-team'        : 'deleteTeamModal',
             'click  .js-delete-team-submit' : 'deleteTeam',
 
@@ -35,17 +33,27 @@
             this.listenTo(this.model, 'change', this.render);
             this.isAdmin = isAdmin;
         },
-        cancelEditTeam: function(e) {
-            e.preventDefault();
-            this.hideEditTeam(event);
+        editTeamKeypress: function(e) {
+            if (e.keyCode === 27) {
+                e.preventDefault();
+                this.hideEditTeam();
+            }
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                this.saveEditTeam();
+            }
+
         },
-        hideEditTeam: function(event) {
+        cancelEditTeam: function(e) {
+            e.stopPropagation();
+            this.hideEditTeam();
+        },
+        hideEditTeam: function() {
             this.$('.team-display').removeClass('hide');
             this.$('.edit-team-form').addClass('hide');
         },
-        deleteTeamModal: function(event) {
-            var team = app.Running.Teams.get(team_id);
-            var deleteView = new app.Views.ModalDeleteTeamView(team);
+        deleteTeamModal: function() {
+            var deleteView = new app.Views.ModalDeleteTeamView(this.model);
             deleteView.render();
         },
         makeDroppable: function() {
@@ -55,8 +63,8 @@
                 tolerance: "pointer",
                 drop: function(event, ui) {
                     var user_id = ui.helper.data('user-id');
-                    var team_id = this.get('team_id');
-                    var team_name = this.get('team_name');
+                    var team_id = that.model.get('team_id');
+                    var team_name = that.model.get('team_name');
 
                     var user = app.Running.Users.get(user_id);
                     user.changeTeam(
@@ -74,23 +82,26 @@
                 }
             });
         },
-        showEditTeamForm: function(event) {
-            event.preventDefault();
+        clickEditTeam: function(e) {
+            e.stopPropagation();
+            this.showEditTeamForm();
+        },
+        showEditTeamForm: function() {
             this.$('.edit-team-form').removeClass('hide');
             this.$('.team-display').addClass('hide');
 
         },
+        clickSaveEdit: function(e) {
+            e.stopPropagation();
+            this.saveEditTeam();
+        },
         saveEditTeam: function() {
-            var name = this.$('.edit-team-name').val();
+            var name = this.$('.js-edit-team-name').val();
             if (name === this.model.get('team_name'))
             {
                 this.hideEditTeam();
                 return;
             }
-
-            this.model.on('all', function(){
-                console.log(arguments);
-            })
 
             this.model.set('team_name', name);
             this.model.save();

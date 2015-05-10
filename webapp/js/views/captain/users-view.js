@@ -18,8 +18,7 @@
 
         // The DOM events specific to an item.
         events: {
-            'click  .js-new-team-open'      : 'showNewTeam',
-            'click  .js-team-name '         : 'sortByTeam',
+            'click  .js-team-name': 'clickTeam',
         },
         team: undefined,
         // constructor
@@ -30,56 +29,34 @@
             this.teams_view = new app.Views.AdminUsersTeamsView();
             this.listenTo(this.collection, 'fetch', this.render);
             this.listenTo(this.collection, 'reset', this.render);
-            this.listenTo(app.Running.Teams, 'destroy', this.render);
-
+            this.listenTo(app.Running.Teams, 'destroy', this.renderDestroyTeam);
+            this.listenTo(app.Running.Users, 'change', this.userChange);
+            this.team_id = 'all';
             this.collection.fetch({reset:true})
 
         },
-        sortByTeam: function(event) {
-            event.preventDefault();
-            this.team = $(event.currentTarget).data('team-name');
-            this.team_id = $(event.currentTarget).data('team-id');
+        clickTeam: function(e) {
+            e.preventDefault();
+            var team_id = $(e.currentTarget).data('team-id');
+            this.sortByTeam(team_id);
+        },
+        sortByTeam: function(team_id) {
+            console.log(team_id);
+            this.team_id = team_id;
             if (this.team_id === 'SHOW_ALL') {
-                this.team = undefined;
                 this.team_id = 'all';
             }
 
             if (this.team_id === 'NO_TEAM') {
-                this.team = "null";
-                this.team_id = 'null';
+                this.team_id = 'none';
             }
 
             this.render();
         },
-        showNewTeam: function(event) {
-            event.preventDefault();
-            this.$el.find('.js-new-team-open').addClass('hide');
-            this.$el.find('.js-form-new-team').removeClass('hide');
-            this.$el.find('.js-form-new-team input').focus();
-        },
-        hideNewTeam: function() {
-            this.$el.find('.js-new-team-open').removeClass('hide');
-            this.$el.find('.js-form-new-team').addClass('hide');
-        },
-        cancelNewTeam: function(event) {
-            if (event)
-                event.preventDefault();
-            this.hideNewTeam();
-        },
-        blurTeamForm: function() {
-            var team_name = this.$el.find('.new-team input').val();
-            if (!team_name) {
-                this.hideNewTeam();
-            }
-
-        },
-
-
 
         selectActiveTeam: function() {
             this.$el.find('.active').removeClass('active');
             this.$el.find('#js-nav-team-'+this.team_id).addClass('active');
-
         },
         addUser: function(user, extras){
             extras.logged_in = false;
@@ -89,6 +66,36 @@
             var userView = new app.Views.AdminUserView(user);
             this.userViews.push(userView);
             return userView.render(extras).el;
+        },
+        renderDestroyTeam: function(team) {
+            var team_id = team.get('team_id');
+            if (this.team_id === team_id) {
+                this.team_id = 'all';
+            }
+            return this.render();
+        },
+        userChange: function(user) {
+            if (user === undefined) {
+                return;
+            }
+
+            var team_id = user.getProperty('team_id');
+            if (this.team_id === 'all') {
+                return;
+            }
+
+            if (this.team_id === 'none' && team_id) {
+                return this.removeUser(user);
+            }
+
+            if (team_id !== this.team_id) {
+                return this.removeUser(user);
+            }
+        },
+
+        removeUser: function(user) {
+            var user_id = user.get('user_id');
+            this.$('#js-user-'+user_id).remove();
         },
         render: function() {
             $('.modal-backdrop').remove();
@@ -114,10 +121,14 @@
             }
 
             data = this.collection.models;
-            if (this.team !== undefined)
+            if (this.team_id !== 'all')
             {
-                data = _.filter(data, function(user){
-                    return user.getProperty('team') === that.team;
+                data = _.filter(data, function(user) {
+                    if (that.team_id === 'none') {
+                        return !user.getProperty('team_id');
+                    }
+
+                    return user.getProperty('team_id') === that.team_id;
                 });
             }
             this.selectActiveTeam();

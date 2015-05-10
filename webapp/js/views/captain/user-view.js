@@ -122,8 +122,6 @@
                 return;
             }
 
-            console.log(user);
-
             this.render();
 
             if (typeof user.changed === 'undefined') {

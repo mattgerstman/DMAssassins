@@ -158,8 +158,8 @@
                 url: this.url() + 'team/' + team_id + '/',
                 success: function(user, response) {
                     user.setProperty('team', team_name);
+                    user.setProperty('team_id', team_id);
                     user.set('team', team_id);
-                    console.log(user);
                     if (typeof success === 'function') {
                         success(user, response);
                     }

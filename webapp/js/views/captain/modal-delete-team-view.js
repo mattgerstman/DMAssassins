@@ -36,15 +36,6 @@
                 headers: {
                     'X-DMAssassins-Send-Email': sendEmail
                 },
-                success: function(){
-                    app.Running.Users.each(function(user){
-                        if (user.getProperty('team') === team_name)
-                        {
-                            user.setProperty('team', 'null');
-
-                        }
-                    });
-                },
                 error: function(model, response){
                     alert(response.responseText);
                 }
