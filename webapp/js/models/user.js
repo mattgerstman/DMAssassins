@@ -66,14 +66,12 @@
             return this;
         },
         setProperty: function(key, value, silent) {
-            var properties = this.get('properties');
-            if (!properties)
-                properties = {};
+            var properties = this.get('properties') || {};
             properties[key] = value;
             this.set('properties', properties);
             if ((silent === undefined) || (silent === false))
             {
-                this.trigger('change');
+                this.trigger('change', this, key);
             }
             return this.get('properties');
         },
@@ -130,11 +128,11 @@
             return this;
         },
         changeRole: function(role_id, options) {
-            this.set('role', role_id);
             this.setProperty('user_role', role_id);
             var url = this.url() + 'role/';
             options.url = url;
-            return this.save(null, options);
+            options.wait = true;
+            return this.save({role: role_id}, options);
         },
         getRole: function() {
 
@@ -154,18 +152,22 @@
         },
         changeTeam: function(team_id, team_name, success, error) {
             var that = this;
+            var curr_team_id    = this.getProperty('team_id');
+            var curr_team_name  = this.getProperty('team_name');
             return this.save(null, {
                 url: this.url() + 'team/' + team_id + '/',
                 success: function(user, response) {
-                    user.setProperty('team', team_name);
                     user.setProperty('team_id', team_id);
-                    user.set('team', team_id);
+                    user.setProperty('team', team_name);
                     if (typeof success === 'function') {
                         success(user, response);
                     }
                 },
-                error: function(response, user) {
+                error: function(user, response) {
                     if (typeof error === 'function') {
+                        user.setProperty('team_id', curr_team_id, true);
+                        user.setProperty('team', curr_team_name, true);
+
                         error(user, response);
                     }
                 }

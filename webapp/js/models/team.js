@@ -33,8 +33,6 @@
                         if (user.getProperty('team_id') !== team_id) {
                             return;
                         }
-                        user.set('team', null);
-                        user.set('team_id', null);
                         user.setProperty('team_id', null);
                         user.setProperty('team', null);
                     });

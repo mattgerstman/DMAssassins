@@ -360,3 +360,11 @@ func (user *User) KillTargetTransactional(tx *sql.Tx, gameId uuid.UUID, secret s
 
 	return newTargetId, oldTargetId, nil
 }
+
+func (user *User) Equal(user2 *User) bool {
+	if user2 == nil {
+		return false
+	}
+
+	return uuid.Equal(user.UserId, user2.UserId)
+}

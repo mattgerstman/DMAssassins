@@ -31,7 +31,7 @@
                         <% if (properties.team === 'null' || !properties.team) { %>
                             <option value="">Select a Team</option>
                         <% } _.each(teams, function(team) { %>
-                            <option value="<%=team.team_id%>" <%= team.team_name === properties.team ? 'selected' : ''%>><%= team.team_name %></option>
+                            <option value="<%=team.team_id%>" <%= team.team_id === properties.team_id ? 'selected' : ''%>><%= team.team_name %></option>
                         <% }) %>
                     </select>
                 </div>

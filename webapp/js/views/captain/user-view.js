@@ -95,13 +95,14 @@
             }
             return this.changeUserRole(role_id);
         },
+        // DROIDs standardize role/team changes
         changeUserRole: function(role_id){
             var that = this;
             this.model.changeRole(role_id, {
                 success: function() {
-                    // fade in confirmation
+                    that.showSaved('role');
                 },
-                error: function(response) {
+                error: function(user, response) {
                     alert(response.responseText);
                     that.render();
                 }
@@ -111,13 +112,25 @@
             var user_id = $(event.currentTarget).data('user-id');
             var team_id = $(event.currentTarget).find('option:selected').val();
             var team_name = $(event.currentTarget).find('option:selected').text();
-            this.addUserToTeam(user_id, team_id, team_name);
+            this.model.changeTeam(
+                team_id,
+                team_name,
+                // success callback
+                function(user, response) {
+
+                },
+                // error callback
+                function(user, response) {
+                    alert(response.responseText);
+                }
+            );
+
 
         },
         showSaved: function(item) {
             this.$('.js-'+item+'-saved').fadeIn(500, function(){ $(this).fadeOut(2000); });
         },
-        renderChange: function(user) {
+        renderChange: function(user, key) {
             if (typeof user === 'undefined') {
                 return;
             }
@@ -128,11 +141,11 @@
                 return;
             }
 
-            if (typeof user.changed.team !== 'undefined') {
+            if ((key === 'team_id') || (key === 'team')) {
                 this.showSaved('team');
             }
 
-            if (typeof user.changed.user_role !== 'undefined') {
+            if (key === 'user_role') {
                 this.showSaved('role');
             }
             return this;
