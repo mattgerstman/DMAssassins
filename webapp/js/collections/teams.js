@@ -17,27 +17,24 @@ var app = app || {
         parse: function(response){
             return _.values(response);
         },
-        tryFetch: function(){
-            var game_id = app.Running.Games.getActiveGameId();
-            if (!game_id)
-            {
+        comparator: function(team) {
+            return team.get('team_name');
+        },
+        fetch: function(options) {
+            if (typeof options === 'object' && typeof options.url === 'string') {
+                return Backbone.Collection.prototype.fetch.call(this, options);
+            }
+
+            if (app.Running.Games.getActiveGameId() === null) {
                 return;
             }
-            // The active user's role in the current game
-            var userRole = app.Running.User.getProperty('user_role');
 
-            // is the user a captain
-            var isCaptain = AuthUtils.requiresCaptain(userRole);
-            if (isCaptain)
-            {
-                this.fetch();
-            }
-
+            return Backbone.Collection.prototype.fetch.call(this, options);
         },
+
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/team/';
         }
-
     });
 })();

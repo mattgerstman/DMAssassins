@@ -272,6 +272,7 @@ func (game *Game) GetAllUsersForGame() (users map[string]*User, appErr *Applicat
 		properties["alive"] = strconv.FormatBool(alive)
 
 		if teams != nil {
+			properties["team_id"] = teamId.String()
 			if team, ok := teams[teamId.String()]; ok {
 				properties["team"] = team.TeamName
 			} else {

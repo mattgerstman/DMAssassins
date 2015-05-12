@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// POST - Wrapper for GameMapping:ChangeRole
-func postGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
+// PUT - Wrapper for GameMapping:ChangeRole
+func putGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *ApplicationError) {
 	_, appErr = RequiresAdmin(r)
 	if appErr != nil {
 		return nil, appErr
@@ -33,12 +33,14 @@ func postGameUserRole(r *http.Request) (gameMapping *GameMapping, appErr *Applic
 		return nil, appErr
 	}
 
-	r.ParseForm()
-	role := r.FormValue("role")
-	if role == "" {
-		msg := "Missing Parameter: role"
-		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	params, appErr := NewParams(r)
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	role, appErr := params.GetStringParam("role")
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	if role == "dm_super_admin" {
@@ -64,8 +66,8 @@ func GameUserRoleHandler() http.HandlerFunc {
 		var err *ApplicationError
 
 		switch r.Method {
-		case "POST":
-			obj, err = postGameUserRole(r)
+		case "PUT":
+			obj, err = putGameUserRole(r)
 
 		default:
 			obj = nil

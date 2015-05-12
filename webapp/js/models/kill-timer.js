@@ -7,16 +7,6 @@
 //
 // Team model, manages single team
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-
 (function() {
     'use strict';
 
@@ -24,11 +14,17 @@ var app = app || {
 
         // default profile properties
         defaults: {
-            'game_id': '',
+            'game_id': null,
             'execute_ts': 0,
             'create_ts': 0
         },
         idAttribute: 'game_id',
+        fetch: function(options) {
+            if (this.get('game_id') === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + 'game/' + game_id + '/kill_timer/';

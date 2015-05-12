@@ -1,0 +1,20 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+    <h4 class="modal-title">Select New Photo</h4>
+</div>
+<div class="modal-body">
+    <div class="container-fluid container-profile-select">
+        <div class="col-sm-6 col-md-4 container-profile-select-photo">
+            <img class="profile-select-photo js-profile-select-photo" src="https://graph.facebook.com/<%= facebook_id %>/picture?width=160" data-index="profile" />
+        </div>
+        <% _.each(photos, function(photo, index) { %>
+            <div class="col-sm-6 col-md-4 container-profile-select-photo">
+                <img class="profile-select-photo js-profile-select-photo" src="<%= photo.picture %>" data-index="<%= index %>" />
+            </div>
+        <% }) %>
+    </div>
+</div>
+<div class="modal-footer">
+    <span class="glyphicon glyphicon-chevron-left  <% if (!previous) { %> arrow-inactive <% } else { %> arrow-active js-photo-previous <% } %>"></span>
+    <span class="glyphicon glyphicon-chevron-right <% if (!next)     { %> arrow-inactive <% } else { %> arrow-active js-photo-next     <% } %>"></span>
+</div><!-- /.modal-footer -->

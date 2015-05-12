@@ -22,7 +22,7 @@ var AuthUtils = {
         for (var key in rolesMap)  {
             if (teams_enabled === false) {
                 // Strip out captains if teams arent enabled
-                if (rolesMap[key].value == 1)
+                if (rolesMap[key].value === 1)
                     continue;
             }
             // Compare the given role and the role to return

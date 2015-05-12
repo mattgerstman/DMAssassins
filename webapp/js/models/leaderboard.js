@@ -7,14 +7,6 @@
 //
 // Leaderboard model, displays high scores for a game
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
 (function() {
     'use strict';
 
@@ -24,22 +16,28 @@ var app = app || {
             user_col_width: 20,
             team_col_width: 20,
             users: [{
-                name: "Loading...",
-                kills: "Loading...",
-                team_name: "Loading..."
-            }, {
-                name: "Loading...",
-                kills: "Loading...",
-                team_name: "Loading..."
+                name: strings.loading,
+                kills: strings.loading,
+                team_name: strings.loading
             }],
-            teams: [{
-                "Loading...": "Loading..."
-            }]
+            teams: {
+                "Loading...": {
+                    alive   : strings.loading,
+                    kills   : strings.loading,
+                    players : strings.loading
+                }
+            }
         },
         parse: function(data) {
             data.user_col_width = 100 / (3 + this.get('teams_enabled'));
             data.team_col_width = 20;
             return data;
+        },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
         },
         url: function() {
             var game_id = app.Running.Games.getActiveGameId();

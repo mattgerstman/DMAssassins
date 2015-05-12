@@ -47,6 +47,7 @@ const (
 	ErrCodeNotFoundGameId      = 40406
 	ErrCodeNotFoundGameMapping = 40407
 	ErrCodeNotFoundTarget      = 40408
+	ErrCodeNotFoundFile        = 40409
 
 	// 404 - Not Found -- Valid Input
 	ErrCodeNoGameMappings = 40420
@@ -61,6 +62,7 @@ const (
 	ErrCodeEmail                  = 50004
 	ErrCodeBadTemplate            = 50005
 	ErrCodeExternalService        = 50006
+	ErrCodeNoUserForContext       = 50010
 	ErrCodeSession                = 50010 // Malformed Session
 )
 

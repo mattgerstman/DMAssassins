@@ -1,0 +1,31 @@
+<div class="modal fade js-modal-revive-user" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Revive User</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to revive <strong><span class="js-user-name"></span></strong>? This will revive them and randomly place them in the middle of another assassin/target pair.
+        </p>
+        <form>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="js-notify-revive-user" checked /> Notify User By Email
+              </label>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+
+        <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary hidden-xs js-revive-user-submit">Revive User</button>
+
+        <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-block btn-primary visible-xs js-revive-user-submit">Revive User</button>
+
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+

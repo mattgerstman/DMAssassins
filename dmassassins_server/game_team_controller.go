@@ -2,10 +2,15 @@ package main
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type TeamPost struct {
+	TeamName string `json:"team_name"`
+}
 
 // POST - Creates a team for a game
 func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
@@ -26,7 +31,20 @@ func postGameTeam(r *http.Request) (team *Team, appErr *ApplicationError) {
 		return nil, appErr
 	}
 
-	teamName := r.FormValue("team_name")
+	decoder := json.NewDecoder(r.Body)
+	var teamInfo TeamPost
+	err := decoder.Decode(&teamInfo)
+	if err != nil {
+		return nil, NewApplicationError("Invalid JSON", err, ErrCodeInvalidJSON)
+	}
+
+	teamName := teamInfo.TeamName
+	if teamName == "" {
+		msg := "Missing Parameter: team_name"
+		err := errors.New(msg)
+		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	}
+
 	return game.NewTeam(teamName)
 }
 

@@ -1,0 +1,31 @@
+<div class="modal fade js-modal-ban-user" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Ban User</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to ban <strong><%= properties.first_name + ' ' + properties.last_name  %></strong>? They will be permanently removed from the game and leaderboard. <br />
+            <strong>This action cannot be undone.</strong><br />
+            If you just want to kill them close this window and click "Kill User."
+        </p>
+        <form>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" class="js-notify-ban-user" checked /> Notify User By Email
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger hidden-xs js-ban-user-submit">Ban User</button>
+
+        <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-block btn-danger visible-xs js-ban-user-submit">Ban User</button>
+
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

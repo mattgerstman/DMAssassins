@@ -1,0 +1,69 @@
+<div class="user-grid col-xs-12 col-sm-6 col-md-4 col-lg-3" id="js-user-<%= user_id %>" data-user-id="<%= user_id %>">
+  <img class="u-maxWidthStandard js-drag-img hide" src=<%= properties.photo_thumb %>>
+  <div class="js-user user">
+     <div class="user-column text-center">
+        <div class="row">
+            <h3 class="u-margin-0">
+                <% if (properties.alive !== "true") { %>
+                    <s>
+                <%} %>
+                        <%= properties.first_name + ' ' + properties.last_name %>
+                <% if (properties.alive !== "true") { %>
+                    </s>
+                <%} %>
+            </h3>
+            <a href="mailto:<%= email %>" class="subtext"><%= email %></a><br />
+            <a href="<%= properties.facebook %>" class="subtext">View Facebook</a>
+        </div>
+
+        <div class="row">
+            <a class="user-thumbnail thumbnail js-draggable-photo <% if (!teams_enabled) { %> u-cursorDefault <%} %>">
+                <div class="user-thumbnailWrapper">
+                    <img class="img img-responsive user-img full-width <% if (properties.alive !="true") { %> user-dead <%} %>" src=<%= properties.photo_thumb %>>
+                </div>
+            </a>
+        </div>
+        <div>
+            <% if (teams_enabled) { %>
+                <div class="user-row">
+                    <label class="user-label">Team:<span class="user-saved js-team-saved" id="js-team-saved-<%= user_id %>" >Saved</span></label>
+                    <select class="js-user-team user-select" data-user-id ="<%=user_id %>">
+                        <% if (properties.team === 'null' || !properties.team) { %>
+                            <option value="">Select a Team</option>
+                        <% } _.each(teams, function(team) { %>
+                            <option value="<%=team.team_id%>" <%= team.team_id === properties.team_id ? 'selected' : ''%>><%= team.team_name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            <% } %>
+            <% if (is_admin) { %>
+                <div class="user-row">
+                    <label class="user-label">Role:<span class="user-saved js-role-saved" id="js-role-saved-<%= user_id %>" >Saved</span></label>
+                    <select class="js-user-role user-select" data-user-id ="<%=user_id %>" <% if (logged_in) { %> disabled <% } %> >
+
+                        <% _.each(roles, function(role, role_id) { %>
+                            <option value="<%=role_id%>" <%= role_id === properties.user_role ? 'selected' : ''%>><%= role.pretty_name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            <% } %>
+        </div>
+        <% if (is_admin) { %>
+            <div class ="user-buttons btn-group btn-group-justified js-user-action">
+              <div class="btn-group">
+                  <button type="button" class="btn btn-danger" data-action="ban">Ban</button>
+              </div>
+              <% if (properties.alive =="true") { %>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-danger" data-action="kill">Kill</button>
+                </div>
+              <% } else { %>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-primary" data-action="revive">Revive</button>
+                </div>
+              <% } %>
+            </div>
+         </div>
+        <% } %>
+    </div>
+</div>

@@ -6,18 +6,8 @@
 // MIT License.
 //
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 // Instantiates all of the running models, routers, and session
-
-$(function() {
+$(document).ready(function() {
     'use strict';
 
     Raven.config(config.SENTRY_DSN, {
@@ -44,13 +34,15 @@ $(function() {
     app.Running.TargetModel.listenTo(app.Running.Games, 'game-change', app.Running.TargetModel.fetch);
     app.Running.LeaderboardModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
     app.Running.RulesModel.listenTo(app.Running.Games, 'game-change', app.Running.RulesModel.fetch);
-    app.Running.Teams.listenTo(app.Running.User, 'change:properties', app.Running.Teams.tryFetch);
+    app.Running.Teams.listenTo(app.Running.User, 'change:properties', app.Running.Teams.fetch);
     app.Running.TargetFriendsModel.listenTo(app.Running.Games, 'game-change', app.Running.LeaderboardModel.fetch);
 
-    app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.checkAccess);
-    app.Running.User.listenTo(app.Running.User, 'change', app.Running.User.checkAccess);
+    app.Running.User.listenTo(app.Running.User, 'fetch', app.Running.User.handleRole);
+    app.Running.User.listenTo(app.Running.User, 'change', app.Running.User.handleRole);
+
+    app.Running.Async = new app.Models.Async();
 
     app.Running.Router = new app.Routers.Router();
-    Backbone.history.start();
+    Backbone.history.start({ pushState: true });
 
 });

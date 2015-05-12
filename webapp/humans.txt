@@ -62,5 +62,5 @@ Code Snob:      Taylor Trimble
 
 
 /* SITE */
-Components: Gorilla, Backbone.js, LESS, MailGun, jQuery, DataTables
+Components: Golang, Gorilla, Backbone.js, LESS, MailGun, jQuery, DataTables
 Software: Sublime Text, Coda, Mac OSX

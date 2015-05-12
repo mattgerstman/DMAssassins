@@ -1,27 +1,26 @@
 package main
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"net/http"
 )
 
 // POST - Takes data from facebook and returns an authenticated user/game
 func postSession(w http.ResponseWriter, r *http.Request) (response map[string]interface{}, appErr *ApplicationError) {
+	params, appErr := NewParams(r)
+	if appErr != nil {
+		return nil, appErr
+	}
 
 	// Parse facebook id and token from form
-	r.ParseForm()
-	facebookId := r.FormValue("facebook_id")
-	if facebookId == "" {
-		msg := "Missing Parameter: facebook_id."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+	facebookId, appErr := params.GetStringParam("facebook_id")
+	if appErr != nil {
+		return nil, appErr
 	}
-	facebookToken := r.FormValue("facebook_token")
-	if facebookToken == "" {
-		msg := "Missing Parameter: facebook_token."
-		err := errors.New("Missing Parameter")
-		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
+
+	facebookToken, appErr := params.GetStringParam("facebook_token")
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	// Get the user data from the facebook data
@@ -43,31 +42,14 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 
 	// Set all of the following to nil if we don't have them yet
 	response["game"] = nil
-	response["rules"] = nil
-	response["leaderboard"] = nil
-
-	// Get games user is a part of
-	games := make(map[string][]*Game)
-	member, appErr := user.GetGamesForUser()
-	if appErr != nil && appErr.Code != ErrCodeNoGameMappings {
-		return nil, appErr
-	}
-	games["member"] = member
-
-	// Get available games to join
-	available, appErr := user.GetNewGamesForUser()
-	if appErr != nil && appErr.Code != ErrCodeNoGameMappings {
-		return nil, appErr
-	}
-	games["available"] = available
-	response["games"] = games
 
 	// If we have a gameId try to get the game mapping first from that
-	gameId := uuid.Parse(r.FormValue("game_id"))
+	gameId, _ := params.GetUUIDParam("game_id")
 	var gameMapping *GameMapping
 	if gameId != nil {
 		gameMapping, appErr = GetGameMapping(user.UserId, gameId)
 		if appErr != nil {
+			// if we have no games return here
 			if appErr.Code != ErrCodeNotFoundGameMapping {
 				return nil, appErr
 			}
@@ -79,6 +61,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 	if gameMapping == nil {
 		gameMapping, appErr = user.GetArbitraryGameMapping()
 		if appErr != nil {
+			// if we have no games return here
 			if appErr.Code != ErrCodeNoGameMappings {
 				return nil, appErr
 			}
@@ -93,31 +76,7 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		return nil, appErr
 	}
 
-	game.GetHTMLRules()
-
 	response["game"] = game
-
-	appErr = user.GetUserGameProperties(gameMapping.GameId)
-	if appErr != nil {
-		return nil, appErr
-	}
-	response["user"] = user
-
-	target, appErr := user.GetTarget(game.GameId)
-	if appErr != nil && appErr.Code != ErrCodeNotFoundTarget {
-		return nil, appErr
-	}
-	if target != nil {
-		target.GetTeamByGameId(gameId)
-	}
-	response["target"] = target
-
-	// Get the Leaderboard for the game
-	leaderboard, appErr := game.GetLeaderboard()
-	if appErr != nil {
-		return nil, appErr
-	}
-	response["leaderboard"] = leaderboard
 
 	return response, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
+	"fmt"
 	"github.com/getsentry/raven-go"
 	fb "github.com/huandu/facebook"
 )
@@ -47,7 +48,7 @@ func CreateUserFromFacebookToken(facebookToken string) (user *User, appErr *Appl
 
 	err = res.DecodeField("email", &email)
 	if err != nil {
-		email = "none-provided@playassassins.com"
+		email = `none-provided@playassassins.com`
 		// DROIDS ask taylor why this would cause a panic
 		// I think the appErr is getting dereferenced and then broken
 
@@ -337,7 +338,9 @@ func (game *Game) FacebookPost(message string) (appErr *ApplicationError) {
 	}
 
 	session := getFacebookSession(accessToken)
-	_, err := session.Post(`/`+pageId+`/feed`, fb.Params{"message": message, "access_token": accessToken})
+	res, err := session.Post(`/`+pageId+`/feed`, fb.Params{"message": message, "access_token": accessToken})
+	fmt.Println(res)
+	fmt.Println(err)
 	if err != nil {
 		return NewApplicationError("Invalid Facebook Token", err, ErrCodeInvalidFBToken)
 	}

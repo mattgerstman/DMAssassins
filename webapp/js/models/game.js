@@ -7,23 +7,14 @@
 //
 // Single game model
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Models.Game = Backbone.Model.extend({
 
         // default properties for a game to appear "Loading..."
         defaults: {
-            game_id: '',
-            game_name: 'Loading...',
+            game_id: null,
+            game_name: strings.loading,
             game_started: false,
             game_has_password: false,
             member: true
@@ -32,10 +23,10 @@ var app = app || {
         // sets game_id as the id attribute
         idAttribute: 'game_id',
         // Sets the url root
-        urlRoot: config.WEB_ROOT + 'user/',
+        urlRoot: config.WEB_ROOT + 'game/',
         // Determine if teams are enabled for this game
         areTeamsEnabled: function() {
-            return this.getProperty('teams_enabled') == 'true';
+            return this.getProperty('teams_enabled') === 'true';
         },
         start: function(data, successCallback, errorCallback) {
             var url = this.gameUrl();
@@ -46,7 +37,7 @@ var app = app || {
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function(response) {
-                    if (typeof successCallback == 'function') {
+                    if (typeof successCallback === 'function') {
                         successCallback(that, response);
                     }
                 },
@@ -56,7 +47,7 @@ var app = app || {
                     }
                 }
             });
-
+            return this;
         },
         // set game property
         setProperty: function(key,value, silent) {
@@ -79,6 +70,12 @@ var app = app || {
                 return null;
             return properties[key];
         },
+        fetch: function(options) {
+            if (this.get('game_id') === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
+        },
         fetchProperties: function() {
             var url = this.gameUrl();
             return this.fetch({url: url});
@@ -89,7 +86,6 @@ var app = app || {
         },
         url: function() {
             var url = this.urlRoot;
-            url += app.Session.get('user_id') + '/game/';
             var game_id = this.get('game_id');
             if (!game_id)
             {

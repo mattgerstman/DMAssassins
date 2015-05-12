@@ -1,0 +1,114 @@
+<div class="view text-center">
+    <div class="row">
+        <label>Name:</label> <%= properties.name %>
+    </div>
+    <div class="row">
+        <label>Email:</label> <a href="mailto:"<%= email %>"><%= email %></a>
+    </div>
+    <div class="row">
+        <label>Facebook:</label> <a href="<%= properties.facebook %>"><%= properties.facebook.replace('https://facebook','fb') %></a>
+    </div>
+    <% if (teams_enabled && properties.team) { %>
+        <div class="row">
+            <label>Team:</label> <%= properties.team %>
+        </div>
+    <% } %>
+    <div class="row">
+        <div class="text-danger"><label>Secret:</label> <%= properties.secret %></div>
+        <p class="text-danger">
+            Give this to your assassin if they kill you.
+        </p>
+    </div>
+
+    <div class="row">
+        <a class="thumbnail js-profile-picture">
+            <div class="profile-thumbnail-container">
+                <img class="profile-thumbnail" src=<%= properties.photo_thumb %>>
+            </div>
+        </a>
+    </div>
+
+    <div class="user-column btn-group btn-group-justified profile-buttons">
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary js-account-settings">Account Settings</button>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary js-change-photo">Change Photo</button>
+        </div>
+    </div>
+    <% if (allow_quit) { %>
+        <div class="user-column profile-buttons">
+            <button type="button" class="btn btn-danger btn-block js-quit-game">Quit Game</button>
+        </div>
+    <% } %>
+</div>
+
+<!-- Profile photo modal -->
+<div class="modal fade js-modal-profile-photo" tabindex="-1" role="dialog" aria-labelledby="photoModal" aria-hidden="true" data-keyboard="true">
+  	<div class="modal-dialog">
+	<img class="img-responsive center-block" src=<%= properties.photo %> />
+  	</div>
+</div>
+
+<!-- Quit Game Modal Wrapper -->
+<div class="js-wrapper-quit-modal">
+
+</div>
+
+<!-- Profile email settings modal -->
+<div class="modal fade js-modal-account-settings" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+  	<div class="modal-dialog">
+    	<div class="modal-content">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<h4 class="modal-title">Email Settings</h4>
+	</div>
+	<form role="form">
+          		<div class="modal-body">
+                	<div class="form-group">
+                    	<label class="control-label" for=email>Email Address:</label>
+				<div class="">
+                        	<input class="form-control js-email" value="<%=email%>"/>
+					</div>
+				</div>
+				<% if (has_page) { %>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" class="js-allow-post" <% if (allow_post) { %>checked<% } %>> Is it ok for us to post your name on the <a href="http://fb.com/<%= page_id %>/"><%= page_name %></a> page when you're involved in a kill? It's ok we know you want to brag.
+							</label>
+                            </div>
+                        <% } %>
+
+				<div class="checkbox">
+					<label>
+						<input type="checkbox" class="js-allow-email" <% if (allow_email){ %>checked<% } %>> Is it ok for us to send you emails?
+					</label>
+				</div>
+				<em class="opt-out-warning">Note: If you opt out of emails, you will not receive updates if your target changes due to a plot twist.</em>
+          			</div>
+  			<div class="modal-footer">
+                  <div class="hidden-xs">
+                      <button class="btn btn-default btn-medium" data-dismiss="modal">Cancel</button>
+                      <button class="btn btn-primary btn-medium js-account-settings-save">Save</button>
+                  </div>
+                  <div class="visible-xs-block">
+                      <button class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+                      <button class="btn btn-primary btn-block js-account-settings-save">Save</button>
+                  </div>
+			</div>
+		</div>
+	</form>
+</div><!-- /.modal-content -->
+  	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="js-wrapper-change-photo-modal">
+    <div class="modal fade js-modal-profile-change-photo"  tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+        <div class="modal-dialog">
+            <div class="modal-content js-profile-select">
+
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>

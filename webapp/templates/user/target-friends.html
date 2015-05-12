@@ -1,0 +1,8 @@
+<% if (!user_friends && show_button) { %>
+    <button class="btn btn-primary js-get-friends btn-target-friends">Show Mutual Friends</button>
+<% } else { %>
+    <p> You have <strong> <%= count %> </strong> mutual friends.</%=></p>
+    <% _.each(friends, function(friend){ %>
+        <img src="https://graph.facebook.com/<%= friend.facebook_id %>/picture?width=50&height=50" title="<%= friend.user_name %>" class="target-friend" />
+    <% }) %>
+<% } %>

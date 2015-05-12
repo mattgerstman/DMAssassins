@@ -1,0 +1,29 @@
+<li class="sidebar-team js-team" id="js-nav-team-all">
+    <a href="#" class="js-team-name sidebar-teamName" data-team-id="SHOW_ALL">Show All</a>
+</li>
+<li class="sidebar-team js-team" id="js-nav-team-none">
+    <a href="#" class="js-team-name sidebar-teamName" data-team-id="NO_TEAM">No Team</a>
+</li>
+<% if (is_admin) { %>
+    <li class="sidebar-team new-team">
+        <a href="#" class="js-new-team-open sidebar-teamName">New Team</a>
+        <form class="js-form-new-team new-team-form form-inline hide">
+            <input placeholder="Enter Team Name" type="text" class="js-new-team-name form-control sidebar-input" />
+            <a href="#" class="js-create-new-team"><span class="glyphicon glyphicon-ok sidebar-glyphicon sidebar-glyphicon-success"></span></a>
+            <a href="#" class="js-cancel-new-team"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
+        </form>
+    </li>
+<%
+    }
+%>
+
+
+<select id="team-select-placeholder" class="hide">
+    <%
+    _.each(teams, function(team){
+    %>
+        <option value="<%= team.team_id %>"> <%= team.team_name %> </option>
+    <%
+    })
+    %>
+</select>

@@ -1,0 +1,25 @@
+<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+  <div class="hidden-sm">
+      <span class="js-header-games">
+          <%= long_text %>
+      </span>
+      <span class="caret"></span>
+  </div>
+  <div class="visible-sm">
+      <span class="js-header-games-short">
+          <%= short_text %>
+      </span>
+      <span class="caret"></span>
+  </div>
+</a>
+<ul class="dropdown-menu js-nav-games-dropdown" role="menu">
+  <%
+  _.each(games, function(game) {
+  %>
+      <li id="js-nav-<%=game.game_id %>" class="js-dropdown-item js-game-name <% if (active_game_id === game.game_id) { %> hide <% } %>" dropdown="games"><a game_id="<%=game.game_id %>" class="js-switch-game js-nav-link" href="#switch_game"><%=game.game_name%></a></li>
+  <%
+  })
+  %>
+  <li id="js-nav-create-game" dropdown="games"><a class="js-nav-link <% if (active_game_id === 'create_game') { %> hide <% } %>" href="#create_game">Create New Game</a></li>
+  <li id="js-nav-join-game" dropdown="games"><a class="js-nav-link <% if ( (!show_join) || (active_game_id === 'join_game') ) { %> hide <% } %>" href="#join_game">Join New Game</a></li>
+</ul>

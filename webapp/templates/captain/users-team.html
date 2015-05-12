@@ -1,0 +1,20 @@
+<li class="sidebar-team js-team js-droppable-team" id="js-nav-team-<%= team_id %>">
+    <div class="team-display">
+        <a href="#" class="js-team-name sidebar-teamName" data-team-id="<%= team_id %>">
+            <%= team_name %>
+        </a>
+        <% if (is_admin) { %>
+            <div class="sidebar-teamButtons">
+                <a href="#" class="js-edit-team"><span class="glyphicon glyphicon glyphicon-pencil sidebar-glyphicon sidebar-glyphicon-warning"></span></a>
+                <a href="#" class="js-delete-team"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
+            </div>
+        <% } %>
+    </div>
+    <% if (is_admin) { %>
+        <form class="edit-team-form form-inline hide">
+            <input type="text" class="js-edit-team-name form-control sidebar-input" value="<%= team_name %>"/>
+            <a href="#" class="js-save-edit-team  "><span class="glyphicon glyphicon-ok sidebar-glyphicon sidebar-glyphicon-success"></span></a>
+            <a href="#" class="js-cancel-edit-team"><span class="glyphicon glyphicon-remove sidebar-glyphicon sidebar-glyphicon-danger"></span></a>
+        </form>
+    <% } %>
+</li>

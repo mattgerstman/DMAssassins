@@ -7,15 +7,6 @@
 //
 // model for target pages
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
     'use strict';
     app.Models.Photos = Backbone.Model.extend({
@@ -32,7 +23,7 @@ var app = app || {
             var that = this;
             app.Running.FB.login(function(response) {
                 var fb_user_photos = response.authResponse.grantedScopes.search('user_photos');
-                if (fb_user_photos == -1)
+                if (fb_user_photos === -1)
                 {
                     return that.needPhotos();
                 }

@@ -7,32 +7,23 @@
 //
 // Handles all the URL *Magic*
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
 
     app.Routers.Router = app.Routers.BaseRouter.extend({
 
-        // Sometime we wanna go back and tis is the only wat to do that.
+        // Sometime we wanna go back and this is the only way to do that.
         history: [],
         // All the routes
         routes: {
-            '': 'my_profile',
+            '': config.DEFAULT_VIEW,
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
             'my_profile': 'my_profile',
             'multigame': 'multigame',
             'leaderboard': 'leaderboard',
-            'create_game': 'create_game',
-            'join_game': 'join_game',
+            'create-game': 'create_game',
+            'join-game': 'join_game',
             'rules': 'rules',
             'users': 'users',
             'edit_rules': 'edit_rules',
@@ -43,43 +34,49 @@ var app = app || {
 
         },
         // routes that require we have a game that has been started
-        requiresTarget: ['#target'],
+        requiresTarget: ['', 'target'],
 
         // routes that require just authentication
-        requiresJustAuth: ['#multigame', ''],
+        requiresJustAuth: ['multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['#my_profile', '#join_game', '#leaderboard', '#rules', '#', ''],
+        requiresGameAndAuth: ['my_profile', 'join_game', 'leaderboard', 'rules'],
 
         // routes that require the user is at least a team captain
-        requiresCaptain: ['#users'],
+        requiresCaptain: ['users'],
 
         // routes that require is at least a game admin
-        requiresAdmin: ['#edit_rules', '#game_settings', '#plot_twists', '#email_users'],
+        requiresAdmin: ['edit_rules', 'game_settings', 'plot_twists', 'email_users'],
 
         // routes that require is a super admin
-        requiresSuperAdmin: ['#targets'],
+        requiresSuperAdmin: ['targets'],
 
         // routes that should hide the nav bar
         noNav: ['login', 'multigame'],
 
         // routes that a logged in user can't access
-        preventAccessWhenAuth: ['#login'],
+        preventAccessWhenAuth: ['login'],
 
         // place to redirect users for requiresGameAndAuth
-        redirectWithoutGame: '#multigame',
+        redirectWithoutGame: 'multigame',
 
         // place to redirect logged in users who don't have a started game
         redirectWithoutGameStarted: 'my_profile',
 
         // place to redirect users who aren't logged in
-        redirectWithoutAuth: '#login',
+        redirectWithoutAuth: 'login',
+
+        // place to redirect to when a user doesn't have a target
+        redirectWithoutTarget: 'my_profile',
 
         before: function(params, next) {
 
             // is the user authenticated
-            var isAuth = app.Session.get('authenticated');
-            var path = Backbone.history.location.hash;
+            var isAuth = app.Session.get('authenticated') === true;
+            var path = Backbone.history.location.pathname;
+            if (path.indexOf('/') === 0){
+                path = path.substring(1);
+            }
 
             // do we need a game and authentication
             var needGameAndAuth = _.contains(this.requiresGameAndAuth, path);
@@ -94,11 +91,7 @@ var app = app || {
             var needTarget = _.contains(this.requiresTarget, path);
 
             // is there a game
-            var sessionHasGame = app.Session.get('has_game');
-            var hasGame = (sessionHasGame == "true") || (sessionHasGame === true);
-
-            // is the game started
-            var hasTarget = !!app.Running.TargetModel.get('user_id') && app.Running.Games.getActiveGame().get('game_started');
+            var hasGame = app.Session.get('has_game') === true;
 
             // do we need to be a captain
             var needCaptain = _.contains(this.requiresCaptain, path);
@@ -110,7 +103,7 @@ var app = app || {
             var needSuperAdmin = _.contains(this.requiresSuperAdmin, path);
 
             // The active user's role in the current game
-            var userRole = app.Running.User.getProperty('user_role');
+            var userRole = app.Running.User.getRole();
 
             // is the user a captain
             var isCaptain = AuthUtils.requiresCaptain(userRole);
@@ -121,16 +114,24 @@ var app = app || {
             // is the user a super admin
             var isSuperAdmin = AuthUtils.requiresSuperAdmin(userRole);
 
+            // is the game started
+            var gameStarted = app.Running.Games.hasActiveGameStarted();
+            // is the game started
+            var hasTarget = !!app.Running.TargetModel.get('user_id') && gameStarted && !isAdmin;
+
             /*
-			Variables I use when shit's not routing properly */
+            Variables I use when shits not routing properly */
             /*/
-			console.log('path:', path);
-			console.log('needGameAndAuth: ', needGameAndAuth);
-			console.log('hasGame: ', hasGame);
-			console.log('hasTarget: ', hasTarget);
-			console.log('needAuth: ', needAuth);
-			console.log('isAuth: ', isAuth);
-			console.log('cancelAccess: ', cancelAccess);
+            console.log('path:', path);
+            console.log('gameStarted:', gameStarted);
+            console.log('userRole:', userRole);
+            console.log('path:', path);
+            console.log('needGameAndAuth: ', needGameAndAuth);
+            console.log('hasGame: ', hasGame);
+            console.log('hasTarget: ', hasTarget);
+            console.log('needAuth: ', needAuth);
+            console.log('isAuth: ', isAuth);
+            console.log('cancelAccess: ', cancelAccess);
             console.log('needCaptain: ', needCaptain);
             console.log('isCaptain: ', isCaptain);
             console.log('needAdmin: ', needAdmin);
@@ -150,7 +151,7 @@ var app = app || {
                     trigger: true
                 });
             }
-            // do we need a game and is it started
+            // do we need a target and do we have one
             else if (needTarget && !hasTarget) {
                 Backbone.history.navigate(this.redirectWithoutTarget, {
                     trigger: true
@@ -180,7 +181,16 @@ var app = app || {
                 });
             }
             else {
-                //No problem handle the route
+                // No problem handle the route
+                if (needCaptain) {
+                    return app.Running.Async.requiresCaptain(next);
+                }
+                if (needAdmin) {
+                    return app.Running.Async.requiresAdmin(next);
+                }
+                if (needSuperAdmin) {
+                    return app.Running.Async.requiresSuperAdmin(next);
+                }
                 return next();
             }
         },
@@ -192,10 +202,9 @@ var app = app || {
         back: function() {
             this.history.pop();
             var path = this.history.pop();
-            console.log(path);
             Backbone.history.navigate(path, {
-                    trigger: true
-                });
+                trigger: true
+            });
         },
         // login route
         login: function() {
@@ -210,9 +219,8 @@ var app = app || {
         },
         // game selection route
         multigame: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.MultiGameView();
             app.Running.AppView.setCurrentView(view);
-            app.Running.currentView.collection.fetch();
             this.render();
         },
         // target route
@@ -223,20 +231,20 @@ var app = app || {
         },
         // create a new game route
         create_game: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.CreateGameView();
             app.Running.AppView.setCurrentView(view);
             this.render();
-            app.Running.currentView.showCreateGame();
         },
         // join a new game route
         join_game: function() {
-            var view = new app.Views.SelectGameView();
+            var view = new app.Views.JoinGameView();
             app.Running.AppView.setCurrentView(view);
             this.render();
-            app.Running.currentView.loadJoinGame(app.Session.get('user_id'));
+
         },
         // profile route
         my_profile: function() {
+            console.log('my_profile');
             var view = new app.Views.ProfileView();
             app.Running.AppView.setCurrentView(view);
             this.render();
@@ -258,7 +266,7 @@ var app = app || {
             app.Running.Teams.fetch();
             var view = new app.Views.AdminUsersView();
             app.Running.AppView.setCurrentView(view);
-            app.Running.currentView.collection.fetch({reset: true});
+            // app.Running.currentView.collection.fetch({ reset: true });
             this.render();
         },
         edit_rules: function() {
@@ -284,7 +292,7 @@ var app = app || {
             this.render();
             app.Running.currentView.model.fetch({reset: true});
         },
-        preventSwitchGameBack: ['join_game', 'create_game'],
+        preventSwitchGameBack: ['join-game', 'create-game'],
         switch_game: function() {
             var lastFragment = this.history[this.history.length - 1];
             if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
@@ -303,30 +311,24 @@ var app = app || {
         // render function, also determines weather or not to render the nav
         render: function() {
             var fragment = Backbone.history.fragment;
-            // if it's a view with a nav and we don't have one, make one
-            if ((this.noNav.indexOf(Backbone.history.fragment) == -1) && (fragment != 'login') && (!app.Running.NavView)) {
-                if (!app.Running.NavGameView) {
-                    app.Running.NavGameView = new app.Views.NavGameView();
-                    app.Running.NavGameView.render();
-                }
+
+            // if we have a game, create a navbar
+            if ((app.Running.Games.getActiveGame() !== null) && (fragment !== 'login') && (!app.Running.NavView)) {
                 app.Running.NavView = new app.Views.NavView();
                 app.Running.NavView = app.Running.NavView.render();
             }
-            // if it explicitely shouldn't have a nav and we have one kill it
-            else if ((this.noNav.indexOf(Backbone.history.fragment) != -1) && (app.Running.NavView)) {
+            // if dont have a game, but we have a navbar delete it
+            else if ((app.Running.Games.getActiveGame() === null) && (app.Running.NavView)) {
                 app.Running.NavView.$el.html('');
                 app.Running.NavView = null;
-                app.Running.navGameView = null;
             }
-            // if we have a nav and highlight the nav item
-            if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) == -1)) {
-                if (fragment === '')
-                    fragment = 'my_profile';
 
-                fragment = fragment.replace('_', '-');
-                app.Running.NavView.highlight('#js-nav-' + fragment);
-                app.Running.NavView.handleTarget();
-                app.Running.NavGameView.updateText();
+            // if we have a nav and highlight the nav item
+            if ((app.Running.NavView) && (this.noNav.indexOf(Backbone.history.fragment) === -1)) {
+                if (fragment === '')
+                    fragment = config.DEFAULT_VIEW;
+
+                app.Running.NavView.updateHighlight();
             }
 
             // render our page within the app

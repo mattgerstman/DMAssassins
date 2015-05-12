@@ -1,13 +1,3 @@
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
-
 $(function() {
 
     // This is called with the results from from FB.getLoginStatus().
@@ -23,9 +13,7 @@ $(function() {
         if (!app.Session)
             return;
 
-        var authenticated =  app.Session.get('authenticated');
-        if ((authenticated === true) || (authenticated =='true'))
-        {
+        if (app.Session.get('authenticated') === true) {
             // If we're already authenticated recover the previous session
             app.Session.recoverSession(response);
             return;

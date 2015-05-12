@@ -7,15 +7,6 @@
 //
 // Manages all local storage information and helps keep various models in sync
 
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
-
 (function() {
 
     app.Models.Session = Backbone.Model.extend({
@@ -42,9 +33,12 @@ var app = app || {
         get: function(key) {
             if (this.supportStorage) {
                 var data = localStorage.getItem(key);
-                if (data && data[0] === '{') {
+                try {
                     return JSON.parse(data);
-                } else {
+                } catch (err) {
+                    console.log("ERROR ACCESSING SESSION DATA");
+                    console.log(err);
+                    console.log(data);
                     return data;
                 }
             } else {
@@ -55,7 +49,7 @@ var app = app || {
         // sets a session variable
         set: function(key, value) {
             if (this.supportStorage) {
-                localStorage.setItem(key, value);
+                localStorage.setItem(key, JSON.stringify(value));
             } else {
                 Backbone.Model.prototype.set.call(this, key, value);
             }
@@ -79,6 +73,7 @@ var app = app || {
             } else {
                 Backbone.Model.prototype.clear(this);
             }
+            return this;
         },
         // calls the facebook login function and handles it appropriately
         // if they are logged into facebook and connected to the app a session is created automatically
@@ -131,13 +126,16 @@ var app = app || {
                             alert('You must authorize Facebook to play DMAssassins!');
                             location.reload();
                         }
-                        // scope are the facebook permissions we're requesting
                     }, {
+                        // scope are the facebook permissions we're requesting
                         scope: config.ALL_PERMISSIONS
                     });
 
                 } else {
+                    // The person is not logged into Facebook, so we're not sure if
+                    // they are logged into this app or not.
 
+                    // hack for chrome for iOS which doesn't like the native FB redirect
                     if( navigator.userAgent.match('CriOS') )
                     {
                         window.open('https://www.facebook.com/dialog/oauth?client_id='+config.APP_ID+'&redirect_uri='+ config.CLIENT_ROOT+'%23login&scope='+config.ALL_PERMISSIONS, '', null);
@@ -154,15 +152,12 @@ var app = app || {
                             alert('You must authorize Facebook to play DMAssassins!');
                             location.reload();
                         }
-
-                        // scope are the facebook permissions we're requesting
                     }, {
+                        // scope are the facebook permissions we're requesting
                         scope: config.ALL_PERMISSIONS
                     });
-
-                    // The person is not logged into Facebook, so we're not sure if
-                    // they are logged into this app or not.
                 }
+                return this;
             });
 
         },
@@ -193,17 +188,9 @@ var app = app || {
 
                 // store all reponse data in the new session immediately
                 var parsedGames    = app.Running.Games.parse(response.games);
-                var games 		   = parsedGames           || {};
-                var game 		   = response.game         || { game_id: null };
-                var user 		   = response.user         || { user_id: null };
-                var target 		   = response.target       || { assassin_id: user.user_id };
-                var leaderboard    = response.leaderboard  || {};
-                var rules          = null;
-                if (game.game_properties)
-                {
-                    rules = {rules: (game.game_properties.rules || null)};
-                }
-                target.assassin_id = response.user.user_id;
+                var game 		       = response.game         || { game_id: null };
+                var user 		       = response.user         || { user_id: null };
+
 
                 // Set user id in case an error occurs
                 Raven.setUser({
@@ -223,28 +210,28 @@ var app = app || {
 
                 // reload the data for all models
                 app.Running.User.set(user);
-                app.Running.TargetModel.set(target);
-                app.Running.LeaderboardModel.set(leaderboard);
-                app.Running.RulesModel.set(rules);
-                app.Running.Games.reset(games);
+
+                var last_role = app.Session.get('user_role');
+                app.Running.User.setProperty('user_role', last_role);
 
                 // store the basic auth token in the session in case we need to reload it on app launch
                 app.Session.storeSession(response);
                 if (game.game_id) {
-                    app.Running.Games.setActiveGame(game.game_id, true);
-                    app.Running.Games.getActiveGame().set(game);
+                    app.Running.Games.add(game);
+                    app.Running.Games.setActiveGame(game.game_id);
+                    app.Running.Games.fetch({reset:true});
                 }
 
                 var targetURLs = app.Running.Router.requiresTarget;
                 var path = Backbone.history.fragment;
 
-                if ((path != 'login') && !_.contains(targetURLs, path)) {
+                if ((path !== 'login') && !_.contains(targetURLs, path)) {
                     Backbone.history.loadUrl();
                     return;
                 }
 
-                if (path == 'login' && app.Running.TargetModel.get('user_id')) {
-                    Backbone.history.navigate('#', {
+                if (path === 'login' && app.Running.TargetModel.get('user_id')) {
+                    Backbone.history.navigate('#target', {
                         trigger: true
                     });
                     return;
@@ -271,7 +258,8 @@ var app = app || {
             // performs the ajax request to the server to get session data
             var login = $.ajax({
                 url: this.url,
-                data: data,
+                data: JSON.stringify(data),
+                contentType: 'application/json',
                 tryCount:0,
                 retryLimit:3,
                 type: 'POST',
@@ -280,18 +268,6 @@ var app = app || {
                     Raven.captureException(new Error('Server failed to login'), {extra: {facebook_response:response, try_count: this.tryCount, server_response: serverResponse, text_status: textStatus, error_thrown :errorThrown}});
                     that.clear();
 
-                    // retry logic for login
-                    this.tryCount++;
-                    if (this.tryCount < this.retryLimit)
-                    {
-                        var loginCall = this;
-                        setTimeout(function(){
-                            $.ajax(loginCall);
-                        }, 100);
-                        return;
-
-                    }
-
                     alert('An error occurred. Please try again later.');
                     Backbone.history.navigate('', {
                         trigger: true
@@ -299,12 +275,12 @@ var app = app || {
                 }
             });
         },
+        // store a boolean to determine if we're authenticated
         storeSession: function(data) {
-            // store a boolean to determine if we're authenticated
             this.set('authenticated', true);
             this.set('has_game', data.game !== null);
-            this.set('response', JSON.stringify(data));
             this.storeBasicAuth(data);
+            return this;
         },
         // stores all the basic auth variables in the session
         storeBasicAuth: function(data) {
@@ -316,8 +292,8 @@ var app = app || {
             var base64Key = window.btoa(plainKey);
             this.set('authKey', base64Key);
             this.setAuthHeader();
+            return this;
         },
-
         // sets the Basic Auth header for all ajax requests
         setAuthHeader: function() {
             var base64Key = this.get('authKey');
@@ -326,7 +302,7 @@ var app = app || {
                     'Authorization': "Basic " + base64Key
                 }
             });
-
+            return this;
         }
     });
 })();

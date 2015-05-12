@@ -1,0 +1,26 @@
+<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Kill Timer Info</h4>
+    </div>
+    <div class="modal-body">
+        <p>
+            At <strong><%= execute_ts_string %></strong> we will automatically kill all users who haven't killed since <strong><%= min_kill_ts_string %></strong>. If you would like to cancel that cancel timer below:
+        </p>
+        <form>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" class="js-notify-cancel-timer" checked /> Notify Users By Email
+              </label>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger hidden-xs js-cancel-timer">Cancel Timer</button>
+
+        <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-block btn-danger visible-xs js-cancel-timer">Cancel Timer</button>
+
+    </div>
+</div><!-- /.modal-content -->

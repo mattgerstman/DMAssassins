@@ -1,0 +1,31 @@
+<div class="container text-center">
+    <% _.each(loops, function(loop, i){ %>
+        <h1>Loop <%= i + 1 %> - <%= loop.length %> Targets</h1>
+        <table class="js-targets-table stripe compact">
+            <thead>
+                <th>Assassin Name</th>
+                <th>Assassin Team</th>
+                <th>Assassin Role</th>
+                <th>Assassin Kills</th>
+                <th>Target Name</th>
+                <th>Target Team</th>
+                <th>Target Role</th>
+                <th>Target Kills</th>
+            </thead>
+            <tbody>
+                <% _.each(loop, function(pair) { %>
+                    <tr>
+                        <td><%= pair.assassin_name %></td>
+                        <td><%= pair.assassin_team_name %></td>
+                        <td><%= pair.assassin_user_role %></td>
+                        <td><%= pair.assassin_kills %></td>
+                        <td><%= pair.target_name %></td>
+                        <td><%= pair.target_team_name %></td>
+                        <td><%= pair.target_user_role %></td>
+                        <td><%= pair.target_kills %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% }) %>
+</div>

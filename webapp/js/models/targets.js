@@ -1,13 +1,6 @@
 // Targets Collection. Handles all of the targets for a game for a super admin
 // js/collections/targets.js
-var app = app || {
-    Collections: {},
-    Models: {},
-    Views: {},
-    Routers: {},
-    Running: {},
-    Session: {}
-};
+
 (function() {
     'use strict';
     app.Models.Targets = Backbone.Model.extend({
@@ -15,16 +8,16 @@ var app = app || {
             loops: [
                 [
                     {
-                        "assassin_id": "Loading...",
-                        "assassin_name": "Loading...",
-                        "assassin_team_name": "Loading...",
-                        "assassin_user_role": "Loading...",
-                        "assassin_kills": "Loading...",
-                        "target_id": "Loading...",
-                        "target_name": "Loading...",
-                        "target_team_name": "Loading...",
-                        "target_user_role": "Loading...",
-                        "target_kills": "Loading..."
+                        "assassin_id": strings.loading,
+                        "assassin_name": strings.loading,
+                        "assassin_team_name": strings.loading,
+                        "assassin_user_role": strings.loading,
+                        "assassin_kills": strings.loading,
+                        "target_id": strings.loading,
+                        "target_name": strings.loading,
+                        "target_team_name": strings.loading,
+                        "target_user_role": strings.loading,
+                        "target_kills": strings.loading
                     }
                 ]
             ]
@@ -65,6 +58,12 @@ var app = app || {
                 data.loops.push(loop);
             }
             return data;
+        },
+        fetch: function(options) {
+            if (app.Running.Games.getActiveGameId() === null) {
+                return;
+            }
+            return Backbone.Model.prototype.fetch.call(this, options);
         },
         url: function(){
             var game_id = app.Running.Games.getActiveGameId();

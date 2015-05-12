@@ -27,11 +27,6 @@ func GetDumbUser(userId uuid.UUID) (user *User) {
 
 // Add a user to the DB and return it as a user object
 func NewUser(username, email, facebookId string, properties map[string]string) (user *User, appErr *ApplicationError) {
-	fmt.Println(username)
-	fmt.Println(email)
-	fmt.Println(facebookId)
-	fmt.Println(properties)
-
 	// Generate the UUID and insert it
 	userId := uuid.NewRandom()
 
@@ -364,4 +359,12 @@ func (user *User) KillTargetTransactional(tx *sql.Tx, gameId uuid.UUID, secret s
 	// DROIDS LOG THIS ERROR
 
 	return newTargetId, oldTargetId, nil
+}
+
+func (user *User) Equal(user2 *User) bool {
+	if user2 == nil {
+		return false
+	}
+
+	return uuid.Equal(user.UserId, user2.UserId)
 }

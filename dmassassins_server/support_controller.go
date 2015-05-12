@@ -13,9 +13,10 @@ type SupportPost struct {
 	Subject string `json:"subject"`
 }
 
-// POST - Creates a team for a game
-func postSupport(r *http.Request) (supportPost *SupportPost, appErr *ApplicationError) {
+// POST - Creates a support ticket
+func postSupport(r *http.Request) (issueMap map[string]int, appErr *ApplicationError) {
 
+	var supportPost SupportPost
 	// Decode json
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&supportPost)
@@ -49,12 +50,16 @@ func postSupport(r *http.Request) (supportPost *SupportPost, appErr *Application
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	appErr = postGithubIssue(supportPost.Subject, supportPost.Message, supportPost.Email, supportPost.Name)
+	issueNum, appErr := postGithubIssue(supportPost.Subject, supportPost.Message, supportPost.Email, supportPost.Name)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	return supportPost, nil
+	issueMap = map[string]int{
+		"issue_num": issueNum,
+	}
+
+	return issueMap, nil
 
 }
 

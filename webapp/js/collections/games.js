@@ -37,9 +37,7 @@ var app = app || {
         active_game: null,
         // handle on initiliazation
         url:function(){
-            var user_id = app.Session.get('user_id');
-            return config.WEB_ROOT + 'user/' + user_id + '/game/';
-
+            return config.WEB_ROOT + 'game/';
         },
         // Add a game to the collection (usually after creation)
         addGame: function(game_id){
@@ -81,6 +79,7 @@ var app = app || {
             this.active_game = game;
             app.Session.set('game_id', game_id);
             app.Session.set('has_game', true);
+            app.Session.set('game_started', game.get('game_started'));
 
             // trigger a game change if necessary
             if (silent === undefined || !silent)
@@ -107,6 +106,31 @@ var app = app || {
                 return null;
             }
             return game.get('game_id');
+        },
+        getActiveGameName: function() {
+            var game = this.getActiveGame();
+            if (!game)
+            {
+                return strings.loading;
+            }
+            return game.get('game_name');
+        },
+        getActiveGameTeamsEnabled: function() {
+            var game = this.getActiveGame();
+            if (!game)
+            {
+                return false;
+            }
+            return game.areTeamsEnabled();
+
+        },
+        hasActiveGameStarted: function() {
+            var game = this.getActiveGame();
+            if (!game)
+            {
+                return app.Session.get('game_started');
+            }
+            return game.get('game_started');
         }
     });
 })();

@@ -20,7 +20,7 @@ type Team struct {
 // Gets a team by it's team_id
 func GetTeamById(teamId uuid.UUID) (team *Team, appErr *ApplicationError) {
 	var gameIdBuffer, teamName string
-	err := db.QueryRow(`SELECT team_id, team_name FROM dm_teams WHERE team_id = $1 ORDER BY team_name`, teamId.String()).Scan(&gameIdBuffer, &teamName)
+	err := db.QueryRow(`SELECT game_id, team_name FROM dm_teams WHERE team_id = $1 ORDER BY team_name`, teamId.String()).Scan(&gameIdBuffer, &teamName)
 	if err != nil {
 		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
 	}
@@ -252,33 +252,67 @@ func (user *User) GetTeam(gameId uuid.UUID) (team *Team, appErr *ApplicationErro
 	return GetTeamById(gameMapping.TeamId)
 }
 
+// returns the captain for a team
+func (team *Team) GetCaptain() (user *User, appErr *ApplicationError) {
+	var userIdBuffer string
+	err := db.QueryRow("SELECT user_id FROM dm_user_game_mapping WHERE team_id = $1 AND user_role = 'dm_captain'", team.TeamId.String()).Scan(&userIdBuffer)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	userId := uuid.Parse(userIdBuffer)
+	return GetUserById(userId)
+}
+
+func (gameMapping *GameMapping) changeTeam(teamId uuid.UUID) (gm *GameMapping, appErr *ApplicationError) {
+	// Updates the user's game_mapping to include their new team id
+	_, err := db.Exec(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE game_id = $2 and user_id = $3`, teamId.String(), gameMapping.GameId.String(), gameMapping.UserId.String())
+	if err != nil {
+		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	}
+
+	gameMapping.TeamId = teamId
+	return gameMapping, nil
+}
+
 // Adds a user to a team
 func (user *User) JoinTeam(teamId uuid.UUID) (gameMapping *GameMapping, appErr *ApplicationError) {
 	// Get the game_id (it's easier to enforce this constraint here than the DB)
-	var gameIdBuffer string
-	err := db.QueryRow(`SELECT game_id FROM dm_teams WHERE team_id = $1`, teamId.String()).Scan(&gameIdBuffer)
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+
+	team, appErr := GetTeamById(teamId)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	gameId := uuid.Parse(gameIdBuffer)
-	if gameId == nil {
-		msg := "Invalid Team Id: " + teamId.String()
-		err := errors.New(msg)
-		return nil, NewApplicationError(msg, err, ErrCodeDatabase)
+	gameMapping, appErr = GetGameMapping(user.UserId, team.GameId)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	var userRole, secret string
-	var kills int
-	var alive bool
-
-	// Updates the user's game_mapping to include their new team id
-	err = db.QueryRow(`UPDATE dm_user_game_mapping SET team_id = $1 WHERE game_id = $2 and user_id = $3 RETURNING user_role, secret, kills, alive`, teamId.String(), gameId.String(), user.UserId.String()).Scan(&userRole, &secret, &kills, &alive)
-	if err != nil {
-		return nil, NewApplicationError("Internal Error", err, ErrCodeDatabase)
+	if gameMapping.UserRole != "dm_captain" {
+		return gameMapping.changeTeam(teamId)
 	}
 
-	return &GameMapping{user.UserId, gameId, teamId, userRole, secret, kills, alive}, nil
+	captain, appErr := team.GetCaptain()
+	if appErr != nil {
+		return nil, appErr
+	}
+
+	if captain == nil {
+		return gameMapping.changeTeam(teamId)
+	}
+
+	if user.Equal(captain) {
+		return gameMapping, nil
+	}
+
+	// Return an error if we have a captain
+	msg := "A team cannot have two captains! \nDemote either " + captain.Properties["first_name"] + " " + captain.Properties["last_name"] + " or " + user.Properties["first_name"] + " " + user.Properties["last_name"] + " to move " + user.Properties["first_name"] + " to the " + team.TeamName + " team"
+	err := errors.New(msg)
+	return nil, NewApplicationError(msg, err, ErrCodeCaptainExists)
 
 }
 

@@ -16,6 +16,8 @@ import (
 var db *sql.DB
 
 const (
+	gamePath = "/game/"
+
 	gameIdPath          = "/game/{game_id}/"
 	gameLeaderboardPath = "/game/{game_id}/leaderboard/"
 	gameKillTimerPath   = "/game/{game_id}/kill_timer/"
@@ -36,8 +38,8 @@ const (
 	gameUserTargetFriendsPath = "/game/{game_id}/user/{user_id}/target/friends/"
 	gameUserTeamPath          = "/game/{game_id}/user/{user_id}/team/{team_id}/"
 
-	userGamePath    = "/user/{user_id}/game/"
 	unsubscribePath = "/unsubscribe/{user_id}"
+	jsPath          = "/js/{portal}/{version}/{file}"
 	supportPath     = "/support/"
 	sessionPath     = "/session/"
 	homePath        = "/"
@@ -174,9 +176,9 @@ func StartServer() {
 	// Just Game
 	r.HandleFunc(gameIdPath, GameIdHandler()).Methods("POST", "PUT", "GET", "DELETE")
 	r.HandleFunc(gameLeaderboardPath, LeaderboardHandler()).Methods("GET")
-	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "POST")
+	r.HandleFunc(gameRulesPath, GameRulesHandler()).Methods("GET", "PUT")
 	r.HandleFunc(gameKillTimerPath, GameKillTimerHandler()).Methods("GET", "DELETE")
-	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("PUT", "POST")
+	r.HandleFunc(gamePlotTwistPath, GamePlotTwistHandler()).Methods("POST")
 	r.HandleFunc(gameTargetsPath, GameTargetsHandler()).Methods("GET")
 
 	// Game then User
@@ -187,7 +189,7 @@ func StartServer() {
 	r.HandleFunc(gameUserTargetFriendsPath, TargetFriendsHandler()).Methods("GET")
 
 	r.HandleFunc(gameUserTeamPath, GameUserTeamHandler()).Methods("GET", "PUT", "POST", "DELETE")
-	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("POST")
+	r.HandleFunc(gameUserRolePath, GameUserRoleHandler()).Methods("PUT")
 
 	// User actions
 	r.HandleFunc(gameUserBanPath, GameUserBanHandler()).Methods("DELETE")
@@ -199,10 +201,10 @@ func StartServer() {
 
 	// Game then Team
 	r.HandleFunc(gameTeamPath, GameTeamHandler()).Methods("GET", "POST")
-	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "POST", "DELETE", "PUT")
+	r.HandleFunc(gameTeamIdPath, GameTeamIdHandler()).Methods("GET", "DELETE", "PUT")
 
 	// User then Game
-	r.HandleFunc(userGamePath, UserGameHandler()).Methods("GET", "PUT")
+	r.HandleFunc(gamePath, GameHandler()).Methods("GET", "POST")
 
 	// Just Support
 	r.HandleFunc(supportPath, SupportHandler()).Methods("POST")
@@ -210,11 +212,14 @@ func StartServer() {
 	// Just Session
 	r.HandleFunc(sessionPath, SessionHandler()).Methods("POST")
 
+	r.HandleFunc(jsPath, JSHandler()).Methods("GET")
+
 	timeoutHandler := http.TimeoutHandler(r, time.Second*20, `Timeout Occurred!`)
 	corsHandler := corsHandler(timeoutHandler)
 	clearHandler := context.ClearHandler(corsHandler)
 
 	handler := clearHandler
 	http.Handle("/", handler)
+
 	http.ListenAndServe(":8000", nil)
 }

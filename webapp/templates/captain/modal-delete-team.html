@@ -1,0 +1,22 @@
+<div class="modal fade js-modal-delete-team" tabindex="-1" role="dialog" aria-hidden="true" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Delete Team</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete team <strong><%= team_name %></strong>? <br />This will remove all users from the team and delete it.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default hidden-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-danger hidden-xs js-delete-team-submit">Delete Team</button>
+
+        <button type="button" class="btn btn-block btn-default visible-xs" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-block btn-danger visible-xs js-delete-team-submit">Delete Team</button>
+
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
