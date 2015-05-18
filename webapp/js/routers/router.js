@@ -325,10 +325,10 @@
             var fragment = Backbone.history.fragment;
 
             var hasActiveGame = app.Running.Games.getActiveGame() !== null;
-            console.log(hasActiveGame);
+            var recoveringSession = app.Session.get('has_game');
 
             // if we have a game, create a navbar
-            if ((hasActiveGame) && (fragment !== 'login') && (!app.Running.NavView)) {
+            if ((hasActiveGame || recoveringSession) && (fragment !== 'login') && (!app.Running.NavView)) {
                 app.Running.NavView = new app.Views.NavView();
                 app.Running.NavView = app.Running.NavView.render();
             }

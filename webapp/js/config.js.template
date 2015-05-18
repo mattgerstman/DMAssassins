@@ -1,10 +1,21 @@
 var config = {
-  BRAND_NAME: "Assassins",
-  DEFAULT_VIEW: "target",
-  ENV: "",
-	LOCAL_ROOT : '/Users/Matthew/Dropbox/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/',
-  CLIENT_ROOT : 'http://assassins.com/',
-	WEB_ROOT : 'http://localhost:8000/',
-	APP_ID : null	,
-	ALL_PERMISSIONS : 'public_profile,email,user_friends,user_photos'
+    BRAND_NAME: 'DevAssassins',
+    ENV: 'prod',
+    VERSION: '1.1.0',
+    DEFAULT_VIEW: 'target',
+    LOCAL_ROOT: '/Go/src/GitHub.com/mattgerstman/DMAssassins/webapp/',
+    WEB_ROOT: 'http://api.playassassins.com/',
+    CLIENT_ROOT: 'http://playassassins.com/',
+    APP_ID: 0,
+    SENTRY_DSN : '',
+    ALL_PERMISSIONS: 'public_profile,email,user_friends,user_photos'
+};
+
+var app = {
+    Collections: {},
+    Models: {},
+    Views: {},
+    Routers: {},
+    Running: {},
+    Session: {}
 };
