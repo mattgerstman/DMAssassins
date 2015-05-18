@@ -24,14 +24,20 @@ func NewParams(r *http.Request) (params *Params, appErr *ApplicationError) {
 }
 
 func (params *Params) GetParam(key string) (param interface{}, appErr *ApplicationError) {
-
-	if _, ok := params.data[key]; !ok {
+	data := params.data
+	if _, ok := data[key]; !ok {
 		msg := "Missing Parameter: " + key
 		err := errors.New(msg)
 		return nil, NewApplicationError(msg, err, ErrCodeMissingParameter)
 	}
 
-	return params.data[key], nil
+	return data[key], nil
+}
+
+func getInvalidParameterAppErr(key string) (appErr *ApplicationError) {
+	msg := "Invalid Parameter: " + key
+	err := errors.New(msg)
+	return NewApplicationError(msg, err, ErrCodeInvalidParameter)
 }
 
 func (params *Params) GetIntParam(key string) (intParam int, appErr *ApplicationError) {
@@ -44,7 +50,11 @@ func (params *Params) GetIntParam(key string) (intParam int, appErr *Application
 		return 0, nil
 	}
 
-	return param.(int), nil
+	if intParam, ok := param.(int); ok {
+		return intParam, nil
+	}
+
+	return 0, getInvalidParameterAppErr(key)
 }
 
 func (params *Params) GetStringParam(key string) (stringParam string, appErr *ApplicationError) {
@@ -57,7 +67,11 @@ func (params *Params) GetStringParam(key string) (stringParam string, appErr *Ap
 		return "", nil
 	}
 
-	return param.(string), nil
+	if stringParam, ok := param.(string); ok {
+		return stringParam, nil
+	}
+
+	return "", getInvalidParameterAppErr(key)
 }
 
 func (params *Params) GetUUIDParam(key string) (uuidParam uuid.UUID, appErr *ApplicationError) {

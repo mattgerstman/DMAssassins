@@ -52,6 +52,10 @@ var app = app || {
         joinGame: function(game_id, password, team_id) {
             app.Running.User.joinGame(game_id, password, team_id);
         },
+        clearActiveGame: function(options) {
+            this.active_game = null;
+            this.reset(options);
+        },
         // Set the active game to an arbitrary one
         setArbitraryActiveGame: function(silent) {
             var newGame = this.findWhere({game_started: true, member:true});
@@ -59,6 +63,15 @@ var app = app || {
             {
                 newGame = this.findWhere({game_started: false, member:true});
             }
+
+            if (!newGame) {
+                return null;
+            }
+
+            if (!newGame.get('game_id')) {
+                return null;
+            }
+
             this.setActiveGame(newGame, silent);
             return newGame;
         },

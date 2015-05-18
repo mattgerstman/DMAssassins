@@ -103,7 +103,7 @@
                         });
                         return;
                     }
-                    Backbone.history.navigate('#my_profile', {
+                    Backbone.history.navigate('#my-profile', {
                             trigger: true
                         });
                 },

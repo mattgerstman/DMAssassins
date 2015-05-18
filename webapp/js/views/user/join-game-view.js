@@ -74,7 +74,7 @@
             this.$('label[for=js-join-game-team]').text('Team:');
         },
         finishJoin: function(){
-            Backbone.history.navigate('my_profile', {
+            Backbone.history.navigate('my-profile', {
                 trigger: true
             });
         },

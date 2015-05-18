@@ -53,7 +53,7 @@
 
         },
         updateHighlight: function() {
-            var fragment = Backbone.history.fragment.replace('_', '-');
+            var fragment = Backbone.history.fragment;
             if (fragment === '') {
                 fragment = config.DEFAULT_VIEW;
             }

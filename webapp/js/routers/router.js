@@ -19,18 +19,26 @@
             'login': 'login',
             'logout': 'logout',
             'target': 'target',
-            'my_profile': 'my_profile',
+            'my-profile': 'my_profile',
             'multigame': 'multigame',
             'leaderboard': 'leaderboard',
             'create-game': 'create_game',
             'join-game': 'join_game',
             'rules': 'rules',
             'users': 'users',
-            'edit_rules': 'edit_rules',
-            'switch_game': 'switch_game',
-            'game_settings': 'game_settings',
+            'edit-rules': 'edit_rules',
+            'switch-game': 'switch_game',
+            'game-settings': 'game_settings',
             'targets': 'targets',
-            'support': 'support'
+            'support': 'support',
+
+            // old links that we want to alert about if an error occurs
+            'my_profile': 'oldLink',
+            'create_game': 'oldLink',
+            'join_game': 'oldLink',
+            'edit_roles': 'oldLink',
+            'switch_game': 'oldLink',
+            'game_settings': 'oldLink',
 
         },
         // routes that require we have a game that has been started
@@ -40,13 +48,13 @@
         requiresJustAuth: ['multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['my_profile', 'join_game', 'leaderboard', 'rules'],
+        requiresGameAndAuth: ['my-profile', 'join-game', 'leaderboard', 'rules'],
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['users'],
 
         // routes that require is at least a game admin
-        requiresAdmin: ['edit_rules', 'game_settings', 'plot_twists', 'email_users'],
+        requiresAdmin: ['edit-rules', 'game-settings', 'plot-twists', 'email-users'],
 
         // routes that require is a super admin
         requiresSuperAdmin: ['targets'],
@@ -61,13 +69,13 @@
         redirectWithoutGame: 'multigame',
 
         // place to redirect logged in users who don't have a started game
-        redirectWithoutGameStarted: 'my_profile',
+        redirectWithoutGameStarted: 'my-profile',
 
         // place to redirect users who aren't logged in
         redirectWithoutAuth: 'login',
 
         // place to redirect to when a user doesn't have a target
-        redirectWithoutTarget: 'my_profile',
+        redirectWithoutTarget: 'my-profile',
 
         before: function(params, next) {
 
@@ -214,7 +222,7 @@
         },
         // logout route
         logout: function() {
-            app.Session.clear();
+            app.Session.logout();
             this.navigate('login', true);
         },
         // game selection route
@@ -244,7 +252,6 @@
         },
         // profile route
         my_profile: function() {
-            console.log('my_profile');
             var view = new app.Views.ProfileView();
             app.Running.AppView.setCurrentView(view);
             this.render();
@@ -296,7 +303,7 @@
         switch_game: function() {
             var lastFragment = this.history[this.history.length - 1];
             if (lastFragment === undefined || _.contains(this.preventSwitchGameBack, lastFragment)) {
-                Backbone.history.navigate('my_profile', {
+                Backbone.history.navigate('my-profile', {
                     trigger: true
                 });
                 return;
@@ -306,19 +313,27 @@
         },
         support: function() {
             this.navigate('', true);
-            $('.js-support').click();
+            var supportView = new app.Views.SupportView();
+            supportView.render();
+        },
+        oldLink: function() {
+            console.log(arguments);
+            alert("Invalid link");
         },
         // render function, also determines weather or not to render the nav
         render: function() {
             var fragment = Backbone.history.fragment;
 
+            var hasActiveGame = app.Running.Games.getActiveGame() !== null;
+            console.log(hasActiveGame);
+
             // if we have a game, create a navbar
-            if ((app.Running.Games.getActiveGame() !== null) && (fragment !== 'login') && (!app.Running.NavView)) {
+            if ((hasActiveGame) && (fragment !== 'login') && (!app.Running.NavView)) {
                 app.Running.NavView = new app.Views.NavView();
                 app.Running.NavView = app.Running.NavView.render();
             }
             // if dont have a game, but we have a navbar delete it
-            else if ((app.Running.Games.getActiveGame() === null) && (app.Running.NavView)) {
+            else if ((!hasActiveGame) && (app.Running.NavView)) {
                 app.Running.NavView.$el.html('');
                 app.Running.NavView = null;
             }

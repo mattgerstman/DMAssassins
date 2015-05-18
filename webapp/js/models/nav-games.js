@@ -47,14 +47,14 @@
                 games: games
             };
 
-            if (Backbone.history.fragment === 'join_game') {
+            if (Backbone.history.fragment === 'join-game') {
                 data.short_text     = strings.join_game;
                 data.long_text      = strings.join_game;
                 data.active_game_id = 'join_game';
                 return this.set(data);
             }
 
-            if (Backbone.history.fragment === 'create_game') {
+            if (Backbone.history.fragment === 'create-game') {
                 data.short_text     = strings.join_game;
                 data.long_text      = strings.join_game;
                 data.active_game_id = 'create_game';

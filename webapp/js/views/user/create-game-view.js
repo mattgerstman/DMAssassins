@@ -51,7 +51,7 @@
         // finish up and navigate to your profile
         finish: function(game) {
             app.Running.Games.setActiveGame(game.get('game_id'));
-            Backbone.history.navigate('my_profile', {
+            Backbone.history.navigate('my-profile', {
                 trigger: true
             });
         },

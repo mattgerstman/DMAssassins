@@ -75,6 +75,23 @@
             }
             return this;
         },
+        // logs the user out
+        logout: function() {
+            var options = {silent:true};
+
+            this.clear();
+            app.Running.Games.clearActiveGame(options);
+            app.Running.Users.reset(options);
+            app.Running.Teams.reset(options);
+
+            app.Running.User.clear(options);
+            app.Running.Permissions.clear(options);
+            app.Running.TargetModel.clear(options);
+            app.Running.LeaderboardModel.clear(options);
+            app.Running.RulesModel.clear(options);
+            app.Running.TargetFriendsModel.clear(options);
+
+        },
         // calls the facebook login function and handles it appropriately
         // if they are logged into facebook and connected to the app a session is created automatically
         // otherwise a popup will appear and handle the session situation
@@ -237,7 +254,7 @@
                     return;
                 }
 
-                Backbone.history.navigate('#my_profile', {
+                Backbone.history.navigate('#my-profile', {
                     trigger: true
                 });
 
