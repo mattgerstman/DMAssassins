@@ -78,6 +78,13 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 
 	response["game"] = game
 
+	// update user in the response to include game related properties
+	appErr = user.GetUserGameProperties(gameId)
+	if appErr != nil {
+		return nil, appErr
+	}
+	response["user"] = user
+
 	return response, nil
 }
 
