@@ -70,8 +70,11 @@ func postSession(w http.ResponseWriter, r *http.Request) (response map[string]in
 		}
 	}
 
+	// use the game id from the game mapping
+	gameId = gameMapping.GameId
+
 	// Get the game for whatever game mapping we're using
-	game, appErr := GetGameById(gameMapping.GameId)
+	game, appErr := GetGameById(gameId)
 	if appErr != nil {
 		return nil, appErr
 	}
