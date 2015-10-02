@@ -48,7 +48,7 @@
         requiresJustAuth: ['multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['my-profile', 'join-game', 'leaderboard', 'rules'],
+        requiresGameAndAuth: ['my-profile', 'leaderboard', 'rules'],
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['users'],
