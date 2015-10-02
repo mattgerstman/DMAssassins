@@ -48,7 +48,7 @@
         requiresJustAuth: ['multigame'],
 
         // routes that require we have a game and we're authenticated
-        requiresGameAndAuth: ['my-profile', 'join-game', 'leaderboard', 'rules'],
+        requiresGameAndAuth: ['my-profile', 'leaderboard', 'rules'],
 
         // routes that require the user is at least a team captain
         requiresCaptain: ['users'],
@@ -239,6 +239,7 @@
         },
         // create a new game route
         create_game: function() {
+            console.log('yo');
             var view = new app.Views.CreateGameView();
             app.Running.AppView.setCurrentView(view);
             this.render();
@@ -247,6 +248,7 @@
         join_game: function() {
             var view = new app.Views.JoinGameView();
             app.Running.AppView.setCurrentView(view);
+            console.log(view);
             this.render();
 
         },

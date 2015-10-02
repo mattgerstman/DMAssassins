@@ -5,7 +5,7 @@
 // Copyright (c) 2014 Matt Gerstman
 // MIT License.
 //
-// Asyncronous code laoder
+// Asyncronous code loader
 
 (function() {
     'use strict';
