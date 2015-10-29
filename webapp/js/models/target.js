@@ -28,7 +28,7 @@
             var game_id = app.Running.Games.getActiveGameId();
             return config.WEB_ROOT + "game/" + game_id + '/user/' + app.Session.get('user_id') + '/target/';
         },
-        idAttribute: 'assassin_id',
+        idAttribute: 'user_id',
         // constructor
         initialize: function() {
             var target_id = app.Session.get('target_id');

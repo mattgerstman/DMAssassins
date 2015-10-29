@@ -77,7 +77,7 @@
                 headers: {
                     'X-DMAssassins-Secret': secret
                 },
-                success: function() {
+                success: function(model, response) {
                     view.model.fetch();
                 },
                 error: function(model, response){
