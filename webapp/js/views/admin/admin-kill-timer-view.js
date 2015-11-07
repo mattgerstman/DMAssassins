@@ -21,7 +21,8 @@
         },
         // constructor
         initialize: function() {
-            this.model = new app.Models.KillTimer();
+            var game_id = app.Running.Games.getActiveGameId();
+            this.model = new app.Models.KillTimer({game_id: game_id});
             this.model.fetch();
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'fetch', this.render);
